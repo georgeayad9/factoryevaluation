@@ -24,13 +24,15 @@
   body{font-family:system-ui,"Segoe UI",Arial,sans-serif;margin:0;background:var(--bg);color:var(--ink)}
   header{background:var(--brand);color:#1d1d1d;padding:10px 20px;font-size:18px;font-weight:700;display:flex;align-items:center;gap:12px}
   header .title{flex:1}
-  header .logo{height:44px;width:auto;border-radius:6px}
+  header .logo{height:52px;width:auto}
   .theme{height:34px;padding:0 12px;border-radius:8px;border:1px solid #1d1d1d;background:transparent;color:#1d1d1d;font-size:13px;cursor:pointer;font-weight:600}
   main{max-width:1000px;margin:16px auto;padding:0 12px}
   .card{background:var(--card);border-radius:12px;box-shadow:0 1px 3px var(--shadow);padding:14px;margin-bottom:14px}
+  .gate{max-width:440px;margin:24px auto}
   label{font-size:13px;color:var(--label);display:block;margin-bottom:4px}
   select,input,textarea{width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;background:var(--field);color:var(--ink)}
-  .top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+  .top{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .who{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;font-size:14px;color:var(--label)}
   .bulk{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;background:var(--brand-tint);padding:12px;border-radius:10px;margin-bottom:12px}
   .bulk > div{display:flex;flex-direction:column;flex:1 1 140px}
   .selall{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--ink);height:38px}
@@ -89,120 +91,136 @@
 </head>
 <body>
 <header>
-  <img src="logo.jpg" alt="EVA Pharma logo" class="logo" onerror="this.remove()">
+  <img src="logo.png" alt="EVA Pharma logo" class="logo" onerror="this.remove()">
   <span class="title">EVA School Factory Evaluation</span>
   <button class="theme" id="themeBtn" type="button">Dark</button>
 </header>
 <main>
 
-  <div class="tabs">
-    <button class="tab on" id="tabNew">New evaluation</button>
-    <button class="tab" id="tabMine">My evaluations</button>
+  <!-- SIGN IN: the teacher picks their name and enters their PIN -->
+  <div class="card gate" id="gate" hidden>
+    <div style="font-size:17px;font-weight:700;margin-bottom:14px;">Sign in</div>
+    <label for="gName">Your name</label>
+    <select id="gName"></select>
+    <label for="gPin" style="margin-top:12px;">PIN</label>
+    <input type="password" id="gPin" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="4-digit PIN">
+    <button class="primary" id="gBtn" type="button" style="margin-top:14px;">Sign in</button>
+    <div id="gMsg"></div>
   </div>
 
-  <div class="card">
-    <div class="top">
-      <div>
-        <label for="engineer">Engineer</label>
-        <select id="engineer"></select>
-      </div>
-      <div id="classWrap">
-        <label for="cls">Class</label>
-        <select id="cls"></select>
-      </div>
-      <div id="dateWrap">
-        <label for="date">Evaluation date</label>
-        <input type="date" id="date">
-      </div>
+  <!-- THE APP: visible only after sign-in -->
+  <div id="app" hidden>
+
+    <div class="who">
+      <span>Signed in as <b id="whoName"></b></span>
+      <button class="ghost" id="signOut" type="button" style="padding:6px 12px;font-size:14px;">Sign out</button>
     </div>
-  </div>
 
-  <!-- NEW EVALUATION -->
-  <div class="card" id="panel" hidden>
-
-    <div class="bulk">
-      <div>
-        <label for="bulkCol">Set column</label>
-        <select id="bulkCol">
-          <option value="ev">Evaluation</option>
-          <option value="com">Comment</option>
-        </select>
-      </div>
-      <div>
-        <label for="bulkVal">To value</label>
-        <select id="bulkVal"></select>
-        <input type="text" id="bulkText" placeholder="Type comment" hidden>
-      </div>
-      <button class="secondary" id="applyBulk">Apply to selected</button>
-      <label class="selall"><input type="checkbox" id="selectAll"> Select all</label>
+    <div class="tabs">
+      <button class="tab on" id="tabNew" type="button">New evaluation</button>
+      <button class="tab" id="tabMine" type="button">My evaluations</button>
     </div>
-    <div class="hint" id="selCount"></div>
 
-    <div class="cards" id="rows"></div>
-
-    <p class="hint">
-      Tap a letter to set the evaluation: O Outstanding, P Proficient, D Developing, N Needs Improvement, U Unsatisfactory, A Absent.
-      Each incident subtracts 5 points and marks the student in red.
-    </p>
-    <button class="primary" id="save">Save evaluation</button>
-    <div id="status"></div>
-  </div>
-
-  <!-- MY EVALUATIONS -->
-  <div class="card" id="mine" hidden>
-    <div class="top" style="grid-template-columns:1fr 1fr;">
-      <div>
-        <label for="mineCls">Class</label>
-        <select id="mineCls"></select>
-      </div>
-      <div style="display:flex;align-items:flex-end;">
-        <button class="secondary" id="refresh" style="width:100%;">Refresh</button>
-      </div>
-    </div>
-    <div id="mineMsg"></div>
-    <div class="tablewrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Student</th>
-            <th>Class</th>
-            <th>Date</th>
-            <th>Score</th>
-            <th>Evaluation</th>
-            <th>Incidents</th>
-            <th>Comment</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="mineRows"></tbody>
-      </table>
-    </div>
-    <p class="hint">Evaluations can be edited for 7 days after they were uploaded. After that they are read only.</p>
-
-    <div class="card" id="editCard" hidden style="margin:12px 0 0;">
-      <div style="font-size:15px;font-weight:600;margin-bottom:4px;" id="editTitle"></div>
-      <div class="editrow">
+    <div class="card" id="topCard">
+      <div class="top">
         <div>
-          <label for="editEv">Evaluation</label>
-          <select id="editEv"></select>
+          <label for="cls">Class</label>
+          <select id="cls"></select>
         </div>
         <div>
-          <label for="editInc">Incidents</label>
-          <input type="number" id="editInc" min="0" step="1" value="0">
+          <label for="date">Evaluation date</label>
+          <input type="date" id="date">
+        </div>
+      </div>
+    </div>
+
+    <!-- NEW EVALUATION -->
+    <div class="card" id="panel" hidden>
+
+      <div class="bulk">
+        <div>
+          <label for="bulkCol">Set column</label>
+          <select id="bulkCol">
+            <option value="ev">Evaluation</option>
+            <option value="com">Comment</option>
+          </select>
         </div>
         <div>
-          <label for="editCom">Comment</label>
-          <textarea id="editCom" class="com" style="min-height:70px;height:70px;"></textarea>
+          <label for="bulkVal">To value</label>
+          <select id="bulkVal"></select>
+          <input type="text" id="bulkText" placeholder="Type comment" hidden>
+        </div>
+        <button class="secondary" id="applyBulk" type="button">Apply to selected</button>
+        <label class="selall"><input type="checkbox" id="selectAll"> Select all</label>
+      </div>
+      <div class="hint" id="selCount"></div>
+
+      <div class="cards" id="rows"></div>
+
+      <p class="hint">
+        Tap a letter to set the evaluation: O Outstanding, P Proficient, D Developing, N Needs Improvement, U Unsatisfactory, A Absent.
+        Each incident subtracts 5 points and marks the student in red.
+      </p>
+      <button class="primary" id="save" type="button">Save evaluation</button>
+      <div id="status"></div>
+    </div>
+
+    <!-- MY EVALUATIONS -->
+    <div class="card" id="mine" hidden>
+      <div class="top" style="grid-template-columns:1fr 1fr;">
+        <div>
+          <label for="mineCls">Class</label>
+          <select id="mineCls"></select>
+        </div>
+        <div style="display:flex;align-items:flex-end;">
+          <button class="secondary" id="refresh" type="button" style="width:100%;">Refresh</button>
         </div>
       </div>
-      <div class="btnrow" style="margin-top:12px;">
-        <button class="primary" id="editSave" style="width:auto;flex:1;">Save changes</button>
-        <button class="ghost" id="editCancel">Cancel</button>
+      <div id="mineMsg"></div>
+      <div class="tablewrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Class</th>
+              <th>Date</th>
+              <th>Score</th>
+              <th>Evaluation</th>
+              <th>Incidents</th>
+              <th>Comment</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="mineRows"></tbody>
+        </table>
       </div>
-      <div id="editMsg"></div>
-    </div>
-  </div>
+      <p class="hint">Evaluations can be edited for 7 days after they were uploaded. After that they are read only.</p>
 
+      <div class="card" id="editCard" hidden style="margin:12px 0 0;">
+        <div style="font-size:15px;font-weight:600;margin-bottom:4px;" id="editTitle"></div>
+        <div class="editrow">
+          <div>
+            <label for="editEv">Evaluation</label>
+            <select id="editEv"></select>
+          </div>
+          <div>
+            <label for="editInc">Incidents</label>
+            <input type="number" id="editInc" min="0" step="1" value="0">
+          </div>
+          <div>
+            <label for="editCom">Comment</label>
+            <textarea id="editCom" class="com" style="min-height:70px;height:70px;"></textarea>
+          </div>
+        </div>
+        <div class="btnrow" style="margin-top:12px;">
+          <button class="primary" id="editSave" type="button" style="width:auto;flex:1;">Save changes</button>
+          <button class="ghost" id="editCancel" type="button">Cancel</button>
+        </div>
+        <div id="editMsg"></div>
+      </div>
+    </div>
+
+  </div>
 </main>
 
 <!-- Sheet URL and key live in config.js. Edit that file only. -->
@@ -231,22 +249,22 @@ const INCIDENT_PENALTY = 5;
 const EV_NUMBER = { outstanding: 5, proficient: 4, developing: 3, needs: 2, unsat: 1, absent: 0 };
 // =====================================================
 
-const EV_CYCLE = [null, ...EVALUATIONS.map(e => e.key)];
-
 const $ = id => document.getElementById(id);
-const engSel = $('engineer'), clsSel = $('cls'), dateEl = $('date');
-const panel = $('panel'), rowsBox = $('rows'), saveBtn = $('save'), status = $('status');
-const bulkCol = $('bulkCol'), bulkVal = $('bulkVal'), bulkText = $('bulkText'), selectAll = $('selectAll');
-const tabNew = $('tabNew'), tabMine = $('tabMine'), classWrap = $('classWrap'), dateWrap = $('dateWrap');
+const clsSel = $('cls'), dateEl = $('date'), panel = $('panel'), rowsBox = $('rows'), saveBtn = $('save');
+const statusBox = $('status'), bulkCol = $('bulkCol'), bulkVal = $('bulkVal'), bulkText = $('bulkText'), selectAll = $('selectAll');
+const tabNew = $('tabNew'), tabMine = $('tabMine'), topCard = $('topCard');
 const mine = $('mine'), mineCls = $('mineCls'), mineMsg = $('mineMsg'), mineRows = $('mineRows');
 const editCard = $('editCard'), editTitle = $('editTitle'), editEv = $('editEv'), editInc = $('editInc');
 const editCom = $('editCom'), editMsg = $('editMsg');
+const gate = $('gate'), gName = $('gName'), gPin = $('gPin'), gBtn = $('gBtn'), gMsg = $('gMsg'), app = $('app');
 
-let ENGINEERS = {};       // { teacher: { class: [students] } }
+let TEACHERS = [];                                   // teacher names from the Setup tab
+let CLASSES = {};                                    // { class name: [student names] }
+let me = sessionStorage.getItem('teacher') || '';    // signed-in teacher (this tab only)
 let rows = [];            // { name, ev, inc, com, sel }
 let dirty = false;        // unsaved changes on screen
 let pendingSaveId = null; // same ID on retry, so the server never writes a save twice
-let lastEng = "", lastCls = "";
+let lastCls = localStorage.getItem('lastCls') || '';
 let mode = "new";         // "new" or "mine"
 let mineRecords = [];     // records loaded for "My evaluations"
 let editing = null;       // record being edited
@@ -254,14 +272,17 @@ let editing = null;       // record being edited
 // ---------- helpers ----------
 const evObj = key => EVALUATIONS.find(e => e.key === key);
 const evKeyByName = name => (EVALUATIONS.find(e => e.en === name) || {}).key || '';
-const nextEv = key => EV_CYCLE[(EV_CYCLE.indexOf(key) + 1) % EV_CYCLE.length];
 const scoreOf = r => r.ev === null ? null : evObj(r.ev).points - INCIDENT_PENALTY * r.inc;
 
 function showIn(el, text, ok) {
-  el.innerHTML = `<div class="msg ${ok ? 'ok' : 'err'}"></div>`;
-  el.firstChild.textContent = text;
+  el.innerHTML = '';
+  if (!text) return;
+  const d = document.createElement('div');
+  d.className = 'msg ' + (ok ? 'ok' : 'err');
+  d.textContent = text;
+  el.appendChild(d);
 }
-const showMsg = (text, ok) => showIn(status, text, ok);
+const showMsg = (text, ok) => showIn(statusBox, text, ok);
 
 // Any change to the evaluations means the next save is new, so drop the old save ID.
 function markDirty() {
@@ -279,9 +300,27 @@ function confirmDiscard() {
   return !dirty || window.confirm('You have unsaved evaluations. Discard them?');
 }
 
-function saveSelection() {
-  localStorage.setItem('lastSel', JSON.stringify({ eng: lastEng, cls: lastCls }));
+// The teacher's name and PIN, sent with every request that needs them.
+function session() {
+  return { teacher: me, pin: sessionStorage.getItem('pin') || '' };
 }
+
+// One POST to the sheet. Errors from the server are thrown with their message.
+async function post(action, data) {
+  if (!SHEET_URL) throw new Error('Sheet link not set. Edit config.js.');
+  const res = await fetch(SHEET_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },   // avoids a browser preflight request
+    body: JSON.stringify({ action, key: SHEET_KEY, ...data })
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const out = await res.json();
+  if (out.error) throw new Error(out.error);
+  return out;
+}
+
+// True when the PIN or name was refused (wrong, changed, or locked out).
+const isAuthError = e => /Wrong name or PIN|Too many wrong PINs/.test(e.message);
 
 // ---------- theme ----------
 function applyTheme(t) {
@@ -295,25 +334,88 @@ $('themeBtn').onclick = () => {
 applyTheme(localStorage.getItem('theme') ||
   (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
 
-// ---------- setup ----------
-// Turns Setup-sheet rows ({Type, Name, Parent}) into { teacher: { class: [students] } }
-function buildEngineers(list) {
-  const out = {};
-  list.filter(x => x.Type === 'Teacher').forEach(x => out[x.Name] = {});
-  list.filter(x => x.Type === 'Class').forEach(x => {
-    if (out[x.Parent]) out[x.Parent][x.Name] = [];
-  });
-  list.filter(x => x.Type === 'Student').forEach(x => {
-    Object.values(out).forEach(classes => {
-      if (classes[x.Parent]) classes[x.Parent].push(x.Name);
-    });
-  });
-  return out;
+// ---------- sign in / sign out ----------
+function showGate(note) {
+  app.hidden = true;
+  gate.hidden = false;
+  gName.innerHTML = '';
+  TEACHERS.forEach(n => gName.add(new Option(n, n)));
+  const last = localStorage.getItem('lastTeacher');
+  if (last && TEACHERS.includes(last)) gName.value = last;
+  gPin.value = '';
+  showIn(gMsg, note || '', false);
 }
 
-function populateEngineers() {
-  engSel.innerHTML = '';
-  Object.keys(ENGINEERS).forEach(name => engSel.add(new Option(name, name)));
+function showApp() {
+  gate.hidden = true;
+  app.hidden = false;
+  $('whoName').textContent = me;
+  fillClassSelect();
+  fillMineClasses();
+  applyMode('new');
+}
+
+async function signIn() {
+  const name = gName.value;
+  const p = gPin.value.trim();
+  if (!name) return showIn(gMsg, 'Choose your name.', false);
+  if (!/^\d{4,6}$/.test(p)) return showIn(gMsg, 'Enter your PIN (4 to 6 digits).', false);
+  gBtn.disabled = true;
+  try {
+    const out = await post('login', { teacher: name, pin: p });
+    me = out.teacher;
+    sessionStorage.setItem('teacher', me);
+    sessionStorage.setItem('pin', p);
+    localStorage.setItem('lastTeacher', me);
+    showApp();
+  } catch (e) {
+    showIn(gMsg, e.message, false);
+  } finally {
+    gBtn.disabled = false;
+  }
+}
+
+function signOut(note) {
+  me = '';
+  sessionStorage.removeItem('teacher');
+  sessionStorage.removeItem('pin');
+  rows = [];
+  dirty = false;
+  pendingSaveId = null;
+  mineRecords = [];
+  editing = null;
+  showGate(note);
+}
+
+gBtn.onclick = signIn;
+gPin.addEventListener('keydown', e => { if (e.key === 'Enter') signIn(); });
+$('signOut').onclick = () => { if (confirmDiscard()) signOut(); };
+
+// ---------- lists ----------
+// Turns the Setup rows ({Type, Name, Parent}) into the teacher names and the classes with their students.
+function buildLists(list) {
+  TEACHERS = list.filter(x => x.Type === 'Teacher').map(x => x.Name);
+  CLASSES = {};
+  list.filter(x => x.Type === 'Class').forEach(x => { CLASSES[x.Name] = []; });
+  list.filter(x => x.Type === 'Student').forEach(x => {
+    if (CLASSES[x.Parent]) CLASSES[x.Parent].push(x.Name);
+  });
+}
+
+function fillClassSelect() {
+  clsSel.innerHTML = '';
+  clsSel.add(new Option('-- choose class --', ''));
+  Object.keys(CLASSES).forEach(c => clsSel.add(new Option(c, c)));
+  clsSel.value = Object.keys(CLASSES).includes(lastCls) ? lastCls : '';
+  loadStudents();
+}
+
+function fillMineClasses() {
+  const prev = mineCls.value;
+  mineCls.innerHTML = '';
+  mineCls.add(new Option('All classes', ''));
+  Object.keys(CLASSES).forEach(c => mineCls.add(new Option(c, c)));
+  mineCls.value = Object.keys(CLASSES).includes(prev) ? prev : '';
 }
 
 function fillBulkValues() {
@@ -331,44 +433,23 @@ function fillEditOptions() {
   EVALUATIONS.forEach(e => editEv.add(new Option(e.en, e.key)));
 }
 
-function fillClasses() {
-  clsSel.innerHTML = '';
-  clsSel.add(new Option('-- choose class --', ''));
-  Object.keys(ENGINEERS[engSel.value] || {}).forEach(c => clsSel.add(new Option(c, c)));
-  panel.hidden = true;
-  rows = [];
-  dirty = false;
-  pendingSaveId = null;
-  status.innerHTML = '';
-}
-
-function fillMineClasses() {
-  const prev = mineCls.value;
-  mineCls.innerHTML = '';
-  mineCls.add(new Option('All classes', ''));
-  Object.keys(ENGINEERS[engSel.value] || {}).forEach(c => mineCls.add(new Option(c, c)));
-  mineCls.value = Object.keys(ENGINEERS[engSel.value] || {}).includes(prev) ? prev : '';
-}
-
 function loadStudents() {
-  const students = (ENGINEERS[engSel.value] || {})[clsSel.value];
+  const students = CLASSES[clsSel.value];
   dirty = false;
   pendingSaveId = null;
-  if (!students) { panel.hidden = true; rows = []; return; }
+  if (!students) { rows = []; panel.hidden = true; render(); return; }
   rows = students.map(name => ({ name, ev: null, inc: 0, com: '', sel: false }));
   panel.hidden = mode !== 'new';
-  status.innerHTML = '';
+  statusBox.innerHTML = '';
   render();
 }
 
 // ---------- mode switch ----------
-function setMode(m) {
-  if (m === 'mine' && mode === 'new' && !confirmDiscard()) return;
+function applyMode(m) {
   mode = m;
   tabNew.classList.toggle('on', m === 'new');
   tabMine.classList.toggle('on', m === 'mine');
-  classWrap.hidden = m !== 'new';
-  dateWrap.hidden = m !== 'new';
+  topCard.hidden = m !== 'new';
   panel.hidden = m !== 'new' || rows.length === 0;
   mine.hidden = m !== 'mine';
   if (m === 'mine') {
@@ -376,6 +457,11 @@ function setMode(m) {
     fillMineClasses();
     loadMine();
   }
+}
+
+function setMode(m) {
+  if (m === 'mine' && mode === 'new' && !confirmDiscard()) return;
+  applyMode(m);
 }
 tabNew.onclick = () => setMode('new');
 tabMine.onclick = () => setMode('mine');
@@ -501,7 +587,6 @@ $('applyBulk').onclick = () => {
 saveBtn.onclick = async () => {
   if (!dateEl.value) return showMsg('Please choose a date.', false);
   if (!rows.length) return showMsg('Choose a class first.', false);
-  if (!SHEET_URL) return showMsg('Sheet link not set. Edit config.js.', false);
 
   for (const r of rows) {
     if (r.ev === null) return showMsg(`Choose an evaluation for ${r.name}.`, false);
@@ -512,8 +597,6 @@ saveBtn.onclick = async () => {
   const now = new Date();
   const pad = n => String(n).padStart(2, '0');
   const payload = {
-    action: 'saveEvaluations',
-    key: SHEET_KEY,
     saveId: pendingSaveId,
     uploadedAt: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`,
     class: clsSel.value,
@@ -530,27 +613,19 @@ saveBtn.onclick = async () => {
   saveBtn.disabled = true;
   saveBtn.textContent = 'Saving…';
   try {
-    // text/plain avoids a browser preflight request, which Apps Script cannot answer
-    const res = await fetch(SHEET_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const out = await res.json();
-    if (out.error) throw new Error(out.error);
-
+    const out = await post('saveEvaluations', { ...session(), ...payload });
     showMsg(out.duplicate
       ? `These evaluations for ${clsSel.value} were already saved.`
-      : `Saved ${rows.length} evaluation(s) for ${clsSel.value} to Google Sheets.`, true);
+      : `Saved ${rows.length} evaluation(s) for ${clsSel.value} by ${me}.`, true);
     pendingSaveId = null;
     dirty = false;
     panel.hidden = true;
     rows = [];
     clsSel.value = '';
     lastCls = '';
-    saveSelection();
+    localStorage.setItem('lastCls', lastCls);
   } catch (err) {
+    if (isAuthError(err)) return signOut(err.message);
     showMsg(`Not saved (${err.message}). Press Save again to retry. Nothing will be saved twice.`, false);
   } finally {
     saveBtn.disabled = false;
@@ -560,19 +635,14 @@ saveBtn.onclick = async () => {
 
 // ---------- my evaluations ----------
 async function loadMine() {
-  const teacher = engSel.value;
-  if (!teacher) return;
   showIn(mineMsg, 'Loading…', true);
   mineRows.innerHTML = '';
   try {
-    const res = await fetch(`${SHEET_URL}?action=myEvaluations&key=${encodeURIComponent(SHEET_KEY)}&teacher=${encodeURIComponent(teacher)}`);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    if (!Array.isArray(data)) throw new Error(data.error || 'unexpected reply');
-    mineRecords = data;
+    mineRecords = await post('myEvaluations', session());
     renderMine();
-    mineMsg.innerHTML = '';
+    showIn(mineMsg, '', true);
   } catch (e) {
+    if (isAuthError(e)) return signOut(e.message);
     showIn(mineMsg, 'Could not load your evaluations: ' + e.message, false);
   }
 }
@@ -676,58 +746,38 @@ $('editSave').onclick = async () => {
   const btn = $('editSave');
   btn.disabled = true;
   try {
-    const res = await fetch(SHEET_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({
-        action: 'updateEvaluation',
-        key: SHEET_KEY,
-        teacher: engSel.value,
-        recordId: editing.id,
-        score: EV_NUMBER[key],
-        evaluation: evObj(key).en,
-        incidents: inc,
-        comment: editCom.value
-      })
+    await post('updateEvaluation', {
+      ...session(),
+      recordId: editing.id,
+      score: EV_NUMBER[key],
+      evaluation: evObj(key).en,
+      incidents: inc,
+      comment: editCom.value
     });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const out = await res.json();
-    if (out.error) throw new Error(out.error);
-
     editing = null;
     editCard.hidden = true;
     showIn(mineMsg, 'Evaluation updated.', true);
     loadMine();
   } catch (e) {
+    if (isAuthError(e)) return signOut(e.message);
     showIn(editMsg, 'Not saved: ' + e.message, false);
   } finally {
     btn.disabled = false;
   }
 };
 
-// ---------- selection changes ----------
-engSel.onchange = () => {
-  if (mode === 'new' && !confirmDiscard()) { engSel.value = lastEng; return; }
-  lastEng = engSel.value;
-  lastCls = '';
-  fillClasses();
-  fillMineClasses();
-  editCard.hidden = true;
-  editing = null;
-  saveSelection();
-  if (mode === 'mine') loadMine();
-};
-
+// ---------- class selection ----------
 clsSel.onchange = () => {
   if (!confirmDiscard()) { clsSel.value = lastCls; return; }
   lastCls = clsSel.value;
+  localStorage.setItem('lastCls', lastCls);
   loadStudents();
-  saveSelection();
 };
 
 // ---------- start ----------
 async function loadLists() {
   let list = null;
+  let loadError = '';
   try {
     if (!SHEET_URL) throw new Error('no url');
     const res = await fetch(`${SHEET_URL}?action=lists&key=${encodeURIComponent(SHEET_KEY)}`);
@@ -739,28 +789,13 @@ async function loadLists() {
   } catch (e) {
     const cached = localStorage.getItem('listsCache');  // fall back to the last good copy
     if (cached) list = JSON.parse(cached);
-    else showMsg('Could not load the lists from Google Sheets. Check config.js.', false);
+    else loadError = 'Could not load the names from Google Sheets. Check config.js.';
   }
 
-  ENGINEERS = buildEngineers(list || []);
-  populateEngineers();
+  buildLists(list || []);
 
-  // Reopen with the engineer and class used last time
-  const saved = JSON.parse(localStorage.getItem('lastSel') || 'null');
-  if (saved && ENGINEERS[saved.eng]) {
-    engSel.value = saved.eng;
-    lastEng = saved.eng;
-    fillClasses();
-    if (saved.cls && ENGINEERS[saved.eng][saved.cls]) {
-      clsSel.value = saved.cls;
-      lastCls = saved.cls;
-      loadStudents();
-    }
-  } else {
-    lastEng = engSel.value;
-    fillClasses();
-  }
-  fillMineClasses();
+  if (me && TEACHERS.includes(me) && sessionStorage.getItem('pin')) showApp();
+  else showGate(loadError);
 }
 
 dateEl.value = new Date().toLocaleDateString('en-CA'); // today, YYYY-MM-DD, editable
