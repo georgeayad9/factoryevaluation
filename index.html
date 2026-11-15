@@ -18,6 +18,9 @@
   .selall{display:flex;align-items:center;gap:6px;font-size:14px;color:#333;height:38px}
   .selall input{width:20px;height:20px;margin:0}
   .hint{font-size:12px;color:#777;margin:8px 0}
+  .tabs{display:flex;gap:8px;margin-bottom:14px}
+  .tab{flex:1;height:44px;border-radius:10px;border:1px solid #1f4e79;background:#fff;color:#1f4e79;font-size:15px;cursor:pointer}
+  .tab.on{background:#1f4e79;color:#fff}
 
   /* student cards */
   .cards{display:grid;grid-template-columns:1fr;gap:10px}
@@ -40,10 +43,24 @@
   textarea.com{min-height:44px;height:44px;resize:vertical;font-size:14px}
   button.primary{background:#1f4e79;color:#fff;border:0;border-radius:8px;padding:12px 18px;font-size:16px;cursor:pointer;width:100%}
   button.secondary{background:#fff;color:#1f4e79;border:1px solid #1f4e79;border-radius:8px;padding:8px 14px;font-size:14px;cursor:pointer;height:38px}
+  button.small{background:#fff;color:#1f4e79;border:1px solid #1f4e79;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer}
+  button.ghost{background:#fff;color:#555;border:1px solid #ccd3db;border-radius:8px;padding:10px 14px;font-size:15px;cursor:pointer}
   button:disabled{background:#9aa5b1;border-color:#9aa5b1;color:#fff;cursor:default}
   .msg{padding:10px;border-radius:8px;margin-top:12px;font-size:14px}
   .ok{background:#e6f4ea;color:#17652a}
   .err{background:#fdecea;color:#8a1c12}
+
+  /* my evaluations table */
+  .tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:10px}
+  table{width:100%;min-width:640px;border-collapse:collapse;font-size:14px}
+  th,td{padding:8px;border-bottom:1px solid #e6e9ee;text-align:left;vertical-align:middle}
+  th{font-size:12px;color:#555;text-transform:uppercase;white-space:nowrap}
+  td.com{min-width:180px;white-space:pre-wrap}
+  tr.inc td:first-child{border-left:4px solid #d32f2f}
+  .badge{display:inline-block;min-width:26px;text-align:center;padding:2px 8px;border-radius:999px;background:#eef3f8;color:#1f4e79;font-weight:600}
+  .closed{font-size:12px;color:#888}
+  .editrow{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap}
   @media (max-width:700px){ .top{grid-template-columns:1fr} }
 </style>
 </head>
@@ -51,23 +68,29 @@
 <header>Student Feedback Tracker</header>
 <main>
 
+  <div class="tabs">
+    <button class="tab on" id="tabNew">New evaluation</button>
+    <button class="tab" id="tabMine">My evaluations</button>
+  </div>
+
   <div class="card">
     <div class="top">
       <div>
         <label for="engineer">Engineer</label>
         <select id="engineer"></select>
       </div>
-      <div>
+      <div id="classWrap">
         <label for="cls">Class</label>
         <select id="cls"></select>
       </div>
-      <div>
+      <div id="dateWrap">
         <label for="date">Evaluation date</label>
         <input type="date" id="date">
       </div>
     </div>
   </div>
 
+  <!-- NEW EVALUATION -->
   <div class="card" id="panel" hidden>
 
     <div class="bulk">
@@ -96,6 +119,61 @@
     </p>
     <button class="primary" id="save">Save evaluation</button>
     <div id="status"></div>
+  </div>
+
+  <!-- MY EVALUATIONS -->
+  <div class="card" id="mine" hidden>
+    <div class="top" style="grid-template-columns:1fr 1fr;">
+      <div>
+        <label for="mineCls">Class</label>
+        <select id="mineCls"></select>
+      </div>
+      <div style="display:flex;align-items:flex-end;">
+        <button class="secondary" id="refresh" style="width:100%;">Refresh</button>
+      </div>
+    </div>
+    <div id="mineMsg"></div>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Class</th>
+            <th>Date</th>
+            <th>Score</th>
+            <th>Evaluation</th>
+            <th>Incidents</th>
+            <th>Comment</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="mineRows"></tbody>
+      </table>
+    </div>
+    <p class="hint">Evaluations can be edited for 7 days after they were uploaded. After that they are read only.</p>
+
+    <div class="card" id="editCard" hidden style="margin:12px 0 0;">
+      <div style="font-size:15px;font-weight:600;margin-bottom:4px;" id="editTitle"></div>
+      <div class="editrow">
+        <div>
+          <label for="editEv">Evaluation</label>
+          <select id="editEv"></select>
+        </div>
+        <div>
+          <label for="editInc">Incidents</label>
+          <input type="number" id="editInc" min="0" step="1" value="0">
+        </div>
+        <div>
+          <label for="editCom">Comment</label>
+          <textarea id="editCom" class="com" style="min-height:70px;height:70px;"></textarea>
+        </div>
+      </div>
+      <div class="btnrow" style="margin-top:12px;">
+        <button class="primary" id="editSave" style="width:auto;flex:1;">Save changes</button>
+        <button class="ghost" id="editCancel">Cancel</button>
+      </div>
+      <div id="editMsg"></div>
+    </div>
   </div>
 
 </main>
@@ -132,22 +210,31 @@ const $ = id => document.getElementById(id);
 const engSel = $('engineer'), clsSel = $('cls'), dateEl = $('date');
 const panel = $('panel'), rowsBox = $('rows'), saveBtn = $('save'), status = $('status');
 const bulkCol = $('bulkCol'), bulkVal = $('bulkVal'), bulkText = $('bulkText'), selectAll = $('selectAll');
+const tabNew = $('tabNew'), tabMine = $('tabMine'), classWrap = $('classWrap'), dateWrap = $('dateWrap');
+const mine = $('mine'), mineCls = $('mineCls'), mineMsg = $('mineMsg'), mineRows = $('mineRows');
+const editCard = $('editCard'), editTitle = $('editTitle'), editEv = $('editEv'), editInc = $('editInc');
+const editCom = $('editCom'), editMsg = $('editMsg');
 
 let ENGINEERS = {};       // { teacher: { class: [students] } }
 let rows = [];            // { name, ev, inc, com, sel }
 let dirty = false;        // unsaved changes on screen
 let pendingSaveId = null; // same ID on retry, so the server never writes a save twice
 let lastEng = "", lastCls = "";
+let mode = "new";         // "new" or "mine"
+let mineRecords = [];     // records loaded for "My evaluations"
+let editing = null;       // record being edited
 
 // ---------- helpers ----------
 const evObj = key => EVALUATIONS.find(e => e.key === key);
+const evKeyByName = name => (EVALUATIONS.find(e => e.en === name) || {}).key || '';
 const nextEv = key => EV_CYCLE[(EV_CYCLE.indexOf(key) + 1) % EV_CYCLE.length];
 const scoreOf = r => r.ev === null ? null : evObj(r.ev).points - INCIDENT_PENALTY * r.inc;
 
-function showMsg(text, ok) {
-  status.innerHTML = `<div class="msg ${ok ? 'ok' : 'err'}"></div>`;
-  status.firstChild.textContent = text;
+function showIn(el, text, ok) {
+  el.innerHTML = `<div class="msg ${ok ? 'ok' : 'err'}"></div>`;
+  el.firstChild.textContent = text;
 }
+const showMsg = (text, ok) => showIn(status, text, ok);
 
 // Any change to the evaluations means the next save is new, so drop the old save ID.
 function markDirty() {
@@ -200,6 +287,11 @@ function fillBulkValues() {
   EVALUATIONS.forEach(e => bulkVal.add(new Option(e.en, e.key)));
 }
 
+function fillEditOptions() {
+  editEv.innerHTML = '';
+  EVALUATIONS.forEach(e => editEv.add(new Option(e.en, e.key)));
+}
+
 function fillClasses() {
   clsSel.innerHTML = '';
   clsSel.add(new Option('-- choose class --', ''));
@@ -211,16 +303,43 @@ function fillClasses() {
   status.innerHTML = '';
 }
 
+function fillMineClasses() {
+  const prev = mineCls.value;
+  mineCls.innerHTML = '';
+  mineCls.add(new Option('All classes', ''));
+  Object.keys(ENGINEERS[engSel.value] || {}).forEach(c => mineCls.add(new Option(c, c)));
+  mineCls.value = Object.keys(ENGINEERS[engSel.value] || {}).includes(prev) ? prev : '';
+}
+
 function loadStudents() {
   const students = (ENGINEERS[engSel.value] || {})[clsSel.value];
   dirty = false;
   pendingSaveId = null;
   if (!students) { panel.hidden = true; rows = []; return; }
   rows = students.map(name => ({ name, ev: null, inc: 0, com: '', sel: false }));
-  panel.hidden = false;
+  panel.hidden = mode !== 'new';
   status.innerHTML = '';
   render();
 }
+
+// ---------- mode switch ----------
+function setMode(m) {
+  if (m === 'mine' && mode === 'new' && !confirmDiscard()) return;
+  mode = m;
+  tabNew.classList.toggle('on', m === 'new');
+  tabMine.classList.toggle('on', m === 'mine');
+  classWrap.hidden = m !== 'new';
+  dateWrap.hidden = m !== 'new';
+  panel.hidden = m !== 'new' || rows.length === 0;
+  mine.hidden = m !== 'mine';
+  if (m === 'mine') {
+    if (rows.length) { rows = []; dirty = false; }
+    fillMineClasses();
+    loadMine();
+  }
+}
+tabNew.onclick = () => setMode('new');
+tabMine.onclick = () => setMode('mine');
 
 // ---------- rendering: one card per student ----------
 function render() {
@@ -339,7 +458,7 @@ $('applyBulk').onclick = () => {
   render();
 };
 
-// ---------- save ----------
+// ---------- save new evaluations ----------
 saveBtn.onclick = async () => {
   if (!dateEl.value) return showMsg('Please choose a date.', false);
   if (!rows.length) return showMsg('Choose a class first.', false);
@@ -400,13 +519,157 @@ saveBtn.onclick = async () => {
   }
 };
 
+// ---------- my evaluations ----------
+async function loadMine() {
+  const teacher = engSel.value;
+  if (!teacher) return;
+  showIn(mineMsg, 'Loading…', true);
+  mineRows.innerHTML = '';
+  try {
+    const res = await fetch(`${SHEET_URL}?action=myEvaluations&key=${encodeURIComponent(SHEET_KEY)}&teacher=${encodeURIComponent(teacher)}`);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error(data.error || 'unexpected reply');
+    mineRecords = data;
+    renderMine();
+    mineMsg.innerHTML = '';
+  } catch (e) {
+    showIn(mineMsg, 'Could not load your evaluations: ' + e.message, false);
+  }
+}
+
+function renderMine() {
+  mineRows.innerHTML = '';
+  const filter = mineCls.value;
+  const list = mineRecords.filter(r => !filter || r.class === filter);
+  if (!list.length) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = 8;
+    td.textContent = 'No evaluations yet.';
+    td.style.color = '#777';
+    tr.appendChild(td);
+    mineRows.appendChild(tr);
+    return;
+  }
+  list.forEach(rec => {
+    const tr = document.createElement('tr');
+    if (rec.incidents > 0) tr.classList.add('inc');
+
+    const cells = [
+      rec.student,
+      rec.class,
+      rec.date,
+      rec.score,
+      rec.evaluation,
+    ];
+    cells.forEach(v => {
+      const td = document.createElement('td');
+      td.textContent = v;
+      tr.appendChild(td);
+    });
+
+    const inc = document.createElement('td');
+    const badge = document.createElement('span');
+    badge.className = 'badge';
+    badge.textContent = rec.incidents;
+    inc.appendChild(badge);
+    tr.appendChild(inc);
+
+    const com = document.createElement('td');
+    com.className = 'com';
+    com.textContent = rec.comment;
+    tr.appendChild(com);
+
+    const act = document.createElement('td');
+    if (rec.editable) {
+      const b = document.createElement('button');
+      b.className = 'small';
+      b.textContent = 'Edit';
+      b.onclick = () => openEdit(rec);
+      act.appendChild(b);
+    } else {
+      const s = document.createElement('span');
+      s.className = 'closed';
+      s.textContent = rec.id ? 'Closed' : 'Read only';
+      act.appendChild(s);
+    }
+    tr.appendChild(act);
+
+    mineRows.appendChild(tr);
+  });
+}
+
+mineCls.onchange = renderMine;
+$('refresh').onclick = loadMine;
+
+function openEdit(rec) {
+  editing = rec;
+  editTitle.textContent = `${rec.student} · ${rec.class} · ${rec.date}`;
+  editEv.value = evKeyByName(rec.evaluation);
+  editInc.value = rec.incidents;
+  editCom.value = rec.comment;
+  editMsg.innerHTML = '';
+  editCard.hidden = false;
+  editCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+$('editCancel').onclick = () => {
+  editing = null;
+  editCard.hidden = true;
+  editMsg.innerHTML = '';
+};
+
+$('editSave').onclick = async () => {
+  if (!editing) return;
+  const key = editEv.value;
+  if (!key) return showIn(editMsg, 'Choose an evaluation.', false);
+  const inc = Number(editInc.value);
+  if (!Number.isInteger(inc) || inc < 0) return showIn(editMsg, 'Incidents must be 0 or more.', false);
+
+  const btn = $('editSave');
+  btn.disabled = true;
+  try {
+    const res = await fetch(SHEET_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'updateEvaluation',
+        key: SHEET_KEY,
+        teacher: engSel.value,
+        recordId: editing.id,
+        score: EV_NUMBER[key],
+        evaluation: evObj(key).en,
+        incidents: inc,
+        comment: editCom.value
+      })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const out = await res.json();
+    if (out.error) throw new Error(out.error);
+
+    editing = null;
+    editCard.hidden = true;
+    showIn(mineMsg, 'Evaluation updated.', true);
+    loadMine();
+  } catch (e) {
+    showIn(editMsg, 'Not saved: ' + e.message, false);
+  } finally {
+    btn.disabled = false;
+  }
+};
+
 // ---------- selection changes ----------
 engSel.onchange = () => {
-  if (!confirmDiscard()) { engSel.value = lastEng; return; }
+  if (mode === 'new' && !confirmDiscard()) { engSel.value = lastEng; return; }
   lastEng = engSel.value;
   lastCls = '';
   fillClasses();
+  fillMineClasses();
+  editCard.hidden = true;
+  editing = null;
   saveSelection();
+  if (mode === 'mine') loadMine();
 };
 
 clsSel.onchange = () => {
@@ -451,10 +714,12 @@ async function loadLists() {
     lastEng = engSel.value;
     fillClasses();
   }
+  fillMineClasses();
 }
 
 dateEl.value = new Date().toLocaleDateString('en-CA'); // today, YYYY-MM-DD, editable
 fillBulkValues();
+fillEditOptions();
 loadLists();
 </script>
 </body>
