@@ -59,6 +59,7 @@
   tr.inc td:first-child{border-left:4px solid #d32f2f}
   .badge{display:inline-block;min-width:26px;text-align:center;padding:2px 8px;border-radius:999px;background:#eef3f8;color:#1f4e79;font-weight:600}
   .closed{font-size:12px;color:#888}
+  td.daygroup{background:#eef3f8;color:#1f4e79;font-weight:600;font-size:14px;border-bottom:1px solid #d5dfea}
   .editrow{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
   .btnrow{display:flex;gap:8px;flex-wrap:wrap}
   @media (max-width:700px){ .top{grid-template-columns:1fr} }
@@ -552,7 +553,19 @@ function renderMine() {
     mineRows.appendChild(tr);
     return;
   }
-  list.forEach(rec => {
+  // Group by date, newest first
+  const groups = {};
+  list.forEach(rec => { (groups[rec.date] = groups[rec.date] || []).push(rec); });
+  Object.keys(groups).sort().reverse().forEach(day => {
+    const head = document.createElement('tr');
+    const hc = document.createElement('td');
+    hc.colSpan = 8;
+    hc.className = 'daygroup';
+    hc.textContent = `${day} · ${groups[day].length} evaluation(s)`;
+    head.appendChild(hc);
+    mineRows.appendChild(head);
+
+    groups[day].forEach(rec => {
     const tr = document.createElement('tr');
     if (rec.incidents > 0) tr.classList.add('inc');
 
@@ -597,6 +610,7 @@ function renderMine() {
     tr.appendChild(act);
 
     mineRows.appendChild(tr);
+    });
   });
 }
 
