@@ -154,11 +154,12 @@
         <label class="selall"><input type="checkbox" id="selectAll"> Select all</label>
       </div>
       <div class="hint" id="selCount"></div>
+      <div class="hint" id="progress" style="font-size:14px;color:var(--ink);font-weight:600"></div>
 
       <div class="cards" id="rows"></div>
 
       <p class="hint">
-        Tap a letter to set the evaluation: O Outstanding, P Proficient, D Developing, N Needs Improvement, U Unsatisfactory, A Absent.
+        Tap a letter to set the evaluation: A Absent, O Outstanding, P Proficient, D Developing, N Needs Improvement, U Unsatisfactory. Every incident needs a reason in the comment.
         Each incident subtracts 5 points and marks the student in red.
       </p>
       <button class="primary" id="save" type="button">Save evaluation</button>
@@ -273,6 +274,8 @@ let editing = null;       // record being edited
 const evObj = key => EVALUATIONS.find(e => e.key === key);
 const evKeyByName = name => (EVALUATIONS.find(e => e.en === name) || {}).key || '';
 const scoreOf = r => r.ev === null ? null : evObj(r.ev).points - INCIDENT_PENALTY * r.inc;
+// Button order on each card: Absent first, then the rest in their usual order
+const DOT_ORDER = [evObj('absent'), ...EVALUATIONS.filter(e => e.key !== 'absent')];
 
 function showIn(el, text, ok) {
   el.innerHTML = '';
@@ -496,7 +499,20 @@ function render() {
     const incBtn = document.createElement('button');
     incBtn.className = 'incbtn';
     incBtn.textContent = `Incident −${INCIDENT_PENALTY}${r.inc ? ' ×' + r.inc : ''}`;
-    incBtn.onclick = () => { r.inc++; markDirty(); render(); };
+    // Absent students cannot have incidents
+    incBtn.disabled = r.ev === 'absent';
+    incBtn.title = r.ev === 'absent' ? "Absent students can't have incidents" : '';
+    incBtn.onclick = () => {
+      // Every incident needs a reason in the comment
+      if (!r.com.trim()) {
+        const reason = window.prompt(`Reason for the incident (${r.name}):`, '');
+        if (!reason || !reason.trim()) return;
+        r.com = reason.trim();
+      }
+      r.inc++;
+      markDirty();
+      render();
+    };
     top.append(cb, name, incBtn);
 
     if (r.inc > 0) {
@@ -512,7 +528,7 @@ function render() {
     // evaluation: round letter buttons
     const dots = document.createElement('div');
     dots.className = 'dots';
-    EVALUATIONS.forEach(e => {
+    DOT_ORDER.forEach(e => {
       const b = document.createElement('button');
       b.className = 'dot' + (r.ev === e.key ? ' on' : '');
       b.textContent = e.letter;
@@ -522,7 +538,12 @@ function render() {
       b.style.setProperty('--c8', e.c8);
       b.style.setProperty('--bg-opt', e.bg);
       b.onclick = () => {
-        r.ev = r.ev === e.key ? null : e.key;   // tap again to clear
+        const next = r.ev === e.key ? null : e.key;   // tap again to clear
+        if (next === 'absent' && r.inc > 0) {
+          if (!window.confirm(`${r.name} has ${r.inc} incident(s). Absent students can't have incidents. Remove them?`)) return;
+          r.inc = 0;
+        }
+        r.ev = next;
         markDirty();
         render();
       };
@@ -546,7 +567,17 @@ function render() {
     rowsBox.appendChild(card);
   });
   updateSelCount();
+  updateProgress();
   syncSelectAll();
+}
+
+// "X of Y rated · N incidents" above the cards
+function updateProgress() {
+  const rated = rows.filter(r => r.ev !== null).length;
+  const inc = rows.reduce((s, r) => s + r.inc, 0);
+  $('progress').textContent = rows.length
+    ? `${rated} of ${rows.length} rated · ${inc} incident(s)`
+    : '';
 }
 
 function updateSelCount() {
@@ -574,7 +605,21 @@ $('applyBulk').onclick = () => {
   }
   if (bulkCol.value === 'ev') {
     const raw = bulkVal.value;
-    targets.forEach(r => r.ev = raw === 'null' ? null : raw);
+    if (raw === 'null') {
+      targets.forEach(r => r.ev = null);
+    } else {
+      // Only fill cards that are still unrated; rated cards keep their choice
+      const blank = targets.filter(r => r.ev === null);
+      const kept = targets.length - blank.length;
+      const withIncidents = blank.filter(r => raw === 'absent' && r.inc > 0);
+      if (withIncidents.length && !window.confirm(
+          `${withIncidents.length} student(s) have incidents. Absent students can't have incidents. Remove them?`)) return;
+      blank.forEach(r => {
+        r.ev = raw;
+        if (raw === 'absent') r.inc = 0;
+      });
+      if (kept) showMsg(`${kept} already rated and left unchanged. Tap a letter to change one.`, true);
+    }
   } else {
     const text = bulkText.value;
     targets.forEach(r => r.com = text);
@@ -591,6 +636,18 @@ saveBtn.onclick = async () => {
   for (const r of rows) {
     if (r.ev === null) return showMsg(`Choose an evaluation for ${r.name}.`, false);
   }
+  for (const r of rows) {
+    if (r.inc > 0 && !r.com.trim()) return showMsg(`Add a reason in the comment for ${r.name}'s incident.`, false);
+  }
+
+  // Confirm the totals before anything is sent
+  const counts = {};
+  EVALUATIONS.forEach(e => counts[e.key] = 0);
+  rows.forEach(r => counts[r.ev]++);
+  const summary = EVALUATIONS.filter(e => counts[e.key])
+    .map(e => `${counts[e.key]} ${e.en}`).join(', ');
+  const incTotal = rows.reduce((s, r) => s + r.inc, 0);
+  if (!window.confirm(`Save for ${clsSel.value}?\n\n${rows.length} students: ${summary}.\nIncidents: ${incTotal}.`)) return;
 
   if (!pendingSaveId) pendingSaveId = newSaveId();
 
