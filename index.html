@@ -121,6 +121,9 @@ const EVALUATIONS = [
 
 // Points removed from the current evaluation for each incident.
 const INCIDENT_PENALTY = 5;
+
+// Number written to the sheet's Evaluation column (5 best, 0 absent)
+const EV_NUMBER = { outstanding: 5, proficient: 4, developing: 3, needs: 2, unsat: 1, absent: 0 };
 // =====================================================
 
 const EV_CYCLE = [null, ...EVALUATIONS.map(e => e.key)];
@@ -359,7 +362,7 @@ saveBtn.onclick = async () => {
     rows: rows.map(r => ({
       date: dateEl.value,
       student: r.name,
-      evaluation: evObj(r.ev).en,
+      evaluation: EV_NUMBER[r.ev],
       incidents: r.inc,
       comment: r.com
     }))
