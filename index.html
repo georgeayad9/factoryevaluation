@@ -3,24 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Student Feedback Tracker</title>
+<title>EVA School Factory Evaluation</title>
 <style>
   * { box-sizing: border-box; }
-  body{font-family:system-ui,"Segoe UI",Arial,sans-serif;margin:0;background:#f4f6f8;color:#1d2330}
-  header{background:#1f4e79;color:#fff;padding:14px 20px;font-size:18px;font-weight:600}
+  :root{--brand:#F7C948;--brand-dark:#D9A900;--brand-soft:#FFF3C4;--brand-tint:#FFF8E1;--ink:#1d1d1d}
+  body{font-family:system-ui,"Segoe UI",Arial,sans-serif;margin:0;background:#FBF8EE;color:var(--ink)}
+  header{background:#F7C948;color:#1d1d1d;padding:10px 20px;font-size:18px;font-weight:700;display:flex;align-items:center;gap:12px}
+  header .logo{height:44px;width:auto;border-radius:6px}
   main{max-width:1000px;margin:16px auto;padding:0 12px}
   .card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:14px;margin-bottom:14px}
   label{font-size:13px;color:#555;display:block;margin-bottom:4px}
   select,input,textarea{width:100%;padding:8px;border:1px solid #ccd3db;border-radius:8px;font-size:15px;font-family:inherit;background:#fff}
   .top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-  .bulk{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;background:#eef3f8;padding:12px;border-radius:10px;margin-bottom:12px}
+  .bulk{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;background:var(--brand-tint);padding:12px;border-radius:10px;margin-bottom:12px}
   .bulk > div{display:flex;flex-direction:column;flex:1 1 140px}
   .selall{display:flex;align-items:center;gap:6px;font-size:14px;color:#333;height:38px}
   .selall input{width:20px;height:20px;margin:0}
   .hint{font-size:12px;color:#777;margin:8px 0}
   .tabs{display:flex;gap:8px;margin-bottom:14px}
-  .tab{flex:1;height:44px;border-radius:10px;border:1px solid #1f4e79;background:#fff;color:#1f4e79;font-size:15px;cursor:pointer}
-  .tab.on{background:#1f4e79;color:#fff}
+  .tab{flex:1;height:44px;border-radius:10px;border:1px solid var(--brand-dark);background:#fff;color:var(--ink);font-size:15px;cursor:pointer}
+  .tab.on{background:var(--brand);color:var(--ink);font-weight:600}
 
   /* student cards */
   .cards{display:grid;grid-template-columns:1fr;gap:10px}
@@ -41,11 +43,15 @@
   .evlabel{font-size:13px;color:#555;min-height:20px;margin-bottom:8px}
 
   textarea.com{min-height:44px;height:44px;resize:vertical;font-size:14px}
-  button.primary{background:#1f4e79;color:#fff;border:0;border-radius:8px;padding:12px 18px;font-size:16px;cursor:pointer;width:100%}
-  button.secondary{background:#fff;color:#1f4e79;border:1px solid #1f4e79;border-radius:8px;padding:8px 14px;font-size:14px;cursor:pointer;height:38px}
-  button.small{background:#fff;color:#1f4e79;border:1px solid #1f4e79;border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer}
+  button.primary{background:var(--brand);color:var(--ink);border:1px solid var(--brand-dark);border-radius:8px;padding:12px 18px;font-size:16px;font-weight:600;cursor:pointer;width:100%}
+  button.primary:hover{background:#F2BE2E}
+  button.secondary{background:#fff;color:var(--ink);border:1px solid var(--brand-dark);border-radius:8px;padding:8px 14px;font-size:14px;cursor:pointer;height:38px}
+  button.secondary:hover{background:var(--brand-tint)}
+  button.small{background:#fff;color:var(--ink);border:1px solid var(--brand-dark);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer}
+  button.small:hover{background:var(--brand-tint)}
   button.ghost{background:#fff;color:#555;border:1px solid #ccd3db;border-radius:8px;padding:10px 14px;font-size:15px;cursor:pointer}
   button:disabled{background:#9aa5b1;border-color:#9aa5b1;color:#fff;cursor:default}
+  button:focus-visible,select:focus,input:focus,textarea:focus{outline:2px solid var(--brand-dark);outline-offset:1px;border-color:var(--brand-dark)}
   .msg{padding:10px;border-radius:8px;margin-top:12px;font-size:14px}
   .ok{background:#e6f4ea;color:#17652a}
   .err{background:#fdecea;color:#8a1c12}
@@ -57,16 +63,19 @@
   th{font-size:12px;color:#555;text-transform:uppercase;white-space:nowrap}
   td.com{min-width:180px;white-space:pre-wrap}
   tr.inc td:first-child{border-left:4px solid #d32f2f}
-  .badge{display:inline-block;min-width:26px;text-align:center;padding:2px 8px;border-radius:999px;background:#eef3f8;color:#1f4e79;font-weight:600}
+  .badge{display:inline-block;min-width:26px;text-align:center;padding:2px 8px;border-radius:999px;background:var(--brand-soft);color:var(--ink);font-weight:600}
   .closed{font-size:12px;color:#888}
-  td.daygroup{background:#eef3f8;color:#1f4e79;font-weight:600;font-size:14px;border-bottom:1px solid #d5dfea}
+  td.daygroup{background:var(--brand-soft);color:var(--ink);font-weight:600;font-size:14px;border-bottom:1px solid #F0D78A}
   .editrow{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
   .btnrow{display:flex;gap:8px;flex-wrap:wrap}
   @media (max-width:700px){ .top{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
-<header>Student Feedback Tracker</header>
+<header>
+  <img src="logo.jpg" alt="EVA Pharma logo" class="logo" onerror="this.remove()">
+  <span>EVA School Factory Evaluation</span>
+</header>
 <main>
 
   <div class="tabs">
