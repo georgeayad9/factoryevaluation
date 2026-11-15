@@ -5,67 +5,83 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>EVA School Factory Evaluation</title>
 <style>
+  :root{
+    --brand:#F7C948; --brand-dark:#D9A900; --brand-soft:#FFF3C4; --brand-tint:#FFF8E1;
+    --bg:#FBF8EE; --card:#ffffff; --field:#ffffff; --ink:#1d1d1d; --muted:#666666; --label:#555555;
+    --border:#ccd3db; --line:#e6e9ee; --stu-border:#e1e6ec; --hover:#FFF8E1;
+    --incident-bg:#fff8f8; --red:#d32f2f; --ok-bg:#e6f4ea; --ok-ink:#17652a; --err-bg:#fdecea; --err-ink:#8a1c12;
+    --disabled:#9aa5b1; --shadow:rgba(0,0,0,.08);
+  }
+  [data-theme="dark"]{
+    --brand-dark:#E0B232; --brand-soft:#4a3d12; --brand-tint:#2e2a18;
+    --bg:#16161a; --card:#22222a; --field:#1b1b21; --ink:#f2f2f2; --muted:#a8a8b3; --label:#c4c4cc;
+    --border:#4a4a56; --line:#33333d; --stu-border:#3a3a46; --hover:#2e2a18;
+    --incident-bg:#3a1e1e; --ok-bg:#1d3324; --ok-ink:#8fd6a4; --err-bg:#3a1e1e; --err-ink:#f5a3a3;
+    --disabled:#55555f; --shadow:rgba(0,0,0,.4);
+  }
+
   * { box-sizing: border-box; }
-  :root{--brand:#F7C948;--brand-dark:#D9A900;--brand-soft:#FFF3C4;--brand-tint:#FFF8E1;--ink:#1d1d1d}
-  body{font-family:system-ui,"Segoe UI",Arial,sans-serif;margin:0;background:#FBF8EE;color:var(--ink)}
-  header{background:#F7C948;color:#1d1d1d;padding:10px 20px;font-size:18px;font-weight:700;display:flex;align-items:center;gap:12px}
+  body{font-family:system-ui,"Segoe UI",Arial,sans-serif;margin:0;background:var(--bg);color:var(--ink)}
+  header{background:var(--brand);color:#1d1d1d;padding:10px 20px;font-size:18px;font-weight:700;display:flex;align-items:center;gap:12px}
+  header .title{flex:1}
   header .logo{height:44px;width:auto;border-radius:6px}
+  .theme{height:34px;padding:0 12px;border-radius:8px;border:1px solid #1d1d1d;background:transparent;color:#1d1d1d;font-size:13px;cursor:pointer;font-weight:600}
   main{max-width:1000px;margin:16px auto;padding:0 12px}
-  .card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:14px;margin-bottom:14px}
-  label{font-size:13px;color:#555;display:block;margin-bottom:4px}
-  select,input,textarea{width:100%;padding:8px;border:1px solid #ccd3db;border-radius:8px;font-size:15px;font-family:inherit;background:#fff}
+  .card{background:var(--card);border-radius:12px;box-shadow:0 1px 3px var(--shadow);padding:14px;margin-bottom:14px}
+  label{font-size:13px;color:var(--label);display:block;margin-bottom:4px}
+  select,input,textarea{width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;background:var(--field);color:var(--ink)}
   .top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
   .bulk{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;background:var(--brand-tint);padding:12px;border-radius:10px;margin-bottom:12px}
   .bulk > div{display:flex;flex-direction:column;flex:1 1 140px}
-  .selall{display:flex;align-items:center;gap:6px;font-size:14px;color:#333;height:38px}
+  .selall{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--ink);height:38px}
   .selall input{width:20px;height:20px;margin:0}
-  .hint{font-size:12px;color:#777;margin:8px 0}
+  .hint{font-size:12px;color:var(--muted);margin:8px 0}
   .tabs{display:flex;gap:8px;margin-bottom:14px}
-  .tab{flex:1;height:44px;border-radius:10px;border:1px solid var(--brand-dark);background:#fff;color:var(--ink);font-size:15px;cursor:pointer}
-  .tab.on{background:var(--brand);color:var(--ink);font-weight:600}
+  .tab{flex:1;height:44px;border-radius:10px;border:1px solid var(--brand-dark);background:var(--card);color:var(--ink);font-size:15px;cursor:pointer}
+  .tab.on{background:var(--brand);color:#1d1d1d;font-weight:600}
 
   /* student cards */
   .cards{display:grid;grid-template-columns:1fr;gap:10px}
   @media (min-width:760px){ .cards{grid-template-columns:1fr 1fr} }
-  .stu{background:#fff;border:1px solid #e1e6ec;border-radius:12px;padding:12px}
-  .stu.incident{border-left:4px solid #d32f2f;background:#fff8f8}
+  .stu{background:var(--card);border:1px solid var(--stu-border);border-radius:12px;padding:12px}
+  .stu.incident{border-left:4px solid var(--red);background:var(--incident-bg)}
   .stu-top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
   .stu-top input[type=checkbox]{width:20px;height:20px;margin:0;flex:0 0 auto}
   .stu-name{flex:1;font-size:16px;font-weight:600;min-width:0;overflow-wrap:anywhere}
-  .flag{display:inline-block;width:10px;height:10px;border-radius:50%;background:#d32f2f;margin-right:6px;vertical-align:middle}
-  .incbtn{height:36px;padding:0 10px;border-radius:8px;border:1px solid #d32f2f;background:#fff;color:#d32f2f;font-size:13px;cursor:pointer;white-space:nowrap}
-  .undo{height:36px;width:36px;border-radius:8px;border:1px solid #ccd3db;background:#fff;color:#555;font-size:15px;cursor:pointer}
+  .flag{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--red);margin-right:6px;vertical-align:middle}
+  .incbtn{height:36px;padding:0 10px;border-radius:8px;border:1px solid var(--red);background:var(--card);color:var(--red);font-size:13px;cursor:pointer;white-space:nowrap}
+  .undo{height:36px;width:36px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--ink);font-size:15px;cursor:pointer}
 
   /* round evaluation buttons */
   .dots{display:flex;justify-content:space-between;gap:4px;margin-bottom:6px}
-  .dot{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--c);background:var(--bg);color:var(--c8);font-size:15px;font-weight:600;padding:0;cursor:pointer;flex:0 0 auto}
+  .dot{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--c);background:var(--bg-opt);color:var(--c8);font-size:15px;font-weight:600;padding:0;cursor:pointer;flex:0 0 auto}
   .dot.on{background:var(--c);color:#fff}
-  .evlabel{font-size:13px;color:#555;min-height:20px;margin-bottom:8px}
+  .evlabel{font-size:13px;color:var(--label);min-height:20px;margin-bottom:8px}
 
   textarea.com{min-height:44px;height:44px;resize:vertical;font-size:14px}
-  button.primary{background:var(--brand);color:var(--ink);border:1px solid var(--brand-dark);border-radius:8px;padding:12px 18px;font-size:16px;font-weight:600;cursor:pointer;width:100%}
-  button.primary:hover{background:#F2BE2E}
-  button.secondary{background:#fff;color:var(--ink);border:1px solid var(--brand-dark);border-radius:8px;padding:8px 14px;font-size:14px;cursor:pointer;height:38px}
+  button.primary{background:var(--brand);color:#1d1d1d;border:1px solid var(--brand-dark);border-radius:8px;padding:12px 18px;font-size:16px;font-weight:600;cursor:pointer;width:100%}
+  button.primary:hover{filter:brightness(.97)}
+  button.secondary{background:var(--card);color:var(--ink);border:1px solid var(--brand-dark);border-radius:8px;padding:8px 14px;font-size:14px;cursor:pointer;height:38px}
   button.secondary:hover{background:var(--brand-tint)}
-  button.small{background:#fff;color:var(--ink);border:1px solid var(--brand-dark);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer}
+  button.small{background:var(--card);color:var(--ink);border:1px solid var(--brand-dark);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer}
   button.small:hover{background:var(--brand-tint)}
-  button.ghost{background:#fff;color:#555;border:1px solid #ccd3db;border-radius:8px;padding:10px 14px;font-size:15px;cursor:pointer}
-  button:disabled{background:#9aa5b1;border-color:#9aa5b1;color:#fff;cursor:default}
+  button.ghost{background:var(--card);color:var(--label);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:15px;cursor:pointer}
+  button:disabled{background:var(--disabled);border-color:var(--disabled);color:#fff;cursor:default}
   button:focus-visible,select:focus,input:focus,textarea:focus{outline:2px solid var(--brand-dark);outline-offset:1px;border-color:var(--brand-dark)}
   .msg{padding:10px;border-radius:8px;margin-top:12px;font-size:14px}
-  .ok{background:#e6f4ea;color:#17652a}
-  .err{background:#fdecea;color:#8a1c12}
+  .ok{background:var(--ok-bg);color:var(--ok-ink)}
+  .err{background:var(--err-bg);color:var(--err-ink)}
 
   /* my evaluations table */
   .tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:10px}
   table{width:100%;min-width:640px;border-collapse:collapse;font-size:14px}
-  th,td{padding:8px;border-bottom:1px solid #e6e9ee;text-align:left;vertical-align:middle}
-  th{font-size:12px;color:#555;text-transform:uppercase;white-space:nowrap}
+  th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+  th{font-size:12px;color:var(--muted);text-transform:uppercase;white-space:nowrap}
   td.com{min-width:180px;white-space:pre-wrap}
-  tr.inc td:first-child{border-left:4px solid #d32f2f}
+  tr.inc td:first-child{border-left:4px solid var(--red)}
   .badge{display:inline-block;min-width:26px;text-align:center;padding:2px 8px;border-radius:999px;background:var(--brand-soft);color:var(--ink);font-weight:600}
-  .closed{font-size:12px;color:#888}
-  td.daygroup{background:var(--brand-soft);color:var(--ink);font-weight:600;font-size:14px;border-bottom:1px solid #F0D78A}
+  .closed{font-size:12px;color:var(--muted)}
+  td.daygroup{background:var(--brand-soft);color:var(--ink);font-weight:600;font-size:14px;border-bottom:1px solid var(--brand-dark)}
   .editrow{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
   .btnrow{display:flex;gap:8px;flex-wrap:wrap}
   @media (max-width:700px){ .top{grid-template-columns:1fr} }
@@ -74,7 +90,8 @@
 <body>
 <header>
   <img src="logo.jpg" alt="EVA Pharma logo" class="logo" onerror="this.remove()">
-  <span>EVA School Factory Evaluation</span>
+  <span class="title">EVA School Factory Evaluation</span>
+  <button class="theme" id="themeBtn" type="button">Dark</button>
 </header>
 <main>
 
@@ -266,6 +283,18 @@ function saveSelection() {
   localStorage.setItem('lastSel', JSON.stringify({ eng: lastEng, cls: lastCls }));
 }
 
+// ---------- theme ----------
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  $('themeBtn').textContent = t === 'dark' ? 'Light' : 'Dark';
+  localStorage.setItem('theme', t);
+}
+$('themeBtn').onclick = () => {
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+};
+applyTheme(localStorage.getItem('theme') ||
+  (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+
 // ---------- setup ----------
 // Turns Setup-sheet rows ({Type, Name, Parent}) into { teacher: { class: [students] } }
 function buildEngineers(list) {
@@ -405,7 +434,7 @@ function render() {
       b.setAttribute('aria-label', e.en);
       b.style.setProperty('--c', e.c);
       b.style.setProperty('--c8', e.c8);
-      b.style.setProperty('--bg', e.bg);
+      b.style.setProperty('--bg-opt', e.bg);
       b.onclick = () => {
         r.ev = r.ev === e.key ? null : e.key;   // tap again to clear
         markDirty();
@@ -557,11 +586,12 @@ function renderMine() {
     const td = document.createElement('td');
     td.colSpan = 8;
     td.textContent = 'No evaluations yet.';
-    td.style.color = '#777';
+    td.style.color = 'var(--muted)';
     tr.appendChild(td);
     mineRows.appendChild(tr);
     return;
   }
+
   // Group by date, newest first
   const groups = {};
   list.forEach(rec => { (groups[rec.date] = groups[rec.date] || []).push(rec); });
@@ -575,50 +605,43 @@ function renderMine() {
     mineRows.appendChild(head);
 
     groups[day].forEach(rec => {
-    const tr = document.createElement('tr');
-    if (rec.incidents > 0) tr.classList.add('inc');
+      const tr = document.createElement('tr');
+      if (rec.incidents > 0) tr.classList.add('inc');
 
-    const cells = [
-      rec.student,
-      rec.class,
-      rec.date,
-      rec.score,
-      rec.evaluation,
-    ];
-    cells.forEach(v => {
-      const td = document.createElement('td');
-      td.textContent = v;
-      tr.appendChild(td);
-    });
+      [rec.student, rec.class, rec.date, rec.score, rec.evaluation].forEach(v => {
+        const td = document.createElement('td');
+        td.textContent = v;
+        tr.appendChild(td);
+      });
 
-    const inc = document.createElement('td');
-    const badge = document.createElement('span');
-    badge.className = 'badge';
-    badge.textContent = rec.incidents;
-    inc.appendChild(badge);
-    tr.appendChild(inc);
+      const inc = document.createElement('td');
+      const badge = document.createElement('span');
+      badge.className = 'badge';
+      badge.textContent = rec.incidents;
+      inc.appendChild(badge);
+      tr.appendChild(inc);
 
-    const com = document.createElement('td');
-    com.className = 'com';
-    com.textContent = rec.comment;
-    tr.appendChild(com);
+      const com = document.createElement('td');
+      com.className = 'com';
+      com.textContent = rec.comment;
+      tr.appendChild(com);
 
-    const act = document.createElement('td');
-    if (rec.editable) {
-      const b = document.createElement('button');
-      b.className = 'small';
-      b.textContent = 'Edit';
-      b.onclick = () => openEdit(rec);
-      act.appendChild(b);
-    } else {
-      const s = document.createElement('span');
-      s.className = 'closed';
-      s.textContent = rec.id ? 'Closed' : 'Read only';
-      act.appendChild(s);
-    }
-    tr.appendChild(act);
+      const act = document.createElement('td');
+      if (rec.editable) {
+        const b = document.createElement('button');
+        b.className = 'small';
+        b.textContent = 'Edit';
+        b.onclick = () => openEdit(rec);
+        act.appendChild(b);
+      } else {
+        const s = document.createElement('span');
+        s.className = 'closed';
+        s.textContent = rec.id ? 'Closed' : 'Read only';
+        act.appendChild(s);
+      }
+      tr.appendChild(act);
 
-    mineRows.appendChild(tr);
+      mineRows.appendChild(tr);
     });
   });
 }
