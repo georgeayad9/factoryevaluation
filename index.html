@@ -5,37 +5,46 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Student Feedback Tracker</title>
 <style>
+  * { box-sizing: border-box; }
   body{font-family:system-ui,"Segoe UI",Arial,sans-serif;margin:0;background:#f4f6f8;color:#1d2330}
   header{background:#1f4e79;color:#fff;padding:14px 20px;font-size:18px;font-weight:600}
-  main{max-width:1000px;margin:20px auto;padding:0 16px}
-  .card{background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:16px;margin-bottom:16px}
+  main{max-width:1000px;margin:16px auto;padding:0 12px}
+  .card{background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:14px;margin-bottom:14px}
   label{font-size:13px;color:#555;display:block;margin-bottom:4px}
-  select,input,textarea{box-sizing:border-box;padding:8px;border:1px solid #ccd3db;border-radius:6px;font-size:14px;font-family:inherit}
+  select,input,textarea{width:100%;padding:8px;border:1px solid #ccd3db;border-radius:8px;font-size:15px;font-family:inherit;background:#fff}
   .top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
-  .top select,.top input{width:100%}
-  .bulk{display:flex;flex-wrap:wrap;gap:8px;align-items:end;background:#eef3f8;padding:12px;border-radius:8px;margin-bottom:12px}
-  .bulk div{display:flex;flex-direction:column}
-  table{width:100%;border-collapse:collapse;font-size:14px}
-  th,td{padding:8px;border-bottom:1px solid #e6e9ee;text-align:left;vertical-align:middle}
-  th{font-size:12px;color:#555;text-transform:uppercase}
-  tr.incident{background:#fff5f5}
+  .bulk{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;background:#eef3f8;padding:12px;border-radius:10px;margin-bottom:12px}
+  .bulk > div{display:flex;flex-direction:column;flex:1 1 140px}
+  .selall{display:flex;align-items:center;gap:6px;font-size:14px;color:#333;height:38px}
+  .selall input{width:20px;height:20px;margin:0}
+  .hint{font-size:12px;color:#777;margin:8px 0}
+
+  /* student cards */
+  .cards{display:grid;grid-template-columns:1fr;gap:10px}
+  @media (min-width:760px){ .cards{grid-template-columns:1fr 1fr} }
+  .stu{background:#fff;border:1px solid #e1e6ec;border-radius:12px;padding:12px}
+  .stu.incident{border-left:4px solid #d32f2f;background:#fff8f8}
+  .stu-top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .stu-top input[type=checkbox]{width:20px;height:20px;margin:0;flex:0 0 auto}
+  .stu-name{flex:1;font-size:16px;font-weight:600;min-width:0;overflow-wrap:anywhere}
   .flag{display:inline-block;width:10px;height:10px;border-radius:50%;background:#d32f2f;margin-right:6px;vertical-align:middle}
-  .evbtn{min-width:210px;padding:6px 10px;border-radius:6px;border:1px solid #ccd3db;background:#fff;cursor:pointer;font-size:13px;text-align:left;white-space:pre-line;line-height:1.35}
-  .evbtn.none{color:#777}
-  .evbtn.absent{background:#eceff2;color:#444}
-  .evbtn.unsat{background:#fdecea;color:#8a1c12;border-color:#e0a09a}
-  .evbtn.good{background:#e3f0fb;color:#1f4e79;font-weight:600}
-  .incbtn{padding:6px 10px;border-radius:6px;border:1px solid #d32f2f;background:#fff;color:#d32f2f;cursor:pointer;font-size:13px;white-space:nowrap}
-  .undo{padding:6px 8px;border-radius:6px;border:1px solid #ccd3db;background:#fff;color:#555;cursor:pointer;font-size:13px}
-  textarea.com{width:100%;min-width:200px;height:40px;resize:vertical}
-  button.primary{background:#1f4e79;color:#fff;border:0;border-radius:6px;padding:10px 18px;font-size:15px;cursor:pointer}
-  button.secondary{background:#fff;color:#1f4e79;border:1px solid #1f4e79;border-radius:6px;padding:8px 14px;font-size:14px;cursor:pointer}
+  .incbtn{height:36px;padding:0 10px;border-radius:8px;border:1px solid #d32f2f;background:#fff;color:#d32f2f;font-size:13px;cursor:pointer;white-space:nowrap}
+  .undo{height:36px;width:36px;border-radius:8px;border:1px solid #ccd3db;background:#fff;color:#555;font-size:15px;cursor:pointer}
+
+  /* round evaluation buttons */
+  .dots{display:flex;justify-content:space-between;gap:4px;margin-bottom:6px}
+  .dot{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--c);background:var(--bg);color:var(--c8);font-size:15px;font-weight:600;padding:0;cursor:pointer;flex:0 0 auto}
+  .dot.on{background:var(--c);color:#fff}
+  .evlabel{font-size:13px;color:#555;min-height:20px;margin-bottom:8px}
+
+  textarea.com{min-height:44px;height:44px;resize:vertical;font-size:14px}
+  button.primary{background:#1f4e79;color:#fff;border:0;border-radius:8px;padding:12px 18px;font-size:16px;cursor:pointer;width:100%}
+  button.secondary{background:#fff;color:#1f4e79;border:1px solid #1f4e79;border-radius:8px;padding:8px 14px;font-size:14px;cursor:pointer;height:38px}
   button:disabled{background:#9aa5b1;border-color:#9aa5b1;color:#fff;cursor:default}
-  .msg{padding:10px;border-radius:6px;margin-top:12px;font-size:14px}
+  .msg{padding:10px;border-radius:8px;margin-top:12px;font-size:14px}
   .ok{background:#e6f4ea;color:#17652a}
   .err{background:#fdecea;color:#8a1c12}
-  .hint{font-size:12px;color:#777;margin:8px 0}
-  @media (max-width:700px){.top{grid-template-columns:1fr}}
+  @media (max-width:700px){ .top{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
@@ -75,25 +84,15 @@
         <input type="text" id="bulkText" placeholder="Type comment" hidden>
       </div>
       <button class="secondary" id="applyBulk">Apply to selected</button>
-      <span class="hint" id="selCount"></span>
+      <label class="selall"><input type="checkbox" id="selectAll"> Select all</label>
     </div>
+    <div class="hint" id="selCount"></div>
 
-    <table>
-      <thead>
-        <tr>
-          <th><input type="checkbox" id="selectAll" title="Select all rows"></th>
-          <th>Student</th>
-          <th>Evaluation</th>
-          <th>Incident</th>
-          <th>Comment</th>
-        </tr>
-      </thead>
-      <tbody id="rows"></tbody>
-    </table>
+    <div class="cards" id="rows"></div>
 
     <p class="hint">
-      Evaluation button cycles: Not rated → Outstanding → Proficient → Developing → Needs Improvement → Unsatisfactory → Absent → Not rated.
-      Each incident subtracts 5 points from the student's current evaluation score and marks the name in red.
+      Tap a letter to set the evaluation: O Outstanding, P Proficient, D Developing, N Needs Improvement, U Unsatisfactory, A Absent.
+      Each incident subtracts 5 points and marks the student in red.
     </p>
     <button class="primary" id="save">Save evaluation</button>
     <div id="status"></div>
@@ -101,39 +100,41 @@
 
 </main>
 
+<!-- Sheet URL and key live in config.js. Edit that file only. -->
+<script src="config.js"></script>
 <script>
-// ===================== CONFIGURATION (edit these) =====================
-// Google Apps Script web app URL (ends with /exec).
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbzXI1B0s_Hr2np_BiJlc0ibmYsMIoL2yaxOaIzYqogtfAdUXbe7wBUfGdaF_qf0wmchRg/exec";
-// Same secret as SECRET in Code.gs.
-const SHEET_KEY = "mybbIp-pobfod-2xabgy";
+// ===================== SETTINGS =====================
+const CFG = window.FEEDBACK_CONFIG || { url: "", key: "" };
+const SHEET_URL = CFG.url;
+const SHEET_KEY = CFG.key;
 
-// Filled automatically from the Setup sheet: { teacher: { class: [students] } }
-let ENGINEERS = {};
-
-// Evaluation options, in cycle order. "points" is the base score for each option.
-// Change the points here if your scale is different.
+// Evaluation options, in cycle order.
+// points: base score. letter: shown on the button. c / c8 / bg: colours.
 const EVALUATIONS = [
-  { key: "outstanding", en: "Outstanding",       ar: "متميز ومبادر",           points: 10, css: "good" },
-  { key: "proficient",  en: "Proficient",        ar: "ملتزم ومتقن",            points: 8,  css: "good" },
-  { key: "developing",  en: "Developing",        ar: "مقبول/تحت التدريب",      points: 6,  css: "good" },
-  { key: "needs",       en: "Needs Improvement", ar: "يحتاج تطوير/سلوك ضعيف", points: 4,  css: "unsat" },
-  { key: "unsat",       en: "Unsatisfactory",    ar: "غير ملتزم/خطر",          points: 2,  css: "unsat" },
-  { key: "absent",      en: "Absent",            ar: "غائب",                   points: 0,  css: "absent" }
+  { key: "outstanding", en: "Outstanding",       ar: "متميز ومبادر",           points: 10, letter: "O", c: "#3B6D11", c8: "#27500A", bg: "#EAF3DE" },
+  { key: "proficient",  en: "Proficient",        ar: "ملتزم ومتقن",            points: 8,  letter: "P", c: "#185FA5", c8: "#0C447C", bg: "#E6F1FB" },
+  { key: "developing",  en: "Developing",        ar: "مقبول/تحت التدريب",      points: 6,  letter: "D", c: "#0F6E56", c8: "#085041", bg: "#E1F5EE" },
+  { key: "needs",       en: "Needs Improvement", ar: "يحتاج تطوير/سلوك ضعيف", points: 4,  letter: "N", c: "#854F0B", c8: "#633806", bg: "#FAEEDA" },
+  { key: "unsat",       en: "Unsatisfactory",    ar: "غير ملتزم/خطر",          points: 2,  letter: "U", c: "#A32D2D", c8: "#791F1F", bg: "#FCEBEB" },
+  { key: "absent",      en: "Absent",            ar: "غائب",                   points: 0,  letter: "A", c: "#5F5E5A", c8: "#444441", bg: "#F1EFE8" }
 ];
 
 // Points removed from the current evaluation for each incident.
 const INCIDENT_PENALTY = 5;
-// =====================================================================
+// =====================================================
 
 const EV_CYCLE = [null, ...EVALUATIONS.map(e => e.key)];
 
 const $ = id => document.getElementById(id);
 const engSel = $('engineer'), clsSel = $('cls'), dateEl = $('date');
-const panel = $('panel'), rowsBody = $('rows'), saveBtn = $('save'), status = $('status');
+const panel = $('panel'), rowsBox = $('rows'), saveBtn = $('save'), status = $('status');
 const bulkCol = $('bulkCol'), bulkVal = $('bulkVal'), bulkText = $('bulkText'), selectAll = $('selectAll');
 
-let rows = []; // { name, ev, inc, com, sel }
+let ENGINEERS = {};       // { teacher: { class: [students] } }
+let rows = [];            // { name, ev, inc, com, sel }
+let dirty = false;        // unsaved changes on screen
+let pendingSaveId = null; // same ID on retry, so the server never writes a save twice
+let lastEng = "", lastCls = "";
 
 // ---------- helpers ----------
 const evObj = key => EVALUATIONS.find(e => e.key === key);
@@ -143,6 +144,26 @@ const scoreOf = r => r.ev === null ? null : evObj(r.ev).points - INCIDENT_PENALT
 function showMsg(text, ok) {
   status.innerHTML = `<div class="msg ${ok ? 'ok' : 'err'}"></div>`;
   status.firstChild.textContent = text;
+}
+
+// Any change to the evaluations means the next save is new, so drop the old save ID.
+function markDirty() {
+  dirty = true;
+  pendingSaveId = null;
+}
+
+function newSaveId() {
+  return (window.crypto && crypto.randomUUID)
+    ? crypto.randomUUID()
+    : Date.now() + '-' + Math.random().toString(36).slice(2);
+}
+
+function confirmDiscard() {
+  return !dirty || window.confirm('You have unsaved evaluations. Discard them?');
+}
+
+function saveSelection() {
+  localStorage.setItem('lastSel', JSON.stringify({ eng: lastEng, cls: lastCls }));
 }
 
 // ---------- setup ----------
@@ -166,28 +187,6 @@ function populateEngineers() {
   Object.keys(ENGINEERS).forEach(name => engSel.add(new Option(name, name)));
 }
 
-async function loadLists() {
-  let list = null;
-  try {
-    if (SHEET_URL.startsWith('PASTE')) throw new Error('no url');
-    const res = await fetch(`${SHEET_URL}?action=lists&key=${encodeURIComponent(SHEET_KEY)}`);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    if (!Array.isArray(data)) throw new Error(data.error || 'unexpected reply');
-    list = data;
-    localStorage.setItem('listsCache', JSON.stringify(list));
-  } catch (e) {
-    const cached = localStorage.getItem('listsCache');  // fall back to last good copy
-    if (cached) list = JSON.parse(cached);
-    else showMsg('Could not load the lists from Google Sheets. Check SHEET_URL and SHEET_KEY.', false);
-  }
-  ENGINEERS = buildEngineers(list || []);
-  populateEngineers();
-  fillClasses();
-}
-
-dateEl.value = new Date().toLocaleDateString('en-CA'); // today, YYYY-MM-DD, editable
-
 function fillBulkValues() {
   const isComment = bulkCol.value === 'com';
   bulkVal.hidden = isComment;
@@ -204,11 +203,15 @@ function fillClasses() {
   Object.keys(ENGINEERS[engSel.value] || {}).forEach(c => clsSel.add(new Option(c, c)));
   panel.hidden = true;
   rows = [];
+  dirty = false;
+  pendingSaveId = null;
   status.innerHTML = '';
 }
 
 function loadStudents() {
   const students = (ENGINEERS[engSel.value] || {})[clsSel.value];
+  dirty = false;
+  pendingSaveId = null;
   if (!students) { panel.hidden = true; rows = []; return; }
   rows = students.map(name => ({ name, ev: null, inc: 0, com: '', sel: false }));
   panel.hidden = false;
@@ -216,69 +219,84 @@ function loadStudents() {
   render();
 }
 
-// ---------- rendering ----------
+// ---------- rendering: one card per student ----------
 function render() {
-  rowsBody.innerHTML = '';
+  rowsBox.innerHTML = '';
   rows.forEach(r => {
-    const tr = document.createElement('tr');
-    if (r.inc > 0) tr.classList.add('incident');
+    const card = document.createElement('div');
+    card.className = 'stu' + (r.inc > 0 ? ' incident' : '');
 
-    // selection
-    const tdSel = document.createElement('td');
+    // top line: select, name (red mark if incidents), incident button and undo
+    const top = document.createElement('div');
+    top.className = 'stu-top';
+
     const cb = document.createElement('input');
-    cb.type = 'checkbox'; cb.checked = r.sel;
+    cb.type = 'checkbox';
+    cb.checked = r.sel;
+    cb.title = 'Select';
     cb.onchange = () => { r.sel = cb.checked; updateSelCount(); syncSelectAll(); };
-    tdSel.appendChild(cb);
 
-    // name with red mark when incidents exist
-    const tdName = document.createElement('td');
+    const name = document.createElement('div');
+    name.className = 'stu-name';
     if (r.inc > 0) {
       const dot = document.createElement('span');
       dot.className = 'flag';
       dot.title = `${r.inc} incident(s)`;
-      tdName.appendChild(dot);
+      name.appendChild(dot);
     }
-    tdName.appendChild(document.createTextNode(r.name));
+    name.appendChild(document.createTextNode(r.name));
 
-    // evaluation button
-    const tdEv = document.createElement('td');
-    const evBtn = document.createElement('button');
-    const e = r.ev ? evObj(r.ev) : null;
-    const s = scoreOf(r);
-    evBtn.className = 'evbtn ' + (e ? e.css : 'none');
-    evBtn.textContent = e
-      ? `${e.en}  (${s} pts)\n${e.ar}`
-      : 'Not rated\n—';
-    evBtn.onclick = () => { r.ev = nextEv(r.ev); render(); };
-    tdEv.appendChild(evBtn);
-
-    // incident button + undo
-    const tdInc = document.createElement('td');
     const incBtn = document.createElement('button');
     incBtn.className = 'incbtn';
-    incBtn.textContent = `⚠ Incident (−${INCIDENT_PENALTY})${r.inc ? ' ×' + r.inc : ''}`;
-    incBtn.onclick = () => { r.inc++; render(); };
-    tdInc.appendChild(incBtn);
+    incBtn.textContent = `Incident −${INCIDENT_PENALTY}${r.inc ? ' ×' + r.inc : ''}`;
+    incBtn.onclick = () => { r.inc++; markDirty(); render(); };
+    top.append(cb, name, incBtn);
+
     if (r.inc > 0) {
       const undo = document.createElement('button');
       undo.className = 'undo';
       undo.title = 'Remove last incident';
+      undo.setAttribute('aria-label', 'Remove last incident');
       undo.textContent = '↺';
-      undo.onclick = () => { r.inc--; render(); };
-      tdInc.appendChild(undo);
+      undo.onclick = () => { r.inc--; markDirty(); render(); };
+      top.appendChild(undo);
     }
 
+    // evaluation: round letter buttons
+    const dots = document.createElement('div');
+    dots.className = 'dots';
+    EVALUATIONS.forEach(e => {
+      const b = document.createElement('button');
+      b.className = 'dot' + (r.ev === e.key ? ' on' : '');
+      b.textContent = e.letter;
+      b.title = e.en;
+      b.setAttribute('aria-label', e.en);
+      b.style.setProperty('--c', e.c);
+      b.style.setProperty('--c8', e.c8);
+      b.style.setProperty('--bg', e.bg);
+      b.onclick = () => {
+        r.ev = r.ev === e.key ? null : e.key;   // tap again to clear
+        markDirty();
+        render();
+      };
+      dots.appendChild(b);
+    });
+
+    // label under the buttons
+    const label = document.createElement('div');
+    label.className = 'evlabel';
+    const e = r.ev ? evObj(r.ev) : null;
+    label.textContent = e ? `${e.en} · ${e.ar} · ${scoreOf(r)} pts` : 'Not rated';
+
     // comment: free typing
-    const tdCom = document.createElement('td');
     const com = document.createElement('textarea');
     com.className = 'com';
-    com.placeholder = 'Type a comment…';
+    com.placeholder = 'Comment…';
     com.value = r.com;
-    com.oninput = () => { r.com = com.value; };
-    tdCom.appendChild(com);
+    com.oninput = () => { r.com = com.value; markDirty(); };
 
-    tr.append(tdSel, tdName, tdEv, tdInc, tdCom);
-    rowsBody.appendChild(tr);
+    card.append(top, dots, label, com);
+    rowsBox.appendChild(card);
   });
   updateSelCount();
   syncSelectAll();
@@ -286,7 +304,7 @@ function render() {
 
 function updateSelCount() {
   const n = rows.filter(r => r.sel).length;
-  $('selCount').textContent = n ? `${n} selected` : 'No rows selected (bulk applies to all rows)';
+  $('selCount').textContent = n ? `${n} selected` : 'No rows selected (bulk applies to all students)';
 }
 
 function syncSelectAll() {
@@ -314,6 +332,7 @@ $('applyBulk').onclick = () => {
     const text = bulkText.value;
     targets.forEach(r => r.com = text);
   }
+  markDirty();
   render();
 };
 
@@ -321,17 +340,20 @@ $('applyBulk').onclick = () => {
 saveBtn.onclick = async () => {
   if (!dateEl.value) return showMsg('Please choose a date.', false);
   if (!rows.length) return showMsg('Choose a class first.', false);
-  if (SHEET_URL.startsWith('PASTE')) return showMsg('Sheet link not set. Edit SHEET_URL in the file.', false);
+  if (!SHEET_URL) return showMsg('Sheet link not set. Edit config.js.', false);
 
   for (const r of rows) {
     if (r.ev === null) return showMsg(`Choose an evaluation for ${r.name}.`, false);
   }
 
-  // One request per save: the whole class goes to Excel as new rows in that class's tab.
-  saveBtn.disabled = true;
+  if (!pendingSaveId) pendingSaveId = newSaveId();
+
   const now = new Date();
   const pad = n => String(n).padStart(2, '0');
   const payload = {
+    action: 'saveEvaluations',
+    key: SHEET_KEY,
+    saveId: pendingSaveId,
     uploadedAt: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`,
     class: clsSel.value,
     rows: rows.map(r => ({
@@ -343,29 +365,91 @@ saveBtn.onclick = async () => {
     }))
   };
 
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Saving…';
   try {
     // text/plain avoids a browser preflight request, which Apps Script cannot answer
     const res = await fetch(SHEET_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ ...payload, action: 'saveEvaluations', key: SHEET_KEY })
+      body: JSON.stringify(payload)
     });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const out = await res.json();
     if (out.error) throw new Error(out.error);
-    showMsg(`Saved ${rows.length} evaluation(s) for ${clsSel.value} to Google Sheets.`, true);
+
+    showMsg(out.duplicate
+      ? `These evaluations for ${clsSel.value} were already saved.`
+      : `Saved ${rows.length} evaluation(s) for ${clsSel.value} to Google Sheets.`, true);
+    pendingSaveId = null;
+    dirty = false;
     panel.hidden = true;
     rows = [];
     clsSel.value = '';
+    lastCls = '';
+    saveSelection();
   } catch (err) {
-    showMsg(`Not saved (${err.message}). Press Save again to retry.`, false);
+    showMsg(`Not saved (${err.message}). Press Save again to retry. Nothing will be saved twice.`, false);
   } finally {
     saveBtn.disabled = false;
+    saveBtn.textContent = 'Save evaluation';
   }
 };
 
-engSel.onchange = fillClasses;
-clsSel.onchange = loadStudents;
+// ---------- selection changes ----------
+engSel.onchange = () => {
+  if (!confirmDiscard()) { engSel.value = lastEng; return; }
+  lastEng = engSel.value;
+  lastCls = '';
+  fillClasses();
+  saveSelection();
+};
+
+clsSel.onchange = () => {
+  if (!confirmDiscard()) { clsSel.value = lastCls; return; }
+  lastCls = clsSel.value;
+  loadStudents();
+  saveSelection();
+};
+
+// ---------- start ----------
+async function loadLists() {
+  let list = null;
+  try {
+    if (!SHEET_URL) throw new Error('no url');
+    const res = await fetch(`${SHEET_URL}?action=lists&key=${encodeURIComponent(SHEET_KEY)}`);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!Array.isArray(data)) throw new Error(data.error || 'unexpected reply');
+    list = data;
+    localStorage.setItem('listsCache', JSON.stringify(list));
+  } catch (e) {
+    const cached = localStorage.getItem('listsCache');  // fall back to the last good copy
+    if (cached) list = JSON.parse(cached);
+    else showMsg('Could not load the lists from Google Sheets. Check config.js.', false);
+  }
+
+  ENGINEERS = buildEngineers(list || []);
+  populateEngineers();
+
+  // Reopen with the engineer and class used last time
+  const saved = JSON.parse(localStorage.getItem('lastSel') || 'null');
+  if (saved && ENGINEERS[saved.eng]) {
+    engSel.value = saved.eng;
+    lastEng = saved.eng;
+    fillClasses();
+    if (saved.cls && ENGINEERS[saved.eng][saved.cls]) {
+      clsSel.value = saved.cls;
+      lastCls = saved.cls;
+      loadStudents();
+    }
+  } else {
+    lastEng = engSel.value;
+    fillClasses();
+  }
+}
+
+dateEl.value = new Date().toLocaleDateString('en-CA'); // today, YYYY-MM-DD, editable
 fillBulkValues();
 loadLists();
 </script>
