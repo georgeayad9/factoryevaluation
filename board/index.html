@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EVA School · Board overview</title>
+<style>
+:root{--brand:#F7C948;--brand-dark:#D9A900;--brand-tint:#FFF8E1;--bg:#FBF8EE;--card:#ffffff;--ink:#1d1d1d;--muted:#666666;--line:#e6e9ee;--border:#ccd3db;--red:#d32f2f;--red-bg:#fdecea;--bar:#F7C948}
+[data-theme="dark"]{--bg:#16161a;--card:#22222a;--ink:#f2f2f2;--muted:#a8a8b3;--line:#33333d;--border:#4a4a56;--brand-tint:#2e2a18;--red-bg:#3a1e1e;--bar:#E0B232}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--brand);color:#1d1d1d;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header img{height:44px;width:auto}
+header .title{flex:1;font-weight:700;font-size:17px;min-width:160px}
+main{max-width:1100px;margin:16px auto;padding:0 12px 40px}
+.btn{border-radius:8px;padding:9px 14px;font-size:14px;cursor:pointer;border:1px solid var(--brand-dark);background:var(--card);color:var(--ink)}
+.btn.dark{background:#1d1d1d;color:var(--brand);border-color:#1d1d1d;font-weight:600}
+.btn.head{background:transparent;color:#1d1d1d;border-color:#1d1d1d}
+.btn:disabled{opacity:.5;cursor:default}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tab{padding:9px 14px;border-radius:8px;border:1px solid var(--brand-dark);background:var(--card);cursor:pointer;font-size:14px;color:var(--ink)}
+.tab.on{background:var(--brand);font-weight:600;color:#1d1d1d}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+h2{font-size:16px;margin:0 0 10px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.kpi .l{font-size:13px;color:var(--muted)}
+.kpi .v{font-size:24px;font-weight:600;margin-top:2px}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{font-size:12px;color:var(--muted);text-transform:uppercase;white-space:nowrap}
+tr.inc td:first-child{border-left:4px solid var(--red)}
+tr.inc{background:var(--red-bg)}
+.barrow{display:grid;grid-template-columns:minmax(90px,150px) 1fr minmax(90px,130px);gap:8px;align-items:center;font-size:14px;margin-bottom:8px}
+.track{background:var(--line);border-radius:4px;height:12px}
+.fill{height:12px;border-radius:4px;background:var(--bar)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+.row label{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:var(--card);color:var(--ink);min-width:160px}
+.msg{padding:10px;border-radius:8px;font-size:14px;margin:10px 0;background:var(--red-bg);color:var(--red)}
+.muted{color:var(--muted);font-size:13px;margin:8px 0}
+#gate{max-width:380px;margin:40px auto}
+#printArea{display:none}
+@media print{
+  body{background:#fff;color:#000}
+  header,main,.noprint{display:none !important}
+  #printArea{display:block}
+  #printArea table{font-size:11px;min-width:0}
+  #printArea th,#printArea td{border-bottom:1px solid #ccc}
+  @page{size:A4 landscape;margin:12mm}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <img src="../logo.png" alt="EVA Pharma logo" onerror="this.remove()">
+  <span class="title">EVA School · Board overview</span>
+  <button class="btn head" id="themeBtn" type="button">Dark</button>
+  <button class="btn head" id="signOut" type="button" hidden>Sign out</button>
+</header>
+
+<main>
+
+  <!-- SIGN IN -->
+  <div class="card" id="gate" hidden>
+    <h2>Board sign in</h2>
+    <label class="muted" for="pw">Board password</label>
+    <input type="password" id="pw" autocomplete="off" style="width:100%">
+    <button class="btn dark" id="openBtn" type="button" style="width:100%;margin-top:12px">Open</button>
+    <div id="gMsg"></div>
+  </div>
+
+  <!-- APP -->
+  <div id="app" hidden>
+    <div class="tabs noprint">
+      <button class="tab on" data-view="vOverview" type="button">Overview</button>
+      <button class="tab" data-view="vTeachers" type="button">Teachers</button>
+      <button class="tab" data-view="vClasses" type="button">Classes</button>
+      <button class="tab" data-view="vAll" type="button">All evaluations</button>
+      <button class="tab" data-view="vComments" type="button">Comments</button>
+      <button class="tab" data-view="vIncidents" type="button">Incidents</button>
+      <button class="btn" id="refresh" type="button" style="margin-left:auto">Refresh data</button>
+    </div>
+    <div class="muted" id="stamp"></div>
+    <div id="appMsg"></div>
+
+    <!-- OVERVIEW -->
+    <div id="vOverview">
+      <div class="kpis" id="kpis"></div>
+      <div class="card">
+        <h2>Evaluations by level</h2>
+        <div id="dist"></div>
+      </div>
+      <div class="card">
+        <h2>Behaviour by class</h2>
+        <div id="classTable"></div>
+        <div class="muted">Average excludes Absent. Absent rate is Absent evaluations out of all evaluations.</div>
+      </div>
+    </div>
+
+    <!-- TEACHERS -->
+    <div id="vTeachers" hidden>
+      <div class="card">
+        <h2>Evaluations per teacher</h2>
+        <div id="teacherBars"></div>
+      </div>
+      <div class="card">
+        <h2>Teacher details</h2>
+        <div id="teacherTable"></div>
+      </div>
+    </div>
+
+    <!-- CLASSES -->
+    <div id="vClasses" hidden>
+      <div class="row noprint">
+        <label>Class <select id="clsPick"></select></label>
+        <button class="btn" id="printCls" type="button">Print this class</button>
+        <button class="btn dark" id="xlsCls" type="button">Download this class (Excel)</button>
+        <button class="btn" id="xlsAll" type="button">Download all classes (Excel)</button>
+      </div>
+      <div class="kpis" id="clsKpis"></div>
+      <div class="card">
+        <h2>Students in this class</h2>
+        <div id="clsStudents"></div>
+      </div>
+      <div class="card">
+        <h2>Latest evaluations</h2>
+        <div id="clsRecent"></div>
+      </div>
+    </div>
+
+    <!-- ALL EVALUATIONS -->
+    <div id="vAll" hidden>
+      <div class="row noprint">
+        <label>Class <select id="fCls"></select></label>
+        <label>Teacher <select id="fTeacher"></select></label>
+        <label>Search student <input id="fQ" placeholder="Name" style="min-width:200px"></label>
+        <button class="btn dark" id="xlsFilter" type="button">Download shown rows (Excel)</button>
+      </div>
+      <div class="card">
+        <div id="allCount" class="muted"></div>
+        <div id="allTable"></div>
+      </div>
+    </div>
+
+    <!-- COMMENTS: every comment, all classes -->
+    <div id="vComments" hidden>
+      <div class="row noprint">
+        <label>Class <select id="cmCls"></select></label>
+        <label>Teacher <select id="cmTeacher"></select></label>
+        <label>Search <input id="cmQ" placeholder="Name or comment" style="min-width:200px"></label>
+        <button class="btn dark" id="xlsComments" type="button">Download (Excel)</button>
+      </div>
+      <div class="card">
+        <div id="cmCount" class="muted"></div>
+        <div id="cmTable"></div>
+      </div>
+    </div>
+
+    <!-- INCIDENTS: every incident, all classes -->
+    <div id="vIncidents" hidden>
+      <div class="row noprint">
+        <label>Class <select id="inCls"></select></label>
+        <label>Teacher <select id="inTeacher"></select></label>
+        <label>Search <input id="inQ" placeholder="Name or comment" style="min-width:200px"></label>
+        <button class="btn dark" id="xlsIncidents" type="button">Download (Excel)</button>
+      </div>
+      <div class="card">
+        <div id="inCount" class="muted"></div>
+        <div id="inTable"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="printArea"></div>
+
+<!-- Excel export in the browser -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+// ===================== SETTINGS =====================
+// The web app URL of the tracker (ends with /exec). Not secret: data needs the board password.
+const BOARD_URL = "https://script.google.com/macros/s/AKfycbzXI1B0s_Hr2np_BiJlc0ibmYsMIoL2yaxOaIzYqogtfAdUXbe7wBUfGdaF_qf0wmchRg/exec";
+// =====================================================
+
+const EVALS = ["Outstanding", "Proficient", "Developing", "Needs Improvement", "Unsatisfactory", "Absent"];
+const HEADER = ["Upload Timing", "Date", "Student Name", "Class", "Teacher", "Score (0-5)", "Evaluation", "Incident (Warning)", "Comments"];
+
+const $ = id => document.getElementById(id);
+let DATA = null;     // { classes: [names], records: [...] }
+let PW = "";         // board password, kept for this browser tab only
+
+// ---------- theme ----------
+function applyTheme(t) {
+  document.documentElement.setAttribute("data-theme", t);
+  $("themeBtn").textContent = t === "dark" ? "Light" : "Dark";
+  localStorage.setItem("theme", t);
+}
+$("themeBtn").onclick = () =>
+  applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
+applyTheme(localStorage.getItem("theme") ||
+  (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+
+// ---------- helpers ----------
+function el(tag, text, cls) {
+  const e = document.createElement(tag);
+  if (text !== undefined && text !== null) e.textContent = String(text);
+  if (cls) e.className = cls;
+  return e;
+}
+
+function table(headers, rows) {
+  const wrap = el("div", null, "tw");
+  const t = el("table");
+  const thead = el("thead");
+  const hr = el("tr");
+  headers.forEach(h => hr.appendChild(el("th", h)));
+  thead.appendChild(hr);
+  t.appendChild(thead);
+  const tb = el("tbody");
+  rows.forEach(r => {
+    const tr = el("tr");
+    if (r.cls) tr.className = r.cls;
+    r.cells.forEach(c => tr.appendChild(el("td", c)));
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb);
+  wrap.appendChild(t);
+  return wrap;
+}
+
+function setView(id) {
+  ["vOverview", "vTeachers", "vClasses", "vAll", "vComments", "vIncidents"].forEach(v => $(v).hidden = v !== id);
+  document.querySelectorAll(".tab").forEach(b => b.classList.toggle("on", b.dataset.view === id));
+}
+
+function avgOf(list) {
+  const scored = list.filter(r => r.evaluation !== "Absent").map(r => r.score);
+  if (!scored.length) return "–";
+  return Math.round(scored.reduce((a, b) => a + b, 0) / scored.length * 100) / 100;
+}
+
+function group(list, keyFn) {
+  const g = {};
+  list.forEach(r => { const k = keyFn(r); (g[k] = g[k] || []).push(r); });
+  return g;
+}
+
+function summarize(list) {
+  const absent = list.filter(r => r.evaluation === "Absent").length;
+  return {
+    evals: list.length,
+    students: new Set(list.map(r => r.class + "||" + r.student)).size,
+    classes: new Set(list.map(r => r.class)).size,
+    teachers: new Set(list.map(r => r.teacher)).size,
+    avg: avgOf(list),
+    incidents: list.reduce((s, r) => s + r.incidents, 0),
+    absentRate: list.length ? Math.round(absent / list.length * 100) + "%" : "–",
+    last: list.reduce((m, r) => (r.uploaded > m ? r.uploaded : m), "") || "–"
+  };
+}
+
+// ---------- data ----------
+async function fetchData(pw) {
+  const res = await fetch(BOARD_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },   // avoids a browser preflight request
+    body: JSON.stringify({ action: "boardData", key: pw })
+  });
+  if (!res.ok) throw new Error("HTTP " + res.status);
+  const out = await res.json();
+  if (out.error) throw new Error(out.error);
+  return out;
+}
+
+async function refresh() {
+  $("appMsg").innerHTML = "";
+  $("refresh").disabled = true;
+  try {
+    DATA = await fetchData(PW);
+    $("stamp").textContent = "Data as of " + DATA.generated;
+    renderAll();
+  } catch (e) {
+    if (/unauthorized/.test(e.message)) return signOut("The board password is not correct.");
+    const m = el("div", "Could not load the data: " + e.message, "msg");
+    $("appMsg").appendChild(m);
+  } finally {
+    $("refresh").disabled = false;
+  }
+}
+
+function signOut(note) {
+  PW = "";
+  sessionStorage.removeItem("boardKey");
+  DATA = null;
+  $("app").hidden = true;
+  $("signOut").hidden = true;
+  $("gate").hidden = false;
+  $("pw").value = "";
+  $("gMsg").innerHTML = "";
+  if (note) $("gMsg").appendChild(el("div", note, "msg"));
+}
+
+function showApp() {
+  $("gate").hidden = true;
+  $("app").hidden = false;
+  $("signOut").hidden = false;
+}
+
+$("openBtn").onclick = async () => {
+  const pw = $("pw").value.trim();
+  if (!pw) return;
+  $("openBtn").disabled = true;
+  try {
+    PW = pw;
+    DATA = await fetchData(pw);
+    sessionStorage.setItem("boardKey", pw);
+    $("stamp").textContent = "Data as of " + DATA.generated;
+    showApp();
+    renderAll();
+  } catch (e) {
+    PW = "";
+    $("gMsg").innerHTML = "";
+    $("gMsg").appendChild(el("div", /unauthorized/.test(e.message)
+      ? "The board password is not correct."
+      : "Could not load the data: " + e.message, "msg"));
+  } finally {
+    $("openBtn").disabled = false;
+  }
+};
+$("pw").addEventListener("keydown", e => { if (e.key === "Enter") $("openBtn").click(); });
+$("signOut").onclick = () => signOut("");
+$("refresh").onclick = refresh;
+document.querySelectorAll(".tab").forEach(b => b.onclick = () => setView(b.dataset.view));
+
+// ---------- rendering ----------
+function renderAll() {
+  const recs = DATA.records;
+  const classNames = [...new Set([...DATA.classes, ...recs.map(r => r.class)])].sort();
+  const teacherNames = [...new Set(recs.map(r => r.teacher))].sort();
+  const all = summarize(recs);
+
+  // Overview
+  const kpis = $("kpis");
+  kpis.innerHTML = "";
+  [
+    ["Evaluations", all.evals],
+    ["Students", all.students],
+    ["Average score (0-5)", all.avg],
+    ["Incidents", all.incidents],
+    ["Absent rate", all.absentRate],
+    ["Teachers who uploaded", all.teachers]
+  ].forEach(([l, v]) => {
+    const k = el("div", null, "kpi");
+    k.append(el("div", l, "l"), el("div", v, "v"));
+    kpis.appendChild(k);
+  });
+
+  const dist = $("dist");
+  dist.innerHTML = "";
+  const counts = EVALS.map(e => [e, recs.filter(r => r.evaluation === e).length]);
+  const maxC = Math.max(1, ...counts.map(c => c[1]));
+  counts.forEach(([name, n]) => dist.appendChild(barRow(name, n, maxC, n + " (" +
+    (recs.length ? Math.round(n / recs.length * 100) : 0) + "%)")));
+
+  const byClass = group(recs, r => r.class);
+  $("classTable").innerHTML = "";
+  $("classTable").appendChild(table(
+    ["Class", "Students", "Evaluations", "Average", "Incidents", "Absent rate", "Last upload"],
+    classNames.map(c => {
+      const s = summarize(byClass[c] || []);
+      return { cells: [c, s.students, s.evals, s.avg, s.incidents, s.absentRate, s.last] };
+    })));
+
+  // Teachers
+  const byTeacher = group(recs, r => r.teacher);
+  const maxT = Math.max(1, ...teacherNames.map(t => (byTeacher[t] || []).length));
+  $("teacherBars").innerHTML = "";
+  teacherNames.forEach(t => {
+    const n = (byTeacher[t] || []).length;
+    $("teacherBars").appendChild(barRow(t, n, maxT, n + " evaluation(s)"));
+  });
+  $("teacherTable").innerHTML = "";
+  $("teacherTable").appendChild(table(
+    ["Teacher", "Evaluations", "Classes", "Students", "Last upload"],
+    teacherNames.map(t => {
+      const s = summarize(byTeacher[t] || []);
+      return { cells: [t, s.evals, s.classes, s.students, s.last] };
+    })));
+
+  // Classes picker (shared by the Classes tab and the Download all button)
+  fillSelect($("clsPick"), classNames, $("clsPick").value || classNames[0]);
+  renderClass();
+
+  // All evaluations filters
+  fillSelect($("fCls"), classNames, $("fCls").value, "All classes");
+  fillSelect($("fTeacher"), teacherNames, $("fTeacher").value, "All teachers");
+  renderAllTable();
+
+  // Comments and incidents tabs
+  fillSelect($("cmCls"), classNames, $("cmCls").value, "All classes");
+  fillSelect($("cmTeacher"), teacherNames, $("cmTeacher").value, "All teachers");
+  fillSelect($("inCls"), classNames, $("inCls").value, "All classes");
+  fillSelect($("inTeacher"), teacherNames, $("inTeacher").value, "All teachers");
+  renderComments();
+  renderIncidents();
+}
+
+function barRow(label, n, max, text) {
+  const row = el("div", null, "barrow");
+  row.appendChild(el("span", label));
+  const track = el("div", null, "track");
+  const fill = el("div", null, "fill");
+  fill.style.width = Math.round(n / max * 100) + "%";
+  track.appendChild(fill);
+  row.append(track, el("span", text));
+  return row;
+}
+
+function fillSelect(sel, values, keep, allLabel) {
+  sel.innerHTML = "";
+  if (allLabel) sel.add(new Option(allLabel, ""));
+  values.forEach(v => sel.add(new Option(v, v)));
+  sel.value = values.includes(keep) ? keep : (allLabel ? "" : values[0] || "");
+}
+
+function sortRecs(list) {
+  return list.slice().sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (b.uploaded > a.uploaded ? 1 : -1)));
+}
+
+function renderClass() {
+  const cls = $("clsPick").value;
+  const list = DATA.records.filter(r => r.class === cls);
+  const s = summarize(list);
+  const kp = $("clsKpis");
+  kp.innerHTML = "";
+  [["Students", s.students], ["Evaluations", s.evals], ["Average (0-5)", s.avg],
+   ["Incidents", s.incidents], ["Absent rate", s.absentRate], ["Last upload", s.last]]
+    .forEach(([l, v]) => {
+      const k = el("div", null, "kpi");
+      k.append(el("div", l, "l"), el("div", v, "v"));
+      kp.appendChild(k);
+    });
+
+  const byStudent = group(list, r => r.student);
+  $("clsStudents").innerHTML = "";
+  $("clsStudents").appendChild(table(
+    ["Student", "Evaluations", "Average", "Incidents", "Absent"],
+    Object.keys(byStudent).sort().map(name => {
+      const rs = byStudent[name];
+      return {
+        cls: rs.reduce((a, r) => a + r.incidents, 0) > 0 ? "inc" : "",
+        cells: [name, rs.length, avgOf(rs), rs.reduce((a, r) => a + r.incidents, 0),
+                rs.filter(r => r.evaluation === "Absent").length]
+      };
+    })));
+
+  $("clsRecent").innerHTML = "";
+  $("clsRecent").appendChild(table(
+    ["Date", "Student", "Teacher", "Evaluation", "Score", "Incidents", "Comment"],
+    sortRecs(list).slice(0, 50).map(r => ({
+      cls: r.incidents > 0 ? "inc" : "",
+      cells: [r.date, r.student, r.teacher, r.evaluation, r.score, r.incidents, r.comment]
+    }))));
+}
+
+function filteredRecs() {
+  const c = $("fCls").value, t = $("fTeacher").value, q = $("fQ").value.trim().toLowerCase();
+  return sortRecs(DATA.records.filter(r =>
+    (!c || r.class === c) && (!t || r.teacher === t) && (!q || r.student.toLowerCase().includes(q))));
+}
+
+function renderAllTable() {
+  const list = filteredRecs();
+  $("allCount").textContent = `${list.length} evaluation(s) match`;
+  $("allTable").innerHTML = "";
+  $("allTable").appendChild(table(
+    ["Date", "Class", "Teacher", "Student", "Evaluation", "Score", "Incidents", "Comment"],
+    list.slice(0, 300).map(r => ({
+      cls: r.incidents > 0 ? "inc" : "",
+      cells: [r.date, r.class, r.teacher, r.student, r.evaluation, r.score, r.incidents, r.comment]
+    }))));
+  if (list.length > 300) $("allTable").appendChild(el("div", "Showing the newest 300. Download to get all of them.", "muted"));
+}
+
+["clsPick"].forEach(id => $(id).onchange = renderClass);
+["fCls", "fTeacher"].forEach(id => $(id).onchange = renderAllTable);
+$("fQ").oninput = renderAllTable;
+["cmCls", "cmTeacher"].forEach(id => $(id).onchange = renderComments);
+$("cmQ").oninput = renderComments;
+["inCls", "inTeacher"].forEach(id => $(id).onchange = renderIncidents);
+$("inQ").oninput = renderIncidents;
+
+// ---------- Excel ----------
+function safeSheetName(name) {
+  return String(name).replace(/[\\\/\?\*\[\]:]/g, " ").substring(0, 31);
+}
+
+function rowsFor(list) {
+  return [HEADER].concat(list.map(r => [
+    r.uploaded, r.date, r.student, r.class, r.teacher, r.score, r.evaluation,
+    r.incidents > 0 ? r.incidents : "", r.comment
+  ]));
+}
+
+function downloadWorkbook(sheets, filename) {
+  const wb = XLSX.utils.book_new();
+  sheets.forEach(([name, list]) =>
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rowsFor(list)), safeSheetName(name)));
+  XLSX.writeFile(wb, filename);
+}
+
+$("xlsCls").onclick = () => {
+  const cls = $("clsPick").value;
+  const list = sortRecs(DATA.records.filter(r => r.class === cls)).reverse();
+  downloadWorkbook([[cls, list]], `${cls} - evaluations.xlsx`);
+};
+
+$("xlsAll").onclick = () => {
+  const names = [...new Set(DATA.records.map(r => r.class))].sort();
+  const byClass = group(DATA.records, r => r.class);
+  downloadWorkbook(names.map(n => [n, sortRecs(byClass[n]).reverse()]), "EVA School - all classes.xlsx");
+};
+
+$("xlsFilter").onclick = () => {
+  const list = filteredRecs().slice().reverse();
+  downloadWorkbook([["Evaluations", list]], "EVA School - evaluations.xlsx");
+};
+
+// ---------- comments and incidents tabs ----------
+// Filters a list by class, teacher and a search text (student name or comment)
+function filterBy(clsId, teacherId, qId, base) {
+  const c = $(clsId).value, t = $(teacherId).value, q = $(qId).value.trim().toLowerCase();
+  return sortRecs(base.filter(r =>
+    (!c || r.class === c) &&
+    (!t || r.teacher === t) &&
+    (!q || r.student.toLowerCase().includes(q) || r.comment.toLowerCase().includes(q))));
+}
+
+function noteIfLong(container, total, shown) {
+  if (total > shown) container.appendChild(el("div", "Showing the newest " + shown + " of " + total + ". Download to get all of them.", "muted"));
+}
+
+function renderComments() {
+  const base = DATA.records.filter(r => r.comment.trim() !== "");
+  const list = filterBy("cmCls", "cmTeacher", "cmQ", base);
+  $("cmCount").textContent = list.length + " comment(s)";
+  const box = $("cmTable");
+  box.innerHTML = "";
+  box.appendChild(table(
+    ["Date", "Class", "Name", "Teacher", "Comments"],
+    list.slice(0, 500).map(r => ({ cells: [r.date, r.class, r.student, r.teacher, r.comment] }))));
+  noteIfLong(box, list.length, 500);
+}
+
+function renderIncidents() {
+  const base = DATA.records.filter(r => r.incidents > 0);
+  const list = filterBy("inCls", "inTeacher", "inQ", base);
+  const total = list.reduce((s, r) => s + r.incidents, 0);
+  $("inCount").textContent = list.length + " evaluation(s) with incidents · " + total + " incident(s) in total";
+  const box = $("inTable");
+  box.innerHTML = "";
+  box.appendChild(table(
+    ["Date", "Class", "Name", "Teacher", "Incident", "Comments"],
+    list.slice(0, 500).map(r => ({
+      cls: "inc",
+      cells: [r.date, r.class, r.student, r.teacher, r.incidents, r.comment]
+    }))));
+  noteIfLong(box, list.length, 500);
+}
+
+function downloadTable(name, headers, rows) {
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers].concat(rows)), safeSheetName(name));
+  XLSX.writeFile(wb, "EVA School - " + name + ".xlsx");
+}
+
+$("xlsComments").onclick = () => {
+  const list = filterBy("cmCls", "cmTeacher", "cmQ", DATA.records.filter(r => r.comment.trim() !== "")).reverse();
+  downloadTable("comments", ["Date", "Class", "Name", "Teacher", "Comments"],
+    list.map(r => [r.date, r.class, r.student, r.teacher, r.comment]));
+};
+
+$("xlsIncidents").onclick = () => {
+  const list = filterBy("inCls", "inTeacher", "inQ", DATA.records.filter(r => r.incidents > 0)).reverse();
+  downloadTable("incidents", ["Date", "Class", "Name", "Teacher", "Incident", "Comments"],
+    list.map(r => [r.date, r.class, r.student, r.teacher, r.incidents, r.comment]));
+};
+
+// ---------- print one class ----------
+$("printCls").onclick = () => {
+  const cls = $("clsPick").value;
+  const list = sortRecs(DATA.records.filter(r => r.class === cls)).reverse();
+  const area = $("printArea");
+  area.innerHTML = "";
+  area.appendChild(el("h2", cls + " · evaluations (" + list.length + ")"));
+  area.appendChild(table(
+    ["Date", "Student", "Teacher", "Evaluation", "Score", "Incidents", "Comment"],
+    list.map(r => ({
+      cls: r.incidents > 0 ? "inc" : "",
+      cells: [r.date, r.student, r.teacher, r.evaluation, r.score, r.incidents, r.comment]
+    }))));
+  window.print();
+};
+
+// ---------- start ----------
+(async function start() {
+  const saved = sessionStorage.getItem("boardKey");
+  if (!saved) { $("gate").hidden = false; return; }
+  PW = saved;
+  try {
+    DATA = await fetchData(saved);
+    $("stamp").textContent = "Data as of " + DATA.generated;
+    showApp();
+    renderAll();
+  } catch (e) {
+    signOut(/unauthorized/.test(e.message) ? "The board password is not correct." : "Could not load the data: " + e.message);
+  }
+})();
+</script>
+</body>
+</html>
