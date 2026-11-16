@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,7 +8,7 @@
 :root{--brand:#F7C948;--brand-dark:#D9A900;--brand-tint:#FFF8E1;--bg:#FBF8EE;--card:#ffffff;--ink:#1d1d1d;--muted:#666666;--line:#e6e9ee;--border:#ccd3db;--red:#d32f2f;--red-bg:#fdecea;--bar:#F7C948}
 [data-theme="dark"]{--bg:#16161a;--card:#22222a;--ink:#f2f2f2;--muted:#a8a8b3;--line:#33333d;--border:#4a4a56;--brand-tint:#2e2a18;--red-bg:#3a1e1e;--bar:#E0B232}
 *{box-sizing:border-box}
-body{margin:0;font-family:system-ui,"Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--ink)}
+body{margin:0;font-family:system-ui,"Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--ink)}
 header{background:var(--brand);color:#1d1d1d;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 header img{height:44px;width:auto}
 header .title{flex:1;font-weight:700;font-size:17px;min-width:160px}
@@ -28,9 +28,9 @@ h2{font-size:16px;margin:0 0 10px}
 .kpi .v{font-size:24px;font-weight:600;margin-top:2px}
 .tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
 table{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
-th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th,td{padding:8px;border-bottom:1px solid var(--line);text-align:start;vertical-align:middle}
 th{font-size:12px;color:var(--muted);text-transform:uppercase;white-space:nowrap}
-tr.inc td:first-child{border-left:4px solid var(--red)}
+tr.inc td:first-child{border-inline-start:4px solid var(--red)}
 tr.inc{background:var(--red-bg)}
 .barrow{display:grid;grid-template-columns:minmax(90px,150px) 1fr minmax(90px,130px);gap:8px;align-items:center;font-size:14px;margin-bottom:8px}
 .track{background:var(--line);border-radius:4px;height:12px}
@@ -62,32 +62,33 @@ select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-s
 
 <header>
   <img src="../logo.png" alt="EVA Pharma logo" onerror="this.remove()">
-  <span class="title">EVA School · Board overview</span>
-  <button class="btn head" id="themeBtn" type="button">Dark</button>
-  <button class="btn head" id="signOut" type="button" hidden>Sign out</button>
+  <span class="title" data-i18n="title"></span>
+  <button class="btn head" id="langBtn" type="button"></button>
+  <button class="btn head" id="themeBtn" type="button"></button>
+  <button class="btn head" id="signOut" type="button" hidden data-i18n="signOut"></button>
 </header>
 
 <main>
 
   <!-- SIGN IN -->
   <div class="card" id="gate" hidden>
-    <h2>Board sign in</h2>
-    <label class="muted" for="pw">Board password</label>
+    <h2 data-i18n="signin"></h2>
+    <label class="muted" for="pw" data-i18n="pw"></label>
     <input type="password" id="pw" autocomplete="off" style="width:100%">
-    <button class="btn dark" id="openBtn" type="button" style="width:100%;margin-top:12px">Open</button>
+    <button class="btn dark" id="openBtn" type="button" style="width:100%;margin-top:12px" data-i18n="open"></button>
     <div id="gMsg"></div>
   </div>
 
   <!-- APP -->
   <div id="app" hidden>
     <div class="tabs noprint">
-      <button class="tab on" data-view="vOverview" type="button">Overview</button>
-      <button class="tab" data-view="vTeachers" type="button">Teachers</button>
-      <button class="tab" data-view="vClasses" type="button">Classes</button>
-      <button class="tab" data-view="vAll" type="button">All evaluations</button>
-      <button class="tab" data-view="vComments" type="button">Comments</button>
-      <button class="tab" data-view="vIncidents" type="button">Incidents</button>
-      <button class="btn" id="refresh" type="button" style="margin-left:auto">Refresh data</button>
+      <button class="tab on" data-view="vOverview" type="button" data-i18n="tabOverview"></button>
+      <button class="tab" data-view="vTeachers" type="button" data-i18n="tabTeachers"></button>
+      <button class="tab" data-view="vClasses" type="button" data-i18n="tabClasses"></button>
+      <button class="tab" data-view="vAll" type="button" data-i18n="tabAll"></button>
+      <button class="tab" data-view="vComments" type="button" data-i18n="tabComments"></button>
+      <button class="tab" data-view="vIncidents" type="button" data-i18n="tabIncidents"></button>
+      <button class="btn" id="refresh" type="button" style="margin-inline-start:auto" data-i18n="refresh"></button>
     </div>
     <div class="muted" id="stamp"></div>
     <div id="appMsg"></div>
@@ -96,24 +97,24 @@ select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-s
     <div id="vOverview">
       <div class="kpis" id="kpis"></div>
       <div class="card">
-        <h2>Evaluations by level</h2>
+        <h2 data-i18n="levelsTitle"></h2>
         <div id="dist"></div>
       </div>
       <div class="card">
-        <h2>Behaviour by class</h2>
+        <h2 data-i18n="classTitle"></h2>
         <div id="classTable"></div>
-        <div class="muted">Average excludes Absent. Absent rate is Absent evaluations out of all evaluations.</div>
+        <div class="muted" data-i18n="classNote"></div>
       </div>
     </div>
 
     <!-- TEACHERS -->
     <div id="vTeachers" hidden>
       <div class="card">
-        <h2>Evaluations per teacher</h2>
+        <h2 data-i18n="teachersTitle"></h2>
         <div id="teacherBars"></div>
       </div>
       <div class="card">
-        <h2>Teacher details</h2>
+        <h2 data-i18n="teacherDetails"></h2>
         <div id="teacherTable"></div>
       </div>
     </div>
@@ -121,18 +122,18 @@ select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-s
     <!-- CLASSES -->
     <div id="vClasses" hidden>
       <div class="row noprint">
-        <label>Class <select id="clsPick"></select></label>
-        <button class="btn" id="printCls" type="button">Print this class</button>
-        <button class="btn dark" id="xlsCls" type="button">Download this class (Excel)</button>
-        <button class="btn" id="xlsAll" type="button">Download all classes (Excel)</button>
+        <label><span data-i18n="clsLabel"></span> <select id="clsPick"></select></label>
+        <button class="btn" id="printCls" type="button" data-i18n="printCls"></button>
+        <button class="btn dark" id="xlsCls" type="button" data-i18n="xlsCls"></button>
+        <button class="btn" id="xlsAll" type="button" data-i18n="xlsAll"></button>
       </div>
       <div class="kpis" id="clsKpis"></div>
       <div class="card">
-        <h2>Students in this class</h2>
+        <h2 data-i18n="studentsTitle"></h2>
         <div id="clsStudents"></div>
       </div>
       <div class="card">
-        <h2>Evaluations by upload date</h2>
+        <h2 data-i18n="byDateTitle"></h2>
         <div id="clsRecent"></div>
       </div>
     </div>
@@ -140,10 +141,10 @@ select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-s
     <!-- ALL EVALUATIONS -->
     <div id="vAll" hidden>
       <div class="row noprint">
-        <label>Class <select id="fCls"></select></label>
-        <label>Teacher <select id="fTeacher"></select></label>
-        <label>Search student <input id="fQ" placeholder="Name" style="min-width:200px"></label>
-        <button class="btn dark" id="xlsFilter" type="button">Download shown rows (Excel)</button>
+        <label><span data-i18n="classLbl"></span> <select id="fCls"></select></label>
+        <label><span data-i18n="teacherLbl"></span> <select id="fTeacher"></select></label>
+        <label><span data-i18n="searchLbl"></span> <input id="fQ" data-i18n-ph="searchPh" style="min-width:200px"></label>
+        <button class="btn dark" id="xlsFilter" type="button" data-i18n="dlShown"></button>
       </div>
       <div class="card">
         <div id="allCount" class="muted"></div>
@@ -151,13 +152,13 @@ select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-s
       </div>
     </div>
 
-    <!-- COMMENTS: every comment, all classes -->
+    <!-- COMMENTS -->
     <div id="vComments" hidden>
       <div class="row noprint">
-        <label>Class <select id="cmCls"></select></label>
-        <label>Teacher <select id="cmTeacher"></select></label>
-        <label>Search <input id="cmQ" placeholder="Name or comment" style="min-width:200px"></label>
-        <button class="btn dark" id="xlsComments" type="button">Download (Excel)</button>
+        <label><span data-i18n="classLbl"></span> <select id="cmCls"></select></label>
+        <label><span data-i18n="teacherLbl"></span> <select id="cmTeacher"></select></label>
+        <label><span data-i18n="searchLbl"></span> <input id="cmQ" data-i18n-ph="searchPh" style="min-width:200px"></label>
+        <button class="btn dark" id="xlsComments" type="button" data-i18n="dl"></button>
       </div>
       <div class="card">
         <div id="cmCount" class="muted"></div>
@@ -165,13 +166,13 @@ select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-s
       </div>
     </div>
 
-    <!-- INCIDENTS: every incident, all classes -->
+    <!-- INCIDENTS -->
     <div id="vIncidents" hidden>
       <div class="row noprint">
-        <label>Class <select id="inCls"></select></label>
-        <label>Teacher <select id="inTeacher"></select></label>
-        <label>Search <input id="inQ" placeholder="Name or comment" style="min-width:200px"></label>
-        <button class="btn dark" id="xlsIncidents" type="button">Download (Excel)</button>
+        <label><span data-i18n="classLbl"></span> <select id="inCls"></select></label>
+        <label><span data-i18n="teacherLbl"></span> <select id="inTeacher"></select></label>
+        <label><span data-i18n="searchLbl"></span> <input id="inQ" data-i18n-ph="searchPh" style="min-width:200px"></label>
+        <button class="btn dark" id="xlsIncidents" type="button" data-i18n="dl"></button>
       </div>
       <div class="card">
         <div id="inCount" class="muted"></div>
@@ -192,17 +193,126 @@ const BOARD_URL = "https://script.google.com/macros/s/AKfycbzXI1B0s_Hr2np_BiJlc0
 // =====================================================
 
 const EVALS = ["Outstanding", "Proficient", "Developing", "Needs Improvement", "Unsatisfactory", "Absent"];
-const HEADER = ["Upload Timing", "Date", "Student Name", "Class", "Teacher", "Score (0-5)", "Evaluation", "Incident (Warning)", "Comments"];
+const EVAL_AR = {
+  "Outstanding": "متميز ومبادر",
+  "Proficient": "ملتزم ومتقن",
+  "Developing": "مقبول/تحت التدريب",
+  "Needs Improvement": "يحتاج تطوير/سلوك ضعيف",
+  "Unsatisfactory": "غير ملتزم/خطر",
+  "Absent": "غائب"
+};
 
+// All text on the page. Keys are used by data-i18n attributes and by t().
+const T = {
+  en: {
+    title: "EVA School · Board overview", signin: "Board sign in", pw: "Board password", open: "Open",
+    signOut: "Sign out", refresh: "Refresh data", dark: "Dark", light: "Light", langBtn: "العربية",
+    tabOverview: "Overview", tabTeachers: "Teachers", tabClasses: "Classes", tabAll: "All evaluations",
+    tabComments: "Comments", tabIncidents: "Incidents",
+    asOf: "Data as of", badPw: "The board password is not correct.", loadErr: "Could not load the data: ",
+    kEvals: "Evaluations (by date)", kStudents: "Students", kAvg: "Average score (0-5)", kInc: "Incidents",
+    kAbsent: "Absent rate", kTeachers: "Teachers who uploaded",
+    levelsTitle: "Student ratings by level", levelsCount: "{n} ({p}%)",
+    classTitle: "Behaviour by class",
+    classNote: "An evaluation is one class on one date. Average excludes Absent. Absent rate is Absent ratings out of all ratings.",
+    teachersTitle: "Evaluations per teacher", teacherDetails: "Teacher details",
+    evalCount: "{n} evaluation(s)",
+    clsLabel: "Class", printCls: "Print this class", xlsCls: "Download this class (Excel)", xlsAll: "Download all classes (Excel)",
+    studentsTitle: "Students in this class", byDateTitle: "Evaluations by date", noClassEvals: "No evaluations for this class yet.",
+    dayMeta: "{n} student(s) evaluated · {t} teacher(s)",
+    classLbl: "Class", teacherLbl: "Teacher", searchLbl: "Search", searchPh: "Name or comment",
+    allClasses: "All classes", allTeachers: "All teachers",
+    dl: "Download (Excel)", dlShown: "Download shown rows (Excel)", matchRows: "{n} evaluation(s) match",
+    showingNewest: "Showing the newest {shown} of {total}. Download to get all of them.",
+    commentsCount: "{n} comment(s)", incCount: "{n} student rating(s) with incidents · {t} incident(s) in total",
+    colDate: "Date", colEvalDate: "Evaluation date", colUploaded: "Uploaded", colClass: "Class", colName: "Name",
+    colStudent: "Student", colTeacher: "Teacher", colEvaluation: "Evaluation", colScore: "Score (0-5)",
+    colIncidents: "Incidents", colIncident: "Incident", colComment: "Comments", colComments: "Comments",
+    colStudents: "Students", colEvals: "Evaluations", colAvg: "Average", colAbsentRate: "Absent rate",
+    colLast: "Last upload", colClasses: "Classes", colAbsent: "Absent",
+    xUpload: "Upload Timing", xDate: "Date", xStudent: "Student Name", xClass: "Class", xTeacher: "Teacher",
+    xScore: "Score (0-5)", xEvaluation: "Evaluation", xWarning: "Incident (Warning)", xComments: "Comments",
+    xName: "Name", xIncident: "Incident",
+    printTitle: "{cls} · evaluations ({n})",
+    fileAll: "EVA School - all classes", fileComments: "EVA School - comments", fileIncidents: "EVA School - incidents",
+    fileShown: "EVA School - evaluations"
+  },
+  ar: {
+    title: "مدرسة EVA · لوحة المجلس", signin: "تسجيل دخول المجلس", pw: "كلمة مرور المجلس", open: "فتح",
+    signOut: "تسجيل الخروج", refresh: "تحديث البيانات", dark: "داكن", light: "فاتح", langBtn: "English",
+    tabOverview: "نظرة عامة", tabTeachers: "المعلمون", tabClasses: "الفصول", tabAll: "كل التقييمات",
+    tabComments: "التعليقات", tabIncidents: "الحوادث",
+    asOf: "البيانات حتى", badPw: "كلمة مرور المجلس غير صحيحة.", loadErr: "تعذر تحميل البيانات: ",
+    kEvals: "التقييمات (حسب التاريخ)", kStudents: "الطلاب", kAvg: "متوسط الدرجة (من 5)", kInc: "الحوادث",
+    kAbsent: "نسبة الغياب", kTeachers: "المعلمون الذين رفعوا تقييمات",
+    levelsTitle: "تقييمات الطلاب حسب المستوى", levelsCount: "{n} ({p}%)",
+    classTitle: "السلوك حسب الفصل",
+    classNote: "التقييم الواحد هو فصل في يوم واحد. المتوسط لا يشمل الغياب. نسبة الغياب هي تقييمات الغياب من إجمالي التقييمات.",
+    teachersTitle: "التقييمات لكل معلم", teacherDetails: "تفاصيل المعلمين",
+    evalCount: "{n} تقييم",
+    clsLabel: "الفصل", printCls: "طباعة هذا الفصل", xlsCls: "تحميل هذا الفصل (Excel)", xlsAll: "تحميل كل الفصول (Excel)",
+    studentsTitle: "طلاب هذا الفصل", byDateTitle: "التقييمات حسب التاريخ", noClassEvals: "لا توجد تقييمات لهذا الفصل بعد.",
+    dayMeta: "{n} طالب تم تقييمه · {t} معلم",
+    classLbl: "الفصل", teacherLbl: "المعلم", searchLbl: "بحث", searchPh: "اسم أو تعليق",
+    allClasses: "كل الفصول", allTeachers: "كل المعلمين",
+    dl: "تحميل (Excel)", dlShown: "تحميل الصفوف المعروضة (Excel)", matchRows: "{n} تقييم مطابق",
+    showingNewest: "يعرض الأحدث {shown} من {total}. حمّل الملف للاطلاع على الكل.",
+    commentsCount: "{n} تعليق", incCount: "{n} تقييم طالب فيه حوادث · {t} حادثة في المجموع",
+    colDate: "التاريخ", colEvalDate: "تاريخ التقييم", colUploaded: "وقت الرفع", colClass: "الفصل", colName: "الاسم",
+    colStudent: "الطالب", colTeacher: "المعلم", colEvaluation: "التقييم", colScore: "الدرجة (0-5)",
+    colIncidents: "الحوادث", colIncident: "الحادثة", colComment: "التعليقات", colComments: "التعليقات",
+    colStudents: "الطلاب", colEvals: "التقييمات", colAvg: "المتوسط", colAbsentRate: "نسبة الغياب",
+    colLast: "آخر رفع", colClasses: "الفصول", colAbsent: "غياب",
+    xUpload: "وقت الرفع", xDate: "التاريخ", xStudent: "اسم الطالب", xClass: "الفصل", xTeacher: "المعلم",
+    xScore: "الدرجة (0-5)", xEvaluation: "التقييم", xWarning: "الحادثة (تنبيه)", xComments: "التعليقات",
+    xName: "الاسم", xIncident: "الحادثة",
+    printTitle: "{cls} · التقييمات ({n})",
+    fileAll: "مدرسة EVA - كل الفصول", fileComments: "مدرسة EVA - التعليقات", fileIncidents: "مدرسة EVA - الحوادث",
+    fileShown: "مدرسة EVA - التقييمات"
+  }
+};
+
+let LANG = localStorage.getItem("boardLang") || "en";
 const $ = id => document.getElementById(id);
 let DATA = null;     // { classes: [names], records: [...] }
 let PW = "";         // board password, kept for this browser tab only
 
-// ---------- theme ----------
-function applyTheme(t) {
-  document.documentElement.setAttribute("data-theme", t);
-  $("themeBtn").textContent = t === "dark" ? "Light" : "Dark";
-  localStorage.setItem("theme", t);
+// t("key", {n: 3}) returns the text in the current language
+function t(key, vars) {
+  let s = (T[LANG] && T[LANG][key]) || T.en[key] || key;
+  if (vars) Object.keys(vars).forEach(k => { s = s.split("{" + k + "}").join(vars[k]); });
+  return s;
+}
+
+// Evaluation name in the current language
+const evalLabel = name => (LANG === "ar" ? (EVAL_AR[name] || name) : name);
+
+// ---------- language and theme ----------
+function applyLang() {
+  document.documentElement.lang = LANG;
+  document.documentElement.dir = LANG === "ar" ? "rtl" : "ltr";
+  document.querySelectorAll("[data-i18n]").forEach(e => { e.textContent = t(e.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-ph]").forEach(e => { e.placeholder = t(e.dataset.i18nPh); });
+  $("langBtn").textContent = t("langBtn");
+  applyThemeText();
+  if (DATA) renderAll();
+}
+
+$("langBtn").onclick = () => {
+  LANG = LANG === "en" ? "ar" : "en";
+  localStorage.setItem("boardLang", LANG);
+  applyLang();
+};
+
+function applyThemeText() {
+  const dark = document.documentElement.getAttribute("data-theme") === "dark";
+  $("themeBtn").textContent = dark ? t("light") : t("dark");
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  localStorage.setItem("theme", theme);
+  applyThemeText();
 }
 $("themeBtn").onclick = () =>
   applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
@@ -219,21 +329,21 @@ function el(tag, text, cls) {
 
 function table(headers, rows) {
   const wrap = el("div", null, "tw");
-  const t = el("table");
+  const tb = el("table");
   const thead = el("thead");
   const hr = el("tr");
   headers.forEach(h => hr.appendChild(el("th", h)));
   thead.appendChild(hr);
-  t.appendChild(thead);
-  const tb = el("tbody");
+  tb.appendChild(thead);
+  const body = el("tbody");
   rows.forEach(r => {
     const tr = el("tr");
     if (r.cls) tr.className = r.cls;
     r.cells.forEach(c => tr.appendChild(el("td", c)));
-    tb.appendChild(tr);
+    body.appendChild(tr);
   });
-  t.appendChild(tb);
-  wrap.appendChild(t);
+  tb.appendChild(body);
+  wrap.appendChild(tb);
   return wrap;
 }
 
@@ -248,6 +358,11 @@ function avgOf(list) {
   return Math.round(scored.reduce((a, b) => a + b, 0) / scored.length * 100) / 100;
 }
 
+// Number of evaluations = distinct (class, date) pairs: one class evaluated on one date counts once
+function sessionsOf(list) {
+  return new Set(list.map(r => r.class + "||" + r.date)).size;
+}
+
 function group(list, keyFn) {
   const g = {};
   list.forEach(r => { const k = keyFn(r); (g[k] = g[k] || []).push(r); });
@@ -257,7 +372,7 @@ function group(list, keyFn) {
 function summarize(list) {
   const absent = list.filter(r => r.evaluation === "Absent").length;
   return {
-    evals: list.length,
+    evals: sessionsOf(list),
     students: new Set(list.map(r => r.class + "||" + r.student)).size,
     classes: new Set(list.map(r => r.class)).size,
     teachers: new Set(list.map(r => r.teacher)).size,
@@ -286,12 +401,11 @@ async function refresh() {
   $("refresh").disabled = true;
   try {
     DATA = await fetchData(PW);
-    $("stamp").textContent = "Data as of " + DATA.generated;
+    $("stamp").textContent = t("asOf") + " " + DATA.generated;
     renderAll();
   } catch (e) {
-    if (/unauthorized/.test(e.message)) return signOut("The board password is not correct.");
-    const m = el("div", "Could not load the data: " + e.message, "msg");
-    $("appMsg").appendChild(m);
+    if (/unauthorized/.test(e.message)) return signOut(t("badPw"));
+    $("appMsg").appendChild(el("div", t("loadErr") + e.message, "msg"));
   } finally {
     $("refresh").disabled = false;
   }
@@ -323,15 +437,13 @@ $("openBtn").onclick = async () => {
     PW = pw;
     DATA = await fetchData(pw);
     sessionStorage.setItem("boardKey", pw);
-    $("stamp").textContent = "Data as of " + DATA.generated;
+    $("stamp").textContent = t("asOf") + " " + DATA.generated;
     showApp();
     renderAll();
   } catch (e) {
     PW = "";
     $("gMsg").innerHTML = "";
-    $("gMsg").appendChild(el("div", /unauthorized/.test(e.message)
-      ? "The board password is not correct."
-      : "Could not load the data: " + e.message, "msg"));
+    $("gMsg").appendChild(el("div", /unauthorized/.test(e.message) ? t("badPw") : t("loadErr") + e.message, "msg"));
   } finally {
     $("openBtn").disabled = false;
   }
@@ -352,12 +464,12 @@ function renderAll() {
   const kpis = $("kpis");
   kpis.innerHTML = "";
   [
-    ["Evaluations", all.evals],
-    ["Students", all.students],
-    ["Average score (0-5)", all.avg],
-    ["Incidents", all.incidents],
-    ["Absent rate", all.absentRate],
-    ["Teachers who uploaded", all.teachers]
+    [t("kEvals"), all.evals],
+    [t("kStudents"), all.students],
+    [t("kAvg"), all.avg],
+    [t("kInc"), all.incidents],
+    [t("kAbsent"), all.absentRate],
+    [t("kTeachers"), all.teachers]
   ].forEach(([l, v]) => {
     const k = el("div", null, "kpi");
     k.append(el("div", l, "l"), el("div", v, "v"));
@@ -368,13 +480,13 @@ function renderAll() {
   dist.innerHTML = "";
   const counts = EVALS.map(e => [e, recs.filter(r => r.evaluation === e).length]);
   const maxC = Math.max(1, ...counts.map(c => c[1]));
-  counts.forEach(([name, n]) => dist.appendChild(barRow(name, n, maxC, n + " (" +
-    (recs.length ? Math.round(n / recs.length * 100) : 0) + "%)")));
+  counts.forEach(([name, n]) => dist.appendChild(barRow(evalLabel(name), n, maxC,
+    t("levelsCount", { n: n, p: recs.length ? Math.round(n / recs.length * 100) : 0 }))));
 
   const byClass = group(recs, r => r.class);
   $("classTable").innerHTML = "";
   $("classTable").appendChild(table(
-    ["Class", "Students", "Evaluations", "Average", "Incidents", "Absent rate", "Last upload"],
+    [t("colClass"), t("colStudents"), t("colEvals"), t("colAvg"), t("colIncidents"), t("colAbsentRate"), t("colLast")],
     classNames.map(c => {
       const s = summarize(byClass[c] || []);
       return { cells: [c, s.students, s.evals, s.avg, s.incidents, s.absentRate, s.last] };
@@ -382,34 +494,34 @@ function renderAll() {
 
   // Teachers
   const byTeacher = group(recs, r => r.teacher);
-  const maxT = Math.max(1, ...teacherNames.map(t => (byTeacher[t] || []).length));
+  const maxT = Math.max(1, ...teacherNames.map(n => sessionsOf(byTeacher[n] || [])));
   $("teacherBars").innerHTML = "";
-  teacherNames.forEach(t => {
-    const n = (byTeacher[t] || []).length;
-    $("teacherBars").appendChild(barRow(t, n, maxT, n + " evaluation(s)"));
+  teacherNames.forEach(n => {
+    const c = sessionsOf(byTeacher[n] || []);
+    $("teacherBars").appendChild(barRow(n, c, maxT, t("evalCount", { n: c })));
   });
   $("teacherTable").innerHTML = "";
   $("teacherTable").appendChild(table(
-    ["Teacher", "Evaluations", "Classes", "Students", "Last upload"],
-    teacherNames.map(t => {
-      const s = summarize(byTeacher[t] || []);
-      return { cells: [t, s.evals, s.classes, s.students, s.last] };
+    [t("colTeacher"), t("colEvals"), t("colClasses"), t("colStudents"), t("colLast")],
+    teacherNames.map(n => {
+      const s = summarize(byTeacher[n] || []);
+      return { cells: [n, s.evals, s.classes, s.students, s.last] };
     })));
 
-  // Classes picker (shared by the Classes tab and the Download all button)
-  fillSelect($("clsPick"), classNames, $("clsPick").value || classNames[0]);
+  // Class tab
+  fillSelect($("clsPick"), classNames, $("clsPick").value);
   renderClass();
 
-  // All evaluations filters
-  fillSelect($("fCls"), classNames, $("fCls").value, "All classes");
-  fillSelect($("fTeacher"), teacherNames, $("fTeacher").value, "All teachers");
+  // All evaluations tab
+  fillSelect($("fCls"), classNames, $("fCls").value, "allClasses");
+  fillSelect($("fTeacher"), teacherNames, $("fTeacher").value, "allTeachers");
   renderAllTable();
 
   // Comments and incidents tabs
-  fillSelect($("cmCls"), classNames, $("cmCls").value, "All classes");
-  fillSelect($("cmTeacher"), teacherNames, $("cmTeacher").value, "All teachers");
-  fillSelect($("inCls"), classNames, $("inCls").value, "All classes");
-  fillSelect($("inTeacher"), teacherNames, $("inTeacher").value, "All teachers");
+  fillSelect($("cmCls"), classNames, $("cmCls").value, "allClasses");
+  fillSelect($("cmTeacher"), teacherNames, $("cmTeacher").value, "allTeachers");
+  fillSelect($("inCls"), classNames, $("inCls").value, "allClasses");
+  fillSelect($("inTeacher"), teacherNames, $("inTeacher").value, "allTeachers");
   renderComments();
   renderIncidents();
 }
@@ -425,11 +537,12 @@ function barRow(label, n, max, text) {
   return row;
 }
 
-function fillSelect(sel, values, keep, allLabel) {
+// allKey: translation key for the "all" option, if the dropdown should have one
+function fillSelect(sel, values, keep, allKey) {
   sel.innerHTML = "";
-  if (allLabel) sel.add(new Option(allLabel, ""));
+  if (allKey) sel.add(new Option(t(allKey), ""));
   values.forEach(v => sel.add(new Option(v, v)));
-  sel.value = values.includes(keep) ? keep : (allLabel ? "" : values[0] || "");
+  sel.value = values.includes(keep) ? keep : (allKey ? "" : values[0] || "");
 }
 
 function sortRecs(list) {
@@ -442,8 +555,8 @@ function renderClass() {
   const s = summarize(list);
   const kp = $("clsKpis");
   kp.innerHTML = "";
-  [["Students", s.students], ["Evaluations", s.evals], ["Average (0-5)", s.avg],
-   ["Incidents", s.incidents], ["Absent rate", s.absentRate], ["Last upload", s.last]]
+  [[t("kStudents"), s.students], [t("kEvals"), s.evals], [t("kAvg"), s.avg],
+   [t("kInc"), s.incidents], [t("kAbsent"), s.absentRate], [t("colLast"), s.last]]
     .forEach(([l, v]) => {
       const k = el("div", null, "kpi");
       k.append(el("div", l, "l"), el("div", v, "v"));
@@ -453,70 +566,69 @@ function renderClass() {
   const byStudent = group(list, r => r.student);
   $("clsStudents").innerHTML = "";
   $("clsStudents").appendChild(table(
-    ["Student", "Evaluations", "Average", "Incidents", "Absent"],
+    [t("colStudent"), t("colEvals"), t("colAvg"), t("colIncidents"), t("colAbsent")],
     Object.keys(byStudent).sort().map(name => {
       const rs = byStudent[name];
+      const inc = rs.reduce((a, r) => a + r.incidents, 0);
       return {
-        cls: rs.reduce((a, r) => a + r.incidents, 0) > 0 ? "inc" : "",
-        cells: [name, rs.length, avgOf(rs), rs.reduce((a, r) => a + r.incidents, 0),
-                rs.filter(r => r.evaluation === "Absent").length]
+        cls: inc > 0 ? "inc" : "",
+        cells: [name, rs.length, avgOf(rs), inc, rs.filter(r => r.evaluation === "Absent").length]
       };
     })));
 
   renderClassDates(list);
 }
 
-// Toggle list for one class: one row per upload date, newest first.
-// Open a date to see the evaluations uploaded that day.
+// Toggle list for one class: one row per evaluation date, newest first.
 function renderClassDates(list) {
   const box = $("clsRecent");
   box.innerHTML = "";
   if (!list.length) {
-    box.appendChild(el("div", "No evaluations for this class yet.", "muted"));
+    box.appendChild(el("div", t("noClassEvals"), "muted"));
     return;
   }
-  const byUpload = group(list, r => r.date);
-  Object.keys(byUpload).sort().reverse().forEach((day, i) => {
-    const recs = byUpload[day];
+  const byDate = group(list, r => r.date);
+  Object.keys(byDate).sort().reverse().forEach((day, i) => {
+    const recs = byDate[day];
     const teachers = new Set(recs.map(r => r.teacher)).size;
 
     const det = el("details", null, "daycard");
     det.open = i === 0;
     const sum = el("summary");
     sum.append(
-      el("span", "Uploaded " + day),
-      el("span", recs.length + " evaluation(s) · " + teachers + " teacher(s)", "daymeta"));
+      el("span", day),
+      el("span", t("dayMeta", { n: recs.length, t: teachers }), "daymeta"));
     det.appendChild(sum);
 
     const sorted = recs.slice().sort((a, b) =>
-      a.date < b.date ? 1 : a.date > b.date ? -1 : a.student.localeCompare(b.student));
+      a.uploaded < b.uploaded ? 1 : a.uploaded > b.uploaded ? -1 : a.student.localeCompare(b.student));
     det.appendChild(table(
-      ["Evaluation date", "Student", "Teacher", "Evaluation", "Score", "Incidents", "Comment"],
+      [t("colUploaded"), t("colStudent"), t("colTeacher"), t("colEvaluation"), t("colScore"), t("colIncidents"), t("colComment")],
       sorted.map(r => ({
         cls: r.incidents > 0 ? "inc" : "",
-        cells: [r.date, r.student, r.teacher, r.evaluation, r.score, r.incidents, r.comment]
+        cells: [r.uploaded, r.student, r.teacher, evalLabel(r.evaluation), r.score, r.incidents, r.comment]
       }))));
     box.appendChild(det);
   });
 }
 
 function filteredRecs() {
-  const c = $("fCls").value, t = $("fTeacher").value, q = $("fQ").value.trim().toLowerCase();
+  const c = $("fCls").value, tch = $("fTeacher").value, q = $("fQ").value.trim().toLowerCase();
   return sortRecs(DATA.records.filter(r =>
-    (!c || r.class === c) && (!t || r.teacher === t) && (!q || r.student.toLowerCase().includes(q))));
+    (!c || r.class === c) && (!tch || r.teacher === tch) && (!q || r.student.toLowerCase().includes(q))));
 }
 
 function renderAllTable() {
   const list = filteredRecs();
-  $("allCount").textContent = `${list.length} evaluation(s) match`;
+  $("allCount").textContent = t("matchRows", { n: list.length });
   $("allTable").innerHTML = "";
   $("allTable").appendChild(table(
-    ["Date", "Class", "Teacher", "Student", "Evaluation", "Score", "Incidents", "Comment"],
+    [t("colDate"), t("colClass"), t("colTeacher"), t("colStudent"), t("colEvaluation"), t("colScore"), t("colIncidents"), t("colComment")],
     list.slice(0, 300).map(r => ({
       cls: r.incidents > 0 ? "inc" : "",
-      cells: [r.date, r.class, r.teacher, r.student, r.evaluation, r.score, r.incidents, r.comment]
+      cells: [r.date, r.class, r.teacher, r.student, evalLabel(r.evaluation), r.score, r.incidents, r.comment]
     }))));
-  if (list.length > 300) $("allTable").appendChild(el("div", "Showing the newest 300. Download to get all of them.", "muted"));
+  if (list.length > 300) $("allTable").appendChild(el("div", t("showingNewest", { shown: 300, total: list.length }), "muted"));
 }
 
 ["clsPick"].forEach(id => $(id).onchange = renderClass);
@@ -527,64 +639,27 @@ $("cmQ").oninput = renderComments;
 ["inCls", "inTeacher"].forEach(id => $(id).onchange = renderIncidents);
 $("inQ").oninput = renderIncidents;
 
-// ---------- Excel ----------
-function safeSheetName(name) {
-  return String(name).replace(/[\\\/\?\*\[\]:]/g, " ").substring(0, 31);
-}
-
-function rowsFor(list) {
-  return [HEADER].concat(list.map(r => [
-    r.uploaded, r.date, r.student, r.class, r.teacher, r.score, r.evaluation,
-    r.incidents > 0 ? r.incidents : "", r.comment
-  ]));
-}
-
-function downloadWorkbook(sheets, filename) {
-  const wb = XLSX.utils.book_new();
-  sheets.forEach(([name, list]) =>
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rowsFor(list)), safeSheetName(name)));
-  XLSX.writeFile(wb, filename);
-}
-
-$("xlsCls").onclick = () => {
-  const cls = $("clsPick").value;
-  const list = sortRecs(DATA.records.filter(r => r.class === cls)).reverse();
-  downloadWorkbook([[cls, list]], `${cls} - evaluations.xlsx`);
-};
-
-$("xlsAll").onclick = () => {
-  const names = [...new Set(DATA.records.map(r => r.class))].sort();
-  const byClass = group(DATA.records, r => r.class);
-  downloadWorkbook(names.map(n => [n, sortRecs(byClass[n]).reverse()]), "EVA School - all classes.xlsx");
-};
-
-$("xlsFilter").onclick = () => {
-  const list = filteredRecs().slice().reverse();
-  downloadWorkbook([["Evaluations", list]], "EVA School - evaluations.xlsx");
-};
-
 // ---------- comments and incidents tabs ----------
-// Filters a list by class, teacher and a search text (student name or comment)
 function filterBy(clsId, teacherId, qId, base) {
-  const c = $(clsId).value, t = $(teacherId).value, q = $(qId).value.trim().toLowerCase();
+  const c = $(clsId).value, tch = $(teacherId).value, q = $(qId).value.trim().toLowerCase();
   return sortRecs(base.filter(r =>
     (!c || r.class === c) &&
-    (!t || r.teacher === t) &&
+    (!tch || r.teacher === tch) &&
     (!q || r.student.toLowerCase().includes(q) || r.comment.toLowerCase().includes(q))));
 }
 
 function noteIfLong(container, total, shown) {
-  if (total > shown) container.appendChild(el("div", "Showing the newest " + shown + " of " + total + ". Download to get all of them.", "muted"));
+  if (total > shown) container.appendChild(el("div", t("showingNewest", { shown: shown, total: total }), "muted"));
 }
 
 function renderComments() {
   const base = DATA.records.filter(r => r.comment.trim() !== "");
   const list = filterBy("cmCls", "cmTeacher", "cmQ", base);
-  $("cmCount").textContent = list.length + " comment(s)";
+  $("cmCount").textContent = t("commentsCount", { n: list.length });
   const box = $("cmTable");
   box.innerHTML = "";
   box.appendChild(table(
-    ["Date", "Class", "Name", "Teacher", "Comments"],
+    [t("colDate"), t("colClass"), t("colName"), t("colTeacher"), t("colComments")],
     list.slice(0, 500).map(r => ({ cells: [r.date, r.class, r.student, r.teacher, r.comment] }))));
   noteIfLong(box, list.length, 500);
 }
@@ -593,11 +668,11 @@ function renderIncidents() {
   const base = DATA.records.filter(r => r.incidents > 0);
   const list = filterBy("inCls", "inTeacher", "inQ", base);
   const total = list.reduce((s, r) => s + r.incidents, 0);
-  $("inCount").textContent = list.length + " evaluation(s) with incidents · " + total + " incident(s) in total";
+  $("inCount").textContent = t("incCount", { n: list.length, t: total });
   const box = $("inTable");
   box.innerHTML = "";
   box.appendChild(table(
-    ["Date", "Class", "Name", "Teacher", "Incident", "Comments"],
+    [t("colDate"), t("colClass"), t("colName"), t("colTeacher"), t("colIncident"), t("colComments")],
     list.slice(0, 500).map(r => ({
       cls: "inc",
       cells: [r.date, r.class, r.student, r.teacher, r.incidents, r.comment]
@@ -605,21 +680,61 @@ function renderIncidents() {
   noteIfLong(box, list.length, 500);
 }
 
-function downloadTable(name, headers, rows) {
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers].concat(rows)), safeSheetName(name));
-  XLSX.writeFile(wb, "EVA School - " + name + ".xlsx");
+// ---------- Excel (headers follow the page language) ----------
+function safeSheetName(name) {
+  return String(name).replace(/[\\\/\?\*\[\]:]/g, " ").substring(0, 31);
 }
+
+function rowsFor(list) {
+  const header = [t("xUpload"), t("xDate"), t("xStudent"), t("xClass"), t("xTeacher"),
+                  t("xScore"), t("xEvaluation"), t("xWarning"), t("xComments")];
+  return [header].concat(list.map(r => [
+    r.uploaded, r.date, r.student, r.class, r.teacher, r.score, evalLabel(r.evaluation),
+    r.incidents > 0 ? r.incidents : "", r.comment
+  ]));
+}
+
+function downloadWorkbook(sheets, filename) {
+  const wb = XLSX.utils.book_new();
+  sheets.forEach(([name, list]) =>
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rowsFor(list)), safeSheetName(name)));
+  XLSX.writeFile(wb, filename + ".xlsx");
+}
+
+function downloadTable(filename, headers, rows) {
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers].concat(rows)), safeSheetName(filename));
+  XLSX.writeFile(wb, filename + ".xlsx");
+}
+
+$("xlsCls").onclick = () => {
+  const cls = $("clsPick").value;
+  const list = sortRecs(DATA.records.filter(r => r.class === cls)).reverse();
+  downloadWorkbook([[cls, list]], cls + " - " + t("colEvals"));
+};
+
+$("xlsAll").onclick = () => {
+  const names = [...new Set(DATA.records.map(r => r.class))].sort();
+  const byClass = group(DATA.records, r => r.class);
+  downloadWorkbook(names.map(n => [n, sortRecs(byClass[n]).reverse()]), t("fileAll"));
+};
+
+$("xlsFilter").onclick = () => {
+  const list = filteredRecs().slice().reverse();
+  downloadWorkbook([[t("tabAll"), list]], t("fileShown"));
+};
 
 $("xlsComments").onclick = () => {
   const list = filterBy("cmCls", "cmTeacher", "cmQ", DATA.records.filter(r => r.comment.trim() !== "")).reverse();
-  downloadTable("comments", ["Date", "Class", "Name", "Teacher", "Comments"],
+  downloadTable(t("fileComments"),
+    [t("xDate"), t("xClass"), t("xName"), t("xTeacher"), t("xComments")],
     list.map(r => [r.date, r.class, r.student, r.teacher, r.comment]));
 };
 
 $("xlsIncidents").onclick = () => {
   const list = filterBy("inCls", "inTeacher", "inQ", DATA.records.filter(r => r.incidents > 0)).reverse();
-  downloadTable("incidents", ["Date", "Class", "Name", "Teacher", "Incident", "Comments"],
+  downloadTable(t("fileIncidents"),
+    [t("xDate"), t("xClass"), t("xName"), t("xTeacher"), t("xIncident"), t("xComments")],
     list.map(r => [r.date, r.class, r.student, r.teacher, r.incidents, r.comment]));
 };
 
@@ -629,28 +744,29 @@ $("printCls").onclick = () => {
   const list = sortRecs(DATA.records.filter(r => r.class === cls)).reverse();
   const area = $("printArea");
   area.innerHTML = "";
-  area.appendChild(el("h2", cls + " · evaluations (" + list.length + ")"));
+  area.appendChild(el("h2", t("printTitle", { cls: cls, n: list.length })));
   area.appendChild(table(
-    ["Date", "Student", "Teacher", "Evaluation", "Score", "Incidents", "Comment"],
+    [t("colDate"), t("colStudent"), t("colTeacher"), t("colEvaluation"), t("colScore"), t("colIncidents"), t("colComment")],
     list.map(r => ({
       cls: r.incidents > 0 ? "inc" : "",
-      cells: [r.date, r.student, r.teacher, r.evaluation, r.score, r.incidents, r.comment]
+      cells: [r.date, r.student, r.teacher, evalLabel(r.evaluation), r.score, r.incidents, r.comment]
     }))));
   window.print();
 };
 
 // ---------- start ----------
+applyLang();
 (async function start() {
   const saved = sessionStorage.getItem("boardKey");
   if (!saved) { $("gate").hidden = false; return; }
   PW = saved;
   try {
     DATA = await fetchData(saved);
-    $("stamp").textContent = "Data as of " + DATA.generated;
+    $("stamp").textContent = t("asOf") + " " + DATA.generated;
     showApp();
     renderAll();
   } catch (e) {
-    signOut(/unauthorized/.test(e.message) ? "The board password is not correct." : "Could not load the data: " + e.message);
+    signOut(/unauthorized/.test(e.message) ? t("badPw") : t("loadErr") + e.message);
   }
 })();
 </script>
