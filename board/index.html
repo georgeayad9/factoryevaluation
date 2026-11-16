@@ -40,6 +40,12 @@ tr.inc{background:var(--red-bg)}
 select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:var(--card);color:var(--ink);min-width:160px}
 .msg{padding:10px;border-radius:8px;font-size:14px;margin:10px 0;background:var(--red-bg);color:var(--red)}
 .muted{color:var(--muted);font-size:13px;margin:8px 0}
+.daycard{border:1px solid var(--line);border-radius:10px;margin-bottom:10px;background:var(--card);overflow:hidden}
+.daycard summary{padding:12px 14px;cursor:pointer;list-style:none;display:flex;flex-direction:column;gap:2px;font-weight:600}
+.daycard summary::-webkit-details-marker{display:none}
+.daycard summary:hover{background:var(--brand-tint)}
+.daycard .tw{padding:0 8px 8px}
+.daymeta{font-size:13px;color:var(--muted);font-weight:400}
 #gate{max-width:380px;margin:40px auto}
 #printArea{display:none}
 @media print{
@@ -126,7 +132,7 @@ select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-s
         <div id="clsStudents"></div>
       </div>
       <div class="card">
-        <h2>Latest evaluations</h2>
+        <h2>Evaluations by upload date</h2>
         <div id="clsRecent"></div>
       </div>
     </div>
@@ -457,13 +463,41 @@ function renderClass() {
       };
     })));
 
-  $("clsRecent").innerHTML = "";
-  $("clsRecent").appendChild(table(
-    ["Date", "Student", "Teacher", "Evaluation", "Score", "Incidents", "Comment"],
-    sortRecs(list).slice(0, 50).map(r => ({
-      cls: r.incidents > 0 ? "inc" : "",
-      cells: [r.date, r.student, r.teacher, r.evaluation, r.score, r.incidents, r.comment]
-    }))));
+  renderClassDates(list);
+}
+
+// Toggle list for one class: one row per upload date, newest first.
+// Open a date to see the evaluations uploaded that day.
+function renderClassDates(list) {
+  const box = $("clsRecent");
+  box.innerHTML = "";
+  if (!list.length) {
+    box.appendChild(el("div", "No evaluations for this class yet.", "muted"));
+    return;
+  }
+  const byUpload = group(list, r => r.uploaded.substring(0, 10));
+  Object.keys(byUpload).sort().reverse().forEach((day, i) => {
+    const recs = byUpload[day];
+    const teachers = new Set(recs.map(r => r.teacher)).size;
+
+    const det = el("details", null, "daycard");
+    det.open = i === 0;
+    const sum = el("summary");
+    sum.append(
+      el("span", "Uploaded " + day),
+      el("span", recs.length + " evaluation(s) · " + teachers + " teacher(s)", "daymeta"));
+    det.appendChild(sum);
+
+    const sorted = recs.slice().sort((a, b) =>
+      a.date < b.date ? 1 : a.date > b.date ? -1 : a.student.localeCompare(b.student));
+    det.appendChild(table(
+      ["Evaluation date", "Student", "Teacher", "Evaluation", "Score", "Incidents", "Comment"],
+      sorted.map(r => ({
+        cls: r.incidents > 0 ? "inc" : "",
+        cells: [r.date, r.student, r.teacher, r.evaluation, r.score, r.incidents, r.comment]
+      }))));
+    box.appendChild(det);
+  });
 }
 
 function filteredRecs() {
