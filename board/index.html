@@ -475,7 +475,7 @@ function renderClassDates(list) {
     box.appendChild(el("div", "No evaluations for this class yet.", "muted"));
     return;
   }
-  const byUpload = group(list, r => r.uploaded.substring(0, 10));
+  const byUpload = group(list, r => r.date);
   Object.keys(byUpload).sort().reverse().forEach((day, i) => {
     const recs = byUpload[day];
     const teachers = new Set(recs.map(r => r.teacher)).size;
