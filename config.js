@@ -5,5 +5,5 @@
 // key: the same value as SECRET in Code.gs
 window.FEEDBACK_CONFIG = {
   url: "https://script.google.com/macros/s/AKfycbzXI1B0s_Hr2np_BiJlc0ibmYsMIoL2yaxOaIzYqogtfAdUXbe7wBUfGdaF_qf0wmchRg/exec",
-  key: "mybbIp-pobfod-2xabgy-Cvswe345-Pol34"
+  key: "mybbIp-pobfod-2xabgy-CviUs345-Po45l34"
 };
