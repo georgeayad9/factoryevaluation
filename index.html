@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OMHG EVA School</title>
+<title>EVA School Factory Evaluation</title>
 <style>
   :root{
     --brand:#F7C948; --brand-dark:#D9A900; --brand-soft:#FFF3C4; --brand-tint:#FFF8E1;
@@ -126,7 +126,7 @@
 <body>
 <header>
   <img src="logo.png" alt="EVA Pharma logo" class="logo" onerror="this.remove()">
-  <span class="title">OMHG EVA SCHOOL</span>
+  <span class="title">EVA School Factory Evaluation</span>
   <button class="theme" id="themeBtn" type="button">Dark</button>
 </header>
 <main>
@@ -168,6 +168,7 @@
     <div class="tabs sub" id="gradeTabs" hidden>
       <button class="tab on" id="tabGMine" type="button">My grades</button>
       <button class="tab" id="tabGNew" type="button">New grading</button>
+      <button class="tab" id="tabGUp" type="button">Upload Excel</button>
     </div>
 
     <div class="card" id="topCard">
@@ -315,6 +316,28 @@
         </div>
       </div>
       <div id="gMsg2"></div>
+    </div>
+
+    <!-- GRADING: UPLOAD EXCEL -->
+    <div class="card" id="gUp" hidden>
+      <div style="font-size:15px;font-weight:600">Upload several quizzes and assignments from Excel</div>
+      <p class="hint">1. Choose the class and download its template. 2. Fill one column per quiz or assignment. 3. Choose the filled file here, check the summary, and save.</p>
+      <div class="top">
+        <div>
+          <label for="upCls">Class</label>
+          <select id="upCls"></select>
+        </div>
+        <div style="display:flex;align-items:flex-end;">
+          <button class="secondary" id="upTemplate" type="button" style="width:100%;">Download template</button>
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <label for="upFile">Filled file (.xlsx or .csv)</label>
+        <input type="file" id="upFile" accept=".xlsx,.csv">
+      </div>
+      <div id="upMsg"></div>
+      <div id="upPreview" style="margin-top:10px"></div>
+      <button class="primary" id="upSave" type="button" hidden style="margin-top:12px">Save all</button>
     </div>
 
     <!-- COMING SOON -->
@@ -492,6 +515,8 @@ function signOut(note) {
   gItems = [];
   gForm = null;
   gDirty = false;
+  upPlan = null;
+  upGrid = null;
   showGate(note);
 }
 
@@ -580,6 +605,7 @@ let gMode = 'mine';            // grading sub-tab: mine | new
 let gItems = [];               // the teacher's quizzes and assignments
 let gForm = null;              // { id, rows: [{ name, score, absent }] } while grading
 let gDirty = false;
+let gNote = '';          // message to show once My grades has reloaded
 
 const SOON_TEXT = {
   time: 'Timetable will be added soon.',
@@ -608,7 +634,7 @@ function showSection() {
     topCard.hidden = true; panel.hidden = true; mine.hidden = true;
   }
   if (isGrade) applyGMode(gMode);
-  else { $('gMine').hidden = true; $('gNew').hidden = true; }
+  else { $('gMine').hidden = true; $('gNew').hidden = true; $('gUp').hidden = true; }
 }
 
 document.querySelectorAll('#nav .tab').forEach(b => { b.onclick = () => setSection(b.dataset.sec); });
@@ -625,9 +651,19 @@ function applyGMode(m) {
   gMode = m;
   $('tabGMine').classList.toggle('on', m === 'mine');
   $('tabGNew').classList.toggle('on', m === 'new');
+  $('tabGUp').classList.toggle('on', m === 'up');
   $('gMine').hidden = m !== 'mine';
   $('gNew').hidden = m !== 'new';
+  $('gUp').hidden = m !== 'up';
   if (m === 'mine') loadGrades();
+  if (m === 'up') {
+    fillGradeClasses();
+    upPlan = null;
+    $('upFile').value = '';
+    showIn($('upMsg'), '', true);
+    renderUpPlan();
+    if (!gItems.length) loadGradeItemsQuietly();   // so a repeated title is recognised as an update
+  }
   if (m === 'new' && !gForm) startNewGrading();
 }
 
@@ -636,10 +672,12 @@ function setGMode(m) {
   if (!confirmGradeDiscard()) return;
   gDirty = false;
   gForm = null;
+  upPlan = null;
   applyGMode(m);
 }
 $('tabGMine').onclick = () => setGMode('mine');
 $('tabGNew').onclick = () => setGMode('new');
+$('tabGUp').onclick = () => setGMode('up');
 
 function fillGradeClasses() {
   const opts = sel => {
@@ -651,6 +689,7 @@ function fillGradeClasses() {
   };
   opts($('gCls'));
   opts($('gMineCls'));
+  opts($('upCls'));
 }
 
 // Empty form for a new quiz or assignment
@@ -688,6 +727,8 @@ function openGradeItem(item) {
   gMode = 'new';
   $('tabGMine').classList.remove('on');
   $('tabGNew').classList.add('on');
+  $('tabGUp').classList.remove('on');
+  $('gUp').hidden = true;
   $('gMine').hidden = true;
   $('gNew').hidden = false;
   $('gFormTitle').textContent = `Edit · ${item.title}`;
@@ -819,8 +860,8 @@ $('gSave').onclick = async () => {
     });
     gDirty = false;
     gForm = null;
+    gNote = `Saved ${title} for ${cls}.`;
     applyGMode('mine');
-    showIn($('gMineMsg'), `Saved ${title} for ${cls}.`, true);
   } catch (err) {
     if (isAuthError(err)) return signOut(err.message);
     showIn(msgBox, `Not saved (${err.message}). Press Save again to retry.`, false);
@@ -837,7 +878,8 @@ async function loadGrades() {
   try {
     const out = await post('myGradeItems', session());
     gItems = out.items || [];
-    showIn($('gMineMsg'), '', true);
+    showIn($('gMineMsg'), gNote, true);
+    gNote = '';
     renderGrades();
   } catch (err) {
     if (isAuthError(err)) return signOut(err.message);
@@ -845,6 +887,13 @@ async function loadGrades() {
   }
 }
 $('gRefresh').onclick = loadGrades;
+
+async function loadGradeItemsQuietly() {
+  try { gItems = (await post('myGradeItems', session())).items || []; if (upPlan) { upPlan = buildUpPlanAgain(); renderUpPlan(); } }
+  catch (err) { /* the upload still works; titles just are not matched to saved ones */ }
+}
+let upGrid = null;
+function buildUpPlanAgain() { return upGrid ? buildUpPlan(upPlan.cls, upGrid) : upPlan; }
 $('gMineCls').onchange = renderGrades;
 
 function renderGrades() {
@@ -876,6 +925,460 @@ function renderGrades() {
   box.querySelectorAll('button[data-id]').forEach(b => {
     b.onclick = () => openGradeItem(gItems.find(i => i.id === b.dataset.id));
   });
+}
+
+// ---------- grading: Excel upload (several quizzes and assignments at once) ----------
+// Template layout, one class per file:
+//   row 1 Title · row 2 Type (Quiz/Assignment) · row 3 Date · row 4 Out of
+//   row 5 headings · row 6 down: one student per row, a score under each quiz or assignment
+// In a score cell: a number, A or Absent for absent, or empty if not graded yet.
+const UP_FIRST_STUDENT_ROW = 6;
+const UP_COLS = 6;          // empty quiz/assignment columns in a fresh template
+let upPlan = null;          // checked upload, waiting for Save
+
+const normKey = s => String(s ?? '').replace(/\s+/g, ' ').trim().toLowerCase();
+
+function upSheetRows(cls) {
+  const students = CLASSES[cls] || [];
+  const blank = Array(UP_COLS).fill('');
+  return [
+    ['Title', ...blank],
+    ['Type (Quiz or Assignment)', ...blank],
+    ['Date (YYYY-MM-DD)', ...blank],
+    ['Out of', ...blank],
+    ['Student', ...Array(UP_COLS).fill('Score (A = absent)')],
+    ...students.map(n => [n, ...blank])
+  ];
+}
+
+$('upTemplate').onclick = () => {
+  const cls = $('upCls').value;
+  if (!cls) return showIn($('upMsg'), 'Choose a class first.', false);
+  const rows = upSheetRows(cls);
+  const help = [
+    ['How to fill this template'],
+    [''],
+    ['1. Each column from B onwards is one quiz or assignment. Add more columns to the right if you need them.'],
+    ['2. Row 1: a title, for example Quiz 1. Row 2: Quiz or Assignment. Row 3: the date. Row 4: the maximum score.'],
+    ['3. Under each one, type the score for every student. Type A for absent. Leave it empty if not graded yet.'],
+    ['4. Do not change the student names in column A. Save the file and upload it on the Upload Excel screen.'],
+    ['5. A column with no title is skipped. Uploading the same title again for this class updates it instead of adding a copy.']
+  ];
+  const blob = xlsxBlob([
+    { name: cls, rows, bold: [0, 1, 2, 3, 4] },
+    { name: 'How to fill', rows: help, bold: [0] }
+  ]);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `Grades template - ${cls}.xlsx`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+
+$('upCls').onchange = () => { upPlan = null; gDirty = false; $('upFile').value = ''; renderUpPlan(); showIn($('upMsg'), '', true); };
+
+$('upFile').onchange = async () => {
+  const file = $('upFile').files[0];
+  const cls = $('upCls').value;
+  upPlan = null;
+  renderUpPlan();
+  if (!file) return;
+  if (!cls) { $('upFile').value = ''; return showIn($('upMsg'), 'Choose the class first, then the file.', false); }
+  showIn($('upMsg'), 'Reading the file…', true);
+  try {
+    let grid;
+    if (/\.csv$/i.test(file.name)) grid = parseCsv(await file.text());
+    else grid = await readXlsxFirstSheet(await file.arrayBuffer());
+    upGrid = grid;
+    upPlan = buildUpPlan(cls, grid);
+    gDirty = true;
+    showIn($('upMsg'), '', true);
+    renderUpPlan();
+  } catch (err) {
+    showIn($('upMsg'), 'Could not read this file: ' + err.message, false);
+  }
+};
+
+// Turns the sheet grid into quizzes/assignments with scores, and lists every problem found
+function buildUpPlan(cls, grid) {
+  const cell = (r, c) => (grid[r] && grid[r][c] !== undefined && grid[r][c] !== null) ? grid[r][c] : '';
+  const width = Math.max(0, ...grid.map(r => r.length));
+  const roster = CLASSES[cls] || [];
+  const rosterByKey = {};
+  roster.forEach(n => { rosterByKey[normKey(n)] = n; });
+
+  // Students in the file, matched to the class list
+  const errors = [];
+  const students = [];
+  const seen = new Set();
+  for (let r = UP_FIRST_STUDENT_ROW - 1; r < grid.length; r++) {
+    const raw = String(cell(r, 0)).trim();
+    if (!raw) continue;
+    const name = rosterByKey[normKey(raw)];
+    if (!name) { errors.push(`Row ${r + 1}: "${raw}" is not a student of ${cls}.`); continue; }
+    if (seen.has(name)) { errors.push(`Row ${r + 1}: ${name} appears twice.`); continue; }
+    seen.add(name);
+    students.push({ name, row: r });
+  }
+
+  const existing = new Map(gItems.filter(i => i.cls === cls).map(i => [normKey(i.title), i]));
+  const items = [];
+  const titles = new Set();
+  for (let c = 1; c < width; c++) {
+    const title = String(cell(0, c)).trim();
+    const col = colName(c);
+    const hasScores = students.some(s => String(cell(s.row, c)).trim() !== '');
+    if (!title) {
+      if (hasScores) errors.push(`Column ${col}: has scores but no title in row 1.`);
+      continue;
+    }
+    if (titles.has(normKey(title))) { errors.push(`Column ${col}: the title "${title}" is used twice.`); continue; }
+    titles.add(normKey(title));
+
+    const typeRaw = normKey(cell(1, c));
+    const type = typeRaw.startsWith('a') ? 'Assignment' : typeRaw.startsWith('q') ? 'Quiz' : '';
+    if (!type) errors.push(`Column ${col} (${title}): row 2 must be Quiz or Assignment.`);
+    const date = excelDate(cell(2, c));
+    if (!date) errors.push(`Column ${col} (${title}): row 3 needs a date like 2026-11-22.`);
+    const max = Number(cell(3, c));
+    if (!(max > 0)) errors.push(`Column ${col} (${title}): row 4 needs the maximum score.`);
+
+    const scores = [];
+    students.forEach(s => {
+      const v = cell(s.row, c);
+      const t = String(v).trim();
+      if (t === '') return;
+      if (/^(a|abs|absent|غ|غائب)$/i.test(t)) { scores.push({ student: s.name, score: null, absent: true }); return; }
+      const n = typeof v === 'number' ? v : Number(t.replace(',', '.'));
+      if (isNaN(n)) { errors.push(`${col}${s.row + 1} (${s.name}, ${title}): "${t}" is not a score.`); return; }
+      if (n < 0 || (max > 0 && n > max)) { errors.push(`${col}${s.row + 1} (${s.name}, ${title}): ${n} is outside 0 to ${max}.`); return; }
+      scores.push({ student: s.name, score: n, absent: false });
+    });
+
+    const old = existing.get(normKey(title));
+    items.push({ col, title, type, date, max, scores, id: old ? old.id : '', replaces: !!old });
+  }
+  if (!students.length) errors.push(`No students of ${cls} were found in column A from row ${UP_FIRST_STUDENT_ROW}.`);
+  if (!items.length) errors.push('No quiz or assignment found. Put a title in row 1, from column B onwards.');
+  const missing = roster.filter(n => !seen.has(n));
+  return { cls, items, errors, missing, studentCount: students.length };
+}
+
+function renderUpPlan() {
+  const box = $('upPreview');
+  const save = $('upSave');
+  if (!upPlan) { box.innerHTML = ''; save.hidden = true; return; }
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const rows = upPlan.items.map(i => {
+    const scored = i.scores.filter(x => !x.absent);
+    const absent = i.scores.length - scored.length;
+    const avg = scored.length ? scored.reduce((t, x) => t + x.score, 0) / scored.length : null;
+    return `<tr><td>${esc(i.col)}</td><td><b>${esc(i.title)}</b>${i.replaces ? '<div class="rec-meta on">updates the existing one</div>' : '<div class="rec-meta">new</div>'}</td>
+      <td>${esc(i.type || '?')}</td><td>${esc(i.date || '?')}</td><td>${i.max > 0 ? esc(i.max) : '?'}</td>
+      <td>${i.scores.length} / ${upPlan.studentCount}${absent ? `<div class="rec-meta">${absent} absent</div>` : ''}</td>
+      <td>${avg === null ? '—' : fmtScore(avg)}</td></tr>`;
+  }).join('');
+  const table = upPlan.items.length ? `<div class="tablewrap"><table>
+    <tr><th>Column</th><th>Title</th><th>Type</th><th>Date</th><th>Out of</th><th>Graded</th><th>Average</th></tr>${rows}</table></div>` : '';
+  const errs = upPlan.errors.length
+    ? `<div class="msg err"><b>Fix these in the file, then choose it again:</b><ul style="margin:6px 0 0 18px;padding:0">${
+        upPlan.errors.slice(0, 30).map(e => `<li>${esc(e)}</li>`).join('')}${upPlan.errors.length > 30 ? `<li>and ${upPlan.errors.length - 30} more</li>` : ''}</ul></div>`
+    : `<div class="msg ok">Checked: ${upPlan.items.length} quiz(zes) or assignment(s) for ${esc(upPlan.cls)}, ready to save.</div>`;
+  const miss = upPlan.missing.length
+    ? `<p class="hint">Not in the file, so left ungraded: ${esc(upPlan.missing.join(', '))}</p>` : '';
+  box.innerHTML = errs + table + miss;
+  save.hidden = upPlan.errors.length > 0 || !upPlan.items.length;
+}
+
+$('upSave').onclick = async () => {
+  if (!upPlan || upPlan.errors.length) return;
+  const n = upPlan.items.length;
+  const upd = upPlan.items.filter(i => i.replaces).length;
+  if (!window.confirm(`Save ${n} quiz(zes)/assignment(s) for ${upPlan.cls}?` + (upd ? `\n${upd} will replace the scores already saved under the same title.` : ''))) return;
+  const btn = $('upSave');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  try {
+    const out = await post('saveGradeItems', {
+      ...session(),
+      items: upPlan.items.map(i => ({
+        item: { id: i.id, cls: upPlan.cls, type: i.type, title: i.title, date: i.date, max: i.max },
+        scores: i.scores
+      }))
+    });
+    const cls = upPlan.cls;
+    upPlan = null;
+    gDirty = false;
+    $('upFile').value = '';
+    gNote = `Uploaded ${out.saved || n} quiz(zes)/assignment(s) for ${cls}.`;
+    applyGMode('mine');
+  } catch (err) {
+    if (isAuthError(err)) return signOut(err.message);
+    showIn($('upMsg'), `Not saved (${err.message}). Press Save again to retry.`, false);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save all';
+  }
+};
+
+// Date cell: an Excel date number, or text like 2026-11-22 or 22/11/2026
+function excelDate(v) {
+  if (typeof v === 'number' && v > 20000 && v < 80000) {
+    const d = new Date(Math.round((v - 25569) * 86400000));
+    return d.toISOString().slice(0, 10);
+  }
+  const t = String(v).trim();
+  let m = /^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/.exec(t);
+  if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
+  m = /^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})/.exec(t);
+  if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+  return '';
+}
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [], cur = '', q = false;
+  text = text.replace(/^﻿/, '');
+  const sep = (text.split('\n')[0].match(/;/g) || []).length > (text.split('\n')[0].match(/,/g) || []).length ? ';' : ',';
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) {
+      if (ch === '"' && text[i + 1] === '"') { cur += '"'; i++; }
+      else if (ch === '"') q = false;
+      else cur += ch;
+    } else if (ch === '"') q = true;
+    else if (ch === sep) { row.push(cur); cur = ''; }
+    else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && text[i + 1] === '\n') i++;
+      row.push(cur); rows.push(row); row = []; cur = '';
+    } else cur += ch;
+  }
+  if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
+  return rows;
+}
+
+// Reads the first sheet of an .xlsx file into a grid of values (numbers stay numbers)
+async function readXlsxFirstSheet(buf) {
+  const files = await unzip(buf);
+  const text = name => files[name] ? new TextDecoder().decode(files[name]) : '';
+  const xml = s => new DOMParser().parseFromString(s, 'application/xml');
+  if (!files['xl/workbook.xml']) throw new Error('this is not an Excel .xlsx file');
+
+  // First sheet's file, via the workbook relationships
+  const wb = xml(text('xl/workbook.xml'));
+  const first = wb.getElementsByTagName('sheet')[0];
+  let path = 'xl/worksheets/sheet1.xml';
+  if (first) {
+    const rid = first.getAttribute('r:id') || first.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id');
+    const rels = xml(text('xl/_rels/workbook.xml.rels')).getElementsByTagName('Relationship');
+    for (const r of rels) {
+      if (r.getAttribute('Id') === rid) {
+        const t = r.getAttribute('Target').replace(/^\//, '');
+        path = t.startsWith('xl/') ? t : 'xl/' + t;
+      }
+    }
+  }
+  const shared = [];
+  if (files['xl/sharedStrings.xml']) {
+    for (const si of xml(text('xl/sharedStrings.xml')).getElementsByTagName('si')) {
+      shared.push([...si.getElementsByTagName('t')].map(t => t.textContent).join(''));
+    }
+  }
+  const sheet = xml(text(path));
+  const grid = [];
+  for (const c of sheet.getElementsByTagName('c')) {
+    const ref = c.getAttribute('r') || '';
+    const m = /^([A-Z]+)(\d+)$/.exec(ref);
+    if (!m) continue;
+    const col = [...m[1]].reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0) - 1;
+    const row = Number(m[2]) - 1;
+    const t = c.getAttribute('t');
+    const vEl = c.getElementsByTagName('v')[0];
+    let v = vEl ? vEl.textContent : '';
+    if (t === 's') v = shared[Number(v)] ?? '';
+    else if (t === 'inlineStr') v = [...c.getElementsByTagName('t')].map(x => x.textContent).join('');
+    else if (t === 'str' || t === 'e') v = v;
+    else if (t === 'b') v = v === '1' ? 'TRUE' : 'FALSE';
+    else if (v !== '') v = Number(v);
+    (grid[row] = grid[row] || [])[col] = v;
+  }
+  for (let i = 0; i < grid.length; i++) grid[i] = grid[i] || [];
+  return grid;
+}
+
+// Minimal zip reader (stored and deflated entries), using the browser's own decompressor
+async function unzip(buf) {
+  const dv = new DataView(buf);
+  const u8 = new Uint8Array(buf);
+  let eocd = -1;
+  for (let i = buf.byteLength - 22; i >= Math.max(0, buf.byteLength - 65557); i--) {
+    if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  }
+  if (eocd < 0) throw new Error('this is not an Excel .xlsx file');
+  const count = dv.getUint16(eocd + 10, true);
+  let p = dv.getUint32(eocd + 16, true);
+  const out = {};
+  const dec = new TextDecoder();
+  for (let k = 0; k < count; k++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const method = dv.getUint16(p + 10, true);
+    const csize = dv.getUint32(p + 20, true);
+    const nlen = dv.getUint16(p + 28, true), xlen = dv.getUint16(p + 30, true), clen = dv.getUint16(p + 32, true);
+    const local = dv.getUint32(p + 42, true);
+    const name = dec.decode(u8.subarray(p + 46, p + 46 + nlen));
+    p += 46 + nlen + xlen + clen;
+    if (!/^(xl\/workbook\.xml|xl\/_rels\/workbook\.xml\.rels|xl\/sharedStrings\.xml|xl\/worksheets\/[^/]+\.xml)$/.test(name)) continue;
+    const start = local + 30 + dv.getUint16(local + 26, true) + dv.getUint16(local + 28, true);
+    const data = u8.subarray(start, start + csize);
+    if (method === 0) out[name] = data;
+    else if (method === 8) {
+      if (typeof DecompressionStream === 'undefined') throw new Error('this browser is too old to read Excel files; save the sheet as CSV instead');
+      const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+      out[name] = new Uint8Array(await new Response(stream).arrayBuffer());
+    }
+  }
+  return out;
+}
+
+// ----- Excel export (.xlsx, built in the browser; no library needed) -----
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+
+function crc32(bytes) {
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+// A zip file with no compression, which is what .xlsx files are made of
+function zipFiles(files) {
+  const enc = new TextEncoder();
+  const parts = [];
+  const central = [];
+  let offset = 0;
+  files.forEach(f => {
+    const name = enc.encode(f.name);
+    const crc = crc32(f.data);
+    const size = f.data.length;
+
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true);
+    lh.setUint16(4, 20, true);
+    lh.setUint16(6, 0x0800, true);      // names are UTF-8
+    lh.setUint16(12, 0x21, true);       // file date 1980-01-01
+    lh.setUint32(14, crc, true);
+    lh.setUint32(18, size, true);
+    lh.setUint32(22, size, true);
+    lh.setUint16(26, name.length, true);
+    parts.push(new Uint8Array(lh.buffer), name, f.data);
+
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true);
+    ch.setUint16(4, 20, true);
+    ch.setUint16(6, 20, true);
+    ch.setUint16(8, 0x0800, true);
+    ch.setUint16(14, 0x21, true);
+    ch.setUint32(16, crc, true);
+    ch.setUint32(20, size, true);
+    ch.setUint32(24, size, true);
+    ch.setUint16(28, name.length, true);
+    ch.setUint32(42, offset, true);
+    central.push(new Uint8Array(ch.buffer), name);
+    offset += 30 + name.length + size;
+  });
+  const cdSize = central.reduce((n, u) => n + u.length, 0);
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true);
+  end.setUint16(8, files.length, true);
+  end.setUint16(10, files.length, true);
+  end.setUint32(12, cdSize, true);
+  end.setUint32(16, offset, true);
+  return new Blob([...parts, ...central, new Uint8Array(end.buffer)],
+    { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+}
+
+const XML_HEAD = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n`;
+const XLSX_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
+const XLSX_REL = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+const xmlEsc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function colName(i) {
+  let s = "";
+  for (let n = i + 1; n > 0; n = Math.floor((n - 1) / 26)) s = String.fromCharCode(65 + ((n - 1) % 26)) + s;
+  return s;
+}
+
+// sheet = { name, rows: [[...]], bold: [row indexes] }
+function sheetXml(sheet) {
+  const width = Math.max(1, ...sheet.rows.map(r => r.length));
+  const rowsXml = sheet.rows.map((r, ri) => {
+    const style = sheet.bold.includes(ri) ? ` s="1"` : "";
+    const cells = r.map((v, ci) => {
+      const ref = colName(ci) + (ri + 1);
+      if (v === null || v === undefined || v === "") return "";
+      if (typeof v === "number") return `<c r="${ref}"${style}><v>${v}</v></c>`;
+      return `<c r="${ref}"${style} t="inlineStr"><is><t xml:space="preserve">${xmlEsc(v)}</t></is></c>`;
+    }).join("");
+    return `<row r="${ri + 1}">${cells}</row>`;
+  }).join("");
+  return XML_HEAD + `<worksheet xmlns="${XLSX_NS}"><cols><col min="1" max="${width}" width="22" customWidth="1"/></cols>` +
+    `<sheetData>${rowsXml}</sheetData></worksheet>`;
+}
+
+function xlsxBlob(sheets) {
+  const enc = new TextEncoder();
+  const used = new Set();
+  const names = sheets.map((s, i) => {
+    const base = String(s.name).replace(/[\[\]:*?\/\\]/g, "-").slice(0, 31) || `Sheet${i + 1}`;
+    let name = base;
+    let k = 2;
+    while (used.has(name.toLowerCase())) name = base.slice(0, 28) + " " + k++;
+    used.add(name.toLowerCase());
+    return name;
+  });
+  const sheetRels = sheets.map((_, i) =>
+    `<Relationship Id="rId${i + 1}" Type="${XLSX_REL}/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join("");
+  const files = [
+    { name: "[Content_Types].xml", data: enc.encode(XML_HEAD +
+      `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">` +
+      `<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>` +
+      `<Default Extension="xml" ContentType="application/xml"/>` +
+      `<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>` +
+      sheets.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join("") +
+      `<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>` +
+      `</Types>`) },
+    { name: "_rels/.rels", data: enc.encode(XML_HEAD +
+      `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">` +
+      `<Relationship Id="rId1" Type="${XLSX_REL}/officeDocument" Target="xl/workbook.xml"/></Relationships>`) },
+    { name: "xl/workbook.xml", data: enc.encode(XML_HEAD +
+      `<workbook xmlns="${XLSX_NS}" xmlns:r="${XLSX_REL}"><sheets>` +
+      names.map((n, i) => `<sheet name="${xmlEsc(n)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join("") +
+      `</sheets></workbook>`) },
+    { name: "xl/_rels/workbook.xml.rels", data: enc.encode(XML_HEAD +
+      `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheetRels}` +
+      `<Relationship Id="rId${sheets.length + 1}" Type="${XLSX_REL}/styles" Target="styles.xml"/></Relationships>`) },
+    { name: "xl/styles.xml", data: enc.encode(XML_HEAD +
+      `<styleSheet xmlns="${XLSX_NS}">` +
+      `<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts>` +
+      `<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>` +
+      `<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>` +
+      `<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>` +
+      `<cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>` +
+      `<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs>` +
+      `<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>` +
+      `</styleSheet>`) },
+    ...sheets.map((s, i) => ({ name: `xl/worksheets/sheet${i + 1}.xml`, data: enc.encode(sheetXml({ ...s, name: names[i] })) }))
+  ];
+  return zipFiles(files);
 }
 
 // ---------- rendering: one card per student ----------
