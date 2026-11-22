@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>EVA School Factory Evaluation</title>
+<title>OMHG EVA SCHOOL</title>
 <style>
   :root{
     --brand:#F7C948; --brand-dark:#D9A900; --brand-soft:#FFF3C4; --brand-tint:#FFF8E1;
@@ -126,7 +126,7 @@
 <body>
 <header>
   <img src="logo.png" alt="EVA Pharma logo" class="logo" onerror="this.remove()">
-  <span class="title">EVA School Factory Evaluation</span>
+  <span class="title">OMHG EVA SCHOOL</span>
   <button class="theme" id="themeBtn" type="button">Dark</button>
 </header>
 <main>
@@ -525,15 +525,35 @@ gPin.addEventListener('keydown', e => { if (e.key === 'Enter') signIn(); });
 $('signOut').onclick = () => { if (confirmDiscard() && confirmGradeDiscard()) signOut(); };
 
 // ---------- lists ----------
-// Turns the Setup rows ({Type, Name, Parent}) into the teacher names and the classes with their students.
+// Turns the Setup rows ({Type, Name, Parent, Department}) into the teacher names and the classes with their students.
+// Evaluations use whole classes. Grading (and later attendance and assessments) uses groups:
+// a class whose students have departments (e.g. Senior 1) becomes one group per department,
+// "Senior 1 · Operation" and "Senior 1 · Utilities"; any other class is one group.
+let GROUPS = {};   // { group key: { cls, dept, students: [names] } }
 function buildLists(list) {
   TEACHERS = list.filter(x => x.Type === 'Teacher').map(x => x.Name);
   CLASSES = {};
   list.filter(x => x.Type === 'Class').forEach(x => { CLASSES[x.Name] = []; });
+  const deptOf = {};
   list.filter(x => x.Type === 'Student').forEach(x => {
-    if (CLASSES[x.Parent]) CLASSES[x.Parent].push(x.Name);
+    if (!CLASSES[x.Parent]) return;
+    CLASSES[x.Parent].push(x.Name);
+    deptOf[x.Parent + '\n' + x.Name] = String(x.Department || '').trim();
+  });
+  GROUPS = {};
+  Object.keys(CLASSES).forEach(cls => {
+    const depts = [...new Set(CLASSES[cls].map(n => deptOf[cls + '\n' + n]))].sort();
+    const split = depts.some(d => d);
+    if (!split) { GROUPS[cls] = { cls, dept: '', students: CLASSES[cls].slice() }; return; }
+    depts.forEach(d => {
+      GROUPS[d ? `${cls} · ${d}` : `${cls} · No department`] = { cls, dept: d, students: CLASSES[cls].filter(n => deptOf[cls + '\n' + n] === d) };
+    });
   });
 }
+const groupKey = (cls, dept) => dept ? `${cls} · ${dept}` : (Object.keys(GROUPS).some(k => k.startsWith(cls + ' · ')) ? `${cls} · No department` : cls);
+const itemKey = i => groupKey(i.cls, i.dept || '');
+const groupStudents = key => (GROUPS[key] && GROUPS[key].students) || [];
+const groupParts = key => GROUPS[key] ? { cls: GROUPS[key].cls, dept: GROUPS[key].dept } : { cls: key, dept: '' };
 
 function fillClassSelect() {
   clsSel.innerHTML = '';
@@ -684,8 +704,8 @@ function fillGradeClasses() {
     const prev = sel.value;
     sel.innerHTML = '';
     sel.add(new Option(sel.id === 'gMineCls' ? 'All classes' : '-- choose class --', ''));
-    Object.keys(CLASSES).forEach(c => sel.add(new Option(c, c)));
-    sel.value = Object.keys(CLASSES).includes(prev) ? prev : '';
+    Object.keys(GROUPS).forEach(c => sel.add(new Option(c, c)));
+    sel.value = Object.keys(GROUPS).includes(prev) ? prev : '';
   };
   opts($('gCls'));
   opts($('gMineCls'));
@@ -714,7 +734,7 @@ function openGradeItem(item) {
   fillGradeClasses();
   const saved = {};
   item.scores.forEach(x => { saved[x.student] = x; });
-  const names = [...new Set([...(CLASSES[item.cls] || []), ...item.scores.map(x => x.student)])];
+  const names = [...new Set([...groupStudents(itemKey(item)), ...item.scores.map(x => x.student)])];
   gForm = {
     id: item.id,
     rows: names.map(n => ({
@@ -732,8 +752,9 @@ function openGradeItem(item) {
   $('gMine').hidden = true;
   $('gNew').hidden = false;
   $('gFormTitle').textContent = `Edit · ${item.title}`;
-  if (![...$('gCls').options].some(o => o.value === item.cls)) $('gCls').add(new Option(item.cls, item.cls));
-  $('gCls').value = item.cls;
+  const key = itemKey(item);
+  if (![...$('gCls').options].some(o => o.value === key)) $('gCls').add(new Option(key, key));
+  $('gCls').value = key;
   $('gCls').disabled = true;
   $('gType').value = item.type;
   $('gTitle').value = item.title;
@@ -749,7 +770,7 @@ $('gCls').onchange = () => {
     return;
   }
   gForm.cls = $('gCls').value;
-  gForm.rows = (CLASSES[gForm.cls] || []).map(n => ({ name: n, score: null, absent: false }));
+  gForm.rows = groupStudents(gForm.cls).map(n => ({ name: n, score: null, absent: false }));
   gDirty = false;
   renderGradeRows();
 };
@@ -855,7 +876,7 @@ $('gSave').onclick = async () => {
   try {
     await post('saveGradeItem', {
       ...session(),
-      item: { id: gForm.id, cls, type: $('gType').value, title, date: $('gDate').value, max },
+      item: { id: gForm.id, ...groupParts(cls), type: $('gType').value, title, date: $('gDate').value, max },
       scores: gForm.rows.map(r => ({ student: r.name, score: r.absent ? null : r.score, absent: r.absent }))
     });
     gDirty = false;
@@ -899,7 +920,7 @@ $('gMineCls').onchange = renderGrades;
 function renderGrades() {
   const box = $('gMineList');
   const cls = $('gMineCls').value;
-  const list = gItems.filter(i => !cls || i.cls === cls)
+  const list = gItems.filter(i => !cls || itemKey(i) === cls)
     .sort((a, b) => (b.date || '').localeCompare(a.date || '') || a.title.localeCompare(b.title));
   if (!list.length) {
     box.innerHTML = '<p class="hint">No quizzes or assignments yet. Open New grading to add one.</p>';
@@ -907,14 +928,14 @@ function renderGrades() {
   }
   const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const rowsHtml = list.map(i => {
-    const total = (CLASSES[i.cls] || []).length || i.scores.length;
+    const total = groupStudents(itemKey(i)).length || i.scores.length;
     const scored = i.scores.filter(x => !x.absent && x.score !== '' && x.score !== null);
     const absent = i.scores.filter(x => x.absent).length;
     const avg = scored.length ? scored.reduce((t, x) => t + Number(x.score), 0) / scored.length : null;
     return `<tr>
       <td>${esc(i.date)}</td>
       <td><b>${esc(i.title)}</b><div class="rec-meta">${esc(i.type)}</div></td>
-      <td>${esc(i.cls)}</td>
+      <td>${esc(itemKey(i))}</td>
       <td>${scored.length + absent} / ${total}${absent ? `<div class="rec-meta">${absent} absent</div>` : ''}</td>
       <td>${avg === null ? '—' : fmtScore(avg) + ' / ' + esc(i.max)}</td>
       <td><button class="small" type="button" data-id="${esc(i.id)}">Open</button></td>
@@ -939,7 +960,7 @@ let upPlan = null;          // checked upload, waiting for Save
 const normKey = s => String(s ?? '').replace(/\s+/g, ' ').trim().toLowerCase();
 
 function upSheetRows(cls) {
-  const students = CLASSES[cls] || [];
+  const students = groupStudents(cls);
   const blank = Array(UP_COLS).fill('');
   return [
     ['Title', ...blank],
@@ -1005,7 +1026,7 @@ $('upFile').onchange = async () => {
 function buildUpPlan(cls, grid) {
   const cell = (r, c) => (grid[r] && grid[r][c] !== undefined && grid[r][c] !== null) ? grid[r][c] : '';
   const width = Math.max(0, ...grid.map(r => r.length));
-  const roster = CLASSES[cls] || [];
+  const roster = groupStudents(cls);
   const rosterByKey = {};
   roster.forEach(n => { rosterByKey[normKey(n)] = n; });
 
@@ -1023,7 +1044,7 @@ function buildUpPlan(cls, grid) {
     students.push({ name, row: r });
   }
 
-  const existing = new Map(gItems.filter(i => i.cls === cls).map(i => [normKey(i.title), i]));
+  const existing = new Map(gItems.filter(i => itemKey(i) === cls).map(i => [normKey(i.title), i]));
   const items = [];
   const titles = new Set();
   for (let c = 1; c < width; c++) {
@@ -1104,7 +1125,7 @@ $('upSave').onclick = async () => {
     const out = await post('saveGradeItems', {
       ...session(),
       items: upPlan.items.map(i => ({
-        item: { id: i.id, cls: upPlan.cls, type: i.type, title: i.title, date: i.date, max: i.max },
+        item: { id: i.id, ...groupParts(upPlan.cls), type: i.type, title: i.title, date: i.date, max: i.max },
         scores: i.scores
       }))
     });
