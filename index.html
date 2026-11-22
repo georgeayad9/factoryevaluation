@@ -21,6 +21,7 @@
   }
 
   * { box-sizing: border-box; }
+  [hidden]{display:none !important}
   body{font-family:system-ui,"Segoe UI",Arial,sans-serif;margin:0;background:var(--bg);color:var(--ink)}
   header{background:var(--brand);color:#1d1d1d;padding:10px 20px;font-size:18px;font-weight:700;display:flex;align-items:center;gap:12px}
   header .title{flex:1}
@@ -41,6 +42,23 @@
   .tabs{display:flex;gap:8px;margin-bottom:14px}
   .tab{flex:1;height:44px;border-radius:10px;border:1px solid var(--brand-dark);background:var(--card);color:var(--ink);font-size:15px;cursor:pointer}
   .tab.on{background:var(--brand);color:#1d1d1d;font-weight:600}
+
+  /* main sections and their sub-tabs */
+  .nav{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+  .nav .tab{height:48px;font-size:15px;font-weight:600}
+  .nav .tab small{display:block;font-size:11px;font-weight:400;color:var(--muted)}
+  .tabs.sub .tab{height:38px;font-size:14px}
+  @media (max-width:560px){ .nav{grid-template-columns:1fr 1fr} }
+  .soon{text-align:center;padding:40px 14px;color:var(--muted);font-size:15px}
+  .grow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+  .grow .gname{flex:1;font-size:15px;font-weight:600;min-width:0;overflow-wrap:anywhere}
+  .grow input[type=number]{width:90px;flex:0 0 auto}
+  .grow .gmax{font-size:13px;color:var(--muted);width:40px}
+  .grow label.abs{display:flex;align-items:center;gap:4px;margin:0;font-size:13px;white-space:nowrap}
+  .grow label.abs input{width:18px;height:18px;margin:0}
+  .grow.bad input[type=number]{border-color:var(--red)}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+  @media (max-width:700px){ .grid3{grid-template-columns:1fr} }
 
   /* student cards */
   .cards{display:grid;grid-template-columns:1fr;gap:10px}
@@ -132,9 +150,24 @@
       <button class="ghost" id="signOut" type="button" style="padding:6px 12px;font-size:14px;">Sign out</button>
     </div>
 
-    <div class="tabs">
+    <!-- Main sections -->
+    <div class="nav" id="nav">
+      <button class="tab on" data-sec="eval" type="button">Evaluations</button>
+      <button class="tab" data-sec="grade" type="button">Grading</button>
+      <button class="tab" data-sec="time" type="button">Timetable<small>coming soon</small></button>
+      <button class="tab" data-sec="assess" type="button">Assessments<small>coming soon</small></button>
+    </div>
+
+    <!-- Evaluations sub-tabs -->
+    <div class="tabs sub" id="evalTabs">
       <button class="tab on" id="tabNew" type="button">New evaluation</button>
       <button class="tab" id="tabMine" type="button">My evaluations</button>
+    </div>
+
+    <!-- Grading sub-tabs -->
+    <div class="tabs sub" id="gradeTabs" hidden>
+      <button class="tab on" id="tabGMine" type="button">My grades</button>
+      <button class="tab" id="tabGNew" type="button">New grading</button>
     </div>
 
     <div class="card" id="topCard">
@@ -220,6 +253,72 @@
         <div id="editMsg"></div>
       </div>
     </div>
+
+    <!-- GRADING: MY GRADES -->
+    <div class="card" id="gMine" hidden>
+      <div class="top">
+        <div>
+          <label for="gMineCls">Class</label>
+          <select id="gMineCls"></select>
+        </div>
+        <div style="display:flex;align-items:flex-end;">
+          <button class="secondary" id="gRefresh" type="button" style="width:100%;">Refresh</button>
+        </div>
+      </div>
+      <div id="gMineMsg"></div>
+      <div id="gMineList" style="margin-top:10px"></div>
+    </div>
+
+    <!-- GRADING: NEW (or edit) -->
+    <div class="card" id="gNew" hidden>
+      <div style="font-size:15px;font-weight:600" id="gFormTitle">New grading</div>
+      <div class="grid3">
+        <div>
+          <label for="gCls">Class</label>
+          <select id="gCls"></select>
+        </div>
+        <div>
+          <label for="gType">Type</label>
+          <select id="gType"><option value="Quiz">Quiz</option><option value="Assignment">Assignment</option></select>
+        </div>
+        <div>
+          <label for="gDate">Date</label>
+          <input type="date" id="gDate">
+        </div>
+      </div>
+      <div class="top" style="margin-top:12px">
+        <div>
+          <label for="gTitle">Title</label>
+          <input type="text" id="gTitle" placeholder="e.g. Quiz 1 · GMP basics" maxlength="80">
+        </div>
+        <div>
+          <label for="gMax">Out of (maximum score)</label>
+          <input type="number" id="gMax" min="1" step="0.5" value="10">
+        </div>
+      </div>
+
+      <div id="gStudents" hidden>
+        <div class="bulk" style="margin-top:14px">
+          <div>
+            <label for="gFill">Give every empty score</label>
+            <input type="number" id="gFill" min="0" step="0.5" placeholder="e.g. 10">
+          </div>
+          <button class="secondary" id="gFillBtn" type="button">Fill empty</button>
+          <button class="secondary" id="gFullBtn" type="button">Full marks to empty</button>
+        </div>
+        <div class="hint" id="gProgress" style="font-size:14px;color:var(--ink);font-weight:600"></div>
+        <div id="gRows"></div>
+        <p class="hint">Leave a score empty if the student has not been graded yet. Tick Absent if they missed it.</p>
+        <div class="btnrow" style="margin-top:12px;display:flex;gap:8px">
+          <button class="primary" id="gSave" type="button" style="flex:1">Save grades</button>
+          <button class="ghost" id="gCancel" type="button">Cancel</button>
+        </div>
+      </div>
+      <div id="gMsg2"></div>
+    </div>
+
+    <!-- COMING SOON -->
+    <div class="card soon" id="soon" hidden></div>
 
   </div>
 </main>
@@ -355,7 +454,10 @@ function showApp() {
   $('whoName').textContent = me;
   fillClassSelect();
   fillMineClasses();
-  applyMode('new');
+  fillGradeClasses();
+  section = 'eval';
+  mode = 'new';
+  showSection();
 }
 
 async function signIn() {
@@ -387,12 +489,15 @@ function signOut(note) {
   pendingSaveId = null;
   mineRecords = [];
   editing = null;
+  gItems = [];
+  gForm = null;
+  gDirty = false;
   showGate(note);
 }
 
 gBtn.onclick = signIn;
 gPin.addEventListener('keydown', e => { if (e.key === 'Enter') signIn(); });
-$('signOut').onclick = () => { if (confirmDiscard()) signOut(); };
+$('signOut').onclick = () => { if (confirmDiscard() && confirmGradeDiscard()) signOut(); };
 
 // ---------- lists ----------
 // Turns the Setup rows ({Type, Name, Parent}) into the teacher names and the classes with their students.
@@ -468,6 +573,310 @@ function setMode(m) {
 }
 tabNew.onclick = () => setMode('new');
 tabMine.onclick = () => setMode('mine');
+
+// ---------- main sections ----------
+let section = 'eval';          // eval | grade | time | assess
+let gMode = 'mine';            // grading sub-tab: mine | new
+let gItems = [];               // the teacher's quizzes and assignments
+let gForm = null;              // { id, rows: [{ name, score, absent }] } while grading
+let gDirty = false;
+
+const SOON_TEXT = {
+  time: 'Timetable will be added soon.',
+  assess: 'Assessments will be added soon.'
+};
+
+function setSection(sec) {
+  if (sec === section) return;
+  if (section === 'eval' && mode === 'new' && !confirmDiscard()) return;
+  if (section === 'grade' && !confirmGradeDiscard()) return;
+  section = sec;
+  showSection();
+}
+
+function showSection() {
+  document.querySelectorAll('#nav .tab').forEach(b => b.classList.toggle('on', b.dataset.sec === section));
+  const isEval = section === 'eval', isGrade = section === 'grade';
+  $('evalTabs').hidden = !isEval;
+  $('gradeTabs').hidden = !isGrade;
+  $('soon').hidden = isEval || isGrade;
+  $('soon').textContent = SOON_TEXT[section] || '';
+  if (isEval) {
+    applyMode(mode);
+    if (mode === 'new') loadStudents();   // fresh cards for the chosen class
+  } else {
+    topCard.hidden = true; panel.hidden = true; mine.hidden = true;
+  }
+  if (isGrade) applyGMode(gMode);
+  else { $('gMine').hidden = true; $('gNew').hidden = true; }
+}
+
+document.querySelectorAll('#nav .tab').forEach(b => { b.onclick = () => setSection(b.dataset.sec); });
+
+// ---------- grading ----------
+const num = v => (v === '' || v === null || v === undefined) ? null : Number(v);
+const fmtScore = n => (Math.round(n * 100) / 100).toString();
+
+function confirmGradeDiscard() {
+  return !gDirty || window.confirm('You have unsaved grades. Discard them?');
+}
+
+function applyGMode(m) {
+  gMode = m;
+  $('tabGMine').classList.toggle('on', m === 'mine');
+  $('tabGNew').classList.toggle('on', m === 'new');
+  $('gMine').hidden = m !== 'mine';
+  $('gNew').hidden = m !== 'new';
+  if (m === 'mine') loadGrades();
+  if (m === 'new' && !gForm) startNewGrading();
+}
+
+function setGMode(m) {
+  if (m === gMode) return;
+  if (!confirmGradeDiscard()) return;
+  gDirty = false;
+  gForm = null;
+  applyGMode(m);
+}
+$('tabGMine').onclick = () => setGMode('mine');
+$('tabGNew').onclick = () => setGMode('new');
+
+function fillGradeClasses() {
+  const opts = sel => {
+    const prev = sel.value;
+    sel.innerHTML = '';
+    sel.add(new Option(sel.id === 'gMineCls' ? 'All classes' : '-- choose class --', ''));
+    Object.keys(CLASSES).forEach(c => sel.add(new Option(c, c)));
+    sel.value = Object.keys(CLASSES).includes(prev) ? prev : '';
+  };
+  opts($('gCls'));
+  opts($('gMineCls'));
+}
+
+// Empty form for a new quiz or assignment
+function startNewGrading() {
+  fillGradeClasses();
+  gForm = { id: '', rows: [] };
+  gDirty = false;
+  $('gFormTitle').textContent = 'New grading';
+  $('gCls').disabled = false;
+  $('gCls').value = '';
+  $('gType').value = 'Quiz';
+  $('gTitle').value = '';
+  $('gMax').value = '10';
+  $('gDate').value = new Date().toLocaleDateString('en-CA');
+  $('gFill').value = '';
+  showIn($('gMsg2'), '', true);
+  renderGradeRows();
+}
+
+// Edit an existing one: same form, class locked, students already filled
+function openGradeItem(item) {
+  fillGradeClasses();
+  const saved = {};
+  item.scores.forEach(x => { saved[x.student] = x; });
+  const names = [...new Set([...(CLASSES[item.cls] || []), ...item.scores.map(x => x.student)])];
+  gForm = {
+    id: item.id,
+    rows: names.map(n => ({
+      name: n,
+      score: saved[n] && saved[n].score !== '' && saved[n].score !== null ? Number(saved[n].score) : null,
+      absent: !!(saved[n] && saved[n].absent)
+    }))
+  };
+  gDirty = false;
+  gMode = 'new';
+  $('tabGMine').classList.remove('on');
+  $('tabGNew').classList.add('on');
+  $('gMine').hidden = true;
+  $('gNew').hidden = false;
+  $('gFormTitle').textContent = `Edit · ${item.title}`;
+  if (![...$('gCls').options].some(o => o.value === item.cls)) $('gCls').add(new Option(item.cls, item.cls));
+  $('gCls').value = item.cls;
+  $('gCls').disabled = true;
+  $('gType').value = item.type;
+  $('gTitle').value = item.title;
+  $('gMax').value = item.max;
+  $('gDate').value = item.date;
+  showIn($('gMsg2'), '', true);
+  renderGradeRows();
+}
+
+$('gCls').onchange = () => {
+  if (gDirty && !window.confirm('Changing the class clears the scores you typed. Continue?')) {
+    $('gCls').value = gForm.cls || '';
+    return;
+  }
+  gForm.cls = $('gCls').value;
+  gForm.rows = (CLASSES[gForm.cls] || []).map(n => ({ name: n, score: null, absent: false }));
+  gDirty = false;
+  renderGradeRows();
+};
+['gType', 'gTitle', 'gDate'].forEach(id => { $(id).oninput = () => { gDirty = true; }; });
+$('gMax').oninput = () => { gDirty = true; renderGradeRows(); };
+
+function renderGradeRows() {
+  const box = $('gRows');
+  box.innerHTML = '';
+  $('gStudents').hidden = !gForm || !gForm.rows.length;
+  if (!gForm) return;
+  const max = num($('gMax').value);
+  gForm.rows.forEach(r => {
+    const line = document.createElement('div');
+    const bad = r.score !== null && (r.score < 0 || (max && r.score > max));
+    line.className = 'grow' + (bad ? ' bad' : '');
+
+    const name = document.createElement('div');
+    name.className = 'gname';
+    name.textContent = r.name;
+
+    const inp = document.createElement('input');
+    inp.type = 'number';
+    inp.min = '0';
+    inp.step = '0.5';
+    inp.inputMode = 'decimal';
+    inp.value = r.score === null ? '' : r.score;
+    inp.disabled = r.absent;
+    inp.oninput = () => {
+      r.score = num(inp.value);
+      gDirty = true;
+      const m = num($('gMax').value);
+      line.classList.toggle('bad', r.score !== null && (r.score < 0 || (m && r.score > m)));
+      updateGradeProgress();
+    };
+
+    const of = document.createElement('span');
+    of.className = 'gmax';
+    of.textContent = max ? '/ ' + max : '';
+
+    const ab = document.createElement('label');
+    ab.className = 'abs';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = r.absent;
+    cb.onchange = () => { r.absent = cb.checked; if (r.absent) r.score = null; gDirty = true; renderGradeRows(); };
+    ab.append(cb, document.createTextNode('Absent'));
+
+    line.append(name, inp, of, ab);
+    box.appendChild(line);
+  });
+  updateGradeProgress();
+}
+
+function updateGradeProgress() {
+  if (!gForm || !gForm.rows.length) { $('gProgress').textContent = ''; return; }
+  const done = gForm.rows.filter(r => r.absent || r.score !== null);
+  const scored = gForm.rows.filter(r => !r.absent && r.score !== null);
+  const avg = scored.length ? scored.reduce((t, r) => t + r.score, 0) / scored.length : null;
+  $('gProgress').textContent = `${done.length} of ${gForm.rows.length} graded` +
+    (avg !== null ? ` · average ${fmtScore(avg)}` : '');
+}
+
+function fillEmpty(value) {
+  if (!gForm) return;
+  const max = num($('gMax').value);
+  if (value === null || isNaN(value) || value < 0) return showIn($('gMsg2'), 'Type a score to fill.', false);
+  if (max && value > max) return showIn($('gMsg2'), `The score can't be more than ${max}.`, false);
+  let n = 0;
+  gForm.rows.forEach(r => { if (!r.absent && r.score === null) { r.score = value; n++; } });
+  gDirty = true;
+  showIn($('gMsg2'), n ? `Filled ${n} empty score(s). Scores already typed were left unchanged.` : 'No empty scores to fill.', true);
+  renderGradeRows();
+}
+$('gFillBtn').onclick = () => fillEmpty(num($('gFill').value));
+$('gFullBtn').onclick = () => fillEmpty(num($('gMax').value));
+
+$('gCancel').onclick = () => {
+  if (!confirmGradeDiscard()) return;
+  gDirty = false;
+  gForm = null;
+  applyGMode('mine');
+};
+
+$('gSave').onclick = async () => {
+  const msgBox = $('gMsg2');
+  const cls = $('gCls').value;
+  const title = $('gTitle').value.trim();
+  const max = num($('gMax').value);
+  if (!cls) return showIn(msgBox, 'Choose a class.', false);
+  if (!title) return showIn(msgBox, 'Type a title.', false);
+  if (!$('gDate').value) return showIn(msgBox, 'Choose a date.', false);
+  if (!max || max <= 0) return showIn(msgBox, 'Set the maximum score.', false);
+  const bad = gForm.rows.find(r => r.score !== null && (isNaN(r.score) || r.score < 0 || r.score > max));
+  if (bad) return showIn(msgBox, `${bad.name}: the score must be between 0 and ${max}.`, false);
+
+  const empty = gForm.rows.filter(r => !r.absent && r.score === null).length;
+  if (empty && !window.confirm(`${empty} student(s) have no score yet. Save anyway? You can finish them later from My grades.`)) return;
+
+  const btn = $('gSave');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  try {
+    await post('saveGradeItem', {
+      ...session(),
+      item: { id: gForm.id, cls, type: $('gType').value, title, date: $('gDate').value, max },
+      scores: gForm.rows.map(r => ({ student: r.name, score: r.absent ? null : r.score, absent: r.absent }))
+    });
+    gDirty = false;
+    gForm = null;
+    applyGMode('mine');
+    showIn($('gMineMsg'), `Saved ${title} for ${cls}.`, true);
+  } catch (err) {
+    if (isAuthError(err)) return signOut(err.message);
+    showIn(msgBox, `Not saved (${err.message}). Press Save again to retry.`, false);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save grades';
+  }
+};
+
+async function loadGrades() {
+  fillGradeClasses();
+  showIn($('gMineMsg'), 'Loading…', true);
+  $('gMineList').innerHTML = '';
+  try {
+    const out = await post('myGradeItems', session());
+    gItems = out.items || [];
+    showIn($('gMineMsg'), '', true);
+    renderGrades();
+  } catch (err) {
+    if (isAuthError(err)) return signOut(err.message);
+    showIn($('gMineMsg'), err.message, false);
+  }
+}
+$('gRefresh').onclick = loadGrades;
+$('gMineCls').onchange = renderGrades;
+
+function renderGrades() {
+  const box = $('gMineList');
+  const cls = $('gMineCls').value;
+  const list = gItems.filter(i => !cls || i.cls === cls)
+    .sort((a, b) => (b.date || '').localeCompare(a.date || '') || a.title.localeCompare(b.title));
+  if (!list.length) {
+    box.innerHTML = '<p class="hint">No quizzes or assignments yet. Open New grading to add one.</p>';
+    return;
+  }
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const rowsHtml = list.map(i => {
+    const total = (CLASSES[i.cls] || []).length || i.scores.length;
+    const scored = i.scores.filter(x => !x.absent && x.score !== '' && x.score !== null);
+    const absent = i.scores.filter(x => x.absent).length;
+    const avg = scored.length ? scored.reduce((t, x) => t + Number(x.score), 0) / scored.length : null;
+    return `<tr>
+      <td>${esc(i.date)}</td>
+      <td><b>${esc(i.title)}</b><div class="rec-meta">${esc(i.type)}</div></td>
+      <td>${esc(i.cls)}</td>
+      <td>${scored.length + absent} / ${total}${absent ? `<div class="rec-meta">${absent} absent</div>` : ''}</td>
+      <td>${avg === null ? '—' : fmtScore(avg) + ' / ' + esc(i.max)}</td>
+      <td><button class="small" type="button" data-id="${esc(i.id)}">Open</button></td>
+    </tr>`;
+  }).join('');
+  box.innerHTML = `<div class="tablewrap"><table>
+    <tr><th>Date</th><th>Title</th><th>Class</th><th>Graded</th><th>Average</th><th></th></tr>${rowsHtml}</table></div>`;
+  box.querySelectorAll('button[data-id]').forEach(b => {
+    b.onclick = () => openGradeItem(gItems.find(i => i.id === b.dataset.id));
+  });
+}
 
 // ---------- rendering: one card per student ----------
 function render() {
