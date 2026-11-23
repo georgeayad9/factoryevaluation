@@ -1,0 +1,2053 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OMHG EVA SCHOOL – Admin</title>
+<!-- Home-screen icon and name for the admin page -->
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="admin.webmanifest">
+<meta name="apple-mobile-web-app-title" content="OMHG Admin">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F7C948">
+<style>
+:root{--brand:#F7C948;--brand-dark:#D9A900;--brand-soft:#FFF3C4;--bg:#FBF8EE;--card:#ffffff;--ink:#1d1d1d;--muted:#6b6b6b;--line:#e8e2cf;--danger:#d32f2f;--ok-bg:#e6f4ea;--ok-ink:#17652a;--err-bg:#fdecea;--err-ink:#8a1c12}
+[data-theme="dark"]{--bg:#16161a;--card:#22222a;--ink:#f2f2f2;--muted:#a0a0aa;--line:#33333d;--brand-soft:#3a3320;--ok-bg:#16351f;--ok-ink:#9fe0b0;--err-bg:#3d1b18;--err-ink:#ffb4ab}
+*{box-sizing:border-box}
+body{font-family:system-ui,"Segoe UI",Arial,sans-serif;margin:0;background:var(--bg);color:var(--ink)}
+header{background:var(--brand);color:#1d1d1d;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+header h1{font-size:18px;margin:0;font-weight:700}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+main{max-width:900px;margin:16px auto;padding:0 12px 40px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:16px}
+h2{font-size:16px;margin:0 0 12px}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
+input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:15px;font-family:inherit;background:var(--card);color:var(--ink)}
+textarea{resize:vertical}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:12px}
+.row > div{flex:1;min-width:150px}
+.row > div.wide{flex:2}
+.row > div.auto{flex:0 0 auto;min-width:0}
+.btn{border:0;border-radius:8px;padding:10px 16px;font-size:15px;cursor:pointer;background:var(--brand);color:#1d1d1d;font-weight:600;white-space:nowrap}
+.btn.alt{background:transparent;color:var(--ink);border:1px solid var(--brand-dark)}
+.btn.save{background:#1d1d1d;color:var(--brand)}
+.btn.small{padding:6px 10px;font-size:13px}
+.btn.rm{background:transparent;color:var(--danger);border:1px solid var(--danger);padding:6px 10px;font-size:13px;font-weight:500}
+header .btn.alt{color:#1d1d1d;border-color:#1d1d1d}
+.btn:disabled{opacity:.45;cursor:default}
+ul{list-style:none;padding:0;margin:0}
+li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 4px;border-bottom:1px solid var(--line)}
+li small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.acts{display:flex;gap:6px;flex:0 0 auto}
+.empty{color:var(--muted);font-size:14px;padding:8px 0}
+.msg{padding:10px 12px;border-radius:8px;margin:0 0 14px;font-size:14px}
+.ok{background:var(--ok-bg);color:var(--ok-ink)}
+.err{background:var(--err-bg);color:var(--err-ink)}
+.counts{font-size:13px;color:var(--muted);margin-bottom:12px}
+.hint{font-size:13px;color:var(--muted);line-height:1.6}
+[hidden]{display:none !important}
+.ptabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.ptabs button{flex:1;min-width:160px;height:44px;border-radius:10px;border:1px solid var(--brand-dark);background:var(--card);color:var(--ink);font-size:15px;font-weight:600;cursor:pointer}
+.ptabs button.on{background:var(--brand);color:#1d1d1d}
+.ttWrap{overflow-x:auto}
+.ttGrid{width:100%;border-collapse:collapse;table-layout:fixed;min-width:640px;font-size:13px}
+.ttGrid th{font-weight:600;color:var(--muted);padding:4px;text-align:center;font-size:12px}
+.ttGrid th.d{text-align:left;width:100px;color:var(--ink)}
+.ttGrid th.d small,.ttGrid td small{display:block;font-weight:400;font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ttGrid th.d.click{cursor:pointer;text-decoration:underline dotted}
+.ttGrid th.d small{white-space:normal}
+.ttGrid th.d.off{color:var(--danger)}
+.ttGrid td{border:1px solid var(--line);height:44px;padding:3px;text-align:center;vertical-align:middle}
+.ttGrid td.click{cursor:pointer}
+.ttGrid td.click:hover{outline:2px solid var(--brand-dark);outline-offset:-2px}
+.ttGrid td.abs{background:var(--err-bg)}.ttGrid td.abs b{color:var(--err-ink);text-decoration:line-through}
+.ttGrid td.cov{background:#E6F1FB}.ttGrid td.cov small{color:#0C447C}
+[data-theme="dark"] .ttGrid td.cov{background:#0C447C}[data-theme="dark"] .ttGrid td.cov small{color:#B5D4F4}
+.ttGrid td.subcell{background:var(--ok-bg)}.ttGrid td.subcell small{color:var(--ok-ink)}
+.ttGrid td.fac{background:repeating-linear-gradient(45deg,transparent 0 6px,var(--line) 6px 7px);color:var(--muted)}
+.ttGrid td.free small.plus{color:var(--muted);opacity:0;font-size:11px}
+.ttGrid td.free:hover small.plus{opacity:1}
+.ttGrid td.free select{padding:4px;font-size:12px}
+.ttGrid th.d.busy{color:var(--danger)}
+.dayWarn{grid-column:1/-1;color:var(--danger);font-size:13px;font-weight:600}
+.facNote{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+.ttGrid.edit td{padding:2px;height:auto}
+.ttGrid.edit input{padding:6px 4px;font-size:13px;text-align:center}
+.ttStats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.ttStat{background:var(--brand-soft);border-radius:10px;padding:8px 10px}
+.ttStat span{display:block;font-size:12px;color:var(--muted)}.ttStat b{font-size:20px}
+.ttStat.warn{background:var(--err-bg)}
+@media (max-width:600px){.ttStats{grid-template-columns:1fr 1fr}}
+.needRow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:6px 10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.needRow small{display:block;color:var(--muted);font-size:12px}
+.needRow.done b{color:var(--ok-ink)}
+.needRow .warnTxt{grid-column:2;font-size:12px}
+.warnTxt{color:var(--danger)}
+.ttSum{width:100%;border-collapse:collapse;font-size:14px}
+.ttSum th{text-align:left;font-size:12px;color:var(--muted);padding:6px;border-bottom:1px solid var(--line)}
+.ttSum td{padding:6px;border-bottom:1px solid var(--line)}
+.ttSum td.pick{cursor:pointer;text-decoration:underline dotted}
+.ttSum td.num select,.ttSum td.num input{width:70px;padding:6px}
+.ttSum td.full{color:var(--muted)}
+.ttSum tr.cur td{background:var(--brand-soft)}
+.upPage{border:1px solid var(--line);border-radius:10px;padding:10px;margin:10px 0}
+.upPage.skip{opacity:.6}
+.otherPages{margin-top:12px}
+main.wide{max-width:1200px}
+.ptabs button{min-width:130px}
+.boardFrame{width:100%;height:calc(100vh - 170px);min-height:600px;border:1px solid var(--line);border-radius:12px;background:var(--card);margin-top:8px}
+.grTable td small{display:block;color:var(--muted);font-size:12px}
+.soonCard{text-align:center;padding:40px 16px}
+.gateWrap{max-width:420px;margin:40px auto;padding:0 12px}
+.gateCard input[type=password]{margin-bottom:12px}
+.gateCard label.keep{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--ink);margin:0 0 14px}
+.gateCard label.keep input{width:18px;height:18px}
+.evUp summary{cursor:pointer;list-style:revert}
+.evUp[open] summary{margin-bottom:10px}
+.soonCard p{color:var(--muted);font-size:16px;margin:0}
+.otherPages summary{cursor:pointer;font-weight:600;padding:8px 0}
+.upHead{display:grid;grid-template-columns:minmax(0,1fr) 220px auto;gap:10px;align-items:center}
+.upHead small{display:block;color:var(--muted);font-size:12px}
+@media (max-width:600px){.upHead{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>OMHG EVA SCHOOL — Admin</h1>
+  <div class="tools">
+    <button class="btn alt" id="themeBtn" type="button">Dark</button>
+    <button class="btn alt" id="loadBtn" type="button">Reload</button>
+    <button class="btn save" id="saveBtn" type="button" disabled>Save</button>
+    <button class="btn alt" id="signOutBtn" type="button" hidden>Sign out</button>
+  </div>
+</header>
+
+<!-- Sign in: the admin password is typed here, never written in this file -->
+<div id="adminGate" class="gateWrap" hidden>
+  <div class="card gateCard">
+    <h2>Admin sign in</h2>
+    <label for="gateKey">Admin password</label>
+    <input type="password" id="gateKey" autocomplete="current-password" placeholder="The ADMIN_KEY from Code.gs">
+    <label class="keep"><input type="checkbox" id="gateKeep" checked> Stay signed in on this device</label>
+    <button class="btn save" id="gateBtn" type="button" style="width:100%">Sign in</button>
+    <div id="gateMsg"></div>
+    <p class="hint">Use "Stay signed in" only on your own phone or computer. Sign out from the top bar on shared devices.</p>
+  </div>
+</div>
+
+<main id="main" hidden>
+  <nav class="ptabs">
+    <button type="button" id="tabLists" class="on">Teachers, classes and students</button>
+    <button type="button" id="tabTT">Timetable</button>
+    <button type="button" id="tabGrades">Grading</button>
+    <button type="button" id="tabEvals">Evaluations</button>
+    <button type="button" id="tabAssess">Assessments</button>
+  </nav>
+  <div id="paneLists">
+  <div id="status"></div>
+  <div class="counts" id="counts">Loading…</div>
+
+  <!-- TEACHERS -->
+  <div class="card">
+    <h2>Teachers</h2>
+    <div class="row">
+      <div class="wide">
+        <label for="tName">Teacher name</label>
+        <input id="tName" placeholder="e.g. Ahmed Ali" autocomplete="off">
+      </div>
+      <div>
+        <label for="tPin">PIN (4 to 6 digits)</label>
+        <input id="tPin" inputmode="numeric" maxlength="6" placeholder="e.g. 4821" autocomplete="off">
+      </div>
+      <div class="auto"><button class="btn alt" id="addTeacher" type="button">Add teacher</button></div>
+    </div>
+    <ul id="tList"></ul>
+  </div>
+
+  <!-- CLASSES -->
+  <div class="card">
+    <h2>Classes</h2>
+    <div class="row">
+      <div class="wide">
+        <label for="cName">Class name</label>
+        <input id="cName" placeholder="e.g. Class A" autocomplete="off">
+      </div>
+      <div class="auto"><button class="btn alt" id="addClass" type="button">Add class</button></div>
+    </div>
+    <ul id="cList"></ul>
+  </div>
+
+  <!-- STUDENTS -->
+  <div class="card">
+    <h2>Students</h2>
+    <div class="row">
+      <div class="wide">
+        <label for="sName">Student name</label>
+        <input id="sName" placeholder="e.g. Mohamed Hassan" autocomplete="off">
+      </div>
+      <div>
+        <label for="sClass">Class</label>
+        <select id="sClass"></select>
+      </div>
+      <div class="auto"><button class="btn alt" id="addStudent" type="button">Add student</button></div>
+    </div>
+
+    <div class="row">
+      <div class="wide">
+        <label for="sBulk">Add many at once (one name per line, goes to the class selected above)</label>
+        <textarea id="sBulk" rows="4" placeholder="Student one&#10;Student two&#10;Student three"></textarea>
+      </div>
+      <div class="auto"><button class="btn alt" id="addMany" type="button">Add all</button></div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="sFilter">Show class</label>
+        <select id="sFilter"></select>
+      </div>
+    </div>
+    <ul id="sList"></ul>
+  </div>
+
+  <p class="hint">
+    A teacher is not tied to a class. Each evaluation is saved with the name of the teacher who made it.<br>
+    Removing a teacher stops their sign-in but keeps their past evaluations. Removing a class removes its students
+    from this list but keeps its evaluation tab.<br>
+    Changes are not sent to the sheet until you press <b>Save</b>. Save replaces the whole list in the sheet
+    with what is on this page.
+  </p>
+  </div>
+  <!-- ===================== GRADING: every teacher ===================== -->
+  <div id="paneGrades" hidden>
+    <div id="grStatus"></div>
+    <div class="card">
+      <h2>Grading: all teachers</h2>
+      <div class="row">
+        <div>
+          <label for="grGrp">Class</label>
+          <select id="grGrp"></select>
+        </div>
+        <div>
+          <label for="grFrom">From</label>
+          <input type="date" id="grFrom">
+        </div>
+        <div>
+          <label for="grTo">To</label>
+          <input type="date" id="grTo">
+        </div>
+        <div>
+          <label for="grTeacher">Teacher</label>
+          <select id="grTeacher"><option value="">All teachers</option></select>
+        </div>
+      </div>
+      <div class="row" id="grQuick">
+        <div class="auto"><button class="btn alt small" type="button" data-r="week">This week</button></div>
+        <div class="auto"><button class="btn alt small" type="button" data-r="month">This month</button></div>
+        <div class="auto"><button class="btn alt small" type="button" data-r="year">This school year</button></div>
+        <div></div>
+        <div class="auto"><button class="btn save" id="grExport" type="button">Export to Excel</button></div>
+      </div>
+      <div id="grOut"><div class="empty">Choose a class.</div></div>
+    </div>
+  </div>
+
+  <!-- ===================== EVALUATIONS: the board ===================== -->
+  <div id="paneEvals" hidden>
+    <div id="evStatus"></div>
+    <details class="card evUp" id="evUpBox">
+      <summary><h2 style="display:inline">Upload past evaluations</h2> <span class="hint">· for one class and one teacher, from Excel</span></summary>
+      <p class="hint">1. Choose the class and the teacher, then download the template: one row per student, one column per date.
+        2. Fill each cell with the evaluation: a letter (O, P, D, N, U, A), the English word (Outstanding, Proficient,
+        Developing, Needs Improvement, Unsatisfactory, Absent) or the Arabic one. Add ! for an incident (for example P! or D!!).
+        Leave a cell empty when there was no evaluation. 3. Choose the filled file, check the summary and save.
+        Evaluations already saved for the same teacher, date and student are skipped.</p>
+      <div class="row">
+        <div>
+          <label for="evCls">Class</label>
+          <select id="evCls"></select>
+        </div>
+        <div>
+          <label for="evTeacher">Teacher</label>
+          <select id="evTeacher"></select>
+        </div>
+        <div class="auto"><button class="btn alt" id="evTemplate" type="button">Download template</button></div>
+      </div>
+      <div class="row">
+        <div class="wide">
+          <label for="evFile">Filled file (.xlsx or .csv)</label>
+          <input type="file" id="evFile" accept=".xlsx,.csv">
+        </div>
+      </div>
+      <div id="evPreview"></div>
+      <button class="btn save" id="evSave" type="button" hidden>Save evaluations</button>
+    </details>
+    <iframe id="boardFrame" title="Evaluations board" class="boardFrame"></iframe>
+  </div>
+
+  <!-- ===================== ASSESSMENTS ===================== -->
+  <div id="paneAssess" hidden>
+    <div class="card soonCard">
+      <h2>Assessments</h2>
+      <p>Coming soon.</p>
+    </div>
+  </div>
+  <!-- ===================== TIMETABLE ===================== -->
+  <div id="paneTT" hidden>
+    <div id="ttStatus"></div>
+
+    <!-- WEEK: absences and substitutions -->
+    <div class="card">
+      <h2>Week: absences and substitutions</h2>
+      <div class="row">
+        <div class="auto"><button class="btn alt small" id="wkPrev" type="button" aria-label="Previous week">◀</button></div>
+        <div>
+          <label for="wkDate">Week of</label>
+          <input type="date" id="wkDate">
+        </div>
+        <div class="auto"><button class="btn alt small" id="wkNext" type="button" aria-label="Next week">▶</button></div>
+        <div>
+          <label for="wkTeacher">Teacher</label>
+          <select id="wkTeacher"></select>
+        </div>
+        <div class="auto"><button class="btn save" id="wkSave" type="button" disabled>Save week</button></div>
+      </div>
+      <div class="ttStats" id="wkStats"></div>
+      <div class="ttWrap"><table class="ttGrid" id="wkGrid"></table></div>
+      <p class="hint">Click a day name to mark the teacher absent all day, or a class to mark that session only. Click again to undo.
+        Click a free session (+ extra) to give the teacher an extra class.</p>
+
+      <h2 style="margin-top:18px" id="needHead">Needs cover</h2>
+      <div id="needList"></div>
+
+      <h2 style="margin-top:18px">This week, every teacher</h2>
+      <div class="ttWrap"><table class="ttSum" id="wkSum"></table></div>
+      <p class="hint">A factory day = more than 7 sessions of field training (تدريب ميداني) in a day. Its sessions are
+        not counted as classes, and it lowers the teacher's days available by 1. Fewer field-training sessions in a day
+        count as normal classes. Max = 5 classes for each available day (5 days = 25,
+        4 = 20, 3 = 15); you can change the days or type any max for this week. Total = classes − absent + substitutions
+        + extra classes; Left = max − total. ⚠ marks a teacher with 6 or more classes on a day.
+        Press Save week to keep changes.</p>
+    </div>
+
+    <!-- UPLOAD a timetable PDF -->
+    <div class="card">
+      <h2>Upload a timetable (PDF from aSc Timetables)</h2>
+      <p class="hint">The PDF is read here in your browser and is never sent to the server. Only the timetable of the
+        matched teachers is saved, as a small table (teacher, day, session, class, subject).</p>
+      <div class="row">
+        <div>
+          <label for="upStart">Starts from the week of</label>
+          <input type="date" id="upStart">
+        </div>
+        <div class="wide">
+          <label for="upPdf">Timetable PDF (one teacher per page)</label>
+          <input type="file" id="upPdf" accept=".pdf,application/pdf">
+        </div>
+      </div>
+      <div id="upInfo" class="hint"></div>
+      <div id="upPages"></div>
+      <button class="btn save" id="upSave" type="button" hidden>Save timetable</button>
+      <h2 style="margin-top:18px">Saved timetables</h2>
+      <ul id="verList"></ul>
+    </div>
+  </div>
+</main>
+
+<script>
+// ===================== CONFIGURATION (edit these two lines) =====================
+// Google Apps Script web app URL (ends with /exec)
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbzXI1B0s_Hr2np_BiJlc0ibmYsMIoL2yaxOaIzYqogtfAdUXbe7wBUfGdaF_qf0wmchRg/exec";
+// The admin key is NOT written here: it is typed on the sign-in screen (it is the ADMIN_KEY value in
+// Code.gs) and kept on this device only, so this file can be published with the rest of the site.
+let ADMIN_KEY = localStorage.getItem('adminKey') || sessionStorage.getItem('adminKey') || '';
+// ================================================================================
+
+const $ = id => document.getElementById(id);
+
+// state.teachers: [{name, pin}]   state.classes: ["name"]   state.students: [{name, cls}]
+let state = { teachers: [], classes: [], students: [] };
+let loaded = false;   // true only after the lists were read from the sheet
+let dirty = false;    // true when there are changes not yet saved
+
+// ---------- theme ----------
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  $('themeBtn').textContent = t === 'dark' ? 'Light' : 'Dark';
+  localStorage.setItem('adminTheme', t);
+}
+applyTheme(localStorage.getItem('adminTheme') ||
+  (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+$('themeBtn').onclick = () =>
+  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+
+// ---------- messages & helpers ----------
+function showMsg(text, ok) {
+  const el = $('status');
+  el.innerHTML = '';
+  if (!text) return;
+  const d = document.createElement('div');
+  d.className = 'msg ' + (ok ? 'ok' : 'err');
+  d.textContent = text;
+  el.appendChild(d);
+}
+
+const sameName = (a, b) => a.trim().toLowerCase() === b.trim().toLowerCase();
+const validPin = p => /^\d{4,6}$/.test(p);
+
+// buttons: [{label, kind ('alt' or 'rm'), fn}]
+function makeItem(main, extra, buttons) {
+  const li = document.createElement('li');
+  const span = document.createElement('span');
+  span.textContent = main;
+  if (extra) {
+    const s = document.createElement('small');
+    s.textContent = extra;
+    span.appendChild(s);
+  }
+  const acts = document.createElement('span');
+  acts.className = 'acts';
+  buttons.forEach(b => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'btn small ' + b.kind;
+    btn.textContent = b.label;
+    btn.onclick = b.fn;
+    acts.appendChild(btn);
+  });
+  li.append(span, acts);
+  return li;
+}
+
+function updateSave() {
+  $('saveBtn').disabled = !loaded;
+}
+
+function markChanged(msg) {
+  dirty = true;
+  if (msg) showMsg(msg + ' Press Save to keep the change.', true);
+  renderAll();
+}
+
+// Calls the sheet with the admin key
+async function post(action, data) {
+  const res = await fetch(SHEET_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },   // avoids a browser preflight request
+    body: JSON.stringify({ action, key: ADMIN_KEY, ...(data || {}) })
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const out = await res.json();
+  if (out.error) throw new Error(out.error);
+  return out;
+}
+
+// ---------- rendering ----------
+function renderAll() {
+  renderTeachers();
+  renderClasses();
+  renderStudents();
+  fillSelects();
+  $('counts').textContent =
+    `${state.teachers.length} teacher(s) · ${state.classes.length} class(es) · ${state.students.length} student(s)` +
+    (dirty ? ' · unsaved changes' : '');
+}
+
+function fillSelects() {
+  const s = $('sClass'), prevS = s.value;
+  s.innerHTML = '';
+  state.classes.forEach(c => s.add(new Option(c, c)));
+  if (state.classes.includes(prevS)) s.value = prevS;
+
+  const f = $('sFilter'), prevF = f.value;
+  f.innerHTML = '';
+  f.add(new Option('All classes', ''));
+  state.classes.forEach(c => f.add(new Option(c, c)));
+  f.value = (prevF === '' || state.classes.includes(prevF)) ? prevF : '';
+}
+
+function renderTeachers() {
+  const ul = $('tList');
+  ul.innerHTML = '';
+  if (!state.teachers.length) ul.innerHTML = '<div class="empty">No teachers yet.</div>';
+  state.teachers.forEach(t => {
+    ul.appendChild(makeItem(
+      t.name,
+      t.pin ? `PIN ${t.pin}` : 'No PIN set (teacher cannot sign in)',
+      [
+        { label: 'Change PIN', kind: 'alt', fn: () => changePin(t.name) },
+        { label: 'Remove', kind: 'rm', fn: () => removeTeacher(t.name) }
+      ]
+    ));
+  });
+}
+
+function renderClasses() {
+  const ul = $('cList');
+  ul.innerHTML = '';
+  if (!state.classes.length) ul.innerHTML = '<div class="empty">No classes yet.</div>';
+  state.classes.forEach(c => {
+    const n = state.students.filter(s => s.cls === c).length;
+    ul.appendChild(makeItem(c, `${n} student(s)`, [
+      { label: 'Remove', kind: 'rm', fn: () => removeClass(c) }
+    ]));
+  });
+}
+
+function renderStudents() {
+  const ul = $('sList');
+  const filter = $('sFilter').value;
+  ul.innerHTML = '';
+  const list = state.students
+    .map((s, i) => ({ ...s, i }))
+    .filter(s => !filter || s.cls === filter);
+  if (!list.length) ul.innerHTML = '<div class="empty">No students here yet.</div>';
+  list.forEach(s => ul.appendChild(makeItem(s.name, s.cls, [
+    { label: 'Remove', kind: 'rm', fn: () => removeStudent(s.i) }
+  ])));
+}
+
+$('sFilter').onchange = renderStudents;
+
+// ---------- teachers ----------
+function addTeacher() {
+  const name = $('tName').value.trim();
+  const pin = $('tPin').value.trim();
+  if (!name) return showMsg('Enter a teacher name.', false);
+  if (!validPin(pin)) return showMsg('The PIN must be 4 to 6 digits.', false);
+  if (state.teachers.some(t => sameName(t.name, name))) return showMsg(`Teacher "${name}" already exists.`, false);
+  state.teachers.push({ name, pin });
+  $('tName').value = '';
+  $('tPin').value = '';
+  markChanged(`Added teacher "${name}".`);
+}
+
+function changePin(name) {
+  const t = state.teachers.find(x => x.name === name);
+  const pin = window.prompt(`New PIN for ${name} (4 to 6 digits):`, '');
+  if (pin === null) return;
+  if (!validPin(pin.trim())) return showMsg('The PIN must be 4 to 6 digits. PIN not changed.', false);
+  t.pin = pin.trim();
+  markChanged(`PIN changed for ${name}.`);
+}
+
+function removeTeacher(name) {
+  if (!window.confirm(`Remove teacher "${name}"? They will no longer be able to sign in. Their past evaluations stay in the sheet.`)) return;
+  state.teachers = state.teachers.filter(t => t.name !== name);
+  markChanged(`Removed teacher "${name}".`);
+}
+
+// ---------- classes ----------
+function addClass() {
+  const name = $('cName').value.trim();
+  if (!name) return showMsg('Enter a class name.', false);
+  if (state.classes.some(c => sameName(c, name))) return showMsg(`Class "${name}" already exists.`, false);
+  state.classes.push(name);
+  $('cName').value = '';
+  markChanged(`Added class "${name}".`);
+}
+
+function removeClass(name) {
+  const n = state.students.filter(s => s.cls === name).length;
+  if (!window.confirm(`Remove class "${name}"` + (n ? ` and its ${n} student(s) from this list?` : '?') +
+      ' Its evaluation tab in the sheet is kept.')) return;
+  state.classes = state.classes.filter(c => c !== name);
+  state.students = state.students.filter(s => s.cls !== name);
+  markChanged(`Removed class "${name}".`);
+}
+
+// ---------- students ----------
+function addStudent() {
+  const name = $('sName').value.trim();
+  const cls = $('sClass').value;
+  if (!name) return showMsg('Enter a student name.', false);
+  if (!cls) return showMsg('Add a class first, then assign the student to it.', false);
+  if (state.students.some(s => s.cls === cls && sameName(s.name, name)))
+    return showMsg(`"${name}" is already in ${cls}.`, false);
+  state.students.push({ name, cls });
+  $('sName').value = '';
+  markChanged(`Added "${name}" to ${cls}.`);
+}
+
+function addMany() {
+  const cls = $('sClass').value;
+  if (!cls) return showMsg('Add a class first, then choose it above.', false);
+  const names = $('sBulk').value.split('\n').map(x => x.trim()).filter(Boolean);
+  if (!names.length) return showMsg('Type at least one name.', false);
+  let added = 0, skipped = 0;
+  names.forEach(name => {
+    if (state.students.some(s => s.cls === cls && sameName(s.name, name))) skipped++;
+    else { state.students.push({ name, cls }); added++; }
+  });
+  $('sBulk').value = '';
+  markChanged(`Added ${added} student(s) to ${cls}` + (skipped ? `, skipped ${skipped} duplicate(s).` : '.'));
+}
+
+function removeStudent(index) {
+  const s = state.students[index];
+  if (!window.confirm(`Remove "${s.name}" from ${s.cls}?`)) return;
+  state.students.splice(index, 1);
+  markChanged(`Removed "${s.name}".`);
+}
+
+$('addTeacher').onclick = addTeacher;
+$('addClass').onclick = addClass;
+$('addStudent').onclick = addStudent;
+$('addMany').onclick = addMany;
+
+// Enter key adds the item in single-line fields
+[['tName', addTeacher], ['tPin', addTeacher], ['cName', addClass], ['sName', addStudent]].forEach(([id, fn]) =>
+  $(id).addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); fn(); } }));
+
+// ---------- sheet sync ----------
+async function loadLists() {
+  if (SHEET_URL.startsWith('PASTE')) return showMsg('Paste the web app URL at the top of this file first.', false);
+  if (dirty && !window.confirm('Reloading will discard the changes you have not saved. Continue?')) return;
+
+  loaded = false;
+  updateSave();
+  $('loadBtn').disabled = true;
+  try {
+    const data = await post('adminLists');
+    if (!Array.isArray(data)) throw new Error('unexpected reply');
+    RAW = data;
+    state = {
+      teachers: data.filter(x => x.Type === 'Teacher').map(x => ({ name: x.Name, pin: x.Pin || '' })),
+      classes: data.filter(x => x.Type === 'Class').map(x => x.Name),
+      students: data.filter(x => x.Type === 'Student').map(x => ({ name: x.Name, cls: x.Parent }))
+    };
+    loaded = true;
+    dirty = false;
+    renderAll();
+    showMsg('Lists loaded from the sheet.', true);
+    if (!$('paneGrades').hidden) grInit();
+    if (!$('paneEvals').hidden) evFill();
+  } catch (e) {
+    if (/unauthorized/i.test(e.message)) return adminSignOut('That admin password is not correct. Sign in again.');
+    showMsg('Could not load the lists: ' + e.message + '. Saving stays off until they load.', false);
+    renderAll();
+  } finally {
+    $('loadBtn').disabled = false;
+    updateSave();
+  }
+}
+
+async function saveLists() {
+  if (!loaded) return showMsg('The lists have not loaded yet. Press Reload first.', false);
+  const missing = state.teachers.find(t => !validPin(t.pin));
+  if (missing) return showMsg(`"${missing.name}" needs a 4 to 6 digit PIN before saving.`, false);
+  const msg = `Save ${state.teachers.length} teacher(s), ${state.classes.length} class(es) and ` +
+              `${state.students.length} student(s) to the sheet?`;
+  if (!window.confirm(msg)) return;
+
+  const btn = $('saveBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  try {
+    await post('saveLists', {
+      teachers: state.teachers.map(t => ({ name: t.name, pin: t.pin })),
+      classes: state.classes.map(c => ({ name: c })),
+      students: state.students.map(s => ({ name: s.name, class: s.cls }))
+    });
+    dirty = false;
+    renderAll();
+    showMsg('Saved. Teachers can sign in with their PIN from now on.', true);
+  } catch (e) {
+    showMsg('Could not save: ' + e.message, false);
+  } finally {
+    btn.textContent = 'Save';
+    updateSave();
+  }
+}
+
+$('loadBtn').onclick = loadLists;
+$('saveBtn').onclick = saveLists;
+
+// Warn before leaving the page with unsaved changes
+window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+// ---------- timetable PDF reader (aSc Timetables, one teacher per page) ----------
+// items: pdf.js text items of one page; pageH: page height. Returns { teacher, cells, problems }.
+// A cell: { day 0-4 (Sunday-Thursday), sessions [n, ...], cls, subject }.
+// Layout: header row with session numbers 1-8 (right to left), day names down the right side.
+// Each block has its class in the middle and its subject in the top-right corner, so the
+// subject marks the block's right edge and the class its centre; together they give its width.
+function parseTimetablePage(items, pageH) {
+  const DAY_NAMES = ['احد', 'اثنين', 'ثلاثاء', 'اربعاء', 'خميس'];
+  const norm = s => String(s).replace(/ﻼ/g, 'لا').replace(/[ً-ٟـ]/g, '').replace(/[أإآ]/g, 'ا').trim();
+  const words = items.filter(it => it.str && it.str.trim()).map(it => {
+    // y is the vertical centre of the text (baseline minus half its height), measured from the top
+    const x0 = it.transform[4], h = it.height || Math.abs(it.transform[3]) || 0;
+    return { s: it.str.trim(), x0, x1: x0 + it.width, xc: x0 + it.width / 2, y: pageH - it.transform[5] - h / 2, h };
+  });
+  const problems = [];
+  // the page title is the largest text above the grid, e.g. "Teacher Mohamed Hesham"
+  const top = words.filter(w => w.y < pageH * 0.12);
+  const t = top.sort((a, b) => b.h - a.h)[0];
+  const title = t ? t.s : '';
+  const teacher = title.replace(/^Teacher\s*/i, '').trim();
+  const isTeacher = /^Teacher/i.test(title);
+  if (!teacher) problems.push('No title on this page.');
+
+  // session columns from the header numbers 1-8
+  const head = words.filter(w => /^[1-8]$/.test(w.s) && w.y < pageH * 0.25);
+  const col = {};
+  head.forEach(w => { col[Number(w.s)] = w.xc; });
+  const nums = Object.keys(col).map(Number).sort((a, b) => a - b);
+  if (nums.length !== 8) problems.push(`Found ${nums.length} of 8 session headers.`);
+  // the header ends below the row of session times (e.g. 7:30 - 8:25)
+  const times = words.filter(w => /^\d{1,2}:\d{2}\s*-\s*\d{1,2}:\d{2}$/.test(w.s));
+  const headerY = Math.max(0, ...head.map(w => w.y), ...times.map(w => w.y));
+  const widths = [];
+  for (let i = 1; i < nums.length; i++) if (nums[i] === nums[i - 1] + 1) widths.push(Math.abs(col[nums[i]] - col[nums[i - 1]]));
+  const colW = widths.length ? Math.min(...widths) : 70;     // breaks make some gaps wider
+  const colOf = x => nums.find(n => Math.abs(col[n] - x) <= colW / 2 + 0.5);
+
+  // day rows from the day names
+  const days = [];
+  words.forEach(w => {
+    const k = DAY_NAMES.indexOf(norm(w.s));
+    if (k !== -1 && w.y > headerY) days.push({ day: k, y: w.y });
+  });
+  if (days.length !== 5) problems.push(`Found ${days.length} of 5 day names.`);
+  const rowH = days.length > 1 ? (Math.max(...days.map(d => d.y)) - Math.min(...days.map(d => d.y))) / (days.length - 1) : 90;
+  const dayOf = y => { let best = null; days.forEach(d => { if (!best || Math.abs(d.y - y) < Math.abs(best.y - y)) best = d; }); return best && Math.abs(best.y - y) <= rowH * 0.5 ? best.day : null; };
+
+  // labels inside the grid: right of nothing in particular, below the header, left of the day names
+  const dayX = days.length ? Math.min(...words.filter(w => DAY_NAMES.includes(norm(w.s))).map(w => w.x0)) : Infinity;
+  const footY = Math.max(...days.map(d => d.y)) + rowH * 0.5;     // the footer sits just below the grid
+  const inGrid = words.filter(w => w.y > headerY + 2 && w.y < footY && w.x1 < dayX - 2 && w !== t && !DAY_NAMES.includes(norm(w.s)));
+  // the class sits lower in the block than the subject; split by position inside the row
+  const rowTop = y => { const d = dayOf(y); const c = days.find(x => x.day === d); return c ? c.y - rowH / 2 : y; };
+  const labels = inGrid.map(w => ({ ...w, rel: (w.y - rowTop(w.y)) / rowH }));
+  // a long subject wraps onto two lines in a narrow block: join lines that overlap side by side
+  const subjects = [];
+  labels.filter(w => w.rel < 0.3).sort((p, q) => p.y - q.y).forEach(w => {
+    const prev = subjects.find(p => dayOf(p.y) === dayOf(w.y) && w.y - p.yLast > 0 && w.y - p.yLast < p.h * 2 &&
+      w.x0 < p.x1 && w.x1 > p.x0);
+    if (prev) {
+      prev.s += ' ' + w.s;
+      prev.x0 = Math.min(prev.x0, w.x0); prev.x1 = Math.max(prev.x1, w.x1); prev.yLast = w.y;
+    } else {
+      subjects.push({ ...w, yLast: w.y });
+    }
+  });
+  const classes = labels.filter(w => w.rel >= 0.3);
+  const usedSubj = new Set();
+  const cells = [];
+  classes.forEach(c => {
+    const day = dayOf(c.y);
+    if (day === null) { problems.push(`"${c.s}" is outside the day rows.`); return; }
+    // its subject: same row, above it, the nearest right edge to the right of its centre
+    const subj = subjects.filter(s => !usedSubj.has(s) && dayOf(s.y) === day && s.x1 >= c.xc - 1)
+      .sort((a, b) => a.x1 - b.x1)[0];
+    let sessions;
+    if (subj) {
+      usedSubj.add(subj);
+      const right = colOf(subj.x1 - 1);
+      const re = col[right] + colW / 2;              // the block's right edge
+      const le = 2 * c.xc - re;
+      sessions = nums.filter(n => col[n] > le + 1 && col[n] < re - 1);
+    } else {
+      const n = colOf(c.xc);
+      sessions = n ? [n] : [];
+    }
+    if (!sessions.length) { problems.push(`Could not place "${c.s}" on ${DAY_NAMES[day]}.`); return; }
+    cells.push({ day, sessions: sessions.sort((a, b) => a - b), cls: c.s, subject: subj ? subj.s : '' });
+  });
+  subjects.filter(s => !usedSubj.has(s)).forEach(s => {
+    const day = dayOf(s.y), n = colOf(s.x1 - colW / 2);
+    problems.push(`Subject "${s.s}" without a class` + (day !== null ? ` on ${DAY_NAMES[day]}` : '') + (n ? `, session ${n}` : '') + '.');
+  });
+  return { teacher, isTeacher, cells, problems };
+}
+
+// ===================== TIMETABLE =====================
+const TT_DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'];
+const PDFJS_VERSION = '6.2.108';
+const PDFJS_BASES = [`https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/build/`,
+                     `https://unpkg.com/pdfjs-dist@${PDFJS_VERSION}/build/`];
+
+// ---------- page tabs: lists | timetable ----------
+const PANES = { lists: ['paneLists', 'tabLists'], tt: ['paneTT', 'tabTT'], grades: ['paneGrades', 'tabGrades'],
+  evals: ['paneEvals', 'tabEvals'], assess: ['paneAssess', 'tabAssess'] };
+function showPane(p) {
+  if (!PANES[p]) p = 'lists';
+  Object.keys(PANES).forEach(k => {
+    $(PANES[k][0]).hidden = k !== p;
+    $(PANES[k][1]).classList.toggle('on', k === p);
+  });
+  $('loadBtn').hidden = $('saveBtn').hidden = p !== 'lists';
+  $('main').classList.toggle('wide', p === 'evals' || p === 'grades' || p === 'tt');
+  localStorage.setItem('adminPane', p);
+  if (p === 'tt' && !W.loaded) loadWeek();
+  if (p === 'grades') grInit();
+  if (p === 'evals') evInit();
+}
+Object.keys(PANES).forEach(k => { $(PANES[k][1]).onclick = () => showPane(k); });
+
+function ttMsg(text, ok) {
+  const el = $('ttStatus');
+  el.innerHTML = '';
+  if (!text) return;
+  const d = document.createElement('div');
+  d.className = 'msg ' + (ok ? 'ok' : 'err');
+  d.textContent = text;
+  el.appendChild(d);
+  if (ok) setTimeout(() => { if (el.contains(d)) d.remove(); }, 6000);
+}
+
+const isoDay = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+function addDays(ymd, n) {
+  const [y, m, d] = ymd.split('-').map(Number);
+  return isoDay(new Date(y, m - 1, d + n));
+}
+function sundayOf(ymd) {
+  const [y, m, d] = ymd.split('-').map(Number);
+  return addDays(ymd, -new Date(y, m - 1, d).getDay());
+}
+const shortDate = ymd => { const [y, m, d] = ymd.split('-').map(Number); return new Date(y, m - 1, d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); };
+
+// ---------- the week ----------
+// W.cover: the week's changes:
+//   { type: 'Absent', teacher, date, session, cls, subject, substitute }   an absent class (substitute optional)
+//   { type: 'Extra', substitute: teacher, date, session, cls }               an extra class in a free session
+// A factory day (more than 7 field-training sessions, تدريب ميداني) is shown but is not classes; it lowers the
+// teacher's default days available (and max, 5 classes a day). Fewer field-training sessions are normal classes.
+const W = { loaded: false, weekStart: '', teachers: [], planned: [], cover: [], limits: {}, dirty: false, versions: [],
+  extraClasses: ['J1', 'J2', 'W1', 'W2', 'S1'], perDay: 5, dayWarning: 6, adding: null };
+
+async function loadWeek(date) {
+  if (W.dirty && !window.confirm('This week has changes you have not saved. Discard them?')) {
+    $('wkDate').value = W.weekStart;
+    return;
+  }
+  const want = date || $('wkDate').value || isoDay(new Date());
+  ttMsg('Loading the week…', true);
+  try {
+    const out = await post('ttWeek', { date: want });
+    Object.assign(W, { loaded: true, weekStart: out.weekStart, teachers: out.teachers, planned: out.planned,
+      cover: out.cover, limits: out.limits || {}, versions: out.versions, dirty: false, adding: null,
+      extraClasses: out.extraClasses || W.extraClasses, perDay: out.perDay || 5, dayWarning: out.dayWarning || 6 });
+    $('wkSave').disabled = true;
+    $('wkDate').value = out.weekStart;
+    const sel = $('wkTeacher'), prev = sel.value || localStorage.getItem('ttTeacher');
+    sel.innerHTML = '';
+    out.teachers.forEach(t => sel.add(new Option(t, t)));
+    if (out.teachers.includes(prev)) sel.value = prev;
+    ttMsg('', true);
+    renderWeek();
+    renderVersions();
+  } catch (e) {
+    ttMsg('Could not load the week: ' + e.message, false);
+  }
+}
+
+$('wkDate').onchange = () => loadWeek($('wkDate').value);
+$('wkPrev').onclick = () => loadWeek(addDays(W.weekStart || isoDay(new Date()), -7));
+$('wkNext').onclick = () => loadWeek(addDays(W.weekStart || isoDay(new Date()), 7));
+$('wkTeacher').onchange = () => { W.adding = null; localStorage.setItem('ttTeacher', $('wkTeacher').value); renderWeek(); };
+
+const coverAt = (t, date, s) => W.cover.find(c => c.type !== 'Extra' && c.teacher === t && c.date === date && c.session === s);
+const dayIdx = date => Math.round((new Date(date) - new Date(W.weekStart)) / 86400000);
+const absentThatDay = (t, date) => W.cover.some(c => c.type !== 'Extra' && c.teacher === t && c.date === date);
+
+// The teacher's factory days (the server marks their sessions: more than 7 of field training that day)
+function factoryDays(t) {
+  return [...new Set(W.planned.filter(p => p.teacher === t && p.factory).map(p => p.date))];
+}
+
+// Same rules as the server: classes (no field training) − absent + substitutions + extra classes
+function weekCounts() {
+  const c = {};
+  const blank = () => ({ planned: 0, absent: 0, subs: 0, extra: 0, perDay: {} });
+  W.teachers.forEach(t => { c[t] = blank(); });
+  const get = t => (c[t] = c[t] || blank());
+  const add = (t, date) => { const x = get(t); x.perDay[date] = (x.perDay[date] || 0) + 1; };
+  W.planned.filter(p => !p.factory).forEach(p => {
+    get(p.teacher).planned++;
+    if (!coverAt(p.teacher, p.date, p.session)) add(p.teacher, p.date);
+  });
+  W.cover.forEach(r => {
+    if (r.type === 'Extra') { if (r.substitute) { get(r.substitute).extra++; add(r.substitute, r.date); } return; }
+    get(r.teacher).absent++;
+    if (r.substitute) { get(r.substitute).subs++; add(r.substitute, r.date); }
+  });
+  Object.keys(c).forEach(t => {
+    const x = c[t];
+    x.total = x.planned - x.absent + x.subs + x.extra;
+    const auto = Math.max(0, 5 - factoryDays(t).length);
+    const l = W.limits[t] || { days: auto, max: auto * W.perDay };
+    x.days = l.days;
+    x.max = l.max;
+    x.room = l.max - x.total;
+    x.factory = factoryDays(t).length;
+    x.busyDays = Object.keys(x.perDay).filter(d => x.perDay[d] >= W.dayWarning).sort();
+  });
+  return c;
+}
+
+function markWeekDirty() {
+  W.dirty = true;
+  $('wkSave').disabled = false;
+  renderWeek();
+}
+
+// Confirms when a teacher would reach 6+ classes that day or go past their max
+function okToAdd(x, date, counts) {
+  const c = counts[x] || { perDay: {}, room: 1, total: 0, max: 0 };
+  const day = (c.perDay[date] || 0) + 1;
+  const notes = [];
+  if (day >= W.dayWarning) notes.push(`${day} classes on ${TT_DAYS[dayIdx(date)]}`);
+  if (c.room <= 0) notes.push(`${c.total + 1} classes this week, over the max of ${c.max}`);
+  return !notes.length || window.confirm(`${x} would have ${notes.join(' and ')}. Continue?`);
+}
+
+function toggleAbsent(p) {
+  const i = W.cover.findIndex(c => c.type !== 'Extra' && c.teacher === p.teacher && c.date === p.date && c.session === p.session);
+  if (i !== -1) {
+    if (W.cover[i].substitute && !window.confirm(`${W.cover[i].substitute} is covering this class. Remove the absence and the substitution?`)) return;
+    W.cover.splice(i, 1);
+  } else {
+    const extras = W.cover.filter(c => c.type === 'Extra' && c.substitute === p.teacher && c.date === p.date);
+    if (extras.length && !window.confirm(`${p.teacher} has ${extras.length} extra class(es) that day. Marking them absent removes those extra classes. Continue?`)) return;
+    W.cover = W.cover.filter(c => !extras.includes(c));
+    W.cover.push({ type: 'Absent', teacher: p.teacher, date: p.date, session: p.session, cls: p.cls, subject: p.subject, substitute: '' });
+  }
+  markWeekDirty();
+}
+
+function toggleDay(t, day) {
+  const date = addDays(W.weekStart, day);
+  const mine = W.planned.filter(p => p.teacher === t && p.date === date && !p.factory);
+  if (!mine.length) return;
+  const allAbsent = mine.every(p => coverAt(t, date, p.session));
+  if (allAbsent) {
+    const covered = mine.filter(p => coverAt(t, date, p.session).substitute).length;
+    if (covered && !window.confirm(`Undo ${t}'s absence on ${TT_DAYS[day]}? ${covered} substitution(s) that day are removed too.`)) return;
+    W.cover = W.cover.filter(c => !(c.type !== 'Extra' && c.teacher === t && c.date === date));
+  } else {
+    const extras = W.cover.filter(c => c.type === 'Extra' && c.substitute === t && c.date === date);
+    if (extras.length && !window.confirm(`${t} has ${extras.length} extra class(es) that day. Marking the day absent removes them. Continue?`)) return;
+    W.cover = W.cover.filter(c => !extras.includes(c));
+    mine.forEach(p => { if (!coverAt(t, date, p.session)) W.cover.push({ type: 'Absent', teacher: t, date, session: p.session, cls: p.cls, subject: p.subject, substitute: '' }); });
+  }
+  markWeekDirty();
+}
+
+function renderWeek() {
+  const t = $('wkTeacher').value;
+  const counts = weekCounts();
+  const me = counts[t] || { planned: 0, absent: 0, subs: 0, extra: 0, total: 0, max: 0, room: 0, busyDays: [] };
+  const stat = (l, v, warn) => `<div class="ttStat${warn ? ' warn' : ''}"><span>${l}</span><b>${v}</b></div>`;
+  $('wkStats').innerHTML = !t ? '' :
+    stat('Classes', me.planned) + stat('Absent', me.absent ? '−' + me.absent : 0) +
+    stat('Substitutions + extra', (me.subs + me.extra) ? '+' + (me.subs + me.extra) : 0) +
+    stat(`Total of max ${me.max} · ${me.room < 0 ? 'over by ' + (-me.room) : me.room + ' left'}`, me.total, me.room < 0) +
+    (me.busyDays.length ? `<div class="dayWarn">⚠ ${me.busyDays.map(d => `${me.perDay[d]} classes on ${TT_DAYS[dayIdx(d)]}`).join(', ')}</div>` : '');
+
+  const grid = $('wkGrid');
+  grid.innerHTML = '';
+  const head = document.createElement('tr');
+  head.innerHTML = '<th class="d">Day</th>' + [1, 2, 3, 4, 5, 6, 7, 8].map(s => `<th>${s}</th>`).join('');
+  grid.appendChild(head);
+  TT_DAYS.forEach((dn, day) => {
+    const date = addDays(W.weekStart, day);
+    const tr = document.createElement('tr');
+    const mine = W.planned.filter(p => p.teacher === t && p.date === date);
+    const classes = mine.filter(p => !p.factory);
+    const factoryDay = mine.length && !classes.length;
+    const offAll = classes.length && classes.every(p => coverAt(t, date, p.session));
+    const n = (counts[t] && counts[t].perDay[date]) || 0;
+    const th = document.createElement('th');
+    th.className = 'd' + (classes.length ? ' click' : '') + (offAll ? ' off' : '') + (n >= W.dayWarning ? ' busy' : '');
+    th.innerHTML = `${dn}<small>${shortDate(date)}${offAll ? ' · absent' : factoryDay ? ' · factory' : n ? ' · ' + n + ' classes' : ''}</small>`;
+    if (classes.length) {
+      th.title = offAll ? 'Undo absent all day' : 'Mark absent all day';
+      th.onclick = () => toggleDay(t, day);
+    }
+    tr.appendChild(th);
+    for (let s = 1; s <= 8; s++) {
+      const td = document.createElement('td');
+      const p = mine.find(x => x.session === s);
+      const sub = W.cover.find(c => c.type !== 'Extra' && c.substitute === t && c.date === date && c.session === s);
+      const extra = W.cover.find(c => c.type === 'Extra' && c.substitute === t && c.date === date && c.session === s);
+      if (p && p.factory) {
+        td.className = 'fac';
+        td.innerHTML = `<b>${esc(p.cls)}</b><small>factory day</small>`;
+        td.title = 'Factory day (field training all day): not counted as a class';
+      } else if (p) {
+        const c = coverAt(t, date, s);
+        td.className = 'click' + (c ? (c.substitute ? ' cov' : ' abs') : '');
+        td.innerHTML = `<b>${esc(p.cls)}</b><small>${c ? (c.substitute ? 'covered by ' + esc(c.substitute) : 'absent') : esc(p.subject)}</small>`;
+        td.title = c ? 'Click to undo the absence' : 'Click to mark absent this session';
+        td.onclick = () => toggleAbsent(p);
+      } else if (sub) {
+        td.className = 'subcell';
+        td.innerHTML = `<b>${esc(sub.cls)}</b><small>covers ${esc(sub.teacher)}</small>`;
+      } else if (extra) {
+        td.className = 'subcell click';
+        td.innerHTML = `<b>${esc(extra.cls)}</b><small>extra class</small>`;
+        td.title = 'Click to remove this extra class';
+        td.onclick = () => {
+          if (!window.confirm(`Remove the extra ${extra.cls} class on ${dn}, session ${s}?`)) return;
+          W.cover.splice(W.cover.indexOf(extra), 1);
+          markWeekDirty();
+        };
+      } else if (t && !absentThatDay(t, date)) {
+        // a free session: the admin can give an extra class here
+        const adding = W.adding && W.adding.date === date && W.adding.session === s;
+        td.className = 'free click';
+        if (adding) {
+          const sel = document.createElement('select');
+          sel.setAttribute('aria-label', `Extra class for ${t}, ${dn} session ${s}`);
+          sel.add(new Option('Class…', ''));
+          W.extraClasses.forEach(k => sel.add(new Option(k, k)));
+          sel.add(new Option('Cancel', '-'));
+          sel.onclick = e => e.stopPropagation();
+          sel.onchange = () => {
+            const k = sel.value;
+            W.adding = null;
+            if (!k || k === '-') { renderWeek(); return; }
+            if (!okToAdd(t, date, counts)) { renderWeek(); return; }
+            W.cover.push({ type: 'Extra', teacher: '', substitute: t, date, session: s, cls: k, subject: 'Extra class' });
+            markWeekDirty();
+          };
+          td.appendChild(sel);
+          setTimeout(() => sel.focus(), 0);
+        } else {
+          td.innerHTML = '<small class="plus">+ extra</small>';
+          td.title = 'Give an extra class in this free session';
+          td.onclick = () => { W.adding = { date, session: s }; renderWeek(); };
+        }
+      }
+      tr.appendChild(td);
+    }
+    grid.appendChild(tr);
+  });
+
+  renderNeeds(counts);
+  renderSum(counts);
+}
+
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// Who can cover a session: has no session then (field training included), covers nothing then,
+// and is not absent that day
+function freeTeachers(r) {
+  return W.teachers.filter(x => x !== r.teacher &&
+    !W.planned.some(p => p.teacher === x && p.date === r.date && p.session === r.session) &&
+    !W.cover.some(c => c !== r && c.substitute === x && c.date === r.date && c.session === r.session) &&
+    !absentThatDay(x, r.date));
+}
+
+function renderNeeds(counts) {
+  const box = $('needList');
+  box.innerHTML = '';
+  const list = W.cover.filter(r => r.type !== 'Extra')
+    .sort((a, b) => a.date.localeCompare(b.date) || a.session - b.session || a.teacher.localeCompare(b.teacher));
+  const open = list.filter(r => !r.substitute).length;
+  $('needHead').textContent = list.length ? `Needs cover · ${open} of ${list.length} still open` : 'Needs cover';
+  if (!list.length) { box.innerHTML = '<div class="empty">No absences this week.</div>'; return; }
+  list.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'needRow' + (r.substitute ? ' done' : '');
+    const day = TT_DAYS[dayIdx(r.date)] || r.date;
+    const label = document.createElement('span');
+    label.innerHTML = `<b>${esc(day.slice(0, 3))} ${esc(shortDate(r.date))} · session ${r.session}</b><small>${esc(r.teacher)} · ${esc(r.cls)}${r.subject ? ' · ' + esc(r.subject) : ''}</small>`;
+    const sel = document.createElement('select');
+    sel.setAttribute('aria-label', `Substitute for ${r.teacher}, ${day} session ${r.session}`);
+    sel.add(new Option('No substitute', ''));
+    const free = freeTeachers(r);
+    if (r.substitute && !free.includes(r.substitute)) free.push(r.substitute);
+    free.sort((a, b) => (counts[b] ? counts[b].room : 0) - (counts[a] ? counts[a].room : 0) || a.localeCompare(b))
+      .forEach(x => {
+        const c = counts[x] || { total: 0, max: 0, room: 0, perDay: {} };
+        const full = c.room <= 0 && x !== r.substitute;
+        const that = c.perDay[r.date] || 0;
+        sel.add(new Option(`${x} · ${c.total} of ${c.max} · ${full ? 'full' : c.room + ' left'} · ${that} on ${day.slice(0, 3)}`, x));
+      });
+    sel.value = r.substitute || '';
+    const warn = document.createElement('span');
+    warn.className = 'warnTxt';
+    sel.onchange = () => {
+      const x = sel.value;
+      if (x && !okToAdd(x, r.date, counts)) { sel.value = r.substitute || ''; return; }
+      r.substitute = x;
+      markWeekDirty();
+    };
+    if (r.substitute && counts[r.substitute] && counts[r.substitute].room < 0) warn.textContent = `${r.substitute} is over their max of ${counts[r.substitute].max}`;
+    if (!free.length) warn.textContent = 'nobody is free at this time';
+    row.append(label, sel, warn);
+    box.appendChild(row);
+  });
+}
+
+function renderSum(counts) {
+  const t = $('wkSum');
+  t.innerHTML = '<tr><th>Teacher</th><th>Days</th><th>Max</th><th>Classes</th><th>Absent</th><th>Subs</th><th>Extra</th><th>Total</th><th>Left</th></tr>';
+  W.teachers.forEach(name => {
+    const c = counts[name];
+    const tr = document.createElement('tr');
+    if (name === $('wkTeacher').value) tr.className = 'cur';
+    const nameTd = document.createElement('td');
+    nameTd.className = 'pick';
+    nameTd.innerHTML = esc(name) + (c.busyDays.length ? ` <span class="warnTxt" title="${c.busyDays.map(d => c.perDay[d] + ' on ' + TT_DAYS[dayIdx(d)]).join(', ')}">⚠ ${W.dayWarning}+ a day</span>` : '');
+    nameTd.title = 'Show ' + name + "'s week";
+    nameTd.onclick = () => { W.adding = null; $('wkTeacher').value = name; localStorage.setItem('ttTeacher', name); renderWeek(); };
+    // days available this week: sets the max to 5 per day; factory days lower the default
+    const days = document.createElement('select');
+    days.setAttribute('aria-label', name + ' days available');
+    [5, 4, 3, 2, 1, 0].forEach(d => days.add(new Option(String(d), String(d))));
+    days.value = String(c.days);
+    days.onchange = () => {
+      W.limits[name] = { days: Number(days.value), max: Number(days.value) * W.perDay };
+      markWeekDirty();
+    };
+    const max = document.createElement('input');
+    max.type = 'number'; max.min = '0'; max.max = '40'; max.step = '1';
+    max.value = c.max;
+    max.setAttribute('aria-label', name + ' maximum classes this week');
+    max.onchange = () => {
+      const v = Math.round(Number(max.value));
+      if (!(v >= 0 && v <= 40)) { max.value = c.max; return ttMsg('The max must be a whole number from 0 to 40.', false); }
+      W.limits[name] = { days: Number(days.value), max: v };
+      markWeekDirty();
+    };
+    const td = el => { const x = document.createElement('td'); if (el instanceof Node) x.appendChild(el); else x.innerHTML = el; tr.appendChild(x); return x; };
+    tr.appendChild(nameTd);
+    const dcell = td(days);
+    dcell.className = 'num';
+    if (c.factory) dcell.insertAdjacentHTML('beforeend', `<small class="facNote">${c.factory} factory day${c.factory > 1 ? 's' : ''}</small>`);
+    td(max).className = 'num';
+    td(String(c.planned));
+    td(c.absent ? '−' + c.absent : '');
+    td(c.subs ? '+' + c.subs : '');
+    td(c.extra ? '+' + c.extra : '');
+    td(`<b>${c.total}</b>`);
+    td(c.room < 0 ? `over by ${-c.room}` : String(c.room)).className = c.room < 0 ? 'warnTxt' : (c.room === 0 ? 'full' : '');
+    t.appendChild(tr);
+  });
+}
+
+$('wkSave').onclick = async () => {
+  const abs = W.cover.filter(r => r.type !== 'Extra');
+  const open = abs.filter(r => !r.substitute).length;
+  const extra = W.cover.length - abs.length;
+  if (!window.confirm(`Save the week of ${shortDate(W.weekStart)}?\n\n${abs.length} absent session(s), ${abs.length - open} covered, ${open} without a substitute, ${extra} extra class(es).`)) return;
+  const btn = $('wkSave');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  try {
+    const counts = weekCounts();
+    await post('ttSaveWeek', {
+      weekStart: W.weekStart,
+      cover: W.cover.map(r => ({ type: r.type === 'Extra' ? 'Extra' : 'Absent', teacher: r.teacher, date: r.date,
+        session: r.session, substitute: r.substitute || '', cls: r.cls })),
+      limits: W.teachers.map(t => ({ teacher: t, days: counts[t].days, max: counts[t].max }))
+    });
+    W.dirty = false;
+    ttMsg('Week saved. Teachers see it on their Timetable tab.', true);
+  } catch (e) {
+    btn.disabled = false;
+    ttMsg('Could not save the week: ' + e.message, false);
+  } finally {
+    btn.textContent = 'Save week';
+  }
+};
+
+function renderVersions() {
+  const ul = $('verList');
+  ul.innerHTML = '';
+  if (!W.versions.length) { ul.innerHTML = '<div class="empty">No timetable uploaded yet.</div>'; return; }
+  W.versions.forEach((v, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<span>From ${esc(shortDate(v.start))} ${v.start.slice(0, 4)}${i === 0 ? ' · newest' : ''}<small>${v.teachers} teachers · ${v.sessions} sessions</small></span>`;
+    ul.appendChild(li);
+  });
+}
+
+// ---------- upload: read the PDF in the browser ----------
+let UP = null;   // { pages: [{ pdfName, isTeacher, cells, teacher (app name or ''), open }], names }
+
+async function loadPdfJs() {
+  let lastErr;
+  for (const base of PDFJS_BASES) {
+    try {
+      const lib = await import(base + 'pdf.min.mjs');
+      // run the reader in a background worker; from a blob so it works from any page address
+      try {
+        const code = await (await fetch(base + 'pdf.worker.min.mjs')).text();
+        lib.GlobalWorkerOptions.workerSrc = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
+      } catch (e) {
+        lib.GlobalWorkerOptions.workerSrc = base + 'pdf.worker.min.mjs';
+      }
+      return lib;
+    } catch (e) { lastErr = e; }
+  }
+  throw new Error('could not load the PDF reader (' + (lastErr && lastErr.message) + '). Check the internet connection.');
+}
+
+$('upStart').value = sundayOf(isoDay(new Date()));   // a timetable always starts on a Sunday
+$('upPdf').onchange = async () => {
+  const file = $('upPdf').files[0];
+  UP = null;
+  $('upPages').innerHTML = '';
+  $('upSave').hidden = true;
+  if (!file) return;
+  $('upInfo').textContent = 'Reading the PDF…';
+  try {
+    const [lib, saved] = await Promise.all([loadPdfJs(), post('ttNames')]);
+    const doc = await lib.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+    const pages = [];
+    for (let p = 1; p <= doc.numPages; p++) {
+      const page = await doc.getPage(p);
+      const vp = page.getViewport({ scale: 1 });
+      const r = parseTimetablePage((await page.getTextContent()).items, vp.height);
+      pages.push({ page: p, pdfName: r.teacher, isTeacher: r.isTeacher, cells: r.cells, problems: r.problems });
+    }
+    const teachers = saved.teachers;
+    pages.forEach(pg => { pg.teacher = matchTeacher(pg, saved.names, teachers); });
+    UP = { pages, teachers };
+    renderUpload();
+  } catch (e) {
+    $('upInfo').textContent = '';
+    ttMsg('Could not read the PDF: ' + e.message, false);
+  }
+};
+
+// The teacher for a PDF page: only from the name list (built-in matches plus the admin's own)
+function matchTeacher(pg, names, teachers) {
+  const key = Object.keys(names).find(k => k.trim().toLowerCase() === String(pg.pdfName).trim().toLowerCase());
+  if (key === undefined) return '';
+  const t = names[key];
+  if (!t) return '';
+  const found = teachers.find(x => x.trim().toLowerCase() === t.trim().toLowerCase());
+  if (!found) pg.missing = t;          // matched name is not in the teacher list
+  return found || '';
+}
+
+function renderUpload() {
+  const box = $('upPages');
+  box.innerHTML = '';
+  const used = UP.pages.filter(p => p.teacher);
+  const others = UP.pages.filter(p => !p.teacher);
+  const sessions = used.reduce((n, p) => n + p.cells.reduce((m, c) => m + c.sessions.length, 0), 0);
+  const missing = UP.pages.filter(p => p.missing && !p.teacher).map(p => `${p.pdfName} → ${p.missing}`);
+  const twice = Object.entries(used.reduce((m, p) => { m[p.teacher] = (m[p.teacher] || 0) + 1; return m; }, {})).filter(([, n]) => n > 1).map(([t]) => t);
+  $('upInfo').innerHTML = `${UP.pages.length} page(s) in the PDF · <b>${used.length}</b> teacher(s) to import · ${sessions} sessions · ${others.length} other page(s) skipped` +
+    (missing.length ? `<br><span class="warnTxt">Not in your teacher list, so skipped: ${esc(missing.join(', '))}. Add them in the first tab, or choose a teacher below.</span>` : '') +
+    (twice.length ? `<br><span class="warnTxt">Chosen for two pages: ${esc(twice.join(', '))}</span>` : '');
+  used.forEach(pg => box.appendChild(pageCard(pg)));
+  if (!used.length) box.insertAdjacentHTML('beforeend', '<div class="empty">No page matched a teacher. Choose one under Other pages.</div>');
+  // the other pages: closed by default; choose a teacher to import one too
+  if (others.length) {
+    const det = document.createElement('details');
+    det.className = 'otherPages';
+    det.open = !!UP.othersOpen;
+    det.ontoggle = () => { UP.othersOpen = det.open; };
+    det.innerHTML = `<summary>Other pages in this PDF (${others.length}) — choose a teacher to import one too</summary>`;
+    others.forEach(pg => det.appendChild(pageCard(pg)));
+    box.appendChild(det);
+  }
+  $('upSave').hidden = !used.length;
+}
+
+function pageCard(pg) {
+  const card = document.createElement('div');
+  card.className = 'upPage' + (pg.teacher ? '' : ' skip');
+  const n = pg.cells.reduce((m, c) => m + c.sessions.length, 0);
+  const head = document.createElement('div');
+  head.className = 'upHead';
+  head.innerHTML = `<span><b>${esc(pg.pdfName || 'Page ' + pg.page)}</b><small>page ${pg.page} · ${n} sessions${pg.problems.length ? ' · ' + pg.problems.length + ' problem(s)' : ''}</small></span>`;
+  const sel = document.createElement('select');
+  sel.setAttribute('aria-label', 'Teacher for ' + (pg.pdfName || 'page ' + pg.page));
+  sel.add(new Option('Skip this page', ''));
+  UP.teachers.forEach(t => sel.add(new Option(t, t)));
+  sel.value = pg.teacher;
+  sel.onchange = () => { pg.teacher = sel.value; pg.changed = true; renderUpload(); };
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'btn alt small';
+  btn.textContent = pg.open ? 'Hide' : 'Check / edit';
+  btn.onclick = () => { pg.open = !pg.open; renderUpload(); };
+  head.append(sel, btn);
+  card.appendChild(head);
+  if (pg.problems.length) {
+    const p = document.createElement('div');
+    p.className = 'hint warnTxt';
+    p.textContent = pg.problems.join(' ');
+    card.appendChild(p);
+  }
+  if (pg.open) card.appendChild(editGrid(pg));
+  return card;
+}
+
+// Editable grid: one box per day and session; a blank box is a free session
+function editGrid(pg) {
+  const wrap = document.createElement('div');
+  wrap.className = 'ttWrap';
+  const t = document.createElement('table');
+  t.className = 'ttGrid edit';
+  t.innerHTML = '<tr><th class="d">Day</th>' + [1, 2, 3, 4, 5, 6, 7, 8].map(s => `<th>${s}</th>`).join('') + '</tr>';
+  TT_DAYS.forEach((dn, day) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<th class="d">${dn}</th>`;
+    for (let s = 1; s <= 8; s++) {
+      const td = document.createElement('td');
+      const cell = pg.cells.find(c => c.day === day && c.sessions.includes(s));
+      const inp = document.createElement('input');
+      inp.value = cell ? cell.cls : '';
+      inp.title = cell && cell.subject ? cell.subject : '';
+      inp.setAttribute('aria-label', `${pg.pdfName} ${dn} session ${s}`);
+      inp.onchange = () => setCell(pg, day, s, inp.value.trim());
+      td.appendChild(inp);
+      if (cell && cell.subject) { const sm = document.createElement('small'); sm.textContent = cell.subject; td.appendChild(sm); }
+      tr.appendChild(td);
+    }
+    t.appendChild(tr);
+  });
+  wrap.appendChild(t);
+  return wrap;
+}
+
+// Change one session: split it out of its block, then set or clear its class
+function setCell(pg, day, s, cls) {
+  const i = pg.cells.findIndex(c => c.day === day && c.sessions.includes(s));
+  let subject = '';
+  if (i !== -1) {
+    const c = pg.cells[i];
+    subject = c.subject;
+    c.sessions = c.sessions.filter(x => x !== s);
+    if (!c.sessions.length) pg.cells.splice(i, 1);
+  }
+  if (cls) pg.cells.push({ day, sessions: [s], cls, subject });
+  renderUpload();
+}
+
+$('upSave').onclick = async () => {
+  if (!$('upStart').value) return ttMsg('Choose the week this timetable starts.', false);
+  const start = sundayOf($('upStart').value);      // the whole week, from Sunday
+  const used = UP.pages.filter(p => p.teacher);
+  const twice = used.map(p => p.teacher).filter((t, i, a) => a.indexOf(t) !== i);
+  if (twice.length) return ttMsg(`${twice[0]} is chosen for two pages. Choose a different teacher or Skip.`, false);
+  const rows = [];
+  used.forEach(p => p.cells.forEach(c => c.sessions.forEach(s =>
+    rows.push({ teacher: p.teacher, day: c.day, session: s, cls: c.cls, subject: c.subject, pdfName: p.pdfName }))));
+  const names = {};
+  UP.pages.forEach(p => { if (p.pdfName && (p.teacher || p.changed)) names[p.pdfName] = p.teacher; });
+  if (!window.confirm(`Save this timetable for ${used.length} teacher(s), ${rows.length} sessions, from Sunday ${shortDate(start)}?\n\n` +
+      `It replaces any timetable that starts the same week. Earlier weeks keep their timetable.`)) return;
+  const btn = $('upSave');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  try {
+    const out = await post('ttSaveVersion', { start, rows, names });
+    UP = null;
+    $('upPdf').value = '';
+    $('upPages').innerHTML = '';
+    $('upInfo').textContent = '';
+    btn.hidden = true;
+    W.dirty = false;
+    await loadWeek(W.weekStart || start);
+    ttMsg(`Timetable saved: ${out.teachers} teachers, ${out.sessions} sessions, from ${out.start}.`, true);
+  } catch (e) {
+    ttMsg('Could not save the timetable: ' + e.message, false);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save timetable';
+  }
+};
+
+window.addEventListener('beforeunload', e => { if (W.dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+// ----- Excel export (.xlsx, built in the browser; no library needed) -----
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+
+function crc32(bytes) {
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+// A zip file with no compression, which is what .xlsx files are made of
+function zipFiles(files) {
+  const enc = new TextEncoder();
+  const parts = [];
+  const central = [];
+  let offset = 0;
+  files.forEach(f => {
+    const name = enc.encode(f.name);
+    const crc = crc32(f.data);
+    const size = f.data.length;
+
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true);
+    lh.setUint16(4, 20, true);
+    lh.setUint16(6, 0x0800, true);      // names are UTF-8
+    lh.setUint16(12, 0x21, true);       // file date 1980-01-01
+    lh.setUint32(14, crc, true);
+    lh.setUint32(18, size, true);
+    lh.setUint32(22, size, true);
+    lh.setUint16(26, name.length, true);
+    parts.push(new Uint8Array(lh.buffer), name, f.data);
+
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true);
+    ch.setUint16(4, 20, true);
+    ch.setUint16(6, 20, true);
+    ch.setUint16(8, 0x0800, true);
+    ch.setUint16(14, 0x21, true);
+    ch.setUint32(16, crc, true);
+    ch.setUint32(20, size, true);
+    ch.setUint32(24, size, true);
+    ch.setUint16(28, name.length, true);
+    ch.setUint32(42, offset, true);
+    central.push(new Uint8Array(ch.buffer), name);
+    offset += 30 + name.length + size;
+  });
+  const cdSize = central.reduce((n, u) => n + u.length, 0);
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true);
+  end.setUint16(8, files.length, true);
+  end.setUint16(10, files.length, true);
+  end.setUint32(12, cdSize, true);
+  end.setUint32(16, offset, true);
+  return new Blob([...parts, ...central, new Uint8Array(end.buffer)],
+    { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+}
+
+const XML_HEAD = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n`;
+const XLSX_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
+const XLSX_REL = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+const xmlEsc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+function colName(i) {
+  let s = "";
+  for (let n = i + 1; n > 0; n = Math.floor((n - 1) / 26)) s = String.fromCharCode(65 + ((n - 1) % 26)) + s;
+  return s;
+}
+
+// sheet = { name, rows: [[...]], bold: [row indexes] }
+function sheetXml(sheet) {
+  const width = Math.max(1, ...sheet.rows.map(r => r.length));
+  const rowsXml = sheet.rows.map((r, ri) => {
+    const style = sheet.bold.includes(ri) ? ` s="1"` : "";
+    const cells = r.map((v, ci) => {
+      const ref = colName(ci) + (ri + 1);
+      if (v === null || v === undefined || v === "") return "";
+      if (typeof v === "number") return `<c r="${ref}"${style}><v>${v}</v></c>`;
+      return `<c r="${ref}"${style} t="inlineStr"><is><t xml:space="preserve">${xmlEsc(v)}</t></is></c>`;
+    }).join("");
+    return `<row r="${ri + 1}">${cells}</row>`;
+  }).join("");
+  return XML_HEAD + `<worksheet xmlns="${XLSX_NS}"><cols><col min="1" max="${width}" width="22" customWidth="1"/></cols>` +
+    `<sheetData>${rowsXml}</sheetData></worksheet>`;
+}
+
+function xlsxBlob(sheets) {
+  const enc = new TextEncoder();
+  const used = new Set();
+  const names = sheets.map((s, i) => {
+    const base = String(s.name).replace(/[\[\]:*?\/\\]/g, "-").slice(0, 31) || `Sheet${i + 1}`;
+    let name = base;
+    let k = 2;
+    while (used.has(name.toLowerCase())) name = base.slice(0, 28) + " " + k++;
+    used.add(name.toLowerCase());
+    return name;
+  });
+  const sheetRels = sheets.map((_, i) =>
+    `<Relationship Id="rId${i + 1}" Type="${XLSX_REL}/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join("");
+  const files = [
+    { name: "[Content_Types].xml", data: enc.encode(XML_HEAD +
+      `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">` +
+      `<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>` +
+      `<Default Extension="xml" ContentType="application/xml"/>` +
+      `<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>` +
+      sheets.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join("") +
+      `<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>` +
+      `</Types>`) },
+    { name: "_rels/.rels", data: enc.encode(XML_HEAD +
+      `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">` +
+      `<Relationship Id="rId1" Type="${XLSX_REL}/officeDocument" Target="xl/workbook.xml"/></Relationships>`) },
+    { name: "xl/workbook.xml", data: enc.encode(XML_HEAD +
+      `<workbook xmlns="${XLSX_NS}" xmlns:r="${XLSX_REL}"><sheets>` +
+      names.map((n, i) => `<sheet name="${xmlEsc(n)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join("") +
+      `</sheets></workbook>`) },
+    { name: "xl/_rels/workbook.xml.rels", data: enc.encode(XML_HEAD +
+      `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheetRels}` +
+      `<Relationship Id="rId${sheets.length + 1}" Type="${XLSX_REL}/styles" Target="styles.xml"/></Relationships>`) },
+    { name: "xl/styles.xml", data: enc.encode(XML_HEAD +
+      `<styleSheet xmlns="${XLSX_NS}">` +
+      `<fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts>` +
+      `<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>` +
+      `<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>` +
+      `<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>` +
+      `<cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>` +
+      `<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs>` +
+      `<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>` +
+      `</styleSheet>`) },
+    ...sheets.map((s, i) => ({ name: `xl/worksheets/sheet${i + 1}.xml`, data: enc.encode(sheetXml({ ...s, name: names[i] })) }))
+  ];
+  return zipFiles(files);
+}
+
+
+// ===================== GRADING: every teacher's daily grading and uploads =====================
+// Same rules as the teacher's Summary: attendance P 10, L 5, A 0; each other criterion averages the
+// sessions where it was used (absent = 0); an uploaded quiz or assignment becomes a mark out of 10.
+const GR_CRIT = [
+  { k: 'behaviour', label: 'Behaviour' }, { k: 'participation', label: 'Participation' },
+  { k: 'assignment', label: 'Assignments' }, { k: 'quiz', label: 'Quizzes' }
+];
+const GR_ATT = { P: 10, L: 5, A: 0 };
+let RAW = [];                 // the Setup list as loaded (students carry their department)
+let GR = { key: '', rows: [], items: [], from: '', to: '' };
+
+// Classes for grading: a class whose students have departments becomes one group per department
+function gradingGroups() {
+  const out = {};
+  state.classes.forEach(c => {
+    const studs = RAW.filter(r => r.Type === 'Student' && r.Parent === c);
+    const depts = [...new Set(studs.map(r => r.Department || ''))].sort();
+    if (!depts.some(d => d)) { out[c] = { cls: c, dept: '', students: studs.map(r => r.Name) }; return; }
+    depts.forEach(d => {
+      out[d ? `${c} · ${d}` : `${c} · No department`] = { cls: c, dept: d, students: studs.filter(r => (r.Department || '') === d).map(r => r.Name) };
+    });
+  });
+  return out;
+}
+
+function grRange(kind) {
+  const today = new Date();
+  if (kind === 'week') { const s = new Date(today); s.setDate(today.getDate() - today.getDay()); return [isoDay(s), isoDay(today)]; }
+  if (kind === 'month') return [isoDay(new Date(today.getFullYear(), today.getMonth(), 1)), isoDay(today)];
+  const y = today.getMonth() >= 8 ? today.getFullYear() : today.getFullYear() - 1;
+  return [`${y}-09-01`, isoDay(today)];
+}
+
+function grInit() {
+  const groups = gradingGroups();
+  const sel = $('grGrp'), prev = sel.value || localStorage.getItem('grGrp') || '';
+  sel.innerHTML = '';
+  sel.add(new Option('-- choose class --', ''));
+  Object.keys(groups).forEach(k => sel.add(new Option(k, k)));
+  sel.value = groups[prev] ? prev : '';
+  if (!$('grFrom').value) { const [f, t] = grRange('month'); $('grFrom').value = f; $('grTo').value = t; }
+  if (sel.value) grLoad();
+}
+
+document.querySelectorAll('#grQuick button[data-r]').forEach(b => {
+  b.onclick = () => { const [f, t] = grRange(b.dataset.r); $('grFrom').value = f; $('grTo').value = t; grLoad(); };
+});
+$('grGrp').onchange = () => { localStorage.setItem('grGrp', $('grGrp').value); grLoad(); };
+$('grFrom').onchange = grLoad;
+$('grTo').onchange = grLoad;
+$('grTeacher').onchange = grRender;
+
+function grMsg(text, ok) {
+  $('grStatus').innerHTML = text ? `<div class="msg ${ok ? 'ok' : 'err'}">${esc(text)}</div>` : '';
+}
+
+async function grLoad() {
+  const key = $('grGrp').value, from = $('grFrom').value, to = $('grTo').value;
+  if (!key) { $('grOut').innerHTML = '<div class="empty">Choose a class.</div>'; return; }
+  if (!from || !to || from > to) return grMsg('Choose a start date before the end date.', false);
+  const g = gradingGroups()[key];
+  $('grOut').innerHTML = '<div class="empty">Loading…</div>';
+  grMsg('', true);
+  try {
+    const out = await post('adminGrading', { cls: g.cls, dept: g.dept, from, to });
+    if ($('grGrp').value !== key || $('grFrom').value !== from || $('grTo').value !== to) return;
+    GR = { key, rows: out.rows || [], items: out.items || [], from, to, students: g.students };
+    // teachers found in this class and period
+    const tsel = $('grTeacher'), prevT = tsel.value;
+    const teachers = [...new Set([...GR.rows.map(r => r.teacher), ...GR.items.map(i => i.teacher)])].sort();
+    tsel.innerHTML = '';
+    tsel.add(new Option(`All teachers (${teachers.length})`, ''));
+    teachers.forEach(t => tsel.add(new Option(t, t)));
+    tsel.value = teachers.includes(prevT) ? prevT : '';
+    grRender();
+  } catch (e) {
+    $('grOut').innerHTML = '';
+    grMsg('Could not load the grading: ' + e.message, false);
+  }
+}
+
+function grData() {
+  const who = $('grTeacher').value;
+  const rows = GR.rows.filter(r => !who || r.teacher === who);
+  const items = GR.items.filter(i => !who || i.teacher === who);
+  const sesKey = r => r.teacher + '|' + r.date + '|' + r.session;
+  const used = {};
+  GR_CRIT.forEach(c => { used[c.k] = new Set(rows.filter(r => r[c.k] !== '').map(sesKey)); });
+  const up = {};
+  items.forEach(i => {
+    const k = i.type === 'Quiz' ? 'quiz' : 'assignment';
+    used[k].add('up|' + i.id);
+    i.scores.forEach(x => {
+      const v = x.absent ? 0 : (x.score === null ? null : x.score / i.max * 10);
+      if (v === null || isNaN(v)) return;
+      ((up[x.student] = up[x.student] || {})[k] = up[x.student][k] || []).push(v);
+    });
+  });
+  const by = {};
+  rows.forEach(r => { (by[r.student] = by[r.student] || []).push(r); });
+  const avg = l => l.length ? l.reduce((a, b) => a + b, 0) / l.length : null;
+  const names = [...new Set([...(GR.students || []), ...Object.keys(by), ...Object.keys(up)])];
+  const students = names.map(name => {
+    const rs = by[name] || [];
+    const c = { P: 0, L: 0, A: 0 };
+    rs.forEach(r => { c[r.att] = (c[r.att] || 0) + 1; });
+    const o = { name, c, att: avg(rs.map(r => GR_ATT[r.att] || 0)) };
+    GR_CRIT.forEach(cr => {
+      o[cr.k] = avg(rs.filter(r => r[cr.k] !== '').map(r => r[cr.k] === 'A' ? 0 : Number(r[cr.k]))
+        .concat((up[name] && up[name][cr.k]) || []));
+    });
+    const parts = [o.att, ...GR_CRIT.map(cr => o[cr.k])].filter(x => x !== null);
+    o.total = parts.length ? parts.reduce((a, b) => a + b, 0) : null;
+    return o;
+  });
+  const shown = GR_CRIT.filter(c => used[c.k].size);
+  // per teacher: sessions, quizzes, assignments and uploads in this class and period
+  const teachers = {};
+  GR.rows.forEach(r => {
+    const t = teachers[r.teacher] = teachers[r.teacher] || { s: new Set(), q: new Set(), a: new Set(), up: 0 };
+    t.s.add(r.date + '|' + r.session);
+    if (r.quizTitle) t.q.add(r.quizTitle);
+    if (r.assignmentTitle) t.a.add(r.assignmentTitle);
+  });
+  GR.items.forEach(i => { (teachers[i.teacher] = teachers[i.teacher] || { s: new Set(), q: new Set(), a: new Set(), up: 0 }).up++; });
+  return { rows, items, students, shown, outOf: 10 + 10 * shown.length, sessions: new Set(rows.map(sesKey)).size, teachers };
+}
+
+function grRender() {
+  const d = grData();
+  const box = $('grOut');
+  if (!d.rows.length && !d.items.length) { box.innerHTML = '<div class="empty">No grading for this class in this period.</div>'; return; }
+  const r1 = v => v === null ? '—' : `<span class="${v < 5 ? 'warnTxt' : ''}">${Math.round(v * 10) / 10}</span>`;
+  const totals = d.students.filter(s => s.total !== null).map(s => s.total);
+  const classAvg = totals.length ? Math.round(totals.reduce((a, b) => a + b, 0) / totals.length * 10) / 10 : '—';
+  const tRows = Object.keys(d.teachers).sort().map(t => {
+    const x = d.teachers[t];
+    return `<tr><td>${esc(t)}</td><td>${x.s.size}</td><td>${x.q.size}</td><td>${x.a.size}</td><td>${x.up}</td></tr>`;
+  }).join('');
+  box.innerHTML = `
+    <div class="ttStats">
+      <div class="ttStat"><span>Sessions</span><b>${d.sessions}</b></div>
+      <div class="ttStat"><span>Students</span><b>${d.students.length}</b></div>
+      <div class="ttStat"><span>Uploaded marks</span><b>${d.items.length}</b></div>
+      <div class="ttStat"><span>Class average</span><b>${classAvg} / ${d.outOf}</b></div>
+    </div>
+    <div class="ttWrap"><table class="ttSum grTable">
+      <tr><th>Student</th><th>Attendance /10</th>${d.shown.map(c => `<th>${c.label} /10</th>`).join('')}<th>Total /${d.outOf}</th></tr>
+      ${d.students.map(s => `<tr><td><b>${esc(s.name)}</b><small>${s.c.P} present · ${s.c.L} late · ${s.c.A} absent</small></td>
+        <td>${r1(s.att)}</td>${d.shown.map(c => `<td>${r1(s[c.k])}</td>`).join('')}<td><b>${s.total === null ? '—' : Math.round(s.total * 10) / 10}</b></td></tr>`).join('')}
+    </table></div>
+    <h2 style="margin-top:16px">Teachers in this class</h2>
+    <div class="ttWrap"><table class="ttSum">
+      <tr><th>Teacher</th><th>Sessions</th><th>Quizzes</th><th>Assignments</th><th>Uploaded</th></tr>${tRows}
+    </table></div>
+    <p class="hint">Attendance: present 10, late 5, absent 0. Each other mark averages the sessions where it was used;
+      absent counts 0. Uploaded quizzes and assignments are converted to a mark out of 10. Marks below 5 are in red.</p>`;
+}
+
+$('grExport').onclick = () => {
+  if (!GR.key) return grMsg('Choose a class first.', false);
+  const d = grData();
+  if (!d.rows.length && !d.items.length) return grMsg('Nothing to export for this period.', false);
+  const who = $('grTeacher').value || 'All teachers';
+  const r1 = v => v === null ? '' : Math.round(v * 10) / 10;
+  const summary = [[`${GR.key} · ${GR.from} to ${GR.to} · ${who}`], [],
+    ['Student', 'Present', 'Late', 'Absent', 'Attendance /10', ...d.shown.map(c => `${c.label} /10`), `Total /${d.outOf}`],
+    ...d.students.map(s => [s.name, s.c.P, s.c.L, s.c.A, r1(s.att), ...d.shown.map(c => r1(s[c.k])), r1(s.total)])];
+  const cell = v => v === '' ? '' : v;
+  const sessions = [['Every session'], [],
+    ['Date', 'Session', 'Teacher', 'Student', 'Attendance', 'Behaviour', 'Participation', 'Assignment', 'Assignment title', 'Quiz', 'Quiz title'],
+    ...d.rows.slice().sort((a, b) => a.date.localeCompare(b.date) || a.session - b.session || a.teacher.localeCompare(b.teacher) || a.student.localeCompare(b.student))
+      .map(r => [r.date, r.session, r.teacher, r.student, { P: 'Present', L: 'Late', A: 'Absent' }[r.att] || r.att,
+        cell(r.behaviour), cell(r.participation), cell(r.assignment), r.assignmentTitle, cell(r.quiz), r.quizTitle])];
+  const sheets = [{ name: 'Summary', rows: summary, bold: [0, 2] }, { name: 'Sessions', rows: sessions, bold: [0, 2] }];
+  if (d.items.length) sheets.push({ name: 'Uploaded', bold: [0, 2], rows: [['Uploaded quizzes and assignments'], [],
+    ['Date', 'Teacher', 'Type', 'Title', 'Student', 'Score', 'Out of', 'Mark /10'],
+    ...d.items.flatMap(i => i.scores.map(x => [i.date, i.teacher, i.type, i.title, x.student, x.absent ? 'A' : (x.score ?? ''), i.max,
+      x.absent ? 0 : (x.score === null ? '' : Math.round(x.score / i.max * 100) / 10)]))] });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(xlsxBlob(sheets));
+  a.download = `Grading - ${GR.key} - ${who} - ${GR.from} to ${GR.to}.xlsx`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+
+// ===================== EVALUATIONS: the board inside the admin page =====================
+// A copy of the board page (board/index.html) is kept inside this file, so it always opens, wherever this
+// file is. It is signed in with the admin key (Code.gs accepts it for board data).
+// When board/index.html changes, this copy is updated with it. The logo is included in the copy.
+const BOARD_HTML_B64 = "PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIiBkaXI9Imx0ciI+CjxoZWFkPgo8bWV0YSBjaGFyc2V0PSJVVEYtOCI+CjxtZXRhIG5hbWU9InZpZXdwb3J0IiBjb250ZW50PSJ3aWR0aD1kZXZpY2Utd2lkdGgsIGluaXRpYWwtc2NhbGU9MSI+Cjx0aXRsZT5PTUhHIEVWQSBTQ0hPT0wgwrcgQm9hcmQgb3ZlcnZpZXc8L3RpdGxlPgo8c3R5bGU+Cjpyb290ey0tYnJhbmQ6I0Y3Qzk0ODstLWJyYW5kLWRhcms6I0Q5QTkwMDstLWJyYW5kLXRpbnQ6I0ZGRjhFMTstLWJnOiNGQkY4RUU7LS1jYXJkOiNmZmZmZmY7LS1pbms6IzFkMWQxZDstLW11dGVkOiM2NjY2NjY7LS1saW5lOiNlNmU5ZWU7LS1ib3JkZXI6I2NjZDNkYjstLXJlZDojZDMyZjJmOy0tcmVkLWJnOiNmZGVjZWE7LS1iYXI6I0Y3Qzk0OH0KW2RhdGEtdGhlbWU9ImRhcmsiXXstLWJnOiMxNjE2MWE7LS1jYXJkOiMyMjIyMmE7LS1pbms6I2YyZjJmMjstLW11dGVkOiNhOGE4YjM7LS1saW5lOiMzMzMzM2Q7LS1ib3JkZXI6IzRhNGE1NjstLWJyYW5kLXRpbnQ6IzJlMmExODstLXJlZC1iZzojM2ExZTFlOy0tYmFyOiNFMEIyMzJ9Cip7Ym94LXNpemluZzpib3JkZXItYm94fQpib2R5e21hcmdpbjowO2ZvbnQtZmFtaWx5OnN5c3RlbS11aSwiU2Vnb2UgVUkiLFRhaG9tYSxBcmlhbCxzYW5zLXNlcmlmO2JhY2tncm91bmQ6dmFyKC0tYmcpO2NvbG9yOnZhcigtLWluayl9CmhlYWRlcntiYWNrZ3JvdW5kOnZhcigtLWJyYW5kKTtjb2xvcjojMWQxZDFkO3BhZGRpbmc6MTBweCAxNnB4O2Rpc3BsYXk6ZmxleDthbGlnbi1pdGVtczpjZW50ZXI7Z2FwOjEycHg7ZmxleC13cmFwOndyYXB9CmhlYWRlciBpbWd7aGVpZ2h0OjQ0cHg7d2lkdGg6YXV0b30KaGVhZGVyIC50aXRsZXtmbGV4OjE7Zm9udC13ZWlnaHQ6NzAwO2ZvbnQtc2l6ZToxN3B4O21pbi13aWR0aDoxNjBweH0KbWFpbnttYXgtd2lkdGg6MTEwMHB4O21hcmdpbjoxNnB4IGF1dG87cGFkZGluZzowIDEycHggNDBweH0KLmJ0bntib3JkZXItcmFkaXVzOjhweDtwYWRkaW5nOjlweCAxNHB4O2ZvbnQtc2l6ZToxNHB4O2N1cnNvcjpwb2ludGVyO2JvcmRlcjoxcHggc29saWQgdmFyKC0tYnJhbmQtZGFyayk7YmFja2dyb3VuZDp2YXIoLS1jYXJkKTtjb2xvcjp2YXIoLS1pbmspfQouYnRuLmRhcmt7YmFja2dyb3VuZDojMWQxZDFkO2NvbG9yOnZhcigtLWJyYW5kKTtib3JkZXItY29sb3I6IzFkMWQxZDtmb250LXdlaWdodDo2MDB9Ci5idG4uaGVhZHtiYWNrZ3JvdW5kOnRyYW5zcGFyZW50O2NvbG9yOiMxZDFkMWQ7Ym9yZGVyLWNvbG9yOiMxZDFkMWR9Ci5idG46ZGlzYWJsZWR7b3BhY2l0eTouNTtjdXJzb3I6ZGVmYXVsdH0KLnRhYnN7ZGlzcGxheTpmbGV4O2dhcDo2cHg7ZmxleC13cmFwOndyYXA7bWFyZ2luLWJvdHRvbToxNHB4fQoudGFie3BhZGRpbmc6OXB4IDE0cHg7Ym9yZGVyLXJhZGl1czo4cHg7Ym9yZGVyOjFweCBzb2xpZCB2YXIoLS1icmFuZC1kYXJrKTtiYWNrZ3JvdW5kOnZhcigtLWNhcmQpO2N1cnNvcjpwb2ludGVyO2ZvbnQtc2l6ZToxNHB4O2NvbG9yOnZhcigtLWluayl9Ci50YWIub257YmFja2dyb3VuZDp2YXIoLS1icmFuZCk7Zm9udC13ZWlnaHQ6NjAwO2NvbG9yOiMxZDFkMWR9Ci5jYXJke2JhY2tncm91bmQ6dmFyKC0tY2FyZCk7Ym9yZGVyOjFweCBzb2xpZCB2YXIoLS1saW5lKTtib3JkZXItcmFkaXVzOjEycHg7cGFkZGluZzoxNHB4O21hcmdpbi1ib3R0b206MTRweH0KaDJ7Zm9udC1zaXplOjE2cHg7bWFyZ2luOjAgMCAxMHB4fQoua3Bpc3tkaXNwbGF5OmdyaWQ7Z3JpZC10ZW1wbGF0ZS1jb2x1bW5zOnJlcGVhdChhdXRvLWZpdCxtaW5tYXgoMTQwcHgsMWZyKSk7Z2FwOjEwcHg7bWFyZ2luLWJvdHRvbToxNHB4fQoua3Bpe2JhY2tncm91bmQ6dmFyKC0tY2FyZCk7Ym9yZGVyOjFweCBzb2xpZCB2YXIoLS1saW5lKTtib3JkZXItcmFkaXVzOjEycHg7cGFkZGluZzoxMnB4fQoua3BpIC5se2ZvbnQtc2l6ZToxM3B4O2NvbG9yOnZhcigtLW11dGVkKX0KLmtwaSAudntmb250LXNpemU6MjRweDtmb250LXdlaWdodDo2MDA7bWFyZ2luLXRvcDoycHh9Ci50d3tvdmVyZmxvdy14OmF1dG87LXdlYmtpdC1vdmVyZmxvdy1zY3JvbGxpbmc6dG91Y2h9CnRhYmxle3dpZHRoOjEwMCU7Ym9yZGVyLWNvbGxhcHNlOmNvbGxhcHNlO2ZvbnQtc2l6ZToxNHB4O21pbi13aWR0aDo1NjBweH0KdGgsdGR7cGFkZGluZzo4cHg7Ym9yZGVyLWJvdHRvbToxcHggc29saWQgdmFyKC0tbGluZSk7dGV4dC1hbGlnbjpzdGFydDt2ZXJ0aWNhbC1hbGlnbjptaWRkbGV9CnRoe2ZvbnQtc2l6ZToxMnB4O2NvbG9yOnZhcigtLW11dGVkKTt0ZXh0LXRyYW5zZm9ybTp1cHBlcmNhc2U7d2hpdGUtc3BhY2U6bm93cmFwfQp0ci5pbmMgdGQ6Zmlyc3QtY2hpbGR7Ym9yZGVyLWlubGluZS1zdGFydDo0cHggc29saWQgdmFyKC0tcmVkKX0KdHIuaW5je2JhY2tncm91bmQ6dmFyKC0tcmVkLWJnKX0KLmJhcnJvd3tkaXNwbGF5OmdyaWQ7Z3JpZC10ZW1wbGF0ZS1jb2x1bW5zOm1pbm1heCg5MHB4LDE1MHB4KSAxZnIgbWlubWF4KDkwcHgsMTMwcHgpO2dhcDo4cHg7YWxpZ24taXRlbXM6Y2VudGVyO2ZvbnQtc2l6ZToxNHB4O21hcmdpbi1ib3R0b206OHB4fQoudHJhY2t7YmFja2dyb3VuZDp2YXIoLS1saW5lKTtib3JkZXItcmFkaXVzOjRweDtoZWlnaHQ6MTJweH0KLmZpbGx7aGVpZ2h0OjEycHg7Ym9yZGVyLXJhZGl1czo0cHg7YmFja2dyb3VuZDp2YXIoLS1iYXIpfQoucm93e2Rpc3BsYXk6ZmxleDtnYXA6MTBweDtmbGV4LXdyYXA6d3JhcDthbGlnbi1pdGVtczpmbGV4LWVuZDttYXJnaW4tYm90dG9tOjEycHh9Ci5yb3cgbGFiZWx7Zm9udC1zaXplOjEzcHg7Y29sb3I6dmFyKC0tbXV0ZWQpO2Rpc3BsYXk6ZmxleDtmbGV4LWRpcmVjdGlvbjpjb2x1bW47Z2FwOjRweH0Kc2VsZWN0LGlucHV0e3BhZGRpbmc6OHB4O2JvcmRlcjoxcHggc29saWQgdmFyKC0tYm9yZGVyKTtib3JkZXItcmFkaXVzOjhweDtmb250LXNpemU6MTRweDtiYWNrZ3JvdW5kOnZhcigtLWNhcmQpO2NvbG9yOnZhcigtLWluayk7bWluLXdpZHRoOjE2MHB4fQoubXNne3BhZGRpbmc6MTBweDtib3JkZXItcmFkaXVzOjhweDtmb250LXNpemU6MTRweDttYXJnaW46MTBweCAwO2JhY2tncm91bmQ6dmFyKC0tcmVkLWJnKTtjb2xvcjp2YXIoLS1yZWQpfQoubXV0ZWR7Y29sb3I6dmFyKC0tbXV0ZWQpO2ZvbnQtc2l6ZToxM3B4O21hcmdpbjo4cHggMH0KLmRheWNhcmR7Ym9yZGVyOjFweCBzb2xpZCB2YXIoLS1saW5lKTtib3JkZXItcmFkaXVzOjEwcHg7bWFyZ2luLWJvdHRvbToxMHB4O2JhY2tncm91bmQ6dmFyKC0tY2FyZCk7b3ZlcmZsb3c6aGlkZGVufQouZGF5Y2FyZCBzdW1tYXJ5e3BhZGRpbmc6MTJweCAxNHB4O2N1cnNvcjpwb2ludGVyO2xpc3Qtc3R5bGU6bm9uZTtkaXNwbGF5OmZsZXg7ZmxleC1kaXJlY3Rpb246Y29sdW1uO2dhcDoycHg7Zm9udC13ZWlnaHQ6NjAwfQouZGF5Y2FyZCBzdW1tYXJ5Ojotd2Via2l0LWRldGFpbHMtbWFya2Vye2Rpc3BsYXk6bm9uZX0KLmRheWNhcmQgc3VtbWFyeTpob3ZlcntiYWNrZ3JvdW5kOnZhcigtLWJyYW5kLXRpbnQpfQouZGF5Y2FyZCAudHd7cGFkZGluZzowIDhweCA4cHh9Ci5kYXltZXRhe2ZvbnQtc2l6ZToxM3B4O2NvbG9yOnZhcigtLW11dGVkKTtmb250LXdlaWdodDo0MDB9CiNnYXRle21heC13aWR0aDozODBweDttYXJnaW46NDBweCBhdXRvfQojcHJpbnRBcmVhe2Rpc3BsYXk6bm9uZX0KQG1lZGlhIHByaW50ewogIGJvZHl7YmFja2dyb3VuZDojZmZmO2NvbG9yOiMwMDB9CiAgaGVhZGVyLG1haW4sLm5vcHJpbnR7ZGlzcGxheTpub25lICFpbXBvcnRhbnR9CiAgI3ByaW50QXJlYXtkaXNwbGF5OmJsb2NrfQogICNwcmludEFyZWEgdGFibGV7Zm9udC1zaXplOjExcHg7bWluLXdpZHRoOjB9CiAgI3ByaW50QXJlYSB0aCwjcHJpbnRBcmVhIHRke2JvcmRlci1ib3R0b206MXB4IHNvbGlkICNjY2N9CiAgQHBhZ2V7c2l6ZTpBNCBsYW5kc2NhcGU7bWFyZ2luOjEybW19Cn0KLmVtYmVkZGVkICNzaWduT3V0e2Rpc3BsYXk6bm9uZSAhaW1wb3J0YW50fQo8L3N0eWxlPgo8L2hlYWQ+Cjxib2R5PgoKPGhlYWRlcj4KICA8aW1nIHNyYz0iZGF0YTppbWFnZS9wbmc7YmFzZTY0LGlWQk9SdzBLR2dvQUFBQU5TVWhFVWdBQUFKd0FBQUJiQ0FZQUFBSHhVdHpYQUFBQUFYTlNSMElBcnM0YzZRQUFBQVJuUVUxQkFBQ3hqd3Y4WVFVQUFBQUpjRWhaY3dBQUZ4RUFBQmNSQWNvbTh6OEFBQm0vU1VSQlZIaGU3VjBKbEYxRm1lN3VkNWZYV1pwQTJGSENrbjZkaEVXMmNWQkVVVVRaZEdDQTBRRVBpS0lnZ3l3RGc0cUs0Z3lnRHN4d0dJL0RZUmtCVVNTUUNEZ3NBU0dRWHBKQVFtQkFJZXdoTExJSEFqRUx1VysrNzc5LzNhNTdYNzJsdTVOTzh2cCs1L3l2cXY3NmEzbi9yVnZicmFWbDJGSHcvWDh0QkVHWnBLekJZNDFGUk5pUmxYdTd5cVNvdCt0aThXd1VpT0FhRXhIb1lHVW5FWktVMVo5Z0VFeFJWdU1vejlFSTUrM3AwODJJMm56L0JQRWNLQXFGd21GcXRkVXdOdVlNRnUzdFcydGtTNVV6ekVES3k5dkM4RWJhMjRMZ05MZ2pzZnYrc1ZENlpQMmJBdGdQaHN4OG1FY3huTElaN2c2MWltTTJqRllVNGlkalRneUpzS1hGc3lJY0E1bG5HQ0g4N2lZZjVrMzB5SWJkUU1HL1pFaFpnNER2NzZHUnpGY09kWHlHV2hzSEl1ZzJPWW5tVE96SXZtcDFnYWZ5YjRqZ1ZjMU5FckRjVi9uZUlvZVBxdHd5WlRVT083SnNZZ1BGQkRXSEhKSEFpaVNNT2NNRnBMcTRTdlkzVXhNbHhkOEZNa3ZVdWJtYWJlQ3RWbnVDY2Z4aGhJYUUyOUl5U3MwNE10OWZxTTZpbXVUdkJQNkxWcGdjTlJIWWFsYUtvTUxueFZ3WGFrU2loMnBHaE1CS25udlUwL1ZNMUZONnRUeHp5aGhsRFFzcXRLUjhRWG5PcEtTS3NVbTlLOUJxOWFCSVhoQ2NxMTZOdy9POGp5UHdkVzJlOXkwNFcyTnVKY29QT0RLSHJvZDZDK3pNZ0ZZcWUvaFFuam1oR04wK3NVT2R6TkNSZHFaYU9qbzJVYS9oQXhLV1NxMGFxVmlPNFFlN1plei93ZHFLdCtkc21PMm9zNTZqSHg3Tkw5V2NTcFBRN2wwTTdkV3FTNW9TbW9qbk80WXY4Y2NveUUvOHlDUEk3aDRFUVpmNEtGcUQ0Q3ExeG9EZ3U2QzVvTXZVWFVhRTM2TWQ1djhwYnk1TklwVTVnUEpxTlkxbTRzYWZQTjlremd2RGJ3c3ZMYjhUVGNSNXF6QlFkYW1aWTUyZ3dNZVRKVHc2VnRyckRzakVrbXltUUN5M1M4WHUrMCtyNlBEQ3lveVFzbDBZM2o1dUptUEo4RExxNnpvcDZpMjlDN3BGV2NNTE8yTjQ3YWNwdTZVOEw5UHdZeUNrWG1zZnlNaE1PMk9vbUtTU05VaGxUQ21hWGJwVXZkUFlZb3ZSS0krdkpQSDUvaHZndHNXZURRQ1ptUTY2emM2UVVrVlhwenlyZEpnemN6MmxWU3Bpd0pGTE9qNE1RZFVQUTdzSnlhQ2tFUlFSK0tlSTVBbzBUeDlTbmhPdXpKVzdPeityM215T0xyVXpwYzNrOENEcTdmcTFuYkZvVHRjSzlXTFQ5WmRVeHRZVnl0MjdiS3hXZ1oycGRaSXhOT2lQcVRWQmRveXdUakpta00xSWluei9FaFZiZDhEYlBjUE9GQVpGcDZ0WGpod1YwSExDNGQxaU9JTkNHUDdjOEMzLzFCdUhNc1l1OWVZT2ZqSWREUHVkYXFYOWFCaUpQTXk0QlFuRDdmRFN2Q2gyMzk4Wi9BL0ViaUFCV0d2clY0VWtBbFNneG0xNEJuRExZQWRtcWtsREptU09ERlhNRDRXaGdOd2hhdHJ4YkFiM0Fqc2R2RWduaTQrQkJ1QUVuWm1rVzRGQngyNjBBeDJ3NzhGQlNCaUdPeWlQbVpnT1kzVHM2Z2NTZWtKTS9pRm9FYVpNeDhJOEhCaytqWFlEK0wrZ1pwdzVqUFpBQzF1S3hRL1RMWkNJNHBHWEdWMjFrMGNMektRQk56d0NtWlBQQzFtQWJ4NnJ6RDRoelArb2FUVDNFRTBiekJ6Q2ZVT2RxWFJ5NUZoNytCRDZDejlHY2VNM2xOZEJmMFZSWEFUemR4aC9IcWd5T1ZDcGZJL3Y1SURKOTUvU0tFWVFnbUNTVXhrV29iSzdDM0lsRFpGRkJ4UjNnY2o2dnJTdlRRM1A4ejZhVlZDR3BPWElvY0RyK0NPSGttTFN2b0dOcUs5em0yanVwTlgyQ0RPaHVaUEswYXpTUlNyYWhBaUNUaWptZ3dwRktVR1paNnBrQ3RIc3J1ZWRDc3NTcDR2bTdibVJCaHNzT0YzT09OckZ0VTZBL2pXVWtacCt5aExxTGZhL3EyYXkzTjIxbjcxd29CNUZQU1ZPU2RWSEdHNlBrczJlcmpOZkxrTEwzaitydE1hQTdqbVU4SXdyUVp1Z3lNZFFzZTJqb2VvQ3IrZjQ4bXkza2x3VTlVNmFxVUVyZ0VIWmZxNDhHVUwrSDRmWWxyRjBFeURxN2p5dVFlV1pWUlFwNEdGeDlaTlRXWjd2ejFDeDVrWFVNL0Z6VVYvWCsyd001UFdsTXVkUExrZmRwZXRVeE1hbVVJd3NjWEJSTUp6enB1c0FXNm5aTUZCdjliZ1VaUWdpTWlQUTlNQnJ4aGtHODhldlJ6MTBOUHArZndQYXV5ME1UNFQvSTVhL20zei9WVVJWZGRWR1V3TksrcjFUS2RWcERvSWxpNEJ5cE1FbGRzM1RDdWJJTVhTZ3puZ0g5SVpOcUhkdTlYMy9xN0N6LzVUcS9ZUDNHaXJsUDZtVHJSMlhFek5jc29vb0MxVDhYNEwvV3lBdW1saUtNQXRsNGw0Qlh2TDEwd0NOd3dQWnJnWGlPUWF5eVpJQ0E4aHk0VG4vQitOL0QzTDNnSjBzZkFUdlpkQzE2a3pBTk1DWGhVWTJ3RnZtQmNGMzFla0doTmpyNzFabkNteTFRTytxa3pNZXAxSWVWdk94ZXlOeCsvNmVOS0hzMUZkL0EveVJZMEdwZVhmRXV3Z1I3aXYyT000VUlQOWtOajdJdmQvUzNyNE56TmVWSlVEKzJSRk96YmJZY2RLTzBjV0JrT3RSRnROL0diejlZY29IQmdQSVBzYUhDcE9iSUtwLzFKZElNd1IyVXNyb1JvS253aW9yQjJDWEpXR0V1SDMvRDdTRGY1ZUdyUUFWUno4UU82N1NlWVY4TW9SU3Z3cXlGUWQzc3VnZDlpdDFBYWtBY2JIa21IQXJhQ0pOZnNjUzBFMFREMzR2OEorRG0wb1p6UzgrdHVJS2hjTEI4UHV0T3BOd1RrZ2lRVEJMblJXQTM5bVVBVTBGMlY5eHJpWmZuUUs2a1RHejlpMEJGUWR5ZnVraHN2RVFrRTlLSFA3Y3BhQ2Y0ZFh0SkJXTHhXM3RNTWhqcXNTcFg3TE9JQlYvdk1MRG83VkNjWkJyaDc5Smg2OHI4aUVGb3dMd1dJaUVIN01KRWZ4S3ZRWGd6ZU1mZ2RWOGY5dWM0U0QzUlhVTDRENFUvSW9CTmVXUXdmOVFad1VRUmxaZDJnRHZObWErWmRTb0xaSCt3OHBPME5IUnNRbEtuWHcrUS94VFVabytLUjRLaEg4V2hydzVzQ2Qxc28wd0RDY2k3dnRwaDh4OW8wZVAza0k4TElEZlN3V3JNMGVPSERseXJHMmdVajhjZEIwYWpxZGd2ZzlhZ3NwNkxvZ2JYU29XZ294b29JWGFGUzBWdjlZbi9iVnFSRGtFR1JuemJEVXdIc3JvWHc4OEFFSlg0Mk1heDhnQ1hyMXpYQXB4MEVxOHRpK0RxT0NWdGgrSzZzanFTK0YxcXpubERmcWdMUXkvcnVLVkNNTURFQWZyd0lyUlJkTUNKWWVqQzVleWhLQ1FaRHpaQUVhMSt2NzVhbTllUUduUHVwU2xWTEU4UEFjQXhYRCt5NlV3Zm1DcCtHcGVuamxseTZpM2RHL1UxL1ZhMU5QMUR1d0xvNTdTbDlSN1JJRGIwYmpMeTYwMDFGY3FseURxNmJ5aDJnYm5xSyswRW9vYzRpa2o2enZxTE90Q2I5YWNaWkFnNnUyNjJhV3dGRDA0cVhrYkJmU3pyblVwUzhqMzMxR3hGS0tlblhhVUwvY3VaV1VJcjYxTS9Rd1JISWx3dGRLNi93NWJLQlErQStXaytsc1pTallNWjRGWGNLNUxTVTZhUDRoUzUzbDdJZjA1b0dWV2ZneXRCajFzZi9jWUZyUjUzcGxJK0Qwckl4V0Vya1pxWjNVV1VOd3lwNUpjTkJ1bDd2NUpEUzJiUUpmbFlsZCthaENYancxMTdaMkY5dmF0MGVQbkdyaGZnNjRIelFOVlhleGlDQXBMOXEvVUFsNi9GVTRsdWFpUGl0dXhmNWVHQTBqM0gxMzVzUWt5czJBZUNmSHNsbmFaU2wralFCM1Z5QlBrQnhJZU50RHdYbFF1RkhRcXlVVmMwbHFqZGNVRDVuUy9LMTlDOEU4K01BMC9PUGZ2ZVNjaEkxZUNya1BYNGdMVWNmdkJKem5sWXlDUXRYRXVKVGtJcmEremdXblpaSk1PNUdXVlVWQ1dVTUorcjVMTmhXak9wT1V1UmFVSWZieG9kdWZmYXBCKytQRUpGTlVJL2g5UnllWkROR1BYMFRXN0pIeEZlN3ZPVS9FRUtFbGZjeWxMeVBkZlViSG1SOVRiZVR1N0hMSVNreXN5SHhDRnZSbjFUdHhkUlJKQU9mSTkxMFdveTdnRWJHUUJIYlZXbm9VWDlVM1pKTHA5b3V1OEN4NWt5Sy93YnFVMWEzMldZTXlZNUhpNVJsRnZWWGtydWt3cTJ0emduL1dDNFB2cXJJcGlzVGdCc3JXbXAwaXlPWFprSUZhSS9IRzhZb3ZZejBLcCtneGFRcDZGZVJCNi83K0VXYit6SFliL3BER09IRkJSTG1VMFNPelhEZjlKY09zTnVIMm9SZ2ZXUVNzd01EOUNRK2ZBNjNvOGxaSlJVa0x3bitIak5WYnhIRlVRY29JQjVyQ2V3WmtqUjQ0Y09YSU1EVzJlZHdxYSs5VG1FSkJjY2dEemJkQThFVFNJajhKNEIyWnk5Q3ZjL1BiQWpTUnlSS3dMREFPS040Znd1NnUxa0JvZDRVc3dja2dkY29UKzNZNlFxemg1RTd5M1c4UHdRblVhY0J1QmladjBXbHV4bUh6dmdQc0xJQzcxejI2YzI1anlNRk1kYWVqa1pQRGZVNmNiRVBvWENMR3Y5QUpJenM4Q3ZTWit2bjhIL1VSUUFmZjlOcy91L1h1ZVYzWDRvMkhZeGVDMzFjMFFOMDl3aks5ZjRKNkY3QzZXSUNpQi81YTZZbUNZQnJtSE5DNGIvQWpPTTdjNEU4MzR0NEo3cVF6aDZJa09NLzB4Tms1dFRjZkQ0MEllYmo4WUgzTmlnTWZwcVFYNFB4OVhWaVVnSUlwVFp3b0l5TTlyVklqc2ZpRTAwbVRMTmhKL0FncmdXSlBIWGoydjdBcG9Hc2tIRVM0dUJFK213MkUycERpNDcwZkFQWkhPb3JGang5cC9sb3BMSFlNSm1mT3NCM01FN0hmQ1hOMWl3dkhOaVkvcWVtNXNXbkVlOHZJU1N2eEUrRlUvYXpaUkhBUVJHUTlGbTh4aGtIb2JSY25tRWRsTUVTc3ltY1lXZjk4L0R2UU5pU2V6Nzh0QS9STEZ3WDBRTTYxMktvNm5UUGNqa09NNHNvcVRCNHg4SEkzMDdMbTNDc1hCZnpyeUtROERma2NnL3Z2aC9pVDRzdDhCdkJWVUl2S3d5RlljcW9IL2hJd3NPVFBwT1dFVVp4TjRDOVNiZ1dWdG05cC9aZXhFb1ZBNFJOMTFyNmFoSHlqWmpnVGlkUTZ5R1FQMks1U1hKbXZIaTFjczd1djUvcjNxbFBqVVNtU1BUMTRPNHBGOUF0aEZjV3AvbFRNcU1HVlBGeFVISTFFYytFbThrTHNGLzhlOURNM1VjYkN5NGpRbjNmVi9ob3MzZzlHZkJ3andRSlprYWhwMlhqMlJmSDJDblJsK1c1MHBnTTg0K05HWHl4QlNpNkxoVjFIaXVPTUYvS1RFOFdIaVQ3NEFlbEtJOGZXZnhXVHFPTUpjYTVNMFZIQW5pdU1KZXJZL0ZXZVZ1SEgwQTIraHBzTXFLRDY3TUF0TGNWVkJmMFR3WFpGRDNhUnM0YmY2L2dYcTVKK1RvNEZvalRuOVVMN3pveS84NnRaeERNOUp6V1NQVmR6eW1lVVZxVmNWY1owT2Q1ODZHYlpmY1FCS1VmOXBmMWFKZzl4VU5DRG5tRFIwRXRXdEc2dFY1Um9MT2I0UWxMeXFCQks2VjJXU1NNQ1RyK2I4MXFvc2ZuZGxhOGFERzA5U1RnSU5PempGQmNGUlNLOWkwWTNHS1ZiWTA0MEQvVWFQbHRWUnNLY1VaeU9qdUFvbElkM3BVT1kvcTdNZjhEZ2VrYVkyd0lHWHVwMEpsZkZ1NFAwWkVmOUdXUXgzTTJYVm1RQzhCZkNyK05JRTNqTXduUDA4bE5xZlZLd0JqcnNlVW1xWUZoc200VnVBLzcwb2VYdlJDdnNqTVRjR3dod0RrbDEvNkpaOHRqVUlyaGFQRENCejkwWWJiVFJPMDN0UTJRbUNscFpPOEoxS3o1RWpSNDRjT1hMa1dGdmdBSEpUR2JGajNJU08wQzZnWGRFcjIwbEc5UEZBY1podks4elJET0FlVUE1SnBxT0h5M01zdWN2WW5pbG9oSllpN0h3TUxjNUtEYUZ5NU9DZ0hRV0VWK25JWmFKcmlWYWhBTitpTldHT2tZWkNvZkJwRklCZVI4RVlEbHJNOURVck9ab1c4UUZwUERyTFZRZ0dRcXNLdkJMZDk2ZTFoZUczUGMvN0tHTG4vRFVQUlRNMER2MjdQU0REOWUrWG8zbmxlV0w4Q0pyRUExNHY1SktKK1J6TkFuNXJqR2RhN1VJekVGcUpnbk1YcWtYdVFoNzZLVEdqUm0wbEJkSDMvNFM0MzBWdGw5eVNsMk5EeHFoUnV3K2hvUEY4RTk0VHdkVUZheGZ4UVgvNUJid2JMTUx3MDJpdXFtNndxVVdvZVc0TXczQkhqYWtteWo5cWFTdDNUOW0yM0YzNlJOVFRlWEEwcTNSZzFEMXg3MmpXeEFIdmI4bXg0Y0ZEWWVHNmRDN2ljaGFtcXVUTGhYUEhhRHhWVVo0NVlWelUxM2xLMUZOYUxQc1pIMURpd1I3Y21rZVRaUHk0MmIyM2EwSFVWL3FIY25tRUhsUGZoT0NDbGFwN0xPdFFOeWR3Tlo2cWtDdWFlcnBtODNDVGdWeWdreEFMSThJaWptdTQrVmFqemJFQm9RMDEwbGRSTTNHRnFLc2cxYUtvMWZmL0MzRlVQZlRBQm1xb002WFdHa3hCeXhKUHFlZ3ByVUN6K3dXTlBzZDZEQjQ1L25VVXNpY2NoYWdSNHJMbG94QlB3MDBibXNMVHkvTW11d3ZQWUVtYTJkTEtjdS9rd3pTWllZRXVKVHpDNDBxOGVMY3FiN0g1WDlBTTBKMmdXOEM3Rm43LzNoYUdKK2c2SlZrTE9qSXdmdnpZUXFId1JTamlKaWhpSUJzdWJWcU8ydXkvRWR1QWQ2eEtNOXJYOWJZMGg2NkNNeFNLajVWNWdIMUNUVzZOZ1Y5TjJqenZEQXlhdUxpNDZtV0ZBeUU4QS9hTEwrZThJcEpZci91aUhYaTFlTzAxei8zblpDaVhXbkxWSUQ5d3MwbmJFZ29xeWF3LzNqejhzWHZ3eHpnNVduZXZlQTNpTHBTck5kMUJBd1h1Y05SRUs5WklVK29nTksycnk5MDdiS3ZKRFFYYm9EWTZGLytaTzNaYytoZ0k4WnJrRi9Bc0hzS3o0T2FWcStDK0NIUWg2R2NGejdzUy9GdTV3aFBwRHVyWW9yVVAzcVhBQXdoOFB6WEx2Z1pwT1pUd1I1aUhJclUxdHVFM21sWGFCd1h1L2JWUzROaXM5blM5d3ZNK05ibUJnbDlNZUc1VnJmUDQ2dEhMS0RpWDZGZVNKajZ6SUFnbTRVK2VoRUl5RGNUTHgxM0tjQkV2TkpwVENNT0xZUDk3MUdEYmFZeHJEU2dVZjZ4NW5OTmc2YUhKbkM1SmRpODBDQTlONWJmdzMzbUJsRXMvOWVoTnZQUS9odDZTelZBNTFqUElpY096dStiTGRJaXI0QXlHWkhxa05LMDhkVXBqWHhhNE9RRE5tS01BMVNmZmZ4NzlycTh4bGppeUhPczl5dWdrbzRCY011ZzVPRU5zUnZ1NlZrWGRuYWRvMURXQmZ1MEJLRFFOWFdTUm9lWHNjeUdLL0R5UkRSbmxlVnVOaW5vNkwwU2hlVSt1azI5azlEb0hGTmRvYnlMY2llV1puM0x1VDdNUWVzWGlEMUZvL3BvcFJQV0o5elBHWjVEbWFEYWdiemNXQTRyOTJROHI5NVR1ZzdtWUF3elFVdEJ6S0ppM2c4Nkp1aWZ0WFo0NW9XNXpocEY2RjVwTkhxSHNMa3cxQ09IdVlyT3JVZVhJVVFWang0NXZEY09mb3RBTVp2azY2WGVJWlQyZG1zalJHRGJiYkF4cWpKdThJUGdPYW8wMU1VZG1veFZWV1JlYVBpNWw1MkVFcmtKVWwxcUQ0QnJFbFE4Q21namNyMys1UG1CT1FMOEsrZzNvSUs0WWhuOGp1N0lLTFdQR2JJcEMreW1FdXdvMHFFdlpMRnBWQ01PZkk5NjhvRFVyT0NHS0IvMVM1c0hieE05dGI2SEdlZ20wR01STG5uaG4wVkMra3FTb0xUNnVpYWN0NVV1YlJnemkwNVVHdTJCZ3dJUzBadWdHbTRhdkI4blJuQWg5SGtFV0JBKzZDc3FnS0w2ZTh3WVFMOFNwTjJXU1k0U0RTM2UyUjQzRVhWbVhvU0RlQjNvWWhlZ0pFRS8xV2dqM282RFprSmtHOTA4Z3gzVnd2TzRxMzcrUUkwZU9IRGx5NU1pUkkwZU9IRU1CSng0NUw5UW9FVnhLbnVYVmdpM3Jrcy9tWWJDVG9mWCtTNjE0VGRoRzBtNGtQb1BCeUZhaldqRDVKeldTRm1HSHFZZUJ5RlpIbStlZExmTkdEVkNibnFBTzhEWUtzOHlHRnlSOFR2a1ZRSml6clBEM0tkdkd4cHhtTURKS3ZJVml3Tjg3MjN6L09BM1Btem80cDhaRFpnelIvUnFJRTdCUHRQait6aHBNQUQ2WGRUT1B0ZTlHamxkLzhNS0h0M3pybkhJSEFzandzNW41NzQvcXNRL1ZVSUJNUEE4WXg4OGp2MDNlNTRMSFl5M2laZWUrZndua1U5TXY0QjhKTWhlWThYUFo1OVhMQ2FUVmZ3dUE3eSsycnhKd2dOK2h1ZFRmL0plWnlUME9BNFYxcHJsZG9GaUR1U2dwM1Y0WThzN29PRng4M25oRkJ2QkFkc2FmNGZkS3lpMXpMWUVHMzN6YjVQMzAzT0ptNG16b2huTWJDSE9zaHI4QlR2ZjU2WVVDcnhYbEZTOHZJai9Kc1EvZ21RS1hQbHM5aXlBb0lSMmU0czhDdDR0eUs5QVdodDlrZko3bjhXRDZ3Mmx2RFlKcjFkc0ZGcmo1a09ObnRVT1VsMFVyL0NTZnJiNS9zZklFNFBFMmxFamo0SVF6ZGZnVjlVNEIvLzE4K29PbXdzNGJBLzVTcThDMWh1RjVFbCt4ZUN6aVBJRjJyb1pSNzRFQkdiUUxuRndJMGlEYWtmZ2ZURmd2ZTlFSEhqajR5ZkZaZUFBVnEySEJwNUtXcVF5dlFpM0NsRHMxU0hnWkJuVFRweWx3TUcrRTAxbmdVRWcrQWdWemsvV1NGcy9iUjlrTkZ6alppVmFud0pFUC8yWElCMitpa1h1RTRPYUhmdWJ0ZUxvZGFLVEFzYkRJd3dkZHJ5d0IzTlFsOHkrdENOSzVTOXllZDZJSUtGRG9mNkZ5cDNHdEh1SmJ4QUlITDJlQjR6bjZrT2VCaTlRcFVZUjlPdU9vVjRzNmdZVDdxOVo0SzluVG9HY3k5RHdUZ1hocU5RVVV1eHZDbUMxc3kvRTBPdFdMZi9qTHlxZVM3d0FyZllGVHNiZ3QvQmFJRFA0MDRvcXYwbWFjVkVJYzlrM3V4UlIrQTBBNnBzRGRDaWRQUnVMQk03eTVZZk9XMGFPM2dJSU93UCtObXkzUHV4ejhCT0RGQmM3Mzc0SE1EMUNEbkpjbDhNK0YrUXZrajAzMjYxVUszRmpHQWYrbDhMZWIzQzNCZnhaaEYxY0pad3JjYXNqeExCUnV0WXp6enY4UmhqdkFuOWVKY0FIQjY5QlQ2aklHOEV5Qk14Y2w4SVcvUm5sbmtnSDdiOFh0Kzkra0cvbllTWFJkcFlacmIyL2ZHdkx6UUcrbGpwYU5XNjVYUUkvRFZhdWJVQW03U1FVdFFXYnVCZDJYb1c0bytqS0lWM3kyd1ovcDc2UHgyTkVZbzVBWmM4TFIyL2hqdXlrL0Fmanlwa200SURoSDJRSzQ1UzRYa3NkVnJ3MEM2WnNDOXpMb05oQjNueWNFdjJ0UTA1N3N1dUViZmxMZ1FGTWgrMlVRbTQ4c0hZMjhuWTMveG03Q0c2NkNnNXIrQjR3SHN1bmJPNGd3M0YvOWJvWXJlMlZVMG9lRGZ6Zk02MEZzSWRnOG1tN0pEWGdCcDZoOEN2RExGamdCbmh0M3d2R2xOZ2NCSGF4ZXFRSUhaMFdCQTUvciszZ0JVQkxHQUhuOGlzWjNCWjB4dHdGaytuQURhVklOMktHOFcrUGdBT0x6aVBNMEV5ZjZNR2VwWEFMdy93N0VQaHRsVW5mZ0tEejgyYmdtQWlGZmxmZkNPSUI4bUQ3Y1ZEZ0g5TUVjWVliZWh5c1c5NUgwZlg4SmlOOWNuOHFROUpjMG5heGVxamVwOFgwL2owZzQvRWZscGdBL1o0RWptQmI4bHVKWmZFeFpnbG9GenNRSHY5YzEzNjcvOGlabEVKSDdtaTBYTWdXT056SnhKejJQaU04U3ExVDZWY0FyRnZkRitIZ0V5T3YvMENFWE8wWTI4RTR2bGNaSURmNS9ObWtpYk5LUHNnSCtKK0FmSDJlQVBoZVVzNmQ2VllVcGNEQ3I5dUdxQWVHR1d1QTJCcCtqeTNmeFlEK3B2QXF3aXlBUEt3amV6eFNBMm4wNGRnbTRnSUI1ZEY4MFZiWEFLU3FtU3V3Q2wycFNlVlpKdkE3d1JjaFVIWW5Eai8xaFB2Y2xqWjY3bDJxKzZoRmtrMnZBc2tEVnpSVVQvZksrLzRhdS9iTEJDenY3TDhTTFR6cXFDdm9iV1R4TVhnYmx2TG5RQURJeUxRSnpHcHdET3F3RjRVeUIrNzZ5M0FpQ1NZai9hY2l5d05uWHQ4V0RBdlR6bEZVVkNIK015dkljWUxrZERFajZjS0JxSnpCMUlPempFdGJ6emxDZUFMeWpOTTVxQmE0Q3lELzdZaXhZck9FMmpia3lLTGhSMDBnTk9GeUF6S2tpR3crUWFqNGZnM0V5UGNEek9tclRqcWlkYWgxUjJnYVo3UkpadkpIS3R4SEFiM3Z4ajNjajFWdFdIWXBjSENlUHBLKzNCSHlNeEIzWHlJMU9mc1pndjQ1cDhQYXkydkNScHc5RGxxY0RtRDV0Q0RmL0YzbU5wY3M1dVhoQTFML0hsTXZjNDZtajdBMjVOb3FRb1Q0b1ordHZ0UEJyUDZNc0FnN2U5Rm1ZZmhqam55ajhSaEhyZzNyUHo4ZkxzYTdRMHZML3pHVXBlVXN1WjhBQUFBQUFTVVZPUks1Q1lJST0iIGFsdD0iRVZBIFBoYXJtYSBsb2dvIiBvbmVycm9yPSJ0aGlzLnJlbW92ZSgpIj4KICA8c3BhbiBjbGFzcz0idGl0bGUiIGRhdGEtaTE4bj0idGl0bGUiPjwvc3Bhbj4KICA8YnV0dG9uIGNsYXNzPSJidG4gaGVhZCIgaWQ9ImxhbmdCdG4iIHR5cGU9ImJ1dHRvbiI+PC9idXR0b24+CiAgPGJ1dHRvbiBjbGFzcz0iYnRuIGhlYWQiIGlkPSJ0aGVtZUJ0biIgdHlwZT0iYnV0dG9uIj48L2J1dHRvbj4KICA8YnV0dG9uIGNsYXNzPSJidG4gaGVhZCIgaWQ9InNpZ25PdXQiIHR5cGU9ImJ1dHRvbiIgaGlkZGVuIGRhdGEtaTE4bj0ic2lnbk91dCI+PC9idXR0b24+CjwvaGVhZGVyPgoKPG1haW4+CgogIDwhLS0gU0lHTiBJTiAtLT4KICA8ZGl2IGNsYXNzPSJjYXJkIiBpZD0iZ2F0ZSIgaGlkZGVuPgogICAgPGgyIGRhdGEtaTE4bj0ic2lnbmluIj48L2gyPgogICAgPGxhYmVsIGNsYXNzPSJtdXRlZCIgZm9yPSJwdyIgZGF0YS1pMThuPSJwdyI+PC9sYWJlbD4KICAgIDxpbnB1dCB0eXBlPSJwYXNzd29yZCIgaWQ9InB3IiBhdXRvY29tcGxldGU9Im9mZiIgc3R5bGU9IndpZHRoOjEwMCUiPgogICAgPGJ1dHRvbiBjbGFzcz0iYnRuIGRhcmsiIGlkPSJvcGVuQnRuIiB0eXBlPSJidXR0b24iIHN0eWxlPSJ3aWR0aDoxMDAlO21hcmdpbi10b3A6MTJweCIgZGF0YS1pMThuPSJvcGVuIj48L2J1dHRvbj4KICAgIDxkaXYgaWQ9ImdNc2ciPjwvZGl2PgogIDwvZGl2PgoKICA8IS0tIEFQUCAtLT4KICA8ZGl2IGlkPSJhcHAiIGhpZGRlbj4KICAgIDxkaXYgY2xhc3M9InRhYnMgbm9wcmludCI+CiAgICAgIDxidXR0b24gY2xhc3M9InRhYiBvbiIgZGF0YS12aWV3PSJ2T3ZlcnZpZXciIHR5cGU9ImJ1dHRvbiIgZGF0YS1pMThuPSJ0YWJPdmVydmlldyI+PC9idXR0b24+CiAgICAgIDxidXR0b24gY2xhc3M9InRhYiIgZGF0YS12aWV3PSJ2VGVhY2hlcnMiIHR5cGU9ImJ1dHRvbiIgZGF0YS1pMThuPSJ0YWJUZWFjaGVycyI+PC9idXR0b24+CiAgICAgIDxidXR0b24gY2xhc3M9InRhYiIgZGF0YS12aWV3PSJ2Q2xhc3NlcyIgdHlwZT0iYnV0dG9uIiBkYXRhLWkxOG49InRhYkNsYXNzZXMiPjwvYnV0dG9uPgogICAgICA8YnV0dG9uIGNsYXNzPSJ0YWIiIGRhdGEtdmlldz0idkFsbCIgdHlwZT0iYnV0dG9uIiBkYXRhLWkxOG49InRhYkFsbCI+PC9idXR0b24+CiAgICAgIDxidXR0b24gY2xhc3M9InRhYiIgZGF0YS12aWV3PSJ2Q29tbWVudHMiIHR5cGU9ImJ1dHRvbiIgZGF0YS1pMThuPSJ0YWJDb21tZW50cyI+PC9idXR0b24+CiAgICAgIDxidXR0b24gY2xhc3M9InRhYiIgZGF0YS12aWV3PSJ2SW5jaWRlbnRzIiB0eXBlPSJidXR0b24iIGRhdGEtaTE4bj0idGFiSW5jaWRlbnRzIj48L2J1dHRvbj4KICAgICAgPGJ1dHRvbiBjbGFzcz0iYnRuIiBpZD0icmVmcmVzaCIgdHlwZT0iYnV0dG9uIiBzdHlsZT0ibWFyZ2luLWlubGluZS1zdGFydDphdXRvIiBkYXRhLWkxOG49InJlZnJlc2giPjwvYnV0dG9uPgogICAgPC9kaXY+CiAgICA8ZGl2IGNsYXNzPSJtdXRlZCIgaWQ9InN0YW1wIj48L2Rpdj4KICAgIDxkaXYgaWQ9ImFwcE1zZyI+PC9kaXY+CgogICAgPCEtLSBPVkVSVklFVyAtLT4KICAgIDxkaXYgaWQ9InZPdmVydmlldyI+CiAgICAgIDxkaXYgY2xhc3M9ImtwaXMiIGlkPSJrcGlzIj48L2Rpdj4KICAgICAgPGRpdiBjbGFzcz0iY2FyZCI+CiAgICAgICAgPGgyIGRhdGEtaTE4bj0ibGV2ZWxzVGl0bGUiPjwvaDI+CiAgICAgICAgPGRpdiBpZD0iZGlzdCI+PC9kaXY+CiAgICAgIDwvZGl2PgogICAgICA8ZGl2IGNsYXNzPSJjYXJkIj4KICAgICAgICA8aDIgZGF0YS1pMThuPSJjbGFzc1RpdGxlIj48L2gyPgogICAgICAgIDxkaXYgaWQ9ImNsYXNzVGFibGUiPjwvZGl2PgogICAgICAgIDxkaXYgY2xhc3M9Im11dGVkIiBkYXRhLWkxOG49ImNsYXNzTm90ZSI+PC9kaXY+CiAgICAgIDwvZGl2PgogICAgPC9kaXY+CgogICAgPCEtLSBURUFDSEVSUyAtLT4KICAgIDxkaXYgaWQ9InZUZWFjaGVycyIgaGlkZGVuPgogICAgICA8ZGl2IGNsYXNzPSJjYXJkIj4KICAgICAgICA8aDIgZGF0YS1pMThuPSJ0ZWFjaGVyc1RpdGxlIj48L2gyPgogICAgICAgIDxkaXYgaWQ9InRlYWNoZXJCYXJzIj48L2Rpdj4KICAgICAgPC9kaXY+CiAgICAgIDxkaXYgY2xhc3M9ImNhcmQiPgogICAgICAgIDxoMiBkYXRhLWkxOG49InRlYWNoZXJEZXRhaWxzIj48L2gyPgogICAgICAgIDxkaXYgaWQ9InRlYWNoZXJUYWJsZSI+PC9kaXY+CiAgICAgIDwvZGl2PgogICAgPC9kaXY+CgogICAgPCEtLSBDTEFTU0VTIC0tPgogICAgPGRpdiBpZD0idkNsYXNzZXMiIGhpZGRlbj4KICAgICAgPGRpdiBjbGFzcz0icm93IG5vcHJpbnQiPgogICAgICAgIDxsYWJlbD48c3BhbiBkYXRhLWkxOG49ImNsc0xhYmVsIj48L3NwYW4+IDxzZWxlY3QgaWQ9ImNsc1BpY2siPjwvc2VsZWN0PjwvbGFiZWw+CiAgICAgICAgPGJ1dHRvbiBjbGFzcz0iYnRuIiBpZD0icHJpbnRDbHMiIHR5cGU9ImJ1dHRvbiIgZGF0YS1pMThuPSJwcmludENscyI+PC9idXR0b24+CiAgICAgICAgPGJ1dHRvbiBjbGFzcz0iYnRuIGRhcmsiIGlkPSJ4bHNDbHMiIHR5cGU9ImJ1dHRvbiIgZGF0YS1pMThuPSJ4bHNDbHMiPjwvYnV0dG9uPgogICAgICAgIDxidXR0b24gY2xhc3M9ImJ0biIgaWQ9Inhsc0FsbCIgdHlwZT0iYnV0dG9uIiBkYXRhLWkxOG49Inhsc0FsbCI+PC9idXR0b24+CiAgICAgIDwvZGl2PgogICAgICA8ZGl2IGNsYXNzPSJrcGlzIiBpZD0iY2xzS3BpcyI+PC9kaXY+CiAgICAgIDxkaXYgY2xhc3M9ImNhcmQiPgogICAgICAgIDxoMiBkYXRhLWkxOG49InN0dWRlbnRzVGl0bGUiPjwvaDI+CiAgICAgICAgPGRpdiBpZD0iY2xzU3R1ZGVudHMiPjwvZGl2PgogICAgICA8L2Rpdj4KICAgICAgPGRpdiBjbGFzcz0iY2FyZCI+CiAgICAgICAgPGgyIGRhdGEtaTE4bj0iYnlEYXRlVGl0bGUiPjwvaDI+CiAgICAgICAgPGRpdiBpZD0iY2xzUmVjZW50Ij48L2Rpdj4KICAgICAgPC9kaXY+CiAgICA8L2Rpdj4KCiAgICA8IS0tIEFMTCBFVkFMVUFUSU9OUyAtLT4KICAgIDxkaXYgaWQ9InZBbGwiIGhpZGRlbj4KICAgICAgPGRpdiBjbGFzcz0icm93IG5vcHJpbnQiPgogICAgICAgIDxsYWJlbD48c3BhbiBkYXRhLWkxOG49ImNsYXNzTGJsIj48L3NwYW4+IDxzZWxlY3QgaWQ9ImZDbHMiPjwvc2VsZWN0PjwvbGFiZWw+CiAgICAgICAgPGxhYmVsPjxzcGFuIGRhdGEtaTE4bj0idGVhY2hlckxibCI+PC9zcGFuPiA8c2VsZWN0IGlkPSJmVGVhY2hlciI+PC9zZWxlY3Q+PC9sYWJlbD4KICAgICAgICA8bGFiZWw+PHNwYW4gZGF0YS1pMThuPSJzZWFyY2hMYmwiPjwvc3Bhbj4gPGlucHV0IGlkPSJmUSIgZGF0YS1pMThuLXBoPSJzZWFyY2hQaCIgc3R5bGU9Im1pbi13aWR0aDoyMDBweCI+PC9sYWJlbD4KICAgICAgICA8YnV0dG9uIGNsYXNzPSJidG4gZGFyayIgaWQ9Inhsc0ZpbHRlciIgdHlwZT0iYnV0dG9uIiBkYXRhLWkxOG49ImRsU2hvd24iPjwvYnV0dG9uPgogICAgICA8L2Rpdj4KICAgICAgPGRpdiBjbGFzcz0iY2FyZCI+CiAgICAgICAgPGRpdiBpZD0iYWxsQ291bnQiIGNsYXNzPSJtdXRlZCI+PC9kaXY+CiAgICAgICAgPGRpdiBpZD0iYWxsVGFibGUiPjwvZGl2PgogICAgICA8L2Rpdj4KICAgIDwvZGl2PgoKICAgIDwhLS0gQ09NTUVOVFMgLS0+CiAgICA8ZGl2IGlkPSJ2Q29tbWVudHMiIGhpZGRlbj4KICAgICAgPGRpdiBjbGFzcz0icm93IG5vcHJpbnQiPgogICAgICAgIDxsYWJlbD48c3BhbiBkYXRhLWkxOG49ImNsYXNzTGJsIj48L3NwYW4+IDxzZWxlY3QgaWQ9ImNtQ2xzIj48L3NlbGVjdD48L2xhYmVsPgogICAgICAgIDxsYWJlbD48c3BhbiBkYXRhLWkxOG49InRlYWNoZXJMYmwiPjwvc3Bhbj4gPHNlbGVjdCBpZD0iY21UZWFjaGVyIj48L3NlbGVjdD48L2xhYmVsPgogICAgICAgIDxsYWJlbD48c3BhbiBkYXRhLWkxOG49InNlYXJjaExibCI+PC9zcGFuPiA8aW5wdXQgaWQ9ImNtUSIgZGF0YS1pMThuLXBoPSJzZWFyY2hQaCIgc3R5bGU9Im1pbi13aWR0aDoyMDBweCI+PC9sYWJlbD4KICAgICAgICA8YnV0dG9uIGNsYXNzPSJidG4gZGFyayIgaWQ9Inhsc0NvbW1lbnRzIiB0eXBlPSJidXR0b24iIGRhdGEtaTE4bj0iZGwiPjwvYnV0dG9uPgogICAgICA8L2Rpdj4KICAgICAgPGRpdiBjbGFzcz0iY2FyZCI+CiAgICAgICAgPGRpdiBpZD0iY21Db3VudCIgY2xhc3M9Im11dGVkIj48L2Rpdj4KICAgICAgICA8ZGl2IGlkPSJjbVRhYmxlIj48L2Rpdj4KICAgICAgPC9kaXY+CiAgICA8L2Rpdj4KCiAgICA8IS0tIElOQ0lERU5UUyAtLT4KICAgIDxkaXYgaWQ9InZJbmNpZGVudHMiIGhpZGRlbj4KICAgICAgPGRpdiBjbGFzcz0icm93IG5vcHJpbnQiPgogICAgICAgIDxsYWJlbD48c3BhbiBkYXRhLWkxOG49ImNsYXNzTGJsIj48L3NwYW4+IDxzZWxlY3QgaWQ9ImluQ2xzIj48L3NlbGVjdD48L2xhYmVsPgogICAgICAgIDxsYWJlbD48c3BhbiBkYXRhLWkxOG49InRlYWNoZXJMYmwiPjwvc3Bhbj4gPHNlbGVjdCBpZD0iaW5UZWFjaGVyIj48L3NlbGVjdD48L2xhYmVsPgogICAgICAgIDxsYWJlbD48c3BhbiBkYXRhLWkxOG49InNlYXJjaExibCI+PC9zcGFuPiA8aW5wdXQgaWQ9ImluUSIgZGF0YS1pMThuLXBoPSJzZWFyY2hQaCIgc3R5bGU9Im1pbi13aWR0aDoyMDBweCI+PC9sYWJlbD4KICAgICAgICA8YnV0dG9uIGNsYXNzPSJidG4gZGFyayIgaWQ9Inhsc0luY2lkZW50cyIgdHlwZT0iYnV0dG9uIiBkYXRhLWkxOG49ImRsIj48L2J1dHRvbj4KICAgICAgPC9kaXY+CiAgICAgIDxkaXYgY2xhc3M9ImNhcmQiPgogICAgICAgIDxkaXYgaWQ9ImluQ291bnQiIGNsYXNzPSJtdXRlZCI+PC9kaXY+CiAgICAgICAgPGRpdiBpZD0iaW5UYWJsZSI+PC9kaXY+CiAgICAgIDwvZGl2PgogICAgPC9kaXY+CiAgPC9kaXY+CjwvbWFpbj4KCjxkaXYgaWQ9InByaW50QXJlYSI+PC9kaXY+Cgo8IS0tIEV4Y2VsIGV4cG9ydCBpbiB0aGUgYnJvd3NlciAtLT4KPHNjcmlwdCBzcmM9Imh0dHBzOi8vY2RuLmpzZGVsaXZyLm5ldC9ucG0veGxzeEAwLjE4LjUvZGlzdC94bHN4LmZ1bGwubWluLmpzIj48L3NjcmlwdD4KPHNjcmlwdD4KLy8gPT09PT09PT09PT09PT09PT09PT09IFNFVFRJTkdTID09PT09PT09PT09PT09PT09PT09PQovLyBUaGUgd2ViIGFwcCBVUkwgb2YgdGhlIHRyYWNrZXIgKGVuZHMgd2l0aCAvZXhlYykuIE5vdCBzZWNyZXQ6IGRhdGEgbmVlZHMgdGhlIGJvYXJkIHBhc3N3b3JkLgpjb25zdCBCT0FSRF9VUkwgPSAiaHR0cHM6Ly9zY3JpcHQuZ29vZ2xlLmNvbS9tYWNyb3Mvcy9BS2Z5Y2J6WEkxQjBzX0hyMm5wX0JpSmxjMGlibVlzTUlvTDJ5YXhPYUl6WXFvZ3RmQWRVWGJlN3dCVWZHZGFGX3FmMHdtY2hSZy9leGVjIjsKLy8gPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KCmNvbnN0IEVWQUxTID0gWyJPdXRzdGFuZGluZyIsICJQcm9maWNpZW50IiwgIkRldmVsb3BpbmciLCAiTmVlZHMgSW1wcm92ZW1lbnQiLCAiVW5zYXRpc2ZhY3RvcnkiLCAiQWJzZW50Il07CmNvbnN0IEVWQUxfQVIgPSB7CiAgIk91dHN0YW5kaW5nIjogItmF2KrZhdmK2LIg2YjZhdio2KfYr9ixIiwKICAiUHJvZmljaWVudCI6ICLZhdmE2KrYstmFINmI2YXYqtmC2YYiLAogICJEZXZlbG9waW5nIjogItmF2YLYqNmI2YQv2KrYrdiqINin2YTYqtiv2LHZitioIiwKICAiTmVlZHMgSW1wcm92ZW1lbnQiOiAi2YrYrdiq2KfYrCDYqti32YjZitixL9iz2YTZiNmDINi22LnZitmBIiwKICAiVW5zYXRpc2ZhY3RvcnkiOiAi2LrZitixINmF2YTYqtiy2YUv2K7Yt9ixIiwKICAiQWJzZW50IjogIti62KfYptioIgp9OwoKLy8gQWxsIHRleHQgb24gdGhlIHBhZ2UuIEtleXMgYXJlIHVzZWQgYnkgZGF0YS1pMThuIGF0dHJpYnV0ZXMgYW5kIGJ5IHQoKS4KY29uc3QgVCA9IHsKICBlbjogewogICAgdGl0bGU6ICJPTUhHIEVWQSBTQ0hPT0wgwrcgQm9hcmQgb3ZlcnZpZXciLCBzaWduaW46ICJCb2FyZCBzaWduIGluIiwgcHc6ICJCb2FyZCBwYXNzd29yZCIsIG9wZW46ICJPcGVuIiwKICAgIHNpZ25PdXQ6ICJTaWduIG91dCIsIHJlZnJlc2g6ICJSZWZyZXNoIGRhdGEiLCBkYXJrOiAiRGFyayIsIGxpZ2h0OiAiTGlnaHQiLCBsYW5nQnRuOiAi2KfZhNi52LHYqNmK2KkiLAogICAgdGFiT3ZlcnZpZXc6ICJPdmVydmlldyIsIHRhYlRlYWNoZXJzOiAiVGVhY2hlcnMiLCB0YWJDbGFzc2VzOiAiQ2xhc3NlcyIsIHRhYkFsbDogIkFsbCBldmFsdWF0aW9ucyIsCiAgICB0YWJDb21tZW50czogIkNvbW1lbnRzIiwgdGFiSW5jaWRlbnRzOiAiSW5jaWRlbnRzIiwKICAgIGFzT2Y6ICJEYXRhIGFzIG9mIiwgYmFkUHc6ICJUaGUgYm9hcmQgcGFzc3dvcmQgaXMgbm90IGNvcnJlY3QuIiwgbG9hZEVycjogIkNvdWxkIG5vdCBsb2FkIHRoZSBkYXRhOiAiLAogICAga0V2YWxzOiAiRXZhbHVhdGlvbnMgKGJ5IGRhdGUpIiwga1N0dWRlbnRzOiAiU3R1ZGVudHMiLCBrQXZnOiAiQXZlcmFnZSBzY29yZSAoMC01KSIsIGtJbmM6ICJJbmNpZGVudHMiLAogICAga0Fic2VudDogIkFic2VudCByYXRlIiwga1RlYWNoZXJzOiAiVGVhY2hlcnMgd2hvIHVwbG9hZGVkIiwKICAgIGxldmVsc1RpdGxlOiAiU3R1ZGVudCByYXRpbmdzIGJ5IGxldmVsIiwgbGV2ZWxzQ291bnQ6ICJ7bn0gKHtwfSUpIiwKICAgIGNsYXNzVGl0bGU6ICJCZWhhdmlvdXIgYnkgY2xhc3MiLAogICAgY2xhc3NOb3RlOiAiQW4gZXZhbHVhdGlvbiBpcyBvbmUgY2xhc3Mgb24gb25lIGRhdGUuIEF2ZXJhZ2UgZXhjbHVkZXMgQWJzZW50LiBBYnNlbnQgcmF0ZSBpcyBBYnNlbnQgcmF0aW5ncyBvdXQgb2YgYWxsIHJhdGluZ3MuIiwKICAgIHRlYWNoZXJzVGl0bGU6ICJFdmFsdWF0aW9ucyBwZXIgdGVhY2hlciIsIHRlYWNoZXJEZXRhaWxzOiAiVGVhY2hlciBkZXRhaWxzIiwKICAgIGV2YWxDb3VudDogIntufSBldmFsdWF0aW9uKHMpIiwKICAgIGNsc0xhYmVsOiAiQ2xhc3MiLCBwcmludENsczogIlByaW50IHRoaXMgY2xhc3MiLCB4bHNDbHM6ICJEb3dubG9hZCB0aGlzIGNsYXNzIChFeGNlbCkiLCB4bHNBbGw6ICJEb3dubG9hZCBhbGwgY2xhc3NlcyAoRXhjZWwpIiwKICAgIHN0dWRlbnRzVGl0bGU6ICJTdHVkZW50cyBpbiB0aGlzIGNsYXNzIiwgYnlEYXRlVGl0bGU6ICJFdmFsdWF0aW9ucyBieSBkYXRlIiwgbm9DbGFzc0V2YWxzOiAiTm8gZXZhbHVhdGlvbnMgZm9yIHRoaXMgY2xhc3MgeWV0LiIsCiAgICBkYXlNZXRhOiAie259IHN0dWRlbnQocykgZXZhbHVhdGVkIMK3IHt0fSB0ZWFjaGVyKHMpIiwKICAgIGNsYXNzTGJsOiAiQ2xhc3MiLCB0ZWFjaGVyTGJsOiAiVGVhY2hlciIsIHNlYXJjaExibDogIlNlYXJjaCIsIHNlYXJjaFBoOiAiTmFtZSBvciBjb21tZW50IiwKICAgIGFsbENsYXNzZXM6ICJBbGwgY2xhc3NlcyIsIGFsbFRlYWNoZXJzOiAiQWxsIHRlYWNoZXJzIiwKICAgIGRsOiAiRG93bmxvYWQgKEV4Y2VsKSIsIGRsU2hvd246ICJEb3dubG9hZCBzaG93biByb3dzIChFeGNlbCkiLCBtYXRjaFJvd3M6ICJ7bn0gZXZhbHVhdGlvbihzKSBtYXRjaCIsCiAgICBzaG93aW5nTmV3ZXN0OiAiU2hvd2luZyB0aGUgbmV3ZXN0IHtzaG93bn0gb2Yge3RvdGFsfS4gRG93bmxvYWQgdG8gZ2V0IGFsbCBvZiB0aGVtLiIsCiAgICBjb21tZW50c0NvdW50OiAie259IGNvbW1lbnQocykiLCBpbmNDb3VudDogIntufSBzdHVkZW50IHJhdGluZyhzKSB3aXRoIGluY2lkZW50cyDCtyB7dH0gaW5jaWRlbnQocykgaW4gdG90YWwiLAogICAgY29sRGF0ZTogIkRhdGUiLCBjb2xFdmFsRGF0ZTogIkV2YWx1YXRpb24gZGF0ZSIsIGNvbFVwbG9hZGVkOiAiVXBsb2FkZWQiLCBjb2xDbGFzczogIkNsYXNzIiwgY29sTmFtZTogIk5hbWUiLAogICAgY29sU3R1ZGVudDogIlN0dWRlbnQiLCBjb2xUZWFjaGVyOiAiVGVhY2hlciIsIGNvbEV2YWx1YXRpb246ICJFdmFsdWF0aW9uIiwgY29sU2NvcmU6ICJTY29yZSAoMC01KSIsCiAgICBjb2xJbmNpZGVudHM6ICJJbmNpZGVudHMiLCBjb2xJbmNpZGVudDogIkluY2lkZW50IiwgY29sQ29tbWVudDogIkNvbW1lbnRzIiwgY29sQ29tbWVudHM6ICJDb21tZW50cyIsCiAgICBjb2xTdHVkZW50czogIlN0dWRlbnRzIiwgY29sRXZhbHM6ICJFdmFsdWF0aW9ucyIsIGNvbEF2ZzogIkF2ZXJhZ2UiLCBjb2xBYnNlbnRSYXRlOiAiQWJzZW50IHJhdGUiLAogICAgY29sTGFzdDogIkxhc3QgdXBsb2FkIiwgY29sQ2xhc3NlczogIkNsYXNzZXMiLCBjb2xBYnNlbnQ6ICJBYnNlbnQiLAogICAgeFVwbG9hZDogIlVwbG9hZCBUaW1pbmciLCB4RGF0ZTogIkRhdGUiLCB4U3R1ZGVudDogIlN0dWRlbnQgTmFtZSIsIHhDbGFzczogIkNsYXNzIiwgeFRlYWNoZXI6ICJUZWFjaGVyIiwKICAgIHhTY29yZTogIlNjb3JlICgwLTUpIiwgeEV2YWx1YXRpb246ICJFdmFsdWF0aW9uIiwgeFdhcm5pbmc6ICJJbmNpZGVudCAoV2FybmluZykiLCB4Q29tbWVudHM6ICJDb21tZW50cyIsCiAgICB4TmFtZTogIk5hbWUiLCB4SW5jaWRlbnQ6ICJJbmNpZGVudCIsCiAgICBwcmludFRpdGxlOiAie2Nsc30gwrcgZXZhbHVhdGlvbnMgKHtufSkiLAogICAgZmlsZUFsbDogIk9NSEcgRVZBIFNDSE9PTCAtIGFsbCBjbGFzc2VzIiwgZmlsZUNvbW1lbnRzOiAiT01IRyBFVkEgU0NIT09MIC0gY29tbWVudHMiLCBmaWxlSW5jaWRlbnRzOiAiT01IRyBFVkEgU0NIT09MIC0gaW5jaWRlbnRzIiwKICAgIGZpbGVTaG93bjogIk9NSEcgRVZBIFNDSE9PTCAtIGV2YWx1YXRpb25zIgogIH0sCiAgYXI6IHsKICAgIHRpdGxlOiAiT01IRyBFVkEgU0NIT09MIMK3INmE2YjYrdipINin2YTZhdis2YTYsyIsIHNpZ25pbjogItiq2LPYrNmK2YQg2K/YrtmI2YQg2KfZhNmF2KzZhNizIiwgcHc6ICLZg9mE2YXYqSDZhdix2YjYsSDYp9mE2YXYrNmE2LMiLCBvcGVuOiAi2YHYqtitIiwKICAgIHNpZ25PdXQ6ICLYqtiz2KzZitmEINin2YTYrtix2YjYrCIsIHJlZnJlc2g6ICLYqtit2K/ZitirINin2YTYqNmK2KfZhtin2KoiLCBkYXJrOiAi2K/Yp9mD2YYiLCBsaWdodDogItmB2KfYqtitIiwgbGFuZ0J0bjogIkVuZ2xpc2giLAogICAgdGFiT3ZlcnZpZXc6ICLZhti42LHYqSDYudin2YXYqSIsIHRhYlRlYWNoZXJzOiAi2KfZhNmF2LnZhNmF2YjZhiIsIHRhYkNsYXNzZXM6ICLYp9mE2YHYtdmI2YQiLCB0YWJBbGw6ICLZg9mEINin2YTYqtmC2YrZitmF2KfYqiIsCiAgICB0YWJDb21tZW50czogItin2YTYqti52YTZitmC2KfYqiIsIHRhYkluY2lkZW50czogItin2YTYrdmI2KfYr9irIiwKICAgIGFzT2Y6ICLYp9mE2KjZitin2YbYp9iqINit2KrZiSIsIGJhZFB3OiAi2YPZhNmF2Kkg2YXYsdmI2LEg2KfZhNmF2KzZhNizINi62YrYsSDYtdit2YrYrdipLiIsIGxvYWRFcnI6ICLYqti52LDYsSDYqtit2YXZitmEINin2YTYqNmK2KfZhtin2Ko6ICIsCiAgICBrRXZhbHM6ICLYp9mE2KrZgtmK2YrZhdin2KogKNit2LPYqCDYp9mE2KrYp9ix2YrYrikiLCBrU3R1ZGVudHM6ICLYp9mE2LfZhNin2KgiLCBrQXZnOiAi2YXYqtmI2LPYtyDYp9mE2K/Ysdis2KkgKNmF2YYgNSkiLCBrSW5jOiAi2KfZhNit2YjYp9iv2KsiLAogICAga0Fic2VudDogItmG2LPYqNipINin2YTYutmK2KfYqCIsIGtUZWFjaGVyczogItin2YTZhdi52YTZhdmI2YYg2KfZhNiw2YrZhiDYsdmB2LnZiNinINiq2YLZitmK2YXYp9iqIiwKICAgIGxldmVsc1RpdGxlOiAi2KrZgtmK2YrZhdin2Kog2KfZhNi32YTYp9ioINit2LPYqCDYp9mE2YXYs9iq2YjZiSIsIGxldmVsc0NvdW50OiAie259ICh7cH0lKSIsCiAgICBjbGFzc1RpdGxlOiAi2KfZhNiz2YTZiNmDINit2LPYqCDYp9mE2YHYtdmEIiwKICAgIGNsYXNzTm90ZTogItin2YTYqtmC2YrZitmFINin2YTZiNin2K3YryDZh9mIINmB2LXZhCDZgdmKINmK2YjZhSDZiNin2K3Yry4g2KfZhNmF2KrZiNiz2Lcg2YTYpyDZiti02YXZhCDYp9mE2LrZitin2KguINmG2LPYqNipINin2YTYutmK2KfYqCDZh9mKINiq2YLZitmK2YXYp9iqINin2YTYutmK2KfYqCDZhdmGINil2KzZhdin2YTZiiDYp9mE2KrZgtmK2YrZhdin2KouIiwKICAgIHRlYWNoZXJzVGl0bGU6ICLYp9mE2KrZgtmK2YrZhdin2Kog2YTZg9mEINmF2LnZhNmFIiwgdGVhY2hlckRldGFpbHM6ICLYqtmB2KfYtdmK2YQg2KfZhNmF2LnZhNmF2YrZhiIsCiAgICBldmFsQ291bnQ6ICJ7bn0g2KrZgtmK2YrZhSIsCiAgICBjbHNMYWJlbDogItin2YTZgdi12YQiLCBwcmludENsczogIti32KjYp9i52Kkg2YfYsNinINin2YTZgdi12YQiLCB4bHNDbHM6ICLYqtit2YXZitmEINmH2LDYpyDYp9mE2YHYtdmEIChFeGNlbCkiLCB4bHNBbGw6ICLYqtit2YXZitmEINmD2YQg2KfZhNmB2LXZiNmEIChFeGNlbCkiLAogICAgc3R1ZGVudHNUaXRsZTogIti32YTYp9ioINmH2LDYpyDYp9mE2YHYtdmEIiwgYnlEYXRlVGl0bGU6ICLYp9mE2KrZgtmK2YrZhdin2Kog2K3Ys9ioINin2YTYqtin2LHZitiuIiwgbm9DbGFzc0V2YWxzOiAi2YTYpyDYqtmI2KzYryDYqtmC2YrZitmF2KfYqiDZhNmH2LDYpyDYp9mE2YHYtdmEINio2LnYry4iLAogICAgZGF5TWV0YTogIntufSDYt9in2YTYqCDYqtmFINiq2YLZitmK2YXZhyDCtyB7dH0g2YXYudmE2YUiLAogICAgY2xhc3NMYmw6ICLYp9mE2YHYtdmEIiwgdGVhY2hlckxibDogItin2YTZhdi52YTZhSIsIHNlYXJjaExibDogItio2K3YqyIsIHNlYXJjaFBoOiAi2KfYs9mFINij2Ygg2KrYudmE2YrZgiIsCiAgICBhbGxDbGFzc2VzOiAi2YPZhCDYp9mE2YHYtdmI2YQiLCBhbGxUZWFjaGVyczogItmD2YQg2KfZhNmF2LnZhNmF2YrZhiIsCiAgICBkbDogItiq2K3ZhdmK2YQgKEV4Y2VsKSIsIGRsU2hvd246ICLYqtit2YXZitmEINin2YTYtdmB2YjZgSDYp9mE2YXYudix2YjYttipIChFeGNlbCkiLCBtYXRjaFJvd3M6ICJ7bn0g2KrZgtmK2YrZhSDZhdi32KfYqNmCIiwKICAgIHNob3dpbmdOZXdlc3Q6ICLZiti52LHYtiDYp9mE2KPYrdiv2Ksge3Nob3dufSDZhdmGIHt0b3RhbH0uINit2YXZkdmEINin2YTZhdmE2YEg2YTZhNin2LfZhNin2Lkg2LnZhNmJINin2YTZg9mELiIsCiAgICBjb21tZW50c0NvdW50OiAie259INiq2LnZhNmK2YIiLCBpbmNDb3VudDogIntufSDYqtmC2YrZitmFINi32KfZhNioINmB2YrZhyDYrdmI2KfYr9irIMK3IHt0fSDYrdin2K/Yq9ipINmB2Yog2KfZhNmF2KzZhdmI2LkiLAogICAgY29sRGF0ZTogItin2YTYqtin2LHZitiuIiwgY29sRXZhbERhdGU6ICLYqtin2LHZitiuINin2YTYqtmC2YrZitmFIiwgY29sVXBsb2FkZWQ6ICLZiNmC2Kog2KfZhNix2YHYuSIsIGNvbENsYXNzOiAi2KfZhNmB2LXZhCIsIGNvbE5hbWU6ICLYp9mE2KfYs9mFIiwKICAgIGNvbFN0dWRlbnQ6ICLYp9mE2LfYp9mE2KgiLCBjb2xUZWFjaGVyOiAi2KfZhNmF2LnZhNmFIiwgY29sRXZhbHVhdGlvbjogItin2YTYqtmC2YrZitmFIiwgY29sU2NvcmU6ICLYp9mE2K/Ysdis2KkgKDAtNSkiLAogICAgY29sSW5jaWRlbnRzOiAi2KfZhNit2YjYp9iv2KsiLCBjb2xJbmNpZGVudDogItin2YTYrdin2K/Yq9ipIiwgY29sQ29tbWVudDogItin2YTYqti52YTZitmC2KfYqiIsIGNvbENvbW1lbnRzOiAi2KfZhNiq2LnZhNmK2YLYp9iqIiwKICAgIGNvbFN0dWRlbnRzOiAi2KfZhNi32YTYp9ioIiwgY29sRXZhbHM6ICLYp9mE2KrZgtmK2YrZhdin2KoiLCBjb2xBdmc6ICLYp9mE2YXYqtmI2LPYtyIsIGNvbEFic2VudFJhdGU6ICLZhtiz2KjYqSDYp9mE2LrZitin2KgiLAogICAgY29sTGFzdDogItii2K7YsSDYsdmB2LkiLCBjb2xDbGFzc2VzOiAi2KfZhNmB2LXZiNmEIiwgY29sQWJzZW50OiAi2LrZitin2KgiLAogICAgeFVwbG9hZDogItmI2YLYqiDYp9mE2LHZgdi5IiwgeERhdGU6ICLYp9mE2KrYp9ix2YrYriIsIHhTdHVkZW50OiAi2KfYs9mFINin2YTYt9in2YTYqCIsIHhDbGFzczogItin2YTZgdi12YQiLCB4VGVhY2hlcjogItin2YTZhdi52YTZhSIsCiAgICB4U2NvcmU6ICLYp9mE2K/Ysdis2KkgKDAtNSkiLCB4RXZhbHVhdGlvbjogItin2YTYqtmC2YrZitmFIiwgeFdhcm5pbmc6ICLYp9mE2K3Yp9iv2KvYqSAo2KrZhtio2YrZhykiLCB4Q29tbWVudHM6ICLYp9mE2KrYudmE2YrZgtin2KoiLAogICAgeE5hbWU6ICLYp9mE2KfYs9mFIiwgeEluY2lkZW50OiAi2KfZhNit2KfYr9ir2KkiLAogICAgcHJpbnRUaXRsZTogIntjbHN9IMK3INin2YTYqtmC2YrZitmF2KfYqiAoe259KSIsCiAgICBmaWxlQWxsOiAiT01IRyBFVkEgU0NIT09MIC0g2YPZhCDYp9mE2YHYtdmI2YQiLCBmaWxlQ29tbWVudHM6ICJPTUhHIEVWQSBTQ0hPT0wgLSDYp9mE2KrYudmE2YrZgtin2KoiLCBmaWxlSW5jaWRlbnRzOiAiT01IRyBFVkEgU0NIT09MIC0g2KfZhNit2YjYp9iv2KsiLAogICAgZmlsZVNob3duOiAiT01IRyBFVkEgU0NIT09MIC0g2KfZhNiq2YLZitmK2YXYp9iqIgogIH0KfTsKCmxldCBMQU5HID0gbG9jYWxTdG9yYWdlLmdldEl0ZW0oImJvYXJkTGFuZyIpIHx8ICJlbiI7CmNvbnN0ICQgPSBpZCA9PiBkb2N1bWVudC5nZXRFbGVtZW50QnlJZChpZCk7CmxldCBEQVRBID0gbnVsbDsgICAgIC8vIHsgY2xhc3NlczogW25hbWVzXSwgcmVjb3JkczogWy4uLl0gfQpsZXQgUFcgPSAiIjsgICAgICAgICAvLyBib2FyZCBwYXNzd29yZCwga2VwdCBmb3IgdGhpcyBicm93c2VyIHRhYiBvbmx5CgovLyB0KCJrZXkiLCB7bjogM30pIHJldHVybnMgdGhlIHRleHQgaW4gdGhlIGN1cnJlbnQgbGFuZ3VhZ2UKZnVuY3Rpb24gdChrZXksIHZhcnMpIHsKICBsZXQgcyA9IChUW0xBTkddICYmIFRbTEFOR11ba2V5XSkgfHwgVC5lbltrZXldIHx8IGtleTsKICBpZiAodmFycykgT2JqZWN0LmtleXModmFycykuZm9yRWFjaChrID0+IHsgcyA9IHMuc3BsaXQoInsiICsgayArICJ9Iikuam9pbih2YXJzW2tdKTsgfSk7CiAgcmV0dXJuIHM7Cn0KCi8vIEV2YWx1YXRpb24gbmFtZSBpbiB0aGUgY3VycmVudCBsYW5ndWFnZQpjb25zdCBldmFsTGFiZWwgPSBuYW1lID0+IChMQU5HID09PSAiYXIiID8gKEVWQUxfQVJbbmFtZV0gfHwgbmFtZSkgOiBuYW1lKTsKCi8vIC0tLS0tLS0tLS0gbGFuZ3VhZ2UgYW5kIHRoZW1lIC0tLS0tLS0tLS0KZnVuY3Rpb24gYXBwbHlMYW5nKCkgewogIGRvY3VtZW50LmRvY3VtZW50RWxlbWVudC5sYW5nID0gTEFORzsKICBkb2N1bWVudC5kb2N1bWVudEVsZW1lbnQuZGlyID0gTEFORyA9PT0gImFyIiA/ICJydGwiIDogImx0ciI7CiAgZG9jdW1lbnQucXVlcnlTZWxlY3RvckFsbCgiW2RhdGEtaTE4bl0iKS5mb3JFYWNoKGUgPT4geyBlLnRleHRDb250ZW50ID0gdChlLmRhdGFzZXQuaTE4bik7IH0pOwogIGRvY3VtZW50LnF1ZXJ5U2VsZWN0b3JBbGwoIltkYXRhLWkxOG4tcGhdIikuZm9yRWFjaChlID0+IHsgZS5wbGFjZWhvbGRlciA9IHQoZS5kYXRhc2V0LmkxOG5QaCk7IH0pOwogICQoImxhbmdCdG4iKS50ZXh0Q29udGVudCA9IHQoImxhbmdCdG4iKTsKICBhcHBseVRoZW1lVGV4dCgpOwogIGlmIChEQVRBKSByZW5kZXJBbGwoKTsKfQoKJCgibGFuZ0J0biIpLm9uY2xpY2sgPSAoKSA9PiB7CiAgTEFORyA9IExBTkcgPT09ICJlbiIgPyAiYXIiIDogImVuIjsKICBsb2NhbFN0b3JhZ2Uuc2V0SXRlbSgiYm9hcmRMYW5nIiwgTEFORyk7CiAgYXBwbHlMYW5nKCk7Cn07CgpmdW5jdGlvbiBhcHBseVRoZW1lVGV4dCgpIHsKICBjb25zdCBkYXJrID0gZG9jdW1lbnQuZG9jdW1lbnRFbGVtZW50LmdldEF0dHJpYnV0ZSgiZGF0YS10aGVtZSIpID09PSAiZGFyayI7CiAgJCgidGhlbWVCdG4iKS50ZXh0Q29udGVudCA9IGRhcmsgPyB0KCJsaWdodCIpIDogdCgiZGFyayIpOwp9CgpmdW5jdGlvbiBhcHBseVRoZW1lKHRoZW1lKSB7CiAgZG9jdW1lbnQuZG9jdW1lbnRFbGVtZW50LnNldEF0dHJpYnV0ZSgiZGF0YS10aGVtZSIsIHRoZW1lKTsKICBsb2NhbFN0b3JhZ2Uuc2V0SXRlbSgidGhlbWUiLCB0aGVtZSk7CiAgYXBwbHlUaGVtZVRleHQoKTsKfQokKCJ0aGVtZUJ0biIpLm9uY2xpY2sgPSAoKSA9PgogIGFwcGx5VGhlbWUoZG9jdW1lbnQuZG9jdW1lbnRFbGVtZW50LmdldEF0dHJpYnV0ZSgiZGF0YS10aGVtZSIpID09PSAiZGFyayIgPyAibGlnaHQiIDogImRhcmsiKTsKYXBwbHlUaGVtZShsb2NhbFN0b3JhZ2UuZ2V0SXRlbSgidGhlbWUiKSB8fAogIChtYXRjaE1lZGlhKCIocHJlZmVycy1jb2xvci1zY2hlbWU6IGRhcmspIikubWF0Y2hlcyA/ICJkYXJrIiA6ICJsaWdodCIpKTsKCi8vIC0tLS0tLS0tLS0gaGVscGVycyAtLS0tLS0tLS0tCmZ1bmN0aW9uIGVsKHRhZywgdGV4dCwgY2xzKSB7CiAgY29uc3QgZSA9IGRvY3VtZW50LmNyZWF0ZUVsZW1lbnQodGFnKTsKICBpZiAodGV4dCAhPT0gdW5kZWZpbmVkICYmIHRleHQgIT09IG51bGwpIGUudGV4dENvbnRlbnQgPSBTdHJpbmcodGV4dCk7CiAgaWYgKGNscykgZS5jbGFzc05hbWUgPSBjbHM7CiAgcmV0dXJuIGU7Cn0KCmZ1bmN0aW9uIHRhYmxlKGhlYWRlcnMsIHJvd3MpIHsKICBjb25zdCB3cmFwID0gZWwoImRpdiIsIG51bGwsICJ0dyIpOwogIGNvbnN0IHRiID0gZWwoInRhYmxlIik7CiAgY29uc3QgdGhlYWQgPSBlbCgidGhlYWQiKTsKICBjb25zdCBociA9IGVsKCJ0ciIpOwogIGhlYWRlcnMuZm9yRWFjaChoID0+IGhyLmFwcGVuZENoaWxkKGVsKCJ0aCIsIGgpKSk7CiAgdGhlYWQuYXBwZW5kQ2hpbGQoaHIpOwogIHRiLmFwcGVuZENoaWxkKHRoZWFkKTsKICBjb25zdCBib2R5ID0gZWwoInRib2R5Iik7CiAgcm93cy5mb3JFYWNoKHIgPT4gewogICAgY29uc3QgdHIgPSBlbCgidHIiKTsKICAgIGlmIChyLmNscykgdHIuY2xhc3NOYW1lID0gci5jbHM7CiAgICByLmNlbGxzLmZvckVhY2goYyA9PiB0ci5hcHBlbmRDaGlsZChlbCgidGQiLCBjKSkpOwogICAgYm9keS5hcHBlbmRDaGlsZCh0cik7CiAgfSk7CiAgdGIuYXBwZW5kQ2hpbGQoYm9keSk7CiAgd3JhcC5hcHBlbmRDaGlsZCh0Yik7CiAgcmV0dXJuIHdyYXA7Cn0KCmZ1bmN0aW9uIHNldFZpZXcoaWQpIHsKICBbInZPdmVydmlldyIsICJ2VGVhY2hlcnMiLCAidkNsYXNzZXMiLCAidkFsbCIsICJ2Q29tbWVudHMiLCAidkluY2lkZW50cyJdLmZvckVhY2godiA9PiAkKHYpLmhpZGRlbiA9IHYgIT09IGlkKTsKICBkb2N1bWVudC5xdWVyeVNlbGVjdG9yQWxsKCIudGFiIikuZm9yRWFjaChiID0+IGIuY2xhc3NMaXN0LnRvZ2dsZSgib24iLCBiLmRhdGFzZXQudmlldyA9PT0gaWQpKTsKfQoKZnVuY3Rpb24gYXZnT2YobGlzdCkgewogIGNvbnN0IHNjb3JlZCA9IGxpc3QuZmlsdGVyKHIgPT4gci5ldmFsdWF0aW9uICE9PSAiQWJzZW50IikubWFwKHIgPT4gci5zY29yZSk7CiAgaWYgKCFzY29yZWQubGVuZ3RoKSByZXR1cm4gIuKAkyI7CiAgcmV0dXJuIE1hdGgucm91bmQoc2NvcmVkLnJlZHVjZSgoYSwgYikgPT4gYSArIGIsIDApIC8gc2NvcmVkLmxlbmd0aCAqIDEwMCkgLyAxMDA7Cn0KCi8vIE51bWJlciBvZiBldmFsdWF0aW9ucyA9IGRpc3RpbmN0IChjbGFzcywgZGF0ZSkgcGFpcnM6IG9uZSBjbGFzcyBldmFsdWF0ZWQgb24gb25lIGRhdGUgY291bnRzIG9uY2UKZnVuY3Rpb24gc2Vzc2lvbnNPZihsaXN0KSB7CiAgcmV0dXJuIG5ldyBTZXQobGlzdC5tYXAociA9PiByLmNsYXNzICsgInx8IiArIHIuZGF0ZSkpLnNpemU7Cn0KCmZ1bmN0aW9uIGdyb3VwKGxpc3QsIGtleUZuKSB7CiAgY29uc3QgZyA9IHt9OwogIGxpc3QuZm9yRWFjaChyID0+IHsgY29uc3QgayA9IGtleUZuKHIpOyAoZ1trXSA9IGdba10gfHwgW10pLnB1c2gocik7IH0pOwogIHJldHVybiBnOwp9CgpmdW5jdGlvbiBzdW1tYXJpemUobGlzdCkgewogIGNvbnN0IGFic2VudCA9IGxpc3QuZmlsdGVyKHIgPT4gci5ldmFsdWF0aW9uID09PSAiQWJzZW50IikubGVuZ3RoOwogIHJldHVybiB7CiAgICBldmFsczogc2Vzc2lvbnNPZihsaXN0KSwKICAgIHN0dWRlbnRzOiBuZXcgU2V0KGxpc3QubWFwKHIgPT4gci5jbGFzcyArICJ8fCIgKyByLnN0dWRlbnQpKS5zaXplLAogICAgY2xhc3NlczogbmV3IFNldChsaXN0Lm1hcChyID0+IHIuY2xhc3MpKS5zaXplLAogICAgdGVhY2hlcnM6IG5ldyBTZXQobGlzdC5tYXAociA9PiByLnRlYWNoZXIpKS5zaXplLAogICAgYXZnOiBhdmdPZihsaXN0KSwKICAgIGluY2lkZW50czogbGlzdC5yZWR1Y2UoKHMsIHIpID0+IHMgKyByLmluY2lkZW50cywgMCksCiAgICBhYnNlbnRSYXRlOiBsaXN0Lmxlbmd0aCA/IE1hdGgucm91bmQoYWJzZW50IC8gbGlzdC5sZW5ndGggKiAxMDApICsgIiUiIDogIuKAkyIsCiAgICBsYXN0OiBsaXN0LnJlZHVjZSgobSwgcikgPT4gKHIudXBsb2FkZWQgPiBtID8gci51cGxvYWRlZCA6IG0pLCAiIikgfHwgIuKAkyIKICB9Owp9CgovLyAtLS0tLS0tLS0tIGRhdGEgLS0tLS0tLS0tLQphc3luYyBmdW5jdGlvbiBmZXRjaERhdGEocHcpIHsKICBjb25zdCByZXMgPSBhd2FpdCBmZXRjaChCT0FSRF9VUkwsIHsKICAgIG1ldGhvZDogIlBPU1QiLAogICAgaGVhZGVyczogeyAiQ29udGVudC1UeXBlIjogInRleHQvcGxhaW47Y2hhcnNldD11dGYtOCIgfSwgICAvLyBhdm9pZHMgYSBicm93c2VyIHByZWZsaWdodCByZXF1ZXN0CiAgICBib2R5OiBKU09OLnN0cmluZ2lmeSh7IGFjdGlvbjogImJvYXJkRGF0YSIsIGtleTogcHcgfSkKICB9KTsKICBpZiAoIXJlcy5vaykgdGhyb3cgbmV3IEVycm9yKCJIVFRQICIgKyByZXMuc3RhdHVzKTsKICBjb25zdCBvdXQgPSBhd2FpdCByZXMuanNvbigpOwogIGlmIChvdXQuZXJyb3IpIHRocm93IG5ldyBFcnJvcihvdXQuZXJyb3IpOwogIHJldHVybiBvdXQ7Cn0KCmFzeW5jIGZ1bmN0aW9uIHJlZnJlc2goKSB7CiAgJCgiYXBwTXNnIikuaW5uZXJIVE1MID0gIiI7CiAgJCgicmVmcmVzaCIpLmRpc2FibGVkID0gdHJ1ZTsKICB0cnkgewogICAgREFUQSA9IGF3YWl0IGZldGNoRGF0YShQVyk7CiAgICAkKCJzdGFtcCIpLnRleHRDb250ZW50ID0gdCgiYXNPZiIpICsgIiAiICsgREFUQS5nZW5lcmF0ZWQ7CiAgICByZW5kZXJBbGwoKTsKICB9IGNhdGNoIChlKSB7CiAgICBpZiAoL3VuYXV0aG9yaXplZC8udGVzdChlLm1lc3NhZ2UpKSByZXR1cm4gc2lnbk91dCh0KCJiYWRQdyIpKTsKICAgICQoImFwcE1zZyIpLmFwcGVuZENoaWxkKGVsKCJkaXYiLCB0KCJsb2FkRXJyIikgKyBlLm1lc3NhZ2UsICJtc2ciKSk7CiAgfSBmaW5hbGx5IHsKICAgICQoInJlZnJlc2giKS5kaXNhYmxlZCA9IGZhbHNlOwogIH0KfQoKZnVuY3Rpb24gc2lnbk91dChub3RlKSB7CiAgUFcgPSAiIjsKICBzZXNzaW9uU3RvcmFnZS5yZW1vdmVJdGVtKCJib2FyZEtleSIpOwogIERBVEEgPSBudWxsOwogICQoImFwcCIpLmhpZGRlbiA9IHRydWU7CiAgJCgic2lnbk91dCIpLmhpZGRlbiA9IHRydWU7CiAgJCgiZ2F0ZSIpLmhpZGRlbiA9IGZhbHNlOwogICQoInB3IikudmFsdWUgPSAiIjsKICAkKCJnTXNnIikuaW5uZXJIVE1MID0gIiI7CiAgaWYgKG5vdGUpICQoImdNc2ciKS5hcHBlbmRDaGlsZChlbCgiZGl2Iiwgbm90ZSwgIm1zZyIpKTsKfQoKZnVuY3Rpb24gc2hvd0FwcCgpIHsKICAkKCJnYXRlIikuaGlkZGVuID0gdHJ1ZTsKICAkKCJhcHAiKS5oaWRkZW4gPSBmYWxzZTsKICAkKCJzaWduT3V0IikuaGlkZGVuID0gZmFsc2U7Cn0KCiQoIm9wZW5CdG4iKS5vbmNsaWNrID0gYXN5bmMgKCkgPT4gewogIGNvbnN0IHB3ID0gJCgicHciKS52YWx1ZS50cmltKCk7CiAgaWYgKCFwdykgcmV0dXJuOwogICQoIm9wZW5CdG4iKS5kaXNhYmxlZCA9IHRydWU7CiAgdHJ5IHsKICAgIFBXID0gcHc7CiAgICBEQVRBID0gYXdhaXQgZmV0Y2hEYXRhKHB3KTsKICAgIHNlc3Npb25TdG9yYWdlLnNldEl0ZW0oImJvYXJkS2V5IiwgcHcpOwogICAgJCgic3RhbXAiKS50ZXh0Q29udGVudCA9IHQoImFzT2YiKSArICIgIiArIERBVEEuZ2VuZXJhdGVkOwogICAgc2hvd0FwcCgpOwogICAgcmVuZGVyQWxsKCk7CiAgfSBjYXRjaCAoZSkgewogICAgUFcgPSAiIjsKICAgICQoImdNc2ciKS5pbm5lckhUTUwgPSAiIjsKICAgICQoImdNc2ciKS5hcHBlbmRDaGlsZChlbCgiZGl2IiwgL3VuYXV0aG9yaXplZC8udGVzdChlLm1lc3NhZ2UpID8gdCgiYmFkUHciKSA6IHQoImxvYWRFcnIiKSArIGUubWVzc2FnZSwgIm1zZyIpKTsKICB9IGZpbmFsbHkgewogICAgJCgib3BlbkJ0biIpLmRpc2FibGVkID0gZmFsc2U7CiAgfQp9OwokKCJwdyIpLmFkZEV2ZW50TGlzdGVuZXIoImtleWRvd24iLCBlID0+IHsgaWYgKGUua2V5ID09PSAiRW50ZXIiKSAkKCJvcGVuQnRuIikuY2xpY2soKTsgfSk7CiQoInNpZ25PdXQiKS5vbmNsaWNrID0gKCkgPT4gc2lnbk91dCgiIik7CiQoInJlZnJlc2giKS5vbmNsaWNrID0gcmVmcmVzaDsKZG9jdW1lbnQucXVlcnlTZWxlY3RvckFsbCgiLnRhYiIpLmZvckVhY2goYiA9PiBiLm9uY2xpY2sgPSAoKSA9PiBzZXRWaWV3KGIuZGF0YXNldC52aWV3KSk7CgovLyAtLS0tLS0tLS0tIHJlbmRlcmluZyAtLS0tLS0tLS0tCmZ1bmN0aW9uIHJlbmRlckFsbCgpIHsKICBjb25zdCByZWNzID0gREFUQS5yZWNvcmRzOwogIGNvbnN0IGNsYXNzTmFtZXMgPSBbLi4ubmV3IFNldChbLi4uREFUQS5jbGFzc2VzLCAuLi5yZWNzLm1hcChyID0+IHIuY2xhc3MpXSldLnNvcnQoKTsKICBjb25zdCB0ZWFjaGVyTmFtZXMgPSBbLi4ubmV3IFNldChyZWNzLm1hcChyID0+IHIudGVhY2hlcikpXS5zb3J0KCk7CiAgY29uc3QgYWxsID0gc3VtbWFyaXplKHJlY3MpOwoKICAvLyBPdmVydmlldwogIGNvbnN0IGtwaXMgPSAkKCJrcGlzIik7CiAga3Bpcy5pbm5lckhUTUwgPSAiIjsKICBbCiAgICBbdCgia0V2YWxzIiksIGFsbC5ldmFsc10sCiAgICBbdCgia1N0dWRlbnRzIiksIGFsbC5zdHVkZW50c10sCiAgICBbdCgia0F2ZyIpLCBhbGwuYXZnXSwKICAgIFt0KCJrSW5jIiksIGFsbC5pbmNpZGVudHNdLAogICAgW3QoImtBYnNlbnQiKSwgYWxsLmFic2VudFJhdGVdLAogICAgW3QoImtUZWFjaGVycyIpLCBhbGwudGVhY2hlcnNdCiAgXS5mb3JFYWNoKChbbCwgdl0pID0+IHsKICAgIGNvbnN0IGsgPSBlbCgiZGl2IiwgbnVsbCwgImtwaSIpOwogICAgay5hcHBlbmQoZWwoImRpdiIsIGwsICJsIiksIGVsKCJkaXYiLCB2LCAidiIpKTsKICAgIGtwaXMuYXBwZW5kQ2hpbGQoayk7CiAgfSk7CgogIGNvbnN0IGRpc3QgPSAkKCJkaXN0Iik7CiAgZGlzdC5pbm5lckhUTUwgPSAiIjsKICBjb25zdCBjb3VudHMgPSBFVkFMUy5tYXAoZSA9PiBbZSwgcmVjcy5maWx0ZXIociA9PiByLmV2YWx1YXRpb24gPT09IGUpLmxlbmd0aF0pOwogIGNvbnN0IG1heEMgPSBNYXRoLm1heCgxLCAuLi5jb3VudHMubWFwKGMgPT4gY1sxXSkpOwogIGNvdW50cy5mb3JFYWNoKChbbmFtZSwgbl0pID0+IGRpc3QuYXBwZW5kQ2hpbGQoYmFyUm93KGV2YWxMYWJlbChuYW1lKSwgbiwgbWF4QywKICAgIHQoImxldmVsc0NvdW50IiwgeyBuOiBuLCBwOiByZWNzLmxlbmd0aCA/IE1hdGgucm91bmQobiAvIHJlY3MubGVuZ3RoICogMTAwKSA6IDAgfSkpKSk7CgogIGNvbnN0IGJ5Q2xhc3MgPSBncm91cChyZWNzLCByID0+IHIuY2xhc3MpOwogICQoImNsYXNzVGFibGUiKS5pbm5lckhUTUwgPSAiIjsKICAkKCJjbGFzc1RhYmxlIikuYXBwZW5kQ2hpbGQodGFibGUoCiAgICBbdCgiY29sQ2xhc3MiKSwgdCgiY29sU3R1ZGVudHMiKSwgdCgiY29sRXZhbHMiKSwgdCgiY29sQXZnIiksIHQoImNvbEluY2lkZW50cyIpLCB0KCJjb2xBYnNlbnRSYXRlIiksIHQoImNvbExhc3QiKV0sCiAgICBjbGFzc05hbWVzLm1hcChjID0+IHsKICAgICAgY29uc3QgcyA9IHN1bW1hcml6ZShieUNsYXNzW2NdIHx8IFtdKTsKICAgICAgcmV0dXJuIHsgY2VsbHM6IFtjLCBzLnN0dWRlbnRzLCBzLmV2YWxzLCBzLmF2Zywgcy5pbmNpZGVudHMsIHMuYWJzZW50UmF0ZSwgcy5sYXN0XSB9OwogICAgfSkpKTsKCiAgLy8gVGVhY2hlcnMKICBjb25zdCBieVRlYWNoZXIgPSBncm91cChyZWNzLCByID0+IHIudGVhY2hlcik7CiAgY29uc3QgbWF4VCA9IE1hdGgubWF4KDEsIC4uLnRlYWNoZXJOYW1lcy5tYXAobiA9PiBzZXNzaW9uc09mKGJ5VGVhY2hlcltuXSB8fCBbXSkpKTsKICAkKCJ0ZWFjaGVyQmFycyIpLmlubmVySFRNTCA9ICIiOwogIHRlYWNoZXJOYW1lcy5mb3JFYWNoKG4gPT4gewogICAgY29uc3QgYyA9IHNlc3Npb25zT2YoYnlUZWFjaGVyW25dIHx8IFtdKTsKICAgICQoInRlYWNoZXJCYXJzIikuYXBwZW5kQ2hpbGQoYmFyUm93KG4sIGMsIG1heFQsIHQoImV2YWxDb3VudCIsIHsgbjogYyB9KSkpOwogIH0pOwogICQoInRlYWNoZXJUYWJsZSIpLmlubmVySFRNTCA9ICIiOwogICQoInRlYWNoZXJUYWJsZSIpLmFwcGVuZENoaWxkKHRhYmxlKAogICAgW3QoImNvbFRlYWNoZXIiKSwgdCgiY29sRXZhbHMiKSwgdCgiY29sQ2xhc3NlcyIpLCB0KCJjb2xTdHVkZW50cyIpLCB0KCJjb2xMYXN0IildLAogICAgdGVhY2hlck5hbWVzLm1hcChuID0+IHsKICAgICAgY29uc3QgcyA9IHN1bW1hcml6ZShieVRlYWNoZXJbbl0gfHwgW10pOwogICAgICByZXR1cm4geyBjZWxsczogW24sIHMuZXZhbHMsIHMuY2xhc3Nlcywgcy5zdHVkZW50cywgcy5sYXN0XSB9OwogICAgfSkpKTsKCiAgLy8gQ2xhc3MgdGFiCiAgZmlsbFNlbGVjdCgkKCJjbHNQaWNrIiksIGNsYXNzTmFtZXMsICQoImNsc1BpY2siKS52YWx1ZSk7CiAgcmVuZGVyQ2xhc3MoKTsKCiAgLy8gQWxsIGV2YWx1YXRpb25zIHRhYgogIGZpbGxTZWxlY3QoJCgiZkNscyIpLCBjbGFzc05hbWVzLCAkKCJmQ2xzIikudmFsdWUsICJhbGxDbGFzc2VzIik7CiAgZmlsbFNlbGVjdCgkKCJmVGVhY2hlciIpLCB0ZWFjaGVyTmFtZXMsICQoImZUZWFjaGVyIikudmFsdWUsICJhbGxUZWFjaGVycyIpOwogIHJlbmRlckFsbFRhYmxlKCk7CgogIC8vIENvbW1lbnRzIGFuZCBpbmNpZGVudHMgdGFicwogIGZpbGxTZWxlY3QoJCgiY21DbHMiKSwgY2xhc3NOYW1lcywgJCgiY21DbHMiKS52YWx1ZSwgImFsbENsYXNzZXMiKTsKICBmaWxsU2VsZWN0KCQoImNtVGVhY2hlciIpLCB0ZWFjaGVyTmFtZXMsICQoImNtVGVhY2hlciIpLnZhbHVlLCAiYWxsVGVhY2hlcnMiKTsKICBmaWxsU2VsZWN0KCQoImluQ2xzIiksIGNsYXNzTmFtZXMsICQoImluQ2xzIikudmFsdWUsICJhbGxDbGFzc2VzIik7CiAgZmlsbFNlbGVjdCgkKCJpblRlYWNoZXIiKSwgdGVhY2hlck5hbWVzLCAkKCJpblRlYWNoZXIiKS52YWx1ZSwgImFsbFRlYWNoZXJzIik7CiAgcmVuZGVyQ29tbWVudHMoKTsKICByZW5kZXJJbmNpZGVudHMoKTsKfQoKZnVuY3Rpb24gYmFyUm93KGxhYmVsLCBuLCBtYXgsIHRleHQpIHsKICBjb25zdCByb3cgPSBlbCgiZGl2IiwgbnVsbCwgImJhcnJvdyIpOwogIHJvdy5hcHBlbmRDaGlsZChlbCgic3BhbiIsIGxhYmVsKSk7CiAgY29uc3QgdHJhY2sgPSBlbCgiZGl2IiwgbnVsbCwgInRyYWNrIik7CiAgY29uc3QgZmlsbCA9IGVsKCJkaXYiLCBudWxsLCAiZmlsbCIpOwogIGZpbGwuc3R5bGUud2lkdGggPSBNYXRoLnJvdW5kKG4gLyBtYXggKiAxMDApICsgIiUiOwogIHRyYWNrLmFwcGVuZENoaWxkKGZpbGwpOwogIHJvdy5hcHBlbmQodHJhY2ssIGVsKCJzcGFuIiwgdGV4dCkpOwogIHJldHVybiByb3c7Cn0KCi8vIGFsbEtleTogdHJhbnNsYXRpb24ga2V5IGZvciB0aGUgImFsbCIgb3B0aW9uLCBpZiB0aGUgZHJvcGRvd24gc2hvdWxkIGhhdmUgb25lCmZ1bmN0aW9uIGZpbGxTZWxlY3Qoc2VsLCB2YWx1ZXMsIGtlZXAsIGFsbEtleSkgewogIHNlbC5pbm5lckhUTUwgPSAiIjsKICBpZiAoYWxsS2V5KSBzZWwuYWRkKG5ldyBPcHRpb24odChhbGxLZXkpLCAiIikpOwogIHZhbHVlcy5mb3JFYWNoKHYgPT4gc2VsLmFkZChuZXcgT3B0aW9uKHYsIHYpKSk7CiAgc2VsLnZhbHVlID0gdmFsdWVzLmluY2x1ZGVzKGtlZXApID8ga2VlcCA6IChhbGxLZXkgPyAiIiA6IHZhbHVlc1swXSB8fCAiIik7Cn0KCmZ1bmN0aW9uIHNvcnRSZWNzKGxpc3QpIHsKICByZXR1cm4gbGlzdC5zbGljZSgpLnNvcnQoKGEsIGIpID0+IChhLmRhdGUgPCBiLmRhdGUgPyAxIDogYS5kYXRlID4gYi5kYXRlID8gLTEgOiAoYi51cGxvYWRlZCA+IGEudXBsb2FkZWQgPyAxIDogLTEpKSk7Cn0KCmZ1bmN0aW9uIHJlbmRlckNsYXNzKCkgewogIGNvbnN0IGNscyA9ICQoImNsc1BpY2siKS52YWx1ZTsKICBjb25zdCBsaXN0ID0gREFUQS5yZWNvcmRzLmZpbHRlcihyID0+IHIuY2xhc3MgPT09IGNscyk7CiAgY29uc3QgcyA9IHN1bW1hcml6ZShsaXN0KTsKICBjb25zdCBrcCA9ICQoImNsc0twaXMiKTsKICBrcC5pbm5lckhUTUwgPSAiIjsKICBbW3QoImtTdHVkZW50cyIpLCBzLnN0dWRlbnRzXSwgW3QoImtFdmFscyIpLCBzLmV2YWxzXSwgW3QoImtBdmciKSwgcy5hdmddLAogICBbdCgia0luYyIpLCBzLmluY2lkZW50c10sIFt0KCJrQWJzZW50IiksIHMuYWJzZW50UmF0ZV0sIFt0KCJjb2xMYXN0IiksIHMubGFzdF1dCiAgICAuZm9yRWFjaCgoW2wsIHZdKSA9PiB7CiAgICAgIGNvbnN0IGsgPSBlbCgiZGl2IiwgbnVsbCwgImtwaSIpOwogICAgICBrLmFwcGVuZChlbCgiZGl2IiwgbCwgImwiKSwgZWwoImRpdiIsIHYsICJ2IikpOwogICAgICBrcC5hcHBlbmRDaGlsZChrKTsKICAgIH0pOwoKICBjb25zdCBieVN0dWRlbnQgPSBncm91cChsaXN0LCByID0+IHIuc3R1ZGVudCk7CiAgJCgiY2xzU3R1ZGVudHMiKS5pbm5lckhUTUwgPSAiIjsKICAkKCJjbHNTdHVkZW50cyIpLmFwcGVuZENoaWxkKHRhYmxlKAogICAgW3QoImNvbFN0dWRlbnQiKSwgdCgiY29sRXZhbHMiKSwgdCgiY29sQXZnIiksIHQoImNvbEluY2lkZW50cyIpLCB0KCJjb2xBYnNlbnQiKV0sCiAgICBPYmplY3Qua2V5cyhieVN0dWRlbnQpLnNvcnQoKS5tYXAobmFtZSA9PiB7CiAgICAgIGNvbnN0IHJzID0gYnlTdHVkZW50W25hbWVdOwogICAgICBjb25zdCBpbmMgPSBycy5yZWR1Y2UoKGEsIHIpID0+IGEgKyByLmluY2lkZW50cywgMCk7CiAgICAgIHJldHVybiB7CiAgICAgICAgY2xzOiBpbmMgPiAwID8gImluYyIgOiAiIiwKICAgICAgICBjZWxsczogW25hbWUsIHJzLmxlbmd0aCwgYXZnT2YocnMpLCBpbmMsIHJzLmZpbHRlcihyID0+IHIuZXZhbHVhdGlvbiA9PT0gIkFic2VudCIpLmxlbmd0aF0KICAgICAgfTsKICAgIH0pKSk7CgogIHJlbmRlckNsYXNzRGF0ZXMobGlzdCk7Cn0KCi8vIFRvZ2dsZSBsaXN0IGZvciBvbmUgY2xhc3M6IG9uZSByb3cgcGVyIGV2YWx1YXRpb24gZGF0ZSwgbmV3ZXN0IGZpcnN0LgpmdW5jdGlvbiByZW5kZXJDbGFzc0RhdGVzKGxpc3QpIHsKICBjb25zdCBib3ggPSAkKCJjbHNSZWNlbnQiKTsKICBib3guaW5uZXJIVE1MID0gIiI7CiAgaWYgKCFsaXN0Lmxlbmd0aCkgewogICAgYm94LmFwcGVuZENoaWxkKGVsKCJkaXYiLCB0KCJub0NsYXNzRXZhbHMiKSwgIm11dGVkIikpOwogICAgcmV0dXJuOwogIH0KICBjb25zdCBieURhdGUgPSBncm91cChsaXN0LCByID0+IHIuZGF0ZSk7CiAgT2JqZWN0LmtleXMoYnlEYXRlKS5zb3J0KCkucmV2ZXJzZSgpLmZvckVhY2goKGRheSwgaSkgPT4gewogICAgY29uc3QgcmVjcyA9IGJ5RGF0ZVtkYXldOwogICAgY29uc3QgdGVhY2hlcnMgPSBuZXcgU2V0KHJlY3MubWFwKHIgPT4gci50ZWFjaGVyKSkuc2l6ZTsKCiAgICBjb25zdCBkZXQgPSBlbCgiZGV0YWlscyIsIG51bGwsICJkYXljYXJkIik7CiAgICBkZXQub3BlbiA9IGkgPT09IDA7CiAgICBjb25zdCBzdW0gPSBlbCgic3VtbWFyeSIpOwogICAgc3VtLmFwcGVuZCgKICAgICAgZWwoInNwYW4iLCBkYXkpLAogICAgICBlbCgic3BhbiIsIHQoImRheU1ldGEiLCB7IG46IHJlY3MubGVuZ3RoLCB0OiB0ZWFjaGVycyB9KSwgImRheW1ldGEiKSk7CiAgICBkZXQuYXBwZW5kQ2hpbGQoc3VtKTsKCiAgICBjb25zdCBzb3J0ZWQgPSByZWNzLnNsaWNlKCkuc29ydCgoYSwgYikgPT4KICAgICAgYS51cGxvYWRlZCA8IGIudXBsb2FkZWQgPyAxIDogYS51cGxvYWRlZCA+IGIudXBsb2FkZWQgPyAtMSA6IGEuc3R1ZGVudC5sb2NhbGVDb21wYXJlKGIuc3R1ZGVudCkpOwogICAgZGV0LmFwcGVuZENoaWxkKHRhYmxlKAogICAgICBbdCgiY29sVXBsb2FkZWQiKSwgdCgiY29sU3R1ZGVudCIpLCB0KCJjb2xUZWFjaGVyIiksIHQoImNvbEV2YWx1YXRpb24iKSwgdCgiY29sU2NvcmUiKSwgdCgiY29sSW5jaWRlbnRzIiksIHQoImNvbENvbW1lbnQiKV0sCiAgICAgIHNvcnRlZC5tYXAociA9PiAoewogICAgICAgIGNsczogci5pbmNpZGVudHMgPiAwID8gImluYyIgOiAiIiwKICAgICAgICBjZWxsczogW3IudXBsb2FkZWQsIHIuc3R1ZGVudCwgci50ZWFjaGVyLCBldmFsTGFiZWwoci5ldmFsdWF0aW9uKSwgci5zY29yZSwgci5pbmNpZGVudHMsIHIuY29tbWVudF0KICAgICAgfSkpKSk7CiAgICBib3guYXBwZW5kQ2hpbGQoZGV0KTsKICB9KTsKfQoKZnVuY3Rpb24gZmlsdGVyZWRSZWNzKCkgewogIGNvbnN0IGMgPSAkKCJmQ2xzIikudmFsdWUsIHRjaCA9ICQoImZUZWFjaGVyIikudmFsdWUsIHEgPSAkKCJmUSIpLnZhbHVlLnRyaW0oKS50b0xvd2VyQ2FzZSgpOwogIHJldHVybiBzb3J0UmVjcyhEQVRBLnJlY29yZHMuZmlsdGVyKHIgPT4KICAgICghYyB8fCByLmNsYXNzID09PSBjKSAmJiAoIXRjaCB8fCByLnRlYWNoZXIgPT09IHRjaCkgJiYgKCFxIHx8IHIuc3R1ZGVudC50b0xvd2VyQ2FzZSgpLmluY2x1ZGVzKHEpKSkpOwp9CgpmdW5jdGlvbiByZW5kZXJBbGxUYWJsZSgpIHsKICBjb25zdCBsaXN0ID0gZmlsdGVyZWRSZWNzKCk7CiAgJCgiYWxsQ291bnQiKS50ZXh0Q29udGVudCA9IHQoIm1hdGNoUm93cyIsIHsgbjogbGlzdC5sZW5ndGggfSk7CiAgJCgiYWxsVGFibGUiKS5pbm5lckhUTUwgPSAiIjsKICAkKCJhbGxUYWJsZSIpLmFwcGVuZENoaWxkKHRhYmxlKAogICAgW3QoImNvbERhdGUiKSwgdCgiY29sQ2xhc3MiKSwgdCgiY29sVGVhY2hlciIpLCB0KCJjb2xTdHVkZW50IiksIHQoImNvbEV2YWx1YXRpb24iKSwgdCgiY29sU2NvcmUiKSwgdCgiY29sSW5jaWRlbnRzIiksIHQoImNvbENvbW1lbnQiKV0sCiAgICBsaXN0LnNsaWNlKDAsIDMwMCkubWFwKHIgPT4gKHsKICAgICAgY2xzOiByLmluY2lkZW50cyA+IDAgPyAiaW5jIiA6ICIiLAogICAgICBjZWxsczogW3IuZGF0ZSwgci5jbGFzcywgci50ZWFjaGVyLCByLnN0dWRlbnQsIGV2YWxMYWJlbChyLmV2YWx1YXRpb24pLCByLnNjb3JlLCByLmluY2lkZW50cywgci5jb21tZW50XQogICAgfSkpKSk7CiAgaWYgKGxpc3QubGVuZ3RoID4gMzAwKSAkKCJhbGxUYWJsZSIpLmFwcGVuZENoaWxkKGVsKCJkaXYiLCB0KCJzaG93aW5nTmV3ZXN0IiwgeyBzaG93bjogMzAwLCB0b3RhbDogbGlzdC5sZW5ndGggfSksICJtdXRlZCIpKTsKfQoKWyJjbHNQaWNrIl0uZm9yRWFjaChpZCA9PiAkKGlkKS5vbmNoYW5nZSA9IHJlbmRlckNsYXNzKTsKWyJmQ2xzIiwgImZUZWFjaGVyIl0uZm9yRWFjaChpZCA9PiAkKGlkKS5vbmNoYW5nZSA9IHJlbmRlckFsbFRhYmxlKTsKJCgiZlEiKS5vbmlucHV0ID0gcmVuZGVyQWxsVGFibGU7ClsiY21DbHMiLCAiY21UZWFjaGVyIl0uZm9yRWFjaChpZCA9PiAkKGlkKS5vbmNoYW5nZSA9IHJlbmRlckNvbW1lbnRzKTsKJCgiY21RIikub25pbnB1dCA9IHJlbmRlckNvbW1lbnRzOwpbImluQ2xzIiwgImluVGVhY2hlciJdLmZvckVhY2goaWQgPT4gJChpZCkub25jaGFuZ2UgPSByZW5kZXJJbmNpZGVudHMpOwokKCJpblEiKS5vbmlucHV0ID0gcmVuZGVySW5jaWRlbnRzOwoKLy8gLS0tLS0tLS0tLSBjb21tZW50cyBhbmQgaW5jaWRlbnRzIHRhYnMgLS0tLS0tLS0tLQpmdW5jdGlvbiBmaWx0ZXJCeShjbHNJZCwgdGVhY2hlcklkLCBxSWQsIGJhc2UpIHsKICBjb25zdCBjID0gJChjbHNJZCkudmFsdWUsIHRjaCA9ICQodGVhY2hlcklkKS52YWx1ZSwgcSA9ICQocUlkKS52YWx1ZS50cmltKCkudG9Mb3dlckNhc2UoKTsKICByZXR1cm4gc29ydFJlY3MoYmFzZS5maWx0ZXIociA9PgogICAgKCFjIHx8IHIuY2xhc3MgPT09IGMpICYmCiAgICAoIXRjaCB8fCByLnRlYWNoZXIgPT09IHRjaCkgJiYKICAgICghcSB8fCByLnN0dWRlbnQudG9Mb3dlckNhc2UoKS5pbmNsdWRlcyhxKSB8fCByLmNvbW1lbnQudG9Mb3dlckNhc2UoKS5pbmNsdWRlcyhxKSkpKTsKfQoKZnVuY3Rpb24gbm90ZUlmTG9uZyhjb250YWluZXIsIHRvdGFsLCBzaG93bikgewogIGlmICh0b3RhbCA+IHNob3duKSBjb250YWluZXIuYXBwZW5kQ2hpbGQoZWwoImRpdiIsIHQoInNob3dpbmdOZXdlc3QiLCB7IHNob3duOiBzaG93biwgdG90YWw6IHRvdGFsIH0pLCAibXV0ZWQiKSk7Cn0KCmZ1bmN0aW9uIHJlbmRlckNvbW1lbnRzKCkgewogIGNvbnN0IGJhc2UgPSBEQVRBLnJlY29yZHMuZmlsdGVyKHIgPT4gci5jb21tZW50LnRyaW0oKSAhPT0gIiIpOwogIGNvbnN0IGxpc3QgPSBmaWx0ZXJCeSgiY21DbHMiLCAiY21UZWFjaGVyIiwgImNtUSIsIGJhc2UpOwogICQoImNtQ291bnQiKS50ZXh0Q29udGVudCA9IHQoImNvbW1lbnRzQ291bnQiLCB7IG46IGxpc3QubGVuZ3RoIH0pOwogIGNvbnN0IGJveCA9ICQoImNtVGFibGUiKTsKICBib3guaW5uZXJIVE1MID0gIiI7CiAgYm94LmFwcGVuZENoaWxkKHRhYmxlKAogICAgW3QoImNvbERhdGUiKSwgdCgiY29sQ2xhc3MiKSwgdCgiY29sTmFtZSIpLCB0KCJjb2xUZWFjaGVyIiksIHQoImNvbENvbW1lbnRzIildLAogICAgbGlzdC5zbGljZSgwLCA1MDApLm1hcChyID0+ICh7IGNlbGxzOiBbci5kYXRlLCByLmNsYXNzLCByLnN0dWRlbnQsIHIudGVhY2hlciwgci5jb21tZW50XSB9KSkpKTsKICBub3RlSWZMb25nKGJveCwgbGlzdC5sZW5ndGgsIDUwMCk7Cn0KCmZ1bmN0aW9uIHJlbmRlckluY2lkZW50cygpIHsKICBjb25zdCBiYXNlID0gREFUQS5yZWNvcmRzLmZpbHRlcihyID0+IHIuaW5jaWRlbnRzID4gMCk7CiAgY29uc3QgbGlzdCA9IGZpbHRlckJ5KCJpbkNscyIsICJpblRlYWNoZXIiLCAiaW5RIiwgYmFzZSk7CiAgY29uc3QgdG90YWwgPSBsaXN0LnJlZHVjZSgocywgcikgPT4gcyArIHIuaW5jaWRlbnRzLCAwKTsKICAkKCJpbkNvdW50IikudGV4dENvbnRlbnQgPSB0KCJpbmNDb3VudCIsIHsgbjogbGlzdC5sZW5ndGgsIHQ6IHRvdGFsIH0pOwogIGNvbnN0IGJveCA9ICQoImluVGFibGUiKTsKICBib3guaW5uZXJIVE1MID0gIiI7CiAgYm94LmFwcGVuZENoaWxkKHRhYmxlKAogICAgW3QoImNvbERhdGUiKSwgdCgiY29sQ2xhc3MiKSwgdCgiY29sTmFtZSIpLCB0KCJjb2xUZWFjaGVyIiksIHQoImNvbEluY2lkZW50IiksIHQoImNvbENvbW1lbnRzIildLAogICAgbGlzdC5zbGljZSgwLCA1MDApLm1hcChyID0+ICh7CiAgICAgIGNsczogImluYyIsCiAgICAgIGNlbGxzOiBbci5kYXRlLCByLmNsYXNzLCByLnN0dWRlbnQsIHIudGVhY2hlciwgci5pbmNpZGVudHMsIHIuY29tbWVudF0KICAgIH0pKSkpOwogIG5vdGVJZkxvbmcoYm94LCBsaXN0Lmxlbmd0aCwgNTAwKTsKfQoKLy8gLS0tLS0tLS0tLSBFeGNlbCAoaGVhZGVycyBmb2xsb3cgdGhlIHBhZ2UgbGFuZ3VhZ2UpIC0tLS0tLS0tLS0KZnVuY3Rpb24gc2FmZVNoZWV0TmFtZShuYW1lKSB7CiAgcmV0dXJuIFN0cmluZyhuYW1lKS5yZXBsYWNlKC9bXFxcL1w/XCpcW1xdOl0vZywgIiAiKS5zdWJzdHJpbmcoMCwgMzEpOwp9CgpmdW5jdGlvbiByb3dzRm9yKGxpc3QpIHsKICBjb25zdCBoZWFkZXIgPSBbdCgieFVwbG9hZCIpLCB0KCJ4RGF0ZSIpLCB0KCJ4U3R1ZGVudCIpLCB0KCJ4Q2xhc3MiKSwgdCgieFRlYWNoZXIiKSwKICAgICAgICAgICAgICAgICAgdCgieFNjb3JlIiksIHQoInhFdmFsdWF0aW9uIiksIHQoInhXYXJuaW5nIiksIHQoInhDb21tZW50cyIpXTsKICByZXR1cm4gW2hlYWRlcl0uY29uY2F0KGxpc3QubWFwKHIgPT4gWwogICAgci51cGxvYWRlZCwgci5kYXRlLCByLnN0dWRlbnQsIHIuY2xhc3MsIHIudGVhY2hlciwgci5zY29yZSwgZXZhbExhYmVsKHIuZXZhbHVhdGlvbiksCiAgICByLmluY2lkZW50cyA+IDAgPyByLmluY2lkZW50cyA6ICIiLCByLmNvbW1lbnQKICBdKSk7Cn0KCmZ1bmN0aW9uIGRvd25sb2FkV29ya2Jvb2soc2hlZXRzLCBmaWxlbmFtZSkgewogIGNvbnN0IHdiID0gWExTWC51dGlscy5ib29rX25ldygpOwogIHNoZWV0cy5mb3JFYWNoKChbbmFtZSwgbGlzdF0pID0+CiAgICBYTFNYLnV0aWxzLmJvb2tfYXBwZW5kX3NoZWV0KHdiLCBYTFNYLnV0aWxzLmFvYV90b19zaGVldChyb3dzRm9yKGxpc3QpKSwgc2FmZVNoZWV0TmFtZShuYW1lKSkpOwogIFhMU1gud3JpdGVGaWxlKHdiLCBmaWxlbmFtZSArICIueGxzeCIpOwp9CgpmdW5jdGlvbiBkb3dubG9hZFRhYmxlKGZpbGVuYW1lLCBoZWFkZXJzLCByb3dzKSB7CiAgY29uc3Qgd2IgPSBYTFNYLnV0aWxzLmJvb2tfbmV3KCk7CiAgWExTWC51dGlscy5ib29rX2FwcGVuZF9zaGVldCh3YiwgWExTWC51dGlscy5hb2FfdG9fc2hlZXQoW2hlYWRlcnNdLmNvbmNhdChyb3dzKSksIHNhZmVTaGVldE5hbWUoZmlsZW5hbWUpKTsKICBYTFNYLndyaXRlRmlsZSh3YiwgZmlsZW5hbWUgKyAiLnhsc3giKTsKfQoKJCgieGxzQ2xzIikub25jbGljayA9ICgpID0+IHsKICBjb25zdCBjbHMgPSAkKCJjbHNQaWNrIikudmFsdWU7CiAgY29uc3QgbGlzdCA9IHNvcnRSZWNzKERBVEEucmVjb3Jkcy5maWx0ZXIociA9PiByLmNsYXNzID09PSBjbHMpKS5yZXZlcnNlKCk7CiAgZG93bmxvYWRXb3JrYm9vayhbW2NscywgbGlzdF1dLCBjbHMgKyAiIC0gIiArIHQoImNvbEV2YWxzIikpOwp9OwoKJCgieGxzQWxsIikub25jbGljayA9ICgpID0+IHsKICBjb25zdCBuYW1lcyA9IFsuLi5uZXcgU2V0KERBVEEucmVjb3Jkcy5tYXAociA9PiByLmNsYXNzKSldLnNvcnQoKTsKICBjb25zdCBieUNsYXNzID0gZ3JvdXAoREFUQS5yZWNvcmRzLCByID0+IHIuY2xhc3MpOwogIGRvd25sb2FkV29ya2Jvb2sobmFtZXMubWFwKG4gPT4gW24sIHNvcnRSZWNzKGJ5Q2xhc3Nbbl0pLnJldmVyc2UoKV0pLCB0KCJmaWxlQWxsIikpOwp9OwoKJCgieGxzRmlsdGVyIikub25jbGljayA9ICgpID0+IHsKICBjb25zdCBsaXN0ID0gZmlsdGVyZWRSZWNzKCkuc2xpY2UoKS5yZXZlcnNlKCk7CiAgZG93bmxvYWRXb3JrYm9vayhbW3QoInRhYkFsbCIpLCBsaXN0XV0sIHQoImZpbGVTaG93biIpKTsKfTsKCiQoInhsc0NvbW1lbnRzIikub25jbGljayA9ICgpID0+IHsKICBjb25zdCBsaXN0ID0gZmlsdGVyQnkoImNtQ2xzIiwgImNtVGVhY2hlciIsICJjbVEiLCBEQVRBLnJlY29yZHMuZmlsdGVyKHIgPT4gci5jb21tZW50LnRyaW0oKSAhPT0gIiIpKS5yZXZlcnNlKCk7CiAgZG93bmxvYWRUYWJsZSh0KCJmaWxlQ29tbWVudHMiKSwKICAgIFt0KCJ4RGF0ZSIpLCB0KCJ4Q2xhc3MiKSwgdCgieE5hbWUiKSwgdCgieFRlYWNoZXIiKSwgdCgieENvbW1lbnRzIildLAogICAgbGlzdC5tYXAociA9PiBbci5kYXRlLCByLmNsYXNzLCByLnN0dWRlbnQsIHIudGVhY2hlciwgci5jb21tZW50XSkpOwp9OwoKJCgieGxzSW5jaWRlbnRzIikub25jbGljayA9ICgpID0+IHsKICBjb25zdCBsaXN0ID0gZmlsdGVyQnkoImluQ2xzIiwgImluVGVhY2hlciIsICJpblEiLCBEQVRBLnJlY29yZHMuZmlsdGVyKHIgPT4gci5pbmNpZGVudHMgPiAwKSkucmV2ZXJzZSgpOwogIGRvd25sb2FkVGFibGUodCgiZmlsZUluY2lkZW50cyIpLAogICAgW3QoInhEYXRlIiksIHQoInhDbGFzcyIpLCB0KCJ4TmFtZSIpLCB0KCJ4VGVhY2hlciIpLCB0KCJ4SW5jaWRlbnQiKSwgdCgieENvbW1lbnRzIildLAogICAgbGlzdC5tYXAociA9PiBbci5kYXRlLCByLmNsYXNzLCByLnN0dWRlbnQsIHIudGVhY2hlciwgci5pbmNpZGVudHMsIHIuY29tbWVudF0pKTsKfTsKCi8vIC0tLS0tLS0tLS0gcHJpbnQgb25lIGNsYXNzIC0tLS0tLS0tLS0KJCgicHJpbnRDbHMiKS5vbmNsaWNrID0gKCkgPT4gewogIGNvbnN0IGNscyA9ICQoImNsc1BpY2siKS52YWx1ZTsKICBjb25zdCBsaXN0ID0gc29ydFJlY3MoREFUQS5yZWNvcmRzLmZpbHRlcihyID0+IHIuY2xhc3MgPT09IGNscykpLnJldmVyc2UoKTsKICBjb25zdCBhcmVhID0gJCgicHJpbnRBcmVhIik7CiAgYXJlYS5pbm5lckhUTUwgPSAiIjsKICBhcmVhLmFwcGVuZENoaWxkKGVsKCJoMiIsIHQoInByaW50VGl0bGUiLCB7IGNsczogY2xzLCBuOiBsaXN0Lmxlbmd0aCB9KSkpOwogIGFyZWEuYXBwZW5kQ2hpbGQodGFibGUoCiAgICBbdCgiY29sRGF0ZSIpLCB0KCJjb2xTdHVkZW50IiksIHQoImNvbFRlYWNoZXIiKSwgdCgiY29sRXZhbHVhdGlvbiIpLCB0KCJjb2xTY29yZSIpLCB0KCJjb2xJbmNpZGVudHMiKSwgdCgiY29sQ29tbWVudCIpXSwKICAgIGxpc3QubWFwKHIgPT4gKHsKICAgICAgY2xzOiByLmluY2lkZW50cyA+IDAgPyAiaW5jIiA6ICIiLAogICAgICBjZWxsczogW3IuZGF0ZSwgci5zdHVkZW50LCByLnRlYWNoZXIsIGV2YWxMYWJlbChyLmV2YWx1YXRpb24pLCByLnNjb3JlLCByLmluY2lkZW50cywgci5jb21tZW50XQogICAgfSkpKSk7CiAgd2luZG93LnByaW50KCk7Cn07CgovLyAtLS0tLS0tLS0tIHN0YXJ0IC0tLS0tLS0tLS0KYXBwbHlMYW5nKCk7Cihhc3luYyBmdW5jdGlvbiBzdGFydCgpIHsKICBjb25zdCBzYXZlZCA9IHNlc3Npb25TdG9yYWdlLmdldEl0ZW0oImJvYXJkS2V5Iik7CiAgaWYgKCFzYXZlZCkgeyAkKCJnYXRlIikuaGlkZGVuID0gZmFsc2U7IHJldHVybjsgfQogIFBXID0gc2F2ZWQ7CiAgdHJ5IHsKICAgIERBVEEgPSBhd2FpdCBmZXRjaERhdGEoc2F2ZWQpOwogICAgJCgic3RhbXAiKS50ZXh0Q29udGVudCA9IHQoImFzT2YiKSArICIgIiArIERBVEEuZ2VuZXJhdGVkOwogICAgc2hvd0FwcCgpOwogICAgcmVuZGVyQWxsKCk7CiAgfSBjYXRjaCAoZSkgewogICAgc2lnbk91dCgvdW5hdXRob3JpemVkLy50ZXN0KGUubWVzc2FnZSkgPyB0KCJiYWRQdyIpIDogdCgibG9hZEVyciIpICsgZS5tZXNzYWdlKTsKICB9Cn0pKCk7CgovLyAtLS0tLS0tLS0tIGluc2lkZSB0aGUgYWRtaW4gcGFnZSAtLS0tLS0tLS0tCi8vIFRoZSBhZG1pbiBwYWdlIHNob3dzIHRoaXMgYm9hcmQgaW4gYSBmcmFtZSBhbmQgc2VuZHMgaXRzIGFkbWluIGtleSwgc28gbm8gYm9hcmQgcGFzc3dvcmQgaXMgbmVlZGVkLgovLyBPbmx5IHRoZSBwYWdlIHRoYXQgY29udGFpbnMgdGhpcyBib2FyZCBjYW4gc2lnbiBpdCBpbiB0aGlzIHdheS4Kd2luZG93LmFkZEV2ZW50TGlzdGVuZXIoIm1lc3NhZ2UiLCBlID0+IHsKICBpZiAoZS5zb3VyY2UgIT09IHdpbmRvdy5wYXJlbnQgfHwgd2luZG93LnBhcmVudCA9PT0gd2luZG93KSByZXR1cm47CiAgY29uc3QgbSA9IGUuZGF0YSB8fCB7fTsKICBpZiAobS50eXBlICE9PSAib21oZy1hZG1pbi1rZXkiIHx8ICFtLmtleSkgcmV0dXJuOwogIFBXID0gbS5rZXk7CiAgZG9jdW1lbnQuZG9jdW1lbnRFbGVtZW50LmNsYXNzTGlzdC5hZGQoImVtYmVkZGVkIik7CiAgc2hvd0FwcCgpOwogIHJlZnJlc2goKTsKfSk7CmlmICh3aW5kb3cucGFyZW50ICE9PSB3aW5kb3cpIHdpbmRvdy5wYXJlbnQucG9zdE1lc3NhZ2UoeyB0eXBlOiAib21oZy1ib2FyZC1yZWFkeSIgfSwgIioiKTsKPC9zY3JpcHQ+CjwvYm9keT4KPC9odG1sPg==";
+let boardStarted = false;
+function evInit() {
+  evFill();
+  if (boardStarted) return;
+  boardStarted = true;
+  const html = new TextDecoder().decode(Uint8Array.from(atob(BOARD_HTML_B64), ch => ch.charCodeAt(0)));
+  $('boardFrame').srcdoc = html;
+}
+window.addEventListener('message', e => {
+  const f = $('boardFrame');
+  if (!f || e.source !== f.contentWindow) return;
+  if ((e.data || {}).type === 'omhg-board-ready') f.contentWindow.postMessage({ type: 'omhg-admin-key', key: ADMIN_KEY }, '*');
+});
+function reloadBoard() {
+  const f = $('boardFrame');
+  if (boardStarted && f.contentWindow) f.contentWindow.postMessage({ type: 'omhg-admin-key', key: ADMIN_KEY }, '*');
+}
+
+// ---------- upload past evaluations ----------
+const EV_SCALE = [
+  { en: 'Outstanding', ar: 'متميز ومبادر', letter: 'O', score: 5 },
+  { en: 'Proficient', ar: 'ملتزم ومتقن', letter: 'P', score: 4 },
+  { en: 'Developing', ar: 'مقبول/تحت التدريب', letter: 'D', score: 3 },
+  { en: 'Needs Improvement', ar: 'يحتاج تطوير/سلوك ضعيف', letter: 'N', score: 2 },
+  { en: 'Unsatisfactory', ar: 'غير ملتزم/خطر', letter: 'U', score: 1 },
+  { en: 'Absent', ar: 'غائب', letter: 'A', score: 0 }
+];
+let EVP = null;    // checked upload: { cls, teacher, rows, errors, dates }
+
+function evFill() {
+  const c = $('evCls'), prevC = c.value, t = $('evTeacher'), prevT = t.value;
+  c.innerHTML = ''; t.innerHTML = '';
+  c.add(new Option('-- choose class --', ''));
+  state.classes.forEach(x => c.add(new Option(x, x)));
+  c.value = state.classes.includes(prevC) ? prevC : '';
+  t.add(new Option('-- choose teacher --', ''));
+  state.teachers.forEach(x => t.add(new Option(x.name, x.name)));
+  t.value = state.teachers.some(x => x.name === prevT) ? prevT : '';
+}
+
+// Names and words compared loosely: Arabic letter forms (أ إ آ → ا, ى → ي, ة → ه), marks and spaces ignored
+const evNorm = v => String(v ?? '').normalize('NFKC').replace(/[\u064B-\u065F\u0640]/g, '')
+  .replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/\s+/g, ' ').trim().toLowerCase();
+// A cell such as "P", "Proficient", "ملتزم ومتقن", "P!" (one incident) or "D!!" (two); "" = no evaluation
+function evCell(v) {
+  let t = String(v ?? '').trim();
+  if (!t) return null;
+  const m = /[!！]+$/.exec(t);
+  const incidents = m ? m[0].length : 0;
+  if (m) t = t.slice(0, -m[0].length).trim();
+  const k = evNorm(t);
+  const e = EV_SCALE.find(x => evNorm(x.letter) === k || evNorm(x.en) === k || evNorm(x.ar) === k);
+  return e ? { evaluation: e.en, score: e.score, incidents } : { bad: String(v) };
+}
+
+$('evCls').onchange = $('evTeacher').onchange = () => { EVP = null; $('evFile').value = ''; evRender(); };
+
+$('evTemplate').onclick = () => {
+  const cls = $('evCls').value;
+  if (!cls) return evMsg('Choose a class first.', false);
+  const students = state.students.filter(s => s.cls === cls).map(s => s.name);
+  const blank = Array(8).fill('');
+  const rows = [['Student \\ Date (YYYY-MM-DD)', ...blank], ...students.map(n => [n, ...blank])];
+  const help = [['How to fill this template'], [''],
+    ['Row 1, from column B: one date per column, e.g. 2026-10-05. Add more columns if you need them.'],
+    ['Under each date, one evaluation per student: O, P, D, N, U or A (or the English or Arabic word).'],
+    ['O = Outstanding, P = Proficient, D = Developing, N = Needs Improvement, U = Unsatisfactory, A = Absent.'],
+    ['Add ! for an incident: P! = Proficient with one incident, D!! = two incidents.'],
+    ['Leave a cell empty when the student was not evaluated that day. Do not change the names in column A.']];
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(xlsxBlob([{ name: cls, rows, bold: [0] }, { name: 'How to fill', rows: help, bold: [0] }]));
+  a.download = `Past evaluations template - ${cls}.xlsx`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+
+function evMsg(text, ok) {
+  $('evStatus').innerHTML = text ? `<div class="msg ${ok ? 'ok' : 'err'}">${esc(text)}</div>` : '';
+}
+
+$('evFile').onchange = async () => {
+  const file = $('evFile').files[0];
+  const cls = $('evCls').value, teacher = $('evTeacher').value;
+  EVP = null;
+  evRender();
+  if (!file) return;
+  if (!cls || !teacher) { $('evFile').value = ''; return evMsg('Choose the class and the teacher first, then the file.', false); }
+  try {
+    const grid = /\.csv$/i.test(file.name) ? parseCsv(await file.text()) : await readXlsxFirstSheet(await file.arrayBuffer());
+    EVP = evPlan(cls, teacher, grid);
+    evMsg('', true);
+    evRender();
+  } catch (e) {
+    evMsg('Could not read this file: ' + e.message, false);
+  }
+};
+
+// Grid → evaluation records for the class, with every problem listed
+function evPlan(cls, teacher, grid) {
+  const roster = {};
+  state.students.filter(s => s.cls === cls).forEach(s => { roster[evNorm(s.name)] = s.name; });
+  const head = grid[0] || [];
+  const errors = [], rows = [], dates = [];
+  const cols = [];
+  for (let c = 1; c < head.length; c++) {
+    if (String(head[c] ?? '').trim() === '') continue;
+    const d = excelDate(head[c]);
+    if (!d) { errors.push(`Column ${colName(c)}: "${head[c]}" is not a date (use 2026-10-05).`); continue; }
+    if (dates.includes(d)) { errors.push(`Column ${colName(c)}: the date ${d} is used twice.`); continue; }
+    dates.push(d);
+    cols.push({ c, d });
+  }
+  const seen = new Set();
+  for (let r = 1; r < grid.length; r++) {
+    const raw = String((grid[r] || [])[0] ?? '').trim();
+    if (!raw) continue;
+    const name = roster[evNorm(raw)];
+    if (!name) { errors.push(`Row ${r + 1}: "${raw}" is not a student of ${cls}.`); continue; }
+    if (seen.has(name)) { errors.push(`Row ${r + 1}: ${name} appears twice.`); continue; }
+    seen.add(name);
+    cols.forEach(({ c, d }) => {
+      const e = evCell((grid[r] || [])[c]);
+      if (!e) return;
+      if (e.bad) { errors.push(`${colName(c)}${r + 1} (${name}, ${d}): "${e.bad}" is not an evaluation.`); return; }
+      rows.push({ date: d, student: name, evaluation: e.evaluation, score: e.score, incidents: e.incidents, comment: '' });
+    });
+  }
+  if (!dates.length) errors.push('No dates found in row 1, from column B.');
+  if (!errors.length && !rows.length) errors.push('No evaluations found under the dates.');
+  return { cls, teacher, rows, errors, dates };
+}
+
+function evRender() {
+  const box = $('evPreview');
+  $('evSave').hidden = true;
+  if (!EVP) { box.innerHTML = ''; return; }
+  if (EVP.errors.length) {
+    box.innerHTML = `<div class="msg err"><b>Fix these in the file, then choose it again:</b><ul style="margin:6px 0 0 18px;padding:0">${
+      EVP.errors.slice(0, 30).map(e => `<li>${esc(e)}</li>`).join('')}${EVP.errors.length > 30 ? `<li>and ${EVP.errors.length - 30} more</li>` : ''}</ul></div>`;
+    return;
+  }
+  const count = {};
+  EVP.rows.forEach(r => { count[r.evaluation] = (count[r.evaluation] || 0) + 1; });
+  const inc = EVP.rows.reduce((n, r) => n + r.incidents, 0);
+  const ds = EVP.dates.slice().sort();
+  box.innerHTML = `<div class="msg ok">Checked: <b>${EVP.rows.length}</b> evaluation(s) for <b>${esc(EVP.cls)}</b> by <b>${esc(EVP.teacher)}</b>,
+    ${EVP.dates.length} date(s) from ${ds[0]} to ${ds[ds.length - 1]}${inc ? `, ${inc} incident(s)` : ''}.<br>
+    ${EV_SCALE.filter(e => count[e.en]).map(e => `${esc(e.en)} ${count[e.en]}`).join(' · ')}</div>`;
+  $('evSave').hidden = false;
+}
+
+$('evSave').onclick = async () => {
+  if (!EVP || EVP.errors.length) return;
+  if (!window.confirm(`Save ${EVP.rows.length} past evaluation(s) for ${EVP.cls} as ${EVP.teacher}?`)) return;
+  const btn = $('evSave');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  try {
+    const out = await post('adminSaveEvaluations', { class: EVP.cls, teacher: EVP.teacher, rows: EVP.rows });
+    evMsg(`Saved ${out.added} evaluation(s) to ${out.tab}` + (out.skipped ? `; ${out.skipped} were already saved and were skipped.` : '.'), true);
+    EVP = null;
+    $('evFile').value = '';
+    evRender();
+    reloadBoard();
+  } catch (e) {
+    evMsg('Could not save: ' + e.message, false);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save evaluations';
+  }
+};
+
+// Date cell: an Excel date number, or text like 2026-11-22 or 22/11/2026
+function excelDate(v) {
+  if (typeof v === 'number' && v > 20000 && v < 80000) {
+    const d = new Date(Math.round((v - 25569) * 86400000));
+    return d.toISOString().slice(0, 10);
+  }
+  const t = String(v).trim();
+  let m = /^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/.exec(t);
+  if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
+  m = /^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})/.exec(t);
+  if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+  return '';
+}
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [], cur = '', q = false;
+  text = text.replace(/^﻿/, '');
+  const sep = (text.split('\n')[0].match(/;/g) || []).length > (text.split('\n')[0].match(/,/g) || []).length ? ';' : ',';
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (q) {
+      if (ch === '"' && text[i + 1] === '"') { cur += '"'; i++; }
+      else if (ch === '"') q = false;
+      else cur += ch;
+    } else if (ch === '"') q = true;
+    else if (ch === sep) { row.push(cur); cur = ''; }
+    else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && text[i + 1] === '\n') i++;
+      row.push(cur); rows.push(row); row = []; cur = '';
+    } else cur += ch;
+  }
+  if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
+  return rows;
+}
+
+// Reads the first sheet of an .xlsx file into a grid of values (numbers stay numbers)
+async function readXlsxFirstSheet(buf) {
+  const files = await unzip(buf);
+  const text = name => files[name] ? new TextDecoder().decode(files[name]) : '';
+  const xml = s => new DOMParser().parseFromString(s, 'application/xml');
+  if (!files['xl/workbook.xml']) throw new Error('this is not an Excel .xlsx file');
+
+  // First sheet's file, via the workbook relationships
+  const wb = xml(text('xl/workbook.xml'));
+  const first = wb.getElementsByTagName('sheet')[0];
+  let path = 'xl/worksheets/sheet1.xml';
+  if (first) {
+    const rid = first.getAttribute('r:id') || first.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id');
+    const rels = xml(text('xl/_rels/workbook.xml.rels')).getElementsByTagName('Relationship');
+    for (const r of rels) {
+      if (r.getAttribute('Id') === rid) {
+        const t = r.getAttribute('Target').replace(/^\//, '');
+        path = t.startsWith('xl/') ? t : 'xl/' + t;
+      }
+    }
+  }
+  const shared = [];
+  if (files['xl/sharedStrings.xml']) {
+    for (const si of xml(text('xl/sharedStrings.xml')).getElementsByTagName('si')) {
+      shared.push([...si.getElementsByTagName('t')].map(t => t.textContent).join(''));
+    }
+  }
+  const sheet = xml(text(path));
+  const grid = [];
+  for (const c of sheet.getElementsByTagName('c')) {
+    const ref = c.getAttribute('r') || '';
+    const m = /^([A-Z]+)(\d+)$/.exec(ref);
+    if (!m) continue;
+    const col = [...m[1]].reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0) - 1;
+    const row = Number(m[2]) - 1;
+    const t = c.getAttribute('t');
+    const vEl = c.getElementsByTagName('v')[0];
+    let v = vEl ? vEl.textContent : '';
+    if (t === 's') v = shared[Number(v)] ?? '';
+    else if (t === 'inlineStr') v = [...c.getElementsByTagName('t')].map(x => x.textContent).join('');
+    else if (t === 'str' || t === 'e') v = v;
+    else if (t === 'b') v = v === '1' ? 'TRUE' : 'FALSE';
+    else if (v !== '') v = Number(v);
+    (grid[row] = grid[row] || [])[col] = v;
+  }
+  for (let i = 0; i < grid.length; i++) grid[i] = grid[i] || [];
+  return grid;
+}
+
+// Minimal zip reader (stored and deflated entries), using the browser's own decompressor
+async function unzip(buf) {
+  const dv = new DataView(buf);
+  const u8 = new Uint8Array(buf);
+  let eocd = -1;
+  for (let i = buf.byteLength - 22; i >= Math.max(0, buf.byteLength - 65557); i--) {
+    if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  }
+  if (eocd < 0) throw new Error('this is not an Excel .xlsx file');
+  const count = dv.getUint16(eocd + 10, true);
+  let p = dv.getUint32(eocd + 16, true);
+  const out = {};
+  const dec = new TextDecoder();
+  for (let k = 0; k < count; k++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const method = dv.getUint16(p + 10, true);
+    const csize = dv.getUint32(p + 20, true);
+    const nlen = dv.getUint16(p + 28, true), xlen = dv.getUint16(p + 30, true), clen = dv.getUint16(p + 32, true);
+    const local = dv.getUint32(p + 42, true);
+    const name = dec.decode(u8.subarray(p + 46, p + 46 + nlen));
+    p += 46 + nlen + xlen + clen;
+    if (!/^(xl\/workbook\.xml|xl\/_rels\/workbook\.xml\.rels|xl\/sharedStrings\.xml|xl\/worksheets\/[^/]+\.xml)$/.test(name)) continue;
+    const start = local + 30 + dv.getUint16(local + 26, true) + dv.getUint16(local + 28, true);
+    const data = u8.subarray(start, start + csize);
+    if (method === 0) out[name] = data;
+    else if (method === 8) {
+      if (typeof DecompressionStream === 'undefined') throw new Error('this browser is too old to read Excel files; save the sheet as CSV instead');
+      const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+      out[name] = new Uint8Array(await new Response(stream).arrayBuffer());
+    }
+  }
+  return out;
+}
+
+
+// ---------- sign in / sign out ----------
+function adminGateShow(note) {
+  $('main').hidden = true;
+  $('adminGate').hidden = false;
+  $('signOutBtn').hidden = true;
+  $('loadBtn').hidden = $('saveBtn').hidden = true;
+  $('gateKey').value = '';
+  $('gateMsg').innerHTML = note ? `<div class="msg err">${esc(note)}</div>` : '';
+  setTimeout(() => $('gateKey').focus(), 0);
+}
+
+function adminStart() {
+  $('adminGate').hidden = true;
+  $('main').hidden = false;
+  $('signOutBtn').hidden = false;
+  renderAll();
+  loadLists();
+  showPane(localStorage.getItem('adminPane') || 'lists');
+}
+
+// Forget the key on this device; the page reloads so nothing signed-in stays open (e.g. the board)
+function adminSignOut(note) {
+  localStorage.removeItem('adminKey');
+  sessionStorage.removeItem('adminKey');
+  if (note) sessionStorage.setItem('adminGateNote', note);
+  location.reload();
+}
+
+$('signOutBtn').onclick = () => {
+  if ((dirty || W.dirty) && !window.confirm('You have changes that are not saved. Sign out anyway?')) return;
+  dirty = false; W.dirty = false;            // no second "leave page" warning
+  adminSignOut();
+};
+
+async function adminSignIn() {
+  const key = $('gateKey').value.trim();
+  if (!key) return ($('gateMsg').innerHTML = '<div class="msg err">Type the admin password.</div>');
+  $('gateBtn').disabled = true;
+  $('gateBtn').textContent = 'Checking…';
+  try {
+    ADMIN_KEY = key;
+    await post('adminLists');                  // the server checks the key
+    (($('gateKeep').checked) ? localStorage : sessionStorage).setItem('adminKey', key);
+    adminStart();
+  } catch (e) {
+    ADMIN_KEY = '';
+    $('gateMsg').innerHTML = `<div class="msg err">${/unauthorized/i.test(e.message) ? 'That admin password is not correct.' : esc('Could not check the password: ' + e.message)}</div>`;
+  } finally {
+    $('gateBtn').disabled = false;
+    $('gateBtn').textContent = 'Sign in';
+  }
+}
+$('gateBtn').onclick = adminSignIn;
+$('gateKey').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); adminSignIn(); } });
+
+// ---------- start ----------
+const gateNote = sessionStorage.getItem('adminGateNote');
+sessionStorage.removeItem('adminGateNote');
+if (ADMIN_KEY) adminStart();
+else adminGateShow(gateNote);
+</script>
+</body>
+</html>
