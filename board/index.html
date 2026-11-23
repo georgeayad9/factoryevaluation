@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>EVA School · Board overview</title>
+<title>OMHG EVA SCHOOL · Board overview</title>
 <style>
 :root{--brand:#F7C948;--brand-dark:#D9A900;--brand-tint:#FFF8E1;--bg:#FBF8EE;--card:#ffffff;--ink:#1d1d1d;--muted:#666666;--line:#e6e9ee;--border:#ccd3db;--red:#d32f2f;--red-bg:#fdecea;--bar:#F7C948}
 [data-theme="dark"]{--bg:#16161a;--card:#22222a;--ink:#f2f2f2;--muted:#a8a8b3;--line:#33333d;--border:#4a4a56;--brand-tint:#2e2a18;--red-bg:#3a1e1e;--bar:#E0B232}
@@ -56,6 +56,7 @@ select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-s
   #printArea th,#printArea td{border-bottom:1px solid #ccc}
   @page{size:A4 landscape;margin:12mm}
 }
+.embedded #signOut{display:none !important}
 </style>
 </head>
 <body>
@@ -205,7 +206,7 @@ const EVAL_AR = {
 // All text on the page. Keys are used by data-i18n attributes and by t().
 const T = {
   en: {
-    title: "EVA School · Board overview", signin: "Board sign in", pw: "Board password", open: "Open",
+    title: "OMHG EVA SCHOOL · Board overview", signin: "Board sign in", pw: "Board password", open: "Open",
     signOut: "Sign out", refresh: "Refresh data", dark: "Dark", light: "Light", langBtn: "العربية",
     tabOverview: "Overview", tabTeachers: "Teachers", tabClasses: "Classes", tabAll: "All evaluations",
     tabComments: "Comments", tabIncidents: "Incidents",
@@ -234,11 +235,11 @@ const T = {
     xScore: "Score (0-5)", xEvaluation: "Evaluation", xWarning: "Incident (Warning)", xComments: "Comments",
     xName: "Name", xIncident: "Incident",
     printTitle: "{cls} · evaluations ({n})",
-    fileAll: "EVA School - all classes", fileComments: "EVA School - comments", fileIncidents: "EVA School - incidents",
-    fileShown: "EVA School - evaluations"
+    fileAll: "OMHG EVA SCHOOL - all classes", fileComments: "OMHG EVA SCHOOL - comments", fileIncidents: "OMHG EVA SCHOOL - incidents",
+    fileShown: "OMHG EVA SCHOOL - evaluations"
   },
   ar: {
-    title: "مدرسة EVA · لوحة المجلس", signin: "تسجيل دخول المجلس", pw: "كلمة مرور المجلس", open: "فتح",
+    title: "OMHG EVA SCHOOL · لوحة المجلس", signin: "تسجيل دخول المجلس", pw: "كلمة مرور المجلس", open: "فتح",
     signOut: "تسجيل الخروج", refresh: "تحديث البيانات", dark: "داكن", light: "فاتح", langBtn: "English",
     tabOverview: "نظرة عامة", tabTeachers: "المعلمون", tabClasses: "الفصول", tabAll: "كل التقييمات",
     tabComments: "التعليقات", tabIncidents: "الحوادث",
@@ -267,8 +268,8 @@ const T = {
     xScore: "الدرجة (0-5)", xEvaluation: "التقييم", xWarning: "الحادثة (تنبيه)", xComments: "التعليقات",
     xName: "الاسم", xIncident: "الحادثة",
     printTitle: "{cls} · التقييمات ({n})",
-    fileAll: "مدرسة EVA - كل الفصول", fileComments: "مدرسة EVA - التعليقات", fileIncidents: "مدرسة EVA - الحوادث",
-    fileShown: "مدرسة EVA - التقييمات"
+    fileAll: "OMHG EVA SCHOOL - كل الفصول", fileComments: "OMHG EVA SCHOOL - التعليقات", fileIncidents: "OMHG EVA SCHOOL - الحوادث",
+    fileShown: "OMHG EVA SCHOOL - التقييمات"
   }
 };
 
@@ -769,6 +770,20 @@ applyLang();
     signOut(/unauthorized/.test(e.message) ? t("badPw") : t("loadErr") + e.message);
   }
 })();
+
+// ---------- inside the admin page ----------
+// The admin page shows this board in a frame and sends its admin key, so no board password is needed.
+// Only the page that contains this board can sign it in this way.
+window.addEventListener("message", e => {
+  if (e.source !== window.parent || window.parent === window) return;
+  const m = e.data || {};
+  if (m.type !== "omhg-admin-key" || !m.key) return;
+  PW = m.key;
+  document.documentElement.classList.add("embedded");
+  showApp();
+  refresh();
+});
+if (window.parent !== window) window.parent.postMessage({ type: "omhg-board-ready" }, "*");
 </script>
 </body>
 </html>
