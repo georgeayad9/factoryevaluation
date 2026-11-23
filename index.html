@@ -1,1092 +1,972 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OMHG EVA SCHOOL</title>
+<title>Assessment Attempts</title>
 <style>
-  :root{
-    --brand:#F7C948; --brand-dark:#D9A900; --brand-soft:#FFF3C4; --brand-tint:#FFF8E1;
-    --bg:#FBF8EE; --card:#ffffff; --field:#ffffff; --ink:#1d1d1d; --muted:#666666; --label:#555555;
-    --border:#ccd3db; --line:#e6e9ee; --stu-border:#e1e6ec; --hover:#FFF8E1;
-    --incident-bg:#fff8f8; --red:#d32f2f; --ok-bg:#e6f4ea; --ok-ink:#17652a; --err-bg:#fdecea; --err-ink:#8a1c12;
-    --disabled:#9aa5b1; --shadow:rgba(0,0,0,.08);
+  :root {
+    --bg: #f6f7f9; --card: #fff; --text: #1d2430; --muted: #6b7585; --line: #e3e7ee;
+    --brand: #1F4E79; --pass: #1e8e4e; --fail: #c0392b; --warn: #b7791f; --hold: #6c5ce7; --dis: #d35400;
   }
-  [data-theme="dark"]{
-    --brand-dark:#E0B232; --brand-soft:#4a3d12; --brand-tint:#2e2a18;
-    --bg:#16161a; --card:#22222a; --field:#1b1b21; --ink:#f2f2f2; --muted:#a8a8b3; --label:#c4c4cc;
-    --border:#4a4a56; --line:#33333d; --stu-border:#3a3a46; --hover:#2e2a18;
-    --incident-bg:#3a1e1e; --ok-bg:#1d3324; --ok-ink:#8fd6a4; --err-bg:#3a1e1e; --err-ink:#f5a3a3;
-    --disabled:#55555f; --shadow:rgba(0,0,0,.4);
-  }
-
   * { box-sizing: border-box; }
-  [hidden]{display:none !important}
-  body{font-family:system-ui,"Segoe UI",Arial,sans-serif;margin:0;background:var(--bg);color:var(--ink)}
-  header{background:var(--brand);color:#1d1d1d;padding:10px 20px;font-size:18px;font-weight:700;display:flex;align-items:center;gap:12px}
-  header .title{flex:1}
-  header .logo{height:52px;width:auto}
-  .theme{height:34px;padding:0 12px;border-radius:8px;border:1px solid #1d1d1d;background:transparent;color:#1d1d1d;font-size:13px;cursor:pointer;font-weight:600}
-  main{max-width:1000px;margin:16px auto;padding:0 12px}
-  .card{background:var(--card);border-radius:12px;box-shadow:0 1px 3px var(--shadow);padding:14px;margin-bottom:14px}
-  .gate{max-width:440px;margin:24px auto}
-  label{font-size:13px;color:var(--label);display:block;margin-bottom:4px}
-  select,input,textarea{width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;font-size:15px;font-family:inherit;background:var(--field);color:var(--ink)}
-  .top{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .who{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px;font-size:14px;color:var(--label)}
-  .bulk{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;background:var(--brand-tint);padding:12px;border-radius:10px;margin-bottom:12px}
-  .bulk > div{display:flex;flex-direction:column;flex:1 1 140px}
-  .selall{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--ink);height:38px}
-  .selall input{width:20px;height:20px;margin:0}
-  .hint{font-size:12px;color:var(--muted);margin:8px 0}
-  .tabs{display:flex;gap:8px;margin-bottom:14px}
-  .tab{flex:1;height:44px;border-radius:10px;border:1px solid var(--brand-dark);background:var(--card);color:var(--ink);font-size:15px;cursor:pointer}
-  .tab.on{background:var(--brand);color:#1d1d1d;font-weight:600}
-
-  /* main sections and their sub-tabs */
-  .nav{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
-  .nav .tab{height:48px;font-size:15px;font-weight:600}
-  .nav .tab small{display:block;font-size:11px;font-weight:400;color:var(--muted)}
-  .tabs.sub .tab{height:38px;font-size:14px}
-  @media (max-width:560px){ .nav{grid-template-columns:1fr 1fr} }
-  .soon{text-align:center;padding:40px 14px;color:var(--muted);font-size:15px}
-  .grow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
-  .grow .gname{flex:1;font-size:15px;font-weight:600;min-width:0;overflow-wrap:anywhere}
-  .grow input[type=number]{width:90px;flex:0 0 auto}
-  .grow .gmax{font-size:13px;color:var(--muted);width:40px}
-  .grow label.abs{display:flex;align-items:center;gap:4px;margin:0;font-size:13px;white-space:nowrap}
-  .grow label.abs input{width:18px;height:18px;margin:0}
-  .grow.bad input[type=number]{border-color:var(--red)}
-  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
-  @media (max-width:700px){ .grid3{grid-template-columns:1fr} }
-
-  /* daily grading */
-  .sesRow{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:10px}
-  .sesBtn{height:48px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--ink);cursor:pointer;position:relative;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
-  .sesBtn b{font-size:16px}
-  .sesBtn small{font-size:11px;color:var(--muted)}
-  .sesBtn.on{background:var(--brand);border-color:var(--brand-dark);color:#1d1d1d}
-  .sesBtn.on small{color:#1d1d1d}
-  .sesBtn.done::after{content:"\2713";position:absolute;top:2px;right:5px;font-size:12px;color:var(--ok-ink)}
-  @media (max-width:560px){ .sesRow{grid-template-columns:repeat(4,1fr)} }
-  .msg.info{background:var(--brand-tint);color:var(--ink)}
-  .critBox{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0;padding:10px;border:1px solid var(--line);border-radius:10px}
-  .critHead{width:100%;font-size:13px;color:var(--muted);font-weight:600}
-  label.crit{display:flex;align-items:center;gap:6px;margin:0;padding:6px 10px;border:1px solid var(--line);border-radius:999px;font-size:14px;cursor:pointer}
-  label.crit input{width:18px;height:18px;margin:0}
-  label.crit.fixed{opacity:.75;cursor:default}
-  .critBox input[type=text]{width:auto;flex:1 1 160px}
-  .dTools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
-  .dTools input[type=text]{width:auto;flex:1 1 180px}
-  .dCounts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0 8px;font-size:13px}
-  .dCounts span[class^=chip]{padding:3px 10px;border-radius:999px;font-weight:600}
-  .chipP{background:var(--ok-bg);color:var(--ok-ink)}
-  .chipL{background:#FAEEDA;color:#854F0B}
-  .chipA{background:var(--err-bg);color:var(--err-ink)}
-  table.dTable{min-width:0}
-  table.dTable td{padding:6px}
-  table.dTable td.dname{font-weight:600;overflow-wrap:anywhere}
-  table.dTable input[type=number]{width:70px;padding:6px}
-  table.dTable input.bad{border-color:var(--red)}
-  table.dTable tr.late td{background:#FFF6E3}
-  table.dTable tr.abs td{background:var(--incident-bg)}
-  [data-theme="dark"] table.dTable tr.late td{background:#3a3018}
-  button.att{width:84px;height:36px;border-radius:8px;border:1px solid var(--ok-ink);background:var(--ok-bg);color:var(--ok-ink);font-weight:600;cursor:pointer}
-  button.att.late{border-color:#B07A1A;background:#FAEEDA;color:#854F0B}
-  button.att.abs{border-color:var(--red);background:var(--err-bg);color:var(--err-ink)}
-  .aMark{display:inline-block;width:70px;text-align:center;color:var(--red);font-weight:700}
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:10px 0}
-  .stats div{background:var(--brand-tint);border-radius:10px;padding:10px}
-  .stats span{display:block;font-size:12px;color:var(--muted)}
-  .stats b{font-size:20px}
-  @media (max-width:560px){ .stats{grid-template-columns:1fr 1fr} }
-  .low{color:var(--red);font-weight:600}
-
-  /* student cards */
-  .cards{display:grid;grid-template-columns:1fr;gap:10px}
-  @media (min-width:760px){ .cards{grid-template-columns:1fr 1fr} }
-  .stu{background:var(--card);border:1px solid var(--stu-border);border-radius:12px;padding:12px}
-  .stu.incident{border-left:4px solid var(--red);background:var(--incident-bg)}
-  .stu-top{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-  .stu-top input[type=checkbox]{width:20px;height:20px;margin:0;flex:0 0 auto}
-  .stu-name{flex:1;font-size:16px;font-weight:600;min-width:0;overflow-wrap:anywhere}
-  .flag{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--red);margin-right:6px;vertical-align:middle}
-  .incbtn{height:36px;padding:0 10px;border-radius:8px;border:1px solid var(--red);background:var(--card);color:var(--red);font-size:13px;cursor:pointer;white-space:nowrap}
-  .undo{height:36px;width:36px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--ink);font-size:15px;cursor:pointer}
-
-  /* round evaluation buttons */
-  .dots{display:flex;justify-content:space-between;gap:4px;margin-bottom:6px}
-  .dot{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--c);background:var(--bg-opt);color:var(--c8);font-size:15px;font-weight:600;padding:0;cursor:pointer;flex:0 0 auto}
-  .dot.on{background:var(--c);color:#fff}
-  .evlabel{font-size:13px;color:var(--label);min-height:20px;margin-bottom:8px}
-
-  textarea.com{min-height:44px;height:44px;resize:vertical;font-size:14px}
-  button.primary{background:var(--brand);color:#1d1d1d;border:1px solid var(--brand-dark);border-radius:8px;padding:12px 18px;font-size:16px;font-weight:600;cursor:pointer;width:100%}
-  button.primary:hover{filter:brightness(.97)}
-  button.secondary{background:var(--card);color:var(--ink);border:1px solid var(--brand-dark);border-radius:8px;padding:8px 14px;font-size:14px;cursor:pointer;height:38px}
-  button.secondary:hover{background:var(--brand-tint)}
-  button.small{background:var(--card);color:var(--ink);border:1px solid var(--brand-dark);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer}
-  button.small:hover{background:var(--brand-tint)}
-  button.ghost{background:var(--card);color:var(--label);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:15px;cursor:pointer}
-  button:disabled{background:var(--disabled);border-color:var(--disabled);color:#fff;cursor:default}
-  button:focus-visible,select:focus,input:focus,textarea:focus{outline:2px solid var(--brand-dark);outline-offset:1px;border-color:var(--brand-dark)}
-  .msg{padding:10px;border-radius:8px;margin-top:12px;font-size:14px}
-  .ok{background:var(--ok-bg);color:var(--ok-ink)}
-  .err{background:var(--err-bg);color:var(--err-ink)}
-
-  /* my evaluations table */
-  .tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:10px}
-  table{width:100%;min-width:640px;border-collapse:collapse;font-size:14px}
-  th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
-  th{font-size:12px;color:var(--muted);text-transform:uppercase;white-space:nowrap}
-  td.com{min-width:180px;white-space:pre-wrap}
-  tr.inc td:first-child{border-left:4px solid var(--red)}
-  .badge{display:inline-block;min-width:26px;text-align:center;padding:2px 8px;border-radius:999px;background:var(--brand-soft);color:var(--ink);font-weight:600}
-  .closed{font-size:12px;color:var(--muted)}
-  td.daygroup{background:var(--brand-soft);color:var(--ink);font-weight:600;font-size:14px;border-bottom:1px solid var(--brand-dark)}
-  .editrow{display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px}
-  .btnrow{display:flex;gap:8px;flex-wrap:wrap}
-  /* my evaluations: one toggle per date */
-  .daycard{border:1px solid var(--line);border-radius:10px;margin-bottom:10px;background:var(--card);overflow:hidden}
-  .daycard summary{padding:12px 14px;cursor:pointer;list-style:none;display:flex;flex-direction:column;gap:2px;font-weight:600}
-  .daycard summary::-webkit-details-marker{display:none}
-  .daycard summary:hover{background:var(--brand-tint)}
-  .daymeta{font-size:13px;color:var(--muted);font-weight:400}
-  .clshead{padding:8px 14px;background:var(--brand-tint);font-size:13px;font-weight:600}
-  .rec{padding:10px 14px;border-top:1px solid var(--line)}
-  .rec.inc{border-left:4px solid var(--red)}
-  .rec-top{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
-  .rec-name{font-weight:600;overflow-wrap:anywhere}
-  .rec-score{font-size:14px}
-  .rec-meta{font-size:13px;color:var(--muted);margin-top:2px}
-  .rec-meta.on{color:var(--red);font-weight:600}
-  .rec-com{font-size:13px;white-space:pre-wrap;margin-top:4px}
-  .rec-act{margin-top:6px}
-  @media (max-width:700px){ .top{grid-template-columns:1fr} }
+  body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif; background: var(--bg); color: var(--text); }
+  header { background: var(--brand); color: #fff; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  header h1 { font-size: 18px; margin: 0; }
+  main { padding: 12px; max-width: 1100px; margin: 0 auto; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 12px; }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 8px 0 4px; }
+  label.inline { display: flex; align-items: center; gap: 8px; margin: 10px 0 0; font-size: 14px; color: var(--text); }
+  input, select, textarea { font-size: 16px; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: #fff; }
+  input[type=checkbox] { width: 18px; height: 18px; padding: 0; }
+  select, input[type=text], input[type=password], input[type=date], textarea { width: 100%; }
+  textarea { font-family: inherit; min-height: 140px; resize: vertical; }
+  button { font-size: 15px; padding: 10px 12px; border: 0; border-radius: 8px; background: var(--brand); color: #fff; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+  button.ghost { background: #fff; color: var(--brand); border: 1px solid var(--brand); }
+  button.pass { background: var(--pass); }
+  button.fail { background: var(--fail); }
+  button.abs { background: var(--warn); }
+  button.hold { background: var(--hold); }
+  button.dis { background: var(--dis); }
+  .tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .tabs button { background: #fff; color: var(--text); border: 1px solid var(--line); padding: 8px 10px; font-size: 14px; }
+  .tabs button.on { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .tabs.sub { margin-top: -4px; }
+  .tabs.sub button { font-size: 13px; padding: 6px 10px; }
+  .exportBar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+  .bulk { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding-bottom: 10px; margin-bottom: 4px; border-bottom: 1px solid var(--line); }
+  .bulk select { width: auto; }
+  .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  .row:last-child { border-bottom: 0; }
+  .who { display: flex; align-items: center; gap: 10px; }
+  .name { font-weight: 600; }
+  .meta { font-size: 13px; color: var(--muted); margin-top: 2px; }
+  .chip { display: inline-block; font-size: 12px; padding: 2px 8px; border-radius: 999px; background: #eef2f7; color: var(--muted); white-space: nowrap; }
+  .chip.bad { background: #fbe3e0; color: var(--fail); font-weight: 600; }
+  .chip.good { background: #e0f4e8; color: var(--pass); font-weight: 600; }
+  .actions { display: flex; flex-wrap: wrap; gap: 6px; }
+  .actions button { padding: 8px 10px; font-size: 14px; }
+  .counts { display: flex; gap: 8px; flex-wrap: wrap; }
+  .count { background: #eef2f7; border-radius: 10px; padding: 8px 12px; font-size: 13px; color: var(--muted); }
+  .count b { display: block; font-size: 18px; color: var(--text); }
+  .msg { font-size: 14px; min-height: 20px; margin-top: 8px; color: var(--pass); }
+  .msg.err { color: var(--fail); }
+  .hidden { display: none !important; }
+  .empty { color: var(--muted); font-size: 14px; padding: 8px 0; }
+  .mh { margin: 16px 0 6px; font-size: 16px; }
+  .mrow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+  .mrow:last-child { border-bottom: 0; }
+  .mrow input, .mrow select { width: auto; min-width: 120px; font-size: 14px; padding: 8px; }
+  .mrow select.wide { min-width: 240px; }
+  .mrow input[type=date] { min-width: 150px; }
+  .clsName { min-width: 170px; font-weight: 600; }
+  .bulkBox { background: #f7f9fc; border: 1px dashed var(--line); border-radius: 10px; padding: 12px; margin: 8px 0 12px; }
+  .bulkBox input { width: 100%; }
+  .yearBar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .yearBar select { width: auto; min-width: 180px; }
+  .tableWrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; margin-bottom: 8px; }
+  table.dash { border-collapse: collapse; font-size: 14px; width: 100%; background: #fff; }
+  table.dash th, table.dash td { border-bottom: 1px solid var(--line); padding: 8px 10px; text-align: left; white-space: nowrap; vertical-align: top; }
+  table.dash th { background: #f3f5f8; font-weight: 600; font-size: 13px; color: var(--text); }
+  table.dash td.sname { font-weight: 600; position: sticky; left: 0; background: #fff; }
+  table.dash tr.tot td { background: #f3f5f8; font-weight: 600; }
+  .sub { font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+  .dates { font-size: 13px; color: var(--muted); }
+  .newBar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+  dialog { border: 0; border-radius: 12px; padding: 18px; width: min(460px, 92vw); color: var(--text); }
+  dialog::backdrop { background: rgba(20, 30, 45, .45); }
+  dialog textarea { min-height: 96px; margin-top: 6px; }
+  .bar { height: 8px; background: #eef2f7; border-radius: 999px; overflow: hidden; margin-top: 8px; }
+  .bar span { display: block; height: 100%; background: var(--pass); }
+  table.assess td.code { font-weight: 700; color: var(--brand); }
+  .cell { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; min-width: 250px; }
+  .cell select, .cell input { width: auto; min-width: 110px; font-size: 14px; padding: 6px; }
+  .cell input[type=date] { min-width: 130px; }
+  button.xs { font-size: 13px; padding: 5px 9px; }
+  .stageTabs { display: flex; gap: 6px; flex-wrap: wrap; }
+  .stageTabs button { background: #fff; color: var(--text); border: 1px solid var(--line); padding: 8px 12px; font-size: 14px; }
+  .stageTabs button.on { background: var(--brand); color: #fff; border-color: var(--brand); }
 </style>
 </head>
 <body>
+
 <header>
-  <img src="logo.png" alt="EVA Pharma logo" class="logo" onerror="this.remove()">
-  <span class="title">OMHG EVA SCHOOL</span>
-  <button class="theme" id="themeBtn" type="button">Dark</button>
+  <h1>Assessment Attempts</h1>
+  <div style="display:flex; gap:10px; align-items:center">
+    <div id="who" class="meta" style="color:#fff"></div>
+    <button class="ghost" id="signOut" style="padding:6px 10px; font-size:13px; background:#fff">Sign out</button>
+  </div>
 </header>
+
 <main>
-
-  <!-- SIGN IN: the teacher picks their name and enters their PIN -->
-  <div class="card gate" id="gate" hidden>
-    <div style="font-size:17px;font-weight:700;margin-bottom:14px;">Sign in</div>
-    <label for="gName">Your name</label>
-    <select id="gName"></select>
-    <label for="gPin" style="margin-top:12px;">PIN</label>
-    <input type="password" id="gPin" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="4-digit PIN">
-    <button class="primary" id="gBtn" type="button" style="margin-top:14px;">Sign in</button>
-    <div id="gMsg"></div>
-  </div>
-
-  <!-- THE APP: visible only after sign-in -->
-  <div id="app" hidden>
-
-    <div class="who">
-      <span>Signed in as <b id="whoName"></b></span>
-      <button class="ghost" id="signOut" type="button" style="padding:6px 12px;font-size:14px;">Sign out</button>
+  <!-- Sign-in -->
+  <section id="gate" class="card">
+    <label>Teacher name</label>
+    <input id="gName" type="text" autocomplete="username">
+    <label>PIN</label>
+    <input id="gPin" type="password" inputmode="numeric" maxlength="6" autocomplete="current-password">
+    <label class="inline"><input type="checkbox" id="gSeniorToggle"> I am the Senior</label>
+    <div id="gSeniorBox" class="hidden">
+      <label>Senior key</label>
+      <input id="gSenior" type="password" autocomplete="off">
     </div>
+    <button id="gBtn" style="margin-top:12px; width:100%">Sign in</button>
+    <div id="gMsg" class="msg err"></div>
+  </section>
 
-    <!-- Main sections -->
-    <div class="nav" id="nav">
-      <button class="tab on" data-sec="eval" type="button">Evaluations</button>
-      <button class="tab" data-sec="grade" type="button">Grading</button>
-      <button class="tab" data-sec="time" type="button">Timetable<small>coming soon</small></button>
-      <button class="tab" data-sec="assess" type="button">Assessments<small>coming soon</small></button>
-    </div>
-
-    <!-- Evaluations sub-tabs -->
-    <div class="tabs sub" id="evalTabs">
-      <button class="tab on" id="tabNew" type="button">New evaluation</button>
-      <button class="tab" id="tabMine" type="button">My evaluations</button>
-    </div>
-
-    <!-- Grading sub-tabs -->
-    <div class="tabs sub" id="gradeTabs" hidden>
-      <button class="tab on" id="tabGDaily" type="button">Daily grading</button>
-      <button class="tab" id="tabGSum" type="button">Summary</button>
-      <button class="tab" id="tabGUp" type="button">Upload Excel</button>
-    </div>
-
-    <div class="card" id="topCard">
-      <div class="top">
-        <div>
-          <label for="cls">Class</label>
-          <select id="cls"></select>
-        </div>
-        <div>
-          <label for="date">Evaluation date</label>
-          <input type="date" id="date">
-        </div>
+  <!-- Main app -->
+  <section id="app" class="hidden">
+    <div class="card">
+      <div class="yearBar">
+        <label style="margin:0">Year</label>
+        <select id="yearSel" class="hidden"></select>
+        <span id="yearNote" class="meta"></span>
       </div>
     </div>
 
-    <!-- NEW EVALUATION -->
-    <div class="card" id="panel" hidden>
+    <nav class="tabs" id="tabs"></nav>
+    <nav class="tabs sub hidden" id="subtabs"></nav>
 
-      <div class="bulk">
-        <div>
-          <label for="bulkCol">Set column</label>
-          <select id="bulkCol">
-            <option value="ev">Evaluation</option>
-            <option value="com">Comment</option>
-          </select>
-        </div>
-        <div>
-          <label for="bulkVal">To value</label>
-          <select id="bulkVal"></select>
-          <input type="text" id="bulkText" placeholder="Type comment" hidden>
-        </div>
-        <button class="secondary" id="applyBulk" type="button">Apply to selected</button>
-        <label class="selall"><input type="checkbox" id="selectAll"> Select all</label>
-      </div>
-      <div class="hint" id="selCount"></div>
-      <div class="hint" id="progress" style="font-size:14px;color:var(--ink);font-weight:600"></div>
-
-      <div class="cards" id="rows"></div>
-
-      <p class="hint">
-        Tap a letter to set the evaluation: A Absent, O Outstanding, P Proficient, D Developing, N Needs Improvement, U Unsatisfactory. Every incident needs a reason in the comment.
-        Each incident subtracts 5 points and marks the student in red.
-      </p>
-      <button class="primary" id="save" type="button">Save evaluation</button>
-      <div id="status"></div>
+    <div class="card hidden" id="assessCard">
+      <label>Assessment (competency · class)</label>
+      <select id="assess"></select>
+      <div id="counts" class="counts" style="margin-top:12px"></div>
     </div>
 
-    <!-- MY EVALUATIONS -->
-    <div class="card" id="mine" hidden>
-      <div class="top" style="grid-template-columns:1fr 1fr;">
-        <div>
-          <label for="mineCls">Class</label>
-          <select id="mineCls"></select>
-        </div>
-        <div style="display:flex;align-items:flex-end;">
-          <button class="secondary" id="refresh" type="button" style="width:100%;">Refresh</button>
-        </div>
+    <div class="card">
+      <!-- Bulk bar: shown on the Attempt lists -->
+      <div id="bulk" class="bulk hidden">
+        <label class="inline"><input type="checkbox" id="selAll"> Select all (<span id="selCount">0</span>)</label>
+        <select id="bulkVal">
+          <option value="">Set selected to…</option>
+          <option value="Pass">Pass</option>
+          <option value="Fail">Fail</option>
+          <option value="Absent">Absent</option>
+        </select>
+        <button id="bulkApply">Apply</button>
       </div>
-      <div id="mineMsg"></div>
-      <div id="mineList" style="margin-top:10px"></div>
-      <p class="hint">Evaluations can be edited for 7 days after they were uploaded. After that they are read only.</p>
-
-      <div class="card" id="editCard" hidden style="margin:12px 0 0;">
-        <div style="font-size:15px;font-weight:600;margin-bottom:4px;" id="editTitle"></div>
-        <div class="editrow">
-          <div>
-            <label for="editEv">Evaluation</label>
-            <select id="editEv"></select>
-          </div>
-          <div>
-            <label for="editInc">Incidents</label>
-            <input type="number" id="editInc" min="0" step="1" value="0">
-          </div>
-          <div>
-            <label for="editCom">Comment</label>
-            <textarea id="editCom" class="com" style="min-height:70px;height:70px;"></textarea>
-          </div>
-        </div>
-        <div class="btnrow" style="margin-top:12px;">
-          <button class="primary" id="editSave" type="button" style="width:auto;flex:1;">Save changes</button>
-          <button class="ghost" id="editCancel" type="button">Cancel</button>
-        </div>
-        <div id="editMsg"></div>
-      </div>
+      <div id="list"></div>
     </div>
-
-    <!-- GRADING: DAILY (one session of one class) -->
-    <div class="card" id="gDaily" hidden>
-      <div class="top">
-        <div>
-          <label for="dGrp">Class</label>
-          <select id="dGrp"></select>
-        </div>
-        <div>
-          <label for="dDate">Date</label>
-          <input type="date" id="dDate">
-        </div>
-      </div>
-      <label style="margin-top:12px">Session</label>
-      <div class="sesRow" id="dSes"></div>
-      <div id="dNote" class="msg" hidden></div>
-
-      <div id="dBody" hidden>
-        <div class="critBox">
-          <span class="critHead">Today's criteria (10 each)</span>
-          <label class="crit fixed"><input type="checkbox" checked disabled> Attendance</label>
-          <label class="crit"><input type="checkbox" id="dOn_behaviour"> Behaviour</label>
-          <label class="crit"><input type="checkbox" id="dOn_participation"> Participation</label>
-          <label class="crit"><input type="checkbox" id="dOn_assignment"> Assignment</label>
-          <input type="text" id="dT_assignment" placeholder="Assignment title, e.g. HW 3" maxlength="80" hidden>
-          <label class="crit"><input type="checkbox" id="dOn_quiz"> Quiz</label>
-          <input type="text" id="dT_quiz" placeholder="Quiz title, e.g. Quiz 2" maxlength="80" hidden>
-        </div>
-        <div class="dTools">
-          <span class="hint" style="margin:0">Fill empty marks with 10:</span>
-          <button class="small" id="dFill_behaviour" type="button">Behaviour</button>
-          <button class="small" id="dFill_participation" type="button">Participation</button>
-          <button class="small" id="dFill_assignment" type="button" hidden>Assignment</button>
-          <button class="small" id="dFill_quiz" type="button" hidden>Quiz</button>
-          <button class="small" id="dAllP" type="button">Everyone present</button>
-        </div>
-        <div class="dCounts" id="dCounts"></div>
-        <div class="tablewrap"><table class="dTable">
-          <thead><tr id="dHead"></tr></thead>
-          <tbody id="dRows"></tbody>
-        </table></div>
-        <p class="hint">Tap the attendance button to change it: Present (10) → Late (5) → Absent (A, counts 0). Absent students get A in every mark.</p>
-        <button class="primary" id="dSave" type="button">Save session</button>
-      </div>
-      <div id="dMsg"></div>
-    </div>
-
-    <!-- GRADING: SUMMARY -->
-    <div class="card" id="gSum" hidden>
-      <div class="grid3" style="margin-top:0">
-        <div>
-          <label for="sGrp">Class</label>
-          <select id="sGrp"></select>
-        </div>
-        <div>
-          <label for="sFrom">From</label>
-          <input type="date" id="sFrom">
-        </div>
-        <div>
-          <label for="sTo">To</label>
-          <input type="date" id="sTo">
-        </div>
-      </div>
-      <div class="dTools" id="sQuick">
-        <button class="small" type="button" data-r="week">This week</button>
-        <button class="small" type="button" data-r="month">This month</button>
-        <button class="small" type="button" data-r="year">This school year</button>
-        <span style="flex:1"></span>
-        <button class="secondary" id="sExport" type="button">Export to Excel</button>
-      </div>
-      <div id="sMsg"></div>
-      <div id="sOut"></div>
-    </div>
-
-    <!-- GRADING: UPLOAD EXCEL -->
-    <div class="card" id="gUp" hidden>
-      <div style="font-size:15px;font-weight:600">Upload several quizzes and assignments from Excel</div>
-      <p class="hint">For marks given outside Daily grading, such as older quizzes and assignments. Each one is converted to a mark out of 10 and counted in the Summary with the quizzes or assignments.<br>1. Choose the class and download its template. 2. Fill one column per quiz or assignment. 3. Choose the filled file here, check the summary, and save.</p>
-      <div class="top">
-        <div>
-          <label for="upCls">Class</label>
-          <select id="upCls"></select>
-        </div>
-        <div style="display:flex;align-items:flex-end;">
-          <button class="secondary" id="upTemplate" type="button" style="width:100%;">Download template</button>
-        </div>
-      </div>
-      <div style="margin-top:12px">
-        <label for="upFile">Filled file (.xlsx or .csv)</label>
-        <input type="file" id="upFile" accept=".xlsx,.csv">
-      </div>
-      <div id="upMsg"></div>
-      <div id="upPreview" style="margin-top:10px"></div>
-      <button class="primary" id="upSave" type="button" hidden style="margin-top:12px">Save all</button>
-    </div>
-
-    <!-- COMING SOON -->
-    <div class="card soon" id="soon" hidden></div>
-
-  </div>
+    <div id="msg" class="msg"></div>
+  </section>
 </main>
 
-<!-- Sheet URL and key live in config.js. Edit that file only. -->
-<script src="config.js"></script>
-<script>
-// ===================== SETTINGS =====================
-const CFG = window.FEEDBACK_CONFIG || { url: "", key: "" };
-const SHEET_URL = CFG.url;
-const SHEET_KEY = CFG.key;
+<!-- Comment / reason dialog (used for Fail, dispute) -->
+<dialog id="dlg">
+  <h3 id="dlgTitle" style="margin:0"></h3>
+  <div id="dlgHint" class="meta"></div>
+  <textarea id="dlgText"></textarea>
+  <div id="dlgErr" class="msg err"></div>
+  <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px">
+    <button class="ghost" id="dlgCancel">Cancel</button>
+    <button id="dlgOk">Save</button>
+  </div>
+</dialog>
 
-// Evaluation options, in cycle order.
-// points: base score. letter: shown on the button. c / c8 / bg: colours.
-const EVALUATIONS = [
-  { key: "outstanding", en: "Outstanding",       ar: "متميز ومبادر",           points: 10, letter: "O", c: "#3B6D11", c8: "#27500A", bg: "#EAF3DE" },
-  { key: "proficient",  en: "Proficient",        ar: "ملتزم ومتقن",            points: 8,  letter: "P", c: "#185FA5", c8: "#0C447C", bg: "#E6F1FB" },
-  { key: "developing",  en: "Developing",        ar: "مقبول/تحت التدريب",      points: 6,  letter: "D", c: "#0F6E56", c8: "#085041", bg: "#E1F5EE" },
-  { key: "needs",       en: "Needs Improvement", ar: "يحتاج تطوير/سلوك ضعيف", points: 4,  letter: "N", c: "#854F0B", c8: "#633806", bg: "#FAEEDA" },
-  { key: "unsat",       en: "Unsatisfactory",    ar: "غير ملتزم/خطر",          points: 2,  letter: "U", c: "#A32D2D", c8: "#791F1F", bg: "#FCEBEB" },
-  { key: "absent",      en: "Absent",            ar: "غائب",                   points: 0,  letter: "A", c: "#5F5E5A", c8: "#444441", bg: "#F1EFE8" }
+<script>
+// ----- settings -----
+const APP_URL = "https://script.google.com/macros/s/AKfycbxC4vTVh4Ig-q4NWCMwWvyBXFKC8UkMD3aLTYmLPeRDO23iWmXdPYuC2qWZsjRpPaUO/exec";  // the web app URL, ends in /exec
+const APP_KEY = "test123";        // same value as APP_KEY in Code.gs
+// The Senior key is never stored in this page. The Senior types it at sign-in.
+
+// The six classes, in display order
+const CLASS_ORDER = ["Junior 1", "Junior 2", "Wheeler 1", "Wheeler 2", "Senior 1 - Utilities", "Senior 2 - Operation"];
+
+// A new assessment is one competency, attached to every parallel class of its stage
+const STAGE_OPTIONS = [
+  { key: "Junior", label: "Junior (Junior 1 and Junior 2)", classes: ["Junior 1", "Junior 2"], match: c => c.stage === "Junior" },
+  { key: "Wheeler", label: "Wheeler (Wheeler 1 and Wheeler 2)", classes: ["Wheeler 1", "Wheeler 2"], match: c => c.stage === "Wheeler" },
+  { key: "Utilities", label: "Final year · Utilities", classes: ["Senior 1 - Utilities"], match: c => c.stage === "Senior" && c.dept === "Utilities" },
+  { key: "Operation", label: "Final year · Operation", classes: ["Senior 2 - Operation"], match: c => c.stage === "Senior" && c.dept === "Operation" }
 ];
 
-// Points removed from the current evaluation for each incident.
-const INCIDENT_PENALTY = 5;
+const TRIAL_ORDER = ["A", "B", "C", "D"];
+const TEACHER_VIEWS = [
+  ["mine", "My assessments"],
+  ["A", "Attempt A"], ["B", "Attempt B"], ["C", "Attempt C"],
+  ["hold", "On hold"], ["disputed", "Disputed"],
+  ["pA", "Passed on A"], ["pB", "Passed on B"], ["pC", "Passed on C"]
+];
+// Senior screens: four tabs, each with sub-screens
+const SENIOR_TABS = [["assess", "Assessments"], ["history", "History"], ["requests", "Requests"], ["settings", "Settings"]];
+const SENIOR_SUBS = {
+  assess: [["assess", "Setup"], ["A", "Attempt A"], ["B", "Attempt B"], ["C", "Attempt C"], ["D", "Attempt D"], ["passed", "Passed"]],
+  history: [["hist-class", "By class"], ["hist-stage", "By stage"], ["hist-year", "By academic year"]],
+  requests: [],
+  settings: [["set-people", "Teachers & students"], ["set-classes", "Classes"]]
+};
+// Which tab each Senior screen belongs to
+const TOP_OF = {
+  assess: "assess", A: "assess", B: "assess", C: "assess", D: "assess", passed: "assess",
+  requests: "requests",
+  "hist-class": "history", "hist-stage": "history", "hist-year": "history",
+  "set-people": "settings", "set-classes": "settings"
+};
 
-// Number written to the Score (0-5) column (5 best, 0 absent)
-const EV_NUMBER = { outstanding: 5, proficient: 4, developing: 3, needs: 2, unsat: 1, absent: 0 };
-// =====================================================
+const S = {
+  teacher: null, pin: null, senior: null, year: null,
+  data: null, assessId: null, view: "mine",
+  selected: new Set(), absentPick: null,
+  manage: null, newAsm: null,
+  stage: "Junior", dirty: false
+};
 
-const $ = id => document.getElementById(id);
-const clsSel = $('cls'), dateEl = $('date'), panel = $('panel'), rowsBox = $('rows'), saveBtn = $('save');
-const statusBox = $('status'), bulkCol = $('bulkCol'), bulkVal = $('bulkVal'), bulkText = $('bulkText'), selectAll = $('selectAll');
-const tabNew = $('tabNew'), tabMine = $('tabMine'), topCard = $('topCard');
-const mine = $('mine'), mineCls = $('mineCls'), mineMsg = $('mineMsg'), mineRows = $('mineList');
-const editCard = $('editCard'), editTitle = $('editTitle'), editEv = $('editEv'), editInc = $('editInc');
-const editCom = $('editCom'), editMsg = $('editMsg');
-const gate = $('gate'), gName = $('gName'), gPin = $('gPin'), gBtn = $('gBtn'), gMsg = $('gMsg'), app = $('app');
+// ----- helpers -----
+const el = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const keyOf = s => String(s).replace(/\s+/g, "_");
 
-let TEACHERS = [];                                   // teacher names from the Setup tab
-let CLASSES = {};                                    // { class name: [student names] }
-let me = sessionStorage.getItem('teacher') || '';    // signed-in teacher (this tab only)
-let rows = [];            // { name, ev, inc, com, sel }
-let dirty = false;        // unsaved changes on screen
-let pendingSaveId = null; // same ID on retry, so the server never writes a save twice
-let lastCls = localStorage.getItem('lastCls') || '';
-let mode = "new";         // "new" or "mine"
-let mineRecords = [];     // records loaded for "My evaluations"
-let editing = null;       // record being edited
-
-// ---------- helpers ----------
-const evObj = key => EVALUATIONS.find(e => e.key === key);
-const evKeyByName = name => (EVALUATIONS.find(e => e.en === name) || {}).key || '';
-const scoreOf = r => r.ev === null ? null : evObj(r.ev).points - INCIDENT_PENALTY * r.inc;
-// Button order on each card: Absent first, then the rest in their usual order
-const DOT_ORDER = [evObj('absent'), ...EVALUATIONS.filter(e => e.key !== 'absent')];
-
-function showIn(el, text, ok) {
-  el.innerHTML = '';
-  if (!text) return;
-  const d = document.createElement('div');
-  d.className = 'msg ' + (ok ? 'ok' : 'err');
-  d.textContent = text;
-  el.appendChild(d);
-}
-const showMsg = (text, ok) => showIn(statusBox, text, ok);
-
-// Any change to the evaluations means the next save is new, so drop the old save ID.
-function markDirty() {
-  dirty = true;
-  pendingSaveId = null;
+function msg(text, isErr) {
+  const m = el("msg");
+  m.textContent = text || "";
+  m.className = "msg" + (isErr ? " err" : "");
 }
 
-function newSaveId() {
-  return (window.crypto && crypto.randomUUID)
-    ? crypto.randomUUID()
-    : Date.now() + '-' + Math.random().toString(36).slice(2);
+// Date arithmetic in UTC (the same rule the server uses for Attempts B, C, D)
+function addDays(ymd, n) {
+  const [y, m, d] = ymd.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10);
 }
 
-function confirmDiscard() {
-  return !dirty || window.confirm('You have unsaved evaluations. Discard them?');
-}
-
-// The teacher's name and PIN, sent with every request that needs them.
-function session() {
-  return { teacher: me, pin: sessionStorage.getItem('pin') || '' };
-}
-
-// One POST to the sheet. Errors from the server are thrown with their message.
-async function post(action, data) {
-  if (!SHEET_URL) throw new Error('Sheet link not set. Edit config.js.');
+async function call(action, extra = {}) {
+  const body = { key: APP_KEY, action, ...extra };
+  if (S.senior) body.seniorKey = S.senior;
+  else { body.teacher = S.teacher; body.pin = S.pin; }
   const t0 = performance.now();
-  const res = await fetch(SHEET_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },   // avoids a browser preflight request
-    body: JSON.stringify({ action, key: SHEET_KEY, ...data })
-  });
-  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const res = await fetch(APP_URL, { method: "POST", body: JSON.stringify(body) });
   const out = await res.json();
-  console.info(`[timing] ${action}: ${Math.round(performance.now() - t0)} ms`);
+  // Timing for speed checks: total wait here, and the part spent on the server (shown in the F12 console)
+  console.info(`[timing] ${action}: ${Math.round(performance.now() - t0)} ms total, ${out.serverMs ?? "?"} ms on server`);
+  if (out.timings) console.table(out.timings.map(([tab, rows, ms]) => ({ tab, rows, ms })));
   if (out.error) throw new Error(out.error);
   return out;
 }
 
-// True when the PIN or name was refused (wrong, changed, or locked out).
-const isAuthError = e => /Wrong name or PIN|Too many wrong PINs/.test(e.message);
-
-// ---------- theme ----------
-function applyTheme(t) {
-  document.documentElement.setAttribute('data-theme', t);
-  $('themeBtn').textContent = t === 'dark' ? 'Light' : 'Dark';
-  localStorage.setItem('theme', t);
-}
-$('themeBtn').onclick = () => {
-  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-};
-applyTheme(localStorage.getItem('theme') ||
-  (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
-
-// ---------- sign in / sign out ----------
-function showGate(note) {
-  app.hidden = true;
-  gate.hidden = false;
-  gName.innerHTML = '';
-  TEACHERS.forEach(n => gName.add(new Option(n, n)));
-  const last = localStorage.getItem('lastTeacher');
-  if (last && TEACHERS.includes(last)) gName.value = last;
-  gPin.value = '';
-  showIn(gMsg, note || '', false);
+// Server action names: the Senior's versions start with "senior"
+function act(name) {
+  if (!S.senior) return name;
+  return { record: "seniorRecord", recordMany: "seniorRecordMany", decide: "seniorDecide" }[name] || name;
 }
 
-function showApp() {
-  gate.hidden = true;
-  app.hidden = false;
-  $('whoName').textContent = me;
-  fillClassSelect();
-  fillMineClasses();
-  fillGradeClasses();
-  section = 'eval';
-  mode = 'new';
-  showSection();
+// The Senior's year is sent with every load. Empty means the current year.
+function loadData() {
+  return S.senior ? call("seniorData", { year: S.year || "" }) : call("myData");
 }
 
-async function signIn() {
-  const name = gName.value;
-  const p = gPin.value.trim();
-  if (!name) return showIn(gMsg, 'Choose your name.', false);
-  if (!/^\d{4,6}$/.test(p)) return showIn(gMsg, 'Enter your PIN (4 to 6 digits).', false);
-  gBtn.disabled = true;
-  try {
-    const out = await post('login', { teacher: name, pin: p });
-    me = out.teacher;
-    sessionStorage.setItem('teacher', me);
-    sessionStorage.setItem('pin', p);
-    localStorage.setItem('lastTeacher', me);
-    showApp();
-  } catch (e) {
-    showIn(gMsg, e.message, false);
-  } finally {
-    gBtn.disabled = false;
-  }
-}
-
-function signOut(note) {
-  me = '';
-  sessionStorage.removeItem('teacher');
-  sessionStorage.removeItem('pin');
-  rows = [];
-  dirty = false;
-  pendingSaveId = null;
-  mineRecords = [];
-  editing = null;
-  gItems = [];
-  gForm = null;
-  gDirty = false;
-  upPlan = null;
-  upGrid = null;
-  D.data = null; D.rows = []; D.session = 0; D_CACHE.clear();
-  S2 = { rows: [], items: [], from: '', to: '' };
-  showGate(note);
-}
-
-gBtn.onclick = signIn;
-gPin.addEventListener('keydown', e => { if (e.key === 'Enter') signIn(); });
-$('signOut').onclick = () => { if (confirmDiscard() && confirmGradeDiscard()) signOut(); };
-
-// ---------- lists ----------
-// Turns the Setup rows ({Type, Name, Parent, Department}) into the teacher names and the classes with their students.
-// Evaluations use whole classes. Grading (and later attendance and assessments) uses groups:
-// a class whose students have departments (e.g. Senior 1) becomes one group per department,
-// "Senior 1 · Operation" and "Senior 1 · Utilities"; any other class is one group.
-let GROUPS = {};   // { group key: { cls, dept, students: [names] } }
-function buildLists(list) {
-  TEACHERS = list.filter(x => x.Type === 'Teacher').map(x => x.Name);
-  CLASSES = {};
-  list.filter(x => x.Type === 'Class').forEach(x => { CLASSES[x.Name] = []; });
-  const deptOf = {};
-  list.filter(x => x.Type === 'Student').forEach(x => {
-    if (!CLASSES[x.Parent]) return;
-    CLASSES[x.Parent].push(x.Name);
-    deptOf[x.Parent + '\n' + x.Name] = String(x.Department || '').trim();
-  });
-  GROUPS = {};
-  Object.keys(CLASSES).forEach(cls => {
-    const depts = [...new Set(CLASSES[cls].map(n => deptOf[cls + '\n' + n]))].sort();
-    const split = depts.some(d => d);
-    if (!split) { GROUPS[cls] = { cls, dept: '', students: CLASSES[cls].slice() }; return; }
-    depts.forEach(d => {
-      GROUPS[d ? `${cls} · ${d}` : `${cls} · No department`] = { cls, dept: d, students: CLASSES[cls].filter(n => deptOf[cls + '\n' + n] === d) };
-    });
-  });
-}
-const groupKey = (cls, dept) => dept ? `${cls} · ${dept}` : (Object.keys(GROUPS).some(k => k.startsWith(cls + ' · ')) ? `${cls} · No department` : cls);
-const itemKey = i => groupKey(i.cls, i.dept || '');
-const groupStudents = key => (GROUPS[key] && GROUPS[key].students) || [];
-const groupParts = key => GROUPS[key] ? { cls: GROUPS[key].cls, dept: GROUPS[key].dept } : { cls: key, dept: '' };
-
-function fillClassSelect() {
-  clsSel.innerHTML = '';
-  clsSel.add(new Option('-- choose class --', ''));
-  Object.keys(CLASSES).forEach(c => clsSel.add(new Option(c, c)));
-  clsSel.value = Object.keys(CLASSES).includes(lastCls) ? lastCls : '';
-  loadStudents();
-}
-
-function fillMineClasses() {
-  const prev = mineCls.value;
-  mineCls.innerHTML = '';
-  mineCls.add(new Option('All classes', ''));
-  Object.keys(CLASSES).forEach(c => mineCls.add(new Option(c, c)));
-  mineCls.value = Object.keys(CLASSES).includes(prev) ? prev : '';
-}
-
-function fillBulkValues() {
-  const isComment = bulkCol.value === 'com';
-  bulkVal.hidden = isComment;
-  bulkText.hidden = !isComment;
-  if (isComment) return;
-  bulkVal.innerHTML = '';
-  bulkVal.add(new Option('Not rated', 'null'));
-  EVALUATIONS.forEach(e => bulkVal.add(new Option(e.en, e.key)));
-}
-
-function fillEditOptions() {
-  editEv.innerHTML = '';
-  EVALUATIONS.forEach(e => editEv.add(new Option(e.en, e.key)));
-}
-
-function loadStudents() {
-  const students = CLASSES[clsSel.value];
-  dirty = false;
-  pendingSaveId = null;
-  if (!students) { rows = []; panel.hidden = true; render(); return; }
-  rows = students.map(name => ({ name, ev: null, inc: 0, com: '', sel: false }));
-  panel.hidden = mode !== 'new';
-  statusBox.innerHTML = '';
+async function reload() {
+  S.yearCache = null;
+  S.data = await loadData();
+  if (S.senior) S.year = S.data.year;
+  persistData();
   render();
 }
 
-// ---------- mode switch ----------
-function applyMode(m) {
-  mode = m;
-  tabNew.classList.toggle('on', m === 'new');
-  tabMine.classList.toggle('on', m === 'mine');
-  topCard.hidden = m !== 'new';
-  panel.hidden = m !== 'new' || rows.length === 0;
-  mine.hidden = m !== 'mine';
-  if (m === 'mine') {
-    if (rows.length) { rows = []; dirty = false; }
-    fillMineClasses();
-    loadMine();
+function saveSession() {
+  sessionStorage.setItem("trials", JSON.stringify({ teacher: S.teacher, pin: S.pin, senior: S.senior, year: S.year }));
+  persistData();
+}
+
+// Keep the last loaded data, so the next page open shows it instantly while it refreshes
+function persistData() {
+  if (S.data) sessionStorage.setItem("trialsData", JSON.stringify(S.data));
+}
+
+// Past years are read-only; only the current year can change
+const canEdit = () => !S.senior || S.data.isCurrent !== false;
+
+function compById(code) { return (S.data.competencies || []).find(c => c.code === code); }
+function compName(code) { const c = compById(code); return c ? c.name : code; }
+function assessLabel(a) { return `${compName(a.competency) || a.name} · ${a.cls}`; }
+function datesText(dA) {
+  return dA ? `B ${esc(addDays(dA, 1))} · C ${esc(addDays(dA, 2))} · D ${esc(addDays(dA, 3))}` : "Set the Attempt A date";
+}
+function classRank(c) { const i = CLASS_ORDER.indexOf(c); return i === -1 ? 99 : i; }
+
+// A small dialog for a written reason (Fail, dispute). Resolves to the text, or null on cancel.
+function askText(title, hint) {
+  return new Promise(resolve => {
+    el("dlgTitle").textContent = title;
+    el("dlgHint").textContent = hint || "";
+    el("dlgText").value = "";
+    el("dlgErr").textContent = "";
+    const dlg = el("dlg");
+    el("dlgOk").onclick = () => {
+      const t = el("dlgText").value.trim();
+      if (!t) { el("dlgErr").textContent = "Please write the reason."; return; }
+      dlg.close();
+      resolve(t);
+    };
+    el("dlgCancel").onclick = () => { dlg.close(); resolve(null); };
+    dlg.showModal();
+    el("dlgText").focus();
+  });
+}
+
+// ----- sign in -----
+el("gSeniorToggle").onchange = e => el("gSeniorBox").classList.toggle("hidden", !e.target.checked);
+el("gBtn").onclick = signIn;
+el("gPin").addEventListener("keydown", e => { if (e.key === "Enter") signIn(); });
+
+async function signIn() {
+  el("gMsg").textContent = "";
+  try {
+    if (el("gSeniorToggle").checked) {
+      S.senior = el("gSenior").value.trim();
+      if (!S.senior) throw new Error("Type the Senior key.");
+      S.teacher = "Senior"; S.pin = null; S.year = null;
+      S.data = await loadData();
+      S.year = S.data.year;
+      resetView("assess");
+    } else {
+      S.senior = null;
+      S.teacher = el("gName").value.trim();
+      S.pin = el("gPin").value.trim();
+      if (!S.teacher || !S.pin) throw new Error("Type your name and PIN.");
+      S.data = await loadData();
+      S.teacher = S.data.teacher;
+    }
+    S.manage = null;
+    if (!S.senior) resetView("mine");
+    saveSession();
+    showApp();
+  } catch (e) {
+    S.senior = null;
+    el("gMsg").textContent = e.message;
   }
 }
 
-function setMode(m) {
-  if (m === 'mine' && mode === 'new' && !confirmDiscard()) return;
-  applyMode(m);
-}
-tabNew.onclick = () => setMode('new');
-tabMine.onclick = () => setMode('mine');
-
-// ---------- main sections ----------
-let section = 'eval';          // eval | grade | time | assess
-let gMode = 'daily';           // grading sub-tab: daily | sum | up
-let gItems = [];               // the teacher's uploaded quizzes and assignments
-let gForm = null;              // { id, rows: [{ name, score, absent }] } while grading
-let gDirty = false;
-
-const SOON_TEXT = {
-  time: 'Timetable will be added soon.',
-  assess: 'Assessments will be added soon.'
+el("signOut").onclick = () => {
+  sessionStorage.removeItem("trials");
+  sessionStorage.removeItem("trialsData");
+  location.reload();
 };
 
-function setSection(sec) {
-  if (sec === section) return;
-  if (section === 'eval' && mode === 'new' && !confirmDiscard()) return;
-  if (section === 'grade' && !confirmGradeDiscard()) return;
-  section = sec;
-  showSection();
+// ----- app -----
+function showApp() {
+  el("gate").classList.add("hidden");
+  el("app").classList.remove("hidden");
+  el("who").textContent = S.senior ? "Senior" : S.teacher;
+  renderYearBar();
+
+  const list = S.data.assessments;
+  el("assess").innerHTML = list.map(a =>
+    `<option value="${esc(a.id)}">${esc(assessLabel(a))}</option>`).join("");
+  if (list.length && (!S.assessId || !list.some(a => a.id === S.assessId))) {
+    S.assessId = list[0].id;
+  }
+  if (S.assessId) el("assess").value = S.assessId;
+  render();
 }
 
-function showSection() {
-  document.querySelectorAll('#nav .tab').forEach(b => b.classList.toggle('on', b.dataset.sec === section));
-  const isEval = section === 'eval', isGrade = section === 'grade';
-  $('evalTabs').hidden = !isEval;
-  $('gradeTabs').hidden = !isGrade;
-  $('soon').hidden = isEval || isGrade;
-  $('soon').textContent = SOON_TEXT[section] || '';
-  if (isEval) {
-    applyMode(mode);
-    if (mode === 'new') loadStudents();   // fresh cards for the chosen class
+function renderYearBar() {
+  if (S.senior) {
+    el("yearSel").innerHTML = S.data.years.map(y =>
+      `<option value="${esc(y.year)}" ${y.year === S.data.year ? "selected" : ""}>${esc(y.year)}${y.status === "Current" ? " (current)" : ""}</option>`).join("");
+    el("yearSel").classList.remove("hidden");
+    el("yearNote").textContent = S.data.isCurrent ? "Current year: you can change everything" : "Past year: read-only";
   } else {
-    topCard.hidden = true; panel.hidden = true; mine.hidden = true;
-  }
-  if (isGrade) applyGMode(gMode);
-  else { ['gDaily', 'gSum', 'gUp'].forEach(id => { $(id).hidden = true; }); }
-}
-
-document.querySelectorAll('#nav .tab').forEach(b => { b.onclick = () => setSection(b.dataset.sec); });
-
-// ---------- grading ----------
-const num = v => (v === '' || v === null || v === undefined) ? null : Number(v);
-const fmtScore = n => (Math.round(n * 100) / 100).toString();
-
-function confirmGradeDiscard() {
-  return !gDirty || window.confirm('You have unsaved grades. Discard them?');
-}
-
-function applyGMode(m) {
-  gMode = m;
-  $('tabGDaily').classList.toggle('on', m === 'daily');
-  $('tabGSum').classList.toggle('on', m === 'sum');
-  $('tabGUp').classList.toggle('on', m === 'up');
-  $('gDaily').hidden = m !== 'daily';
-  $('gSum').hidden = m !== 'sum';
-  $('gUp').hidden = m !== 'up';
-  if (m === 'daily') dInit();
-  if (m === 'sum') sInit();
-  if (m === 'up') {
-    fillGradeClasses();
-    upPlan = null;
-    $('upFile').value = '';
-    showIn($('upMsg'), '', true);
-    renderUpPlan();
-    if (!gItems.length) loadGradeItemsQuietly();   // so a repeated title is recognised as an update
+    el("yearSel").classList.add("hidden");
+    el("yearNote").textContent = "Year " + S.data.year;
   }
 }
 
-function setGMode(m) {
-  if (m === gMode) return;
-  if (!confirmGradeDiscard()) return;
-  gDirty = false;
-  gForm = null;
-  upPlan = null;
-  applyGMode(m);
-}
-$('tabGDaily').onclick = () => setGMode('daily');
-$('tabGSum').onclick = () => setGMode('sum');
-$('tabGUp').onclick = () => setGMode('up');
+el("yearSel").onchange = async e => {
+  S.year = e.target.value;
+  S.assessId = null;
+  S.manage = null;
+  S.newAsm = null;
+  S.selected = new Set();
+  try {
+    msg("Loading year…");
+    S.data = await loadData();
+    S.year = S.data.year;
+    persistData();
+    saveSession();
+    showApp();
+    msg("");
+  } catch (err) {
+    msg(err.message, true);
+  }
+};
 
-function fillGradeClasses() {
-  const opts = sel => {
-    const prev = sel.value;
-    sel.innerHTML = '';
-    sel.add(new Option('-- choose class --', ''));
-    Object.keys(GROUPS).forEach(c => sel.add(new Option(c, c)));
-    sel.value = Object.keys(GROUPS).includes(prev) ? prev : '';
+el("assess").onchange = e => { S.assessId = e.target.value; resetView("A"); render(); };
+
+function resetView(view) {
+  S.view = view;
+  S.selected = new Set();
+  S.absentPick = null;
+  S.newAsm = null;
+}
+
+function assessById(id) { return S.data.assessments.find(a => a.id === id); }
+
+// Can this attempt take a result now? (Open, not locked for the teacher, year editable)
+function canAct(x, a) {
+  if (!canEdit()) return false;
+  if (x.status !== "Open") return false;
+  if (x.trial === "D" && !S.senior) return false;
+  const date = a.dates[x.trial];
+  if (date && date > S.data.today && !S.senior) return false;
+  return true;
+}
+
+function listFor(view, rows) {
+  if (view === "D") return rows.filter(x => x.trial === "D");          // every D result stays visible
+  if (view === "hold") return rows.filter(x => x.status === "On hold");
+  if (view === "disputed") return rows.filter(x => x.status === "Disputed");
+  if (view === "passed") return rows.filter(x => x.status === "Passed");
+  if (view[0] === "p") return rows.filter(x => x.trial === view[1] && x.status === "Passed");
+  // Attempt A/B/C: open and waiting students for that attempt
+  return rows.filter(x => x.trial === view && (x.status === "Open" || x.status === "Waiting"));
+}
+
+function render() {
+  const senior = !!S.senior;
+  if (senior && !(S.view in TOP_OF)) resetView("assess");
+  if (!senior && !TEACHER_VIEWS.some(v => v[0] === S.view)) resetView("mine");
+
+  const top = senior ? TOP_OF[S.view] : S.view;
+  const reqCount = senior ? S.data.attempts.filter(x => x.status === "On hold" || x.status === "Disputed").length : 0;
+  el("tabs").innerHTML = senior
+    ? SENIOR_TABS.map(([key, label]) =>
+      `<button data-view="${key}" class="${key === top ? "on" : ""}">${key === "requests" && reqCount ? `${label} (${reqCount})` : label}</button>`).join("")
+    : TEACHER_VIEWS.map(([key, label]) =>
+      `<button data-view="${key}" class="${key === S.view ? "on" : ""}">${label}</button>`).join("");
+
+  const subs = senior ? SENIOR_SUBS[top] : [];
+  el("subtabs").classList.toggle("hidden", !subs.length);
+  el("subtabs").innerHTML = subs.map(([key, label]) =>
+    `<button data-view="${key}" class="${key === S.view ? "on" : ""}">${label}</button>`).join("");
+
+  // The assessment picker is only needed on attempt lists
+  const plain = ["assess", "mine", "requests", "hist-class", "hist-stage", "hist-year", "set-people", "set-classes"];
+  el("assessCard").classList.toggle("hidden", plain.includes(S.view));
+  const showPlain = html => {
+    el("counts").innerHTML = "";
+    el("bulk").classList.add("hidden");
+    el("list").innerHTML = html;
   };
-  opts($('upCls'));
-  opts($('dGrp'));
-  opts($('sGrp'));
+
+  if (S.view === "assess") return showPlain(assessHtml());
+  if (S.view === "mine") return showPlain(myAssessHtml());
+  if (S.view === "requests") return showPlain(requestsHtml());
+  if (S.view === "hist-class") return showPlain(dashboardHtml("class"));
+  if (S.view === "hist-stage") return showPlain(dashboardHtml("stage"));
+  if (S.view === "hist-year") {
+    if (S.yearCache) return showPlain(yearTable(S.yearCache));
+    showPlain(`<div class="empty">Loading academic years…</div>`);
+    return loadYears();
+  }
+  if (S.view === "set-people") return showPlain(manageHtml());
+  if (S.view === "set-classes") return showPlain(classesHtml());
+
+  const a = assessById(S.assessId);
+  if (!a) {
+    el("counts").innerHTML = "";
+    el("bulk").classList.add("hidden");
+    el("list").innerHTML = `<div class="empty">${S.senior ? "No assessments in this year yet. Open Assessments to add one." : "No assessments are assigned to you yet."}</div>`;
+    return;
+  }
+
+  const rows = S.data.attempts.filter(x => x.assessmentId === a.id);
+
+  const attempts = S.senior ? TRIAL_ORDER : TRIAL_ORDER.slice(0, 3);
+  el("counts").innerHTML = attempts.map(t => {
+    const open = rows.filter(x => x.trial === t && x.status === "Open").length;
+    const passed = rows.filter(x => x.trial === t && x.status === "Passed").length;
+    return `<div class="count">Attempt ${t} open<b>${open}</b>${passed} passed</div>`;
+  }).join("")
+    + `<div class="count">Waiting for Senior<b>${rows.filter(x => x.status === "On hold" || x.status === "Disputed").length}</b></div>`
+    + (S.senior ? `<div class="count">Failed final (Attempt D)<b>${rows.filter(x => x.trial === "D" && x.status === "Failed").length}</b>students</div>` : "");
+
+  const items = listFor(S.view, rows);
+  const isAttemptView = TRIAL_ORDER.indexOf(S.view) !== -1;
+  const selectable = items.filter(x => canAct(x, a));
+
+  // Forget selections for rows that are no longer selectable
+  const ok = new Set(selectable.map(x => x.rowId));
+  S.selected = new Set([...S.selected].filter(id => ok.has(id)));
+
+  el("bulk").classList.toggle("hidden", !(isAttemptView && selectable.length));
+  el("selCount").textContent = S.selected.size;
+  el("selAll").checked = selectable.length > 0 && selectable.every(x => S.selected.has(x.rowId));
+
+  el("list").innerHTML = items.length
+    ? items.map(x => rowHtml(x, a)).join("")
+    : `<div class="empty">Nothing here.</div>`;
 }
 
-async function loadGradeItemsQuietly() {
-  try { gItems = (await post('myGradeItems', session())).items || []; if (upPlan) { upPlan = buildUpPlanAgain(); renderUpPlan(); } }
-  catch (err) { /* the upload still works; titles just are not matched to saved ones */ }
-}
-let upGrid = null;
-function buildUpPlanAgain() { return upGrid ? buildUpPlan(upPlan.cls, upGrid) : upPlan; }
-// ---------- grading: Excel upload (several quizzes and assignments at once) ----------
-// Template layout, one class per file:
-//   row 1 Title · row 2 Type (Quiz/Assignment) · row 3 Date · row 4 Out of
-//   row 5 headings · row 6 down: one student per row, a score under each quiz or assignment
-// In a score cell: a number, A or Absent for absent, or empty if not graded yet.
-const UP_FIRST_STUDENT_ROW = 6;
-const UP_COLS = 6;          // empty quiz/assignment columns in a fresh template
-let upPlan = null;          // checked upload, waiting for Save
-
-const normKey = s => String(s ?? '').replace(/\s+/g, ' ').trim().toLowerCase();
-
-function upSheetRows(cls) {
-  const students = groupStudents(cls);
-  const blank = Array(UP_COLS).fill('');
-  return [
-    ['Title', ...blank],
-    ['Type (Quiz or Assignment)', ...blank],
-    ['Date (YYYY-MM-DD)', ...blank],
-    ['Out of', ...blank],
-    ['Student', ...Array(UP_COLS).fill('Score (A = absent)')],
-    ...students.map(n => [n, ...blank])
-  ];
-}
-
-$('upTemplate').onclick = () => {
-  const cls = $('upCls').value;
-  if (!cls) return showIn($('upMsg'), 'Choose a class first.', false);
-  const rows = upSheetRows(cls);
-  const help = [
-    ['How to fill this template'],
-    [''],
-    ['1. Each column from B onwards is one quiz or assignment. Add more columns to the right if you need them.'],
-    ['2. Row 1: a title, for example Quiz 1. Row 2: Quiz or Assignment. Row 3: the date. Row 4: the maximum score.'],
-    ['3. Under each one, type the score for every student. Type A for absent. Leave it empty if not graded yet.'],
-    ['4. Do not change the student names in column A. Save the file and upload it on the Upload Excel screen.'],
-    ['5. A column with no title is skipped. Uploading the same title again for this class updates it instead of adding a copy.']
-  ];
-  const blob = xlsxBlob([
-    { name: cls, rows, bold: [0, 1, 2, 3, 4] },
-    { name: 'How to fill', rows: help, bold: [0] }
-  ]);
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `Grades template - ${cls}.xlsx`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+el("tabs").onclick = e => {
+  const b = e.target.closest("button[data-view]");
+  if (!b) return;
+  const key = b.dataset.view;
+  if (S.senior) {
+    if (TOP_OF[S.view] === key) return;   // already on this tab: keep its sub-screen
+    resetView(SENIOR_SUBS[key].length ? SENIOR_SUBS[key][0][0] : key);
+  } else {
+    resetView(key);
+  }
+  render();
 };
 
-$('upCls').onchange = () => { upPlan = null; gDirty = false; $('upFile').value = ''; renderUpPlan(); showIn($('upMsg'), '', true); };
+el("subtabs").onclick = e => {
+  const b = e.target.closest("button[data-view]");
+  if (!b || b.dataset.view === S.view) return;
+  resetView(b.dataset.view);
+  render();
+};
 
-$('upFile').onchange = async () => {
-  const file = $('upFile').files[0];
-  const cls = $('upCls').value;
-  upPlan = null;
-  renderUpPlan();
-  if (!file) return;
-  if (!cls) { $('upFile').value = ''; return showIn($('upMsg'), 'Choose the class first, then the file.', false); }
-  showIn($('upMsg'), 'Reading the file…', true);
+// ----- selection -----
+el("selAll").onchange = e => {
+  const a = assessById(S.assessId);
+  if (!a) return;
+  const rows = S.data.attempts.filter(x => x.assessmentId === a.id);
+  listFor(S.view, rows).filter(x => canAct(x, a)).forEach(x => {
+    if (e.target.checked) S.selected.add(x.rowId); else S.selected.delete(x.rowId);
+  });
+  render();
+};
+
+el("bulkApply").onclick = async () => {
+  const v = el("bulkVal").value;
+  const ids = [...S.selected];
+  if (!ids.length) return msg("Select at least one student.", true);
+  if (!v) return msg("Choose Pass, Fail or Absent first.", true);
+
+  let result = v === "Pass" ? "Pass" : v === "Fail" ? "Fail" : "Absent (unexcused)";
+  let excuse = "";
+  let comment = "";
+  if (v === "Absent") {
+    const ans = prompt(`Absent for ${ids.length} student(s).\nType the sick-leave reference if they are excused, or leave empty if not excused:`);
+    if (ans === null) return;
+    excuse = ans.trim();
+    result = excuse ? "Absent (excused)" : "Absent (unexcused)";
+  }
+  if (v === "Fail") {
+    comment = await askText(`Why did ${ids.length} student(s) fail?`,
+      "The same reason is saved for each selected student. For different reasons, use Fail on each row.");
+    if (!comment) return;
+  }
+  if (!confirm(`${result} for ${ids.length} student(s)?`)) return;
+
   try {
-    let grid;
-    if (/\.csv$/i.test(file.name)) grid = parseCsv(await file.text());
-    else grid = await readXlsxFirstSheet(await file.arrayBuffer());
-    upGrid = grid;
-    upPlan = buildUpPlan(cls, grid);
-    gDirty = true;
-    showIn($('upMsg'), '', true);
-    renderUpPlan();
+    msg("Saving…");
+    const out = await call(act("recordMany"), { rowIds: ids, result, excuse, comment });
+    S.selected = new Set();
+    el("bulkVal").value = "";
+    await reload();
+    msg(`Saved ${out.done}.` + (out.skipped.length ? ` Skipped ${out.skipped.length}: ${out.skipped[0]}` : ""), out.skipped.length > 0 && out.done === 0);
   } catch (err) {
-    showIn($('upMsg'), 'Could not read this file: ' + err.message, false);
+    msg(err.message, true);
   }
 };
 
-// Turns the sheet grid into quizzes/assignments with scores, and lists every problem found
-function buildUpPlan(cls, grid) {
-  const cell = (r, c) => (grid[r] && grid[r][c] !== undefined && grid[r][c] !== null) ? grid[r][c] : '';
-  const width = Math.max(0, ...grid.map(r => r.length));
-  const roster = groupStudents(cls);
-  const rosterByKey = {};
-  roster.forEach(n => { rosterByKey[normKey(n)] = n; });
+// ----- rows -----
+// Chip shows the state; Attempt D reads as final
+function statusChip(x) {
+  if (x.trial === "D" && x.status === "Failed") return `<span class="chip bad">FAILED (final)</span>`;
+  if (x.status === "Passed") return `<span class="chip good">PASSED</span>`;
+  if (x.status === "On hold") return `<span class="chip">ON HOLD · Senior decides</span>`;
+  return `<span class="chip">${esc(x.status)}</span>`;
+}
 
-  // Students in the file, matched to the class list
-  const errors = [];
-  const students = [];
-  const seen = new Set();
-  for (let r = UP_FIRST_STUDENT_ROW - 1; r < grid.length; r++) {
-    const raw = String(cell(r, 0)).trim();
-    if (!raw) continue;
-    const name = rosterByKey[normKey(raw)];
-    if (!name) { errors.push(`Row ${r + 1}: "${raw}" is not a student of ${cls}.`); continue; }
-    if (seen.has(name)) { errors.push(`Row ${r + 1}: ${name} appears twice.`); continue; }
-    seen.add(name);
-    students.push({ name, row: r });
+function rowHtml(x, a) {
+  const date = a.dates[x.trial] || "";
+  const actionable = canAct(x, a);
+  const pick = actionable
+    ? `<input type="checkbox" class="pick" data-id="${esc(x.rowId)}" ${S.selected.has(x.rowId) ? "checked" : ""}>`
+    : "";
+
+  let actions = "";
+  if (x.status === "Disputed" || x.status === "On hold") {
+    actions = !S.senior ? `<span class="chip">Waiting for Senior</span>`
+      : canEdit() ? decideButtons(x) : "";
+  } else if (actionable) {
+    actions = S.absentPick === x.rowId ? absentPicker(x) : recordButtons(x);
+  } else if (x.status === "Open" && date && date > S.data.today && !S.senior) {
+    actions = `<span class="chip">Opens ${esc(date)}</span>`;
+  } else if (x.status === "Waiting") {
+    actions = `<span class="chip">Waiting${date ? " · opens " + esc(date) : ""}</span>`;
   }
 
-  const existing = new Map(gItems.filter(i => itemKey(i) === cls).map(i => [normKey(i.title), i]));
-  const items = [];
-  const titles = new Set();
-  for (let c = 1; c < width; c++) {
-    const title = String(cell(0, c)).trim();
-    const col = colName(c);
-    const hasScores = students.some(s => String(cell(s.row, c)).trim() !== '');
-    if (!title) {
-      if (hasScores) errors.push(`Column ${col}: has scores but no title in row 1.`);
-      continue;
-    }
-    if (titles.has(normKey(title))) { errors.push(`Column ${col}: the title "${title}" is used twice.`); continue; }
-    titles.add(normKey(title));
+  const details = [
+    `Attempt ${esc(x.trial)}`,
+    date ? `date ${esc(date)}` : "",
+    x.result ? `last: ${esc(x.result)}` : "",
+    x.excuse ? `sick-leave ref: ${esc(x.excuse)}` : "",
+    x.dispute ? `dispute: ${esc(x.dispute)}` : "",
+    x.comment ? `reason: ${esc(x.comment)}` : ""
+  ].filter(Boolean).join(" · ");
 
-    const typeRaw = normKey(cell(1, c));
-    const type = typeRaw.startsWith('a') ? 'Assignment' : typeRaw.startsWith('q') ? 'Quiz' : '';
-    if (!type) errors.push(`Column ${col} (${title}): row 2 must be Quiz or Assignment.`);
-    const date = excelDate(cell(2, c));
-    if (!date) errors.push(`Column ${col} (${title}): row 3 needs a date like 2026-11-22.`);
-    const max = Number(cell(3, c));
-    if (!(max > 0)) errors.push(`Column ${col} (${title}): row 4 needs the maximum score.`);
+  return `<div class="row">
+    <div class="who">
+      ${pick}
+      <div>
+        <div class="name">${esc(x.student)}</div>
+        <div class="meta">${details} ${statusChip(x)}</div>
+      </div>
+    </div>
+    <div class="actions">${actions}</div>
+  </div>`;
+}
 
-    const scores = [];
-    students.forEach(s => {
-      const v = cell(s.row, c);
-      const t = String(v).trim();
-      if (t === '') return;
-      if (/^(a|abs|absent|غ|غائب)$/i.test(t)) { scores.push({ student: s.name, score: null, absent: true }); return; }
-      const n = typeof v === 'number' ? v : Number(t.replace(',', '.'));
-      if (isNaN(n)) { errors.push(`${col}${s.row + 1} (${s.name}, ${title}): "${t}" is not a score.`); return; }
-      if (n < 0 || (max > 0 && n > max)) { errors.push(`${col}${s.row + 1} (${s.name}, ${title}): ${n} is outside 0 to ${max}.`); return; }
-      scores.push({ student: s.name, score: n, absent: false });
+function recordButtons(x) {
+  return `
+    <button class="pass" data-act="rec" data-id="${esc(x.rowId)}" data-res="Pass">Pass</button>
+    <button class="fail" data-act="rec" data-id="${esc(x.rowId)}" data-res="Fail">Fail</button>
+    <button class="abs" data-act="absent" data-id="${esc(x.rowId)}">Absent</button>
+    ${S.senior ? "" : `<button class="dis" data-act="dispute" data-id="${esc(x.rowId)}">Dispute</button>`}`;
+}
+
+// After "Absent": choose excused or not. Both go to the Senior.
+function absentPicker(x) {
+  return `
+    <button class="hold" data-act="absentYes" data-id="${esc(x.rowId)}">Excused (sick leave)</button>
+    <button class="abs" data-act="absentNo" data-id="${esc(x.rowId)}">Not excused</button>
+    <button class="ghost" data-act="absentCancel">Cancel</button>`;
+}
+
+// Senior decides Pass or Fail on On hold and Disputed attempts
+function decideButtons(x) {
+  return `
+    <button class="pass" data-act="decide" data-id="${esc(x.rowId)}" data-res="Pass">Pass</button>
+    <button class="fail" data-act="decide" data-id="${esc(x.rowId)}" data-res="Fail">Fail</button>`;
+}
+
+// ----- Assessments (Senior only) -----
+// One table per stage. Each row is one competency, and its parallel classes sit side by side.
+function stageOpt(key) { return STAGE_OPTIONS.find(s => s.key === key) || STAGE_OPTIONS[0]; }
+
+// The competencies of a stage, in code order
+function stageComps(st) {
+  return (S.data.competencies || []).filter(st.match)
+    .sort((p, q) => p.code.localeCompare(q.code, undefined, { numeric: true }));
+}
+
+// Index of the copy's row for this competency and class, or -1
+function assignedIndex(code, cls) {
+  return S.manage.assessments.findIndex(a => a.competency === code && a.cls === cls);
+}
+
+// Short date for the table: "20 Nov"
+function fmtDay(ymd) {
+  return ymd ? new Date(ymd + "T00:00:00Z").toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" }) : "";
+}
+
+// Attempts A to D, shown on hover so the table stays short
+function datesTitle(dA) {
+  return dA
+    ? `A ${fmtDay(dA)} · B ${fmtDay(addDays(dA, 1))} · C ${fmtDay(addDays(dA, 2))} · D ${fmtDay(addDays(dA, 3))}`
+    : "Set the Attempt A date";
+}
+
+// The stage buttons across the top
+function stageTabsHtml(st) {
+  return `<div class="stageTabs">${STAGE_OPTIONS.map(s =>
+    `<button data-act="stage" data-key="${s.key}" class="${s.key === st.key ? "on" : ""}">${esc(s.key)}</button>`).join("")}</div>`;
+}
+
+// Progress for the stage: how many competencies are assigned to every class of it
+function progressHtml(st, comps) {
+  const fully = comps.filter(c => st.classes.every(cls => assignedIndex(c.code, cls) !== -1)).length;
+  const missing = comps.filter(c => st.classes.some(cls => assignedIndex(c.code, cls) === -1));
+  const pct = comps.length ? Math.round(fully / comps.length * 100) : 0;
+  return `<div class="card" style="padding:10px 14px">
+    <div class="meta"><b>${esc(st.label)}</b> · ${fully} of ${comps.length} competencies assigned to every class</div>
+    <div class="bar"><span style="width:${pct}%"></span></div>
+    <div class="meta" style="margin-top:6px">${missing.length
+      ? "Not yet assigned: " + missing.map(c => esc(c.code)).join(", ")
+      : "All competencies of this stage are assigned."}</div>
+  </div>`;
+}
+
+function assessHtml() {
+  if (!canEdit()) return readOnlyAssess();
+  manageInit();
+  const st = stageOpt(S.stage);
+  const comps = stageComps(st);
+
+  let html = `<div class="newBar">${stageTabsHtml(st)}<button data-act="aNew">+ New assessment</button></div>`;
+  html += progressHtml(st, comps);
+  if (S.newAsm) html += newAssessForm();
+  if (!comps.length) return html + `<div class="empty">No competencies in this stage.</div>`;
+
+  const head = `<tr><th>Code</th><th>Competency</th>${st.classes.map(c => `<th>${esc(c)}</th>`).join("")}<th></th></tr>`;
+  const body = comps.map(c => {
+    const cells = st.classes.map(cls => {
+      const i = assignedIndex(c.code, cls);
+      if (i === -1) return `<td><span class="meta">Not assigned</span></td>`;
+      const a = S.manage.assessments[i];
+      return `<td><div class="cell">
+          <select data-k="assessments" data-i="${i}" data-f="teacher">${teacherOpts(a.teacher)}</select>
+          <input type="date" data-k="assessments" data-i="${i}" data-f="dA" value="${esc(a.dA)}" title="${esc(datesTitle(a.dA))}">
+          <button class="ghost xs" data-act="aRemove" data-i="${i}" title="Remove this class">×</button>
+        </div></td>`;
+    }).join("");
+    const hasMissing = st.classes.some(cls => assignedIndex(c.code, cls) === -1);
+    return `<tr><td class="code">${esc(c.code)}</td>
+      <td title="${esc(c.nameAr)}">${esc(c.name)}</td>${cells}
+      <td>${hasMissing ? `<button class="ghost xs" data-act="aAssign" data-code="${esc(c.code)}">Assign</button>` : ""}</td></tr>`;
+  }).join("");
+
+  html += `<div class="tableWrap"><table class="dash assess">${head}${body}</table></div>`;
+  if (S.dirty) html += `<div style="margin-top:8px"><button data-act="aSave">Save changes</button></div>`;
+  html += `<div class="meta" style="margin-top:6px">Hover a date to see Attempts B, C and D. A class cannot be removed once it has results.</div>`;
+  return html;
+}
+
+// The New assessment form. Only classes that are still missing for the competency are shown.
+function newAssessForm() {
+  const st = stageOpt(S.newAsm.stage);
+  const code = S.newAsm.code || "";
+  const comps = stageComps(st).filter(c => st.classes.some(cls => assignedIndex(c.code, cls) === -1));
+  const open = code ? st.classes.filter(cls => assignedIndex(code, cls) === -1) : [];
+
+  let body;
+  if (!code) {
+    body = `<div class="meta">Choose a competency. It is assigned to ${st.classes.map(esc).join(" and ")}.</div>`;
+  } else if (!open.length) {
+    body = `<div class="meta">Already assigned to every class of this stage.</div>`;
+  } else {
+    body = open.map(cls => `<div class="mrow">
+        <span class="clsName">${esc(cls)}</span>
+        <select id="naT_${keyOf(cls)}">${teacherOpts("")}</select>
+        <label style="margin:0">Attempt A <input type="date" id="naD_${keyOf(cls)}"></label>
+      </div>`).join("") + `<div class="meta">Attempts B, C and D follow on the next days.</div>`;
+  }
+
+  return `<div class="card">
+    <div class="name">New assessment</div>
+    <div class="mrow" style="margin-top:10px">
+      <label style="margin:0">Stage <select id="naStage">${STAGE_OPTIONS.map(s =>
+        `<option value="${s.key}" ${s.key === st.key ? "selected" : ""}>${esc(s.label)}</option>`).join("")}</select></label>
+      <label style="margin:0; flex:1">Competency <select id="naComp" class="wide">
+        <option value="">Choose competency</option>
+        ${comps.map(c => `<option value="${esc(c.code)}" ${c.code === code ? "selected" : ""}>${esc(c.code)} · ${esc(c.name)}</option>`).join("")}
+      </select></label>
+    </div>
+    <div style="margin-top:8px">${body}</div>
+    <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap">
+      ${open.length ? `<button data-act="aAdd">Add assessment</button>` : ""}
+      <button class="ghost" data-act="aCancel">Cancel</button>
+    </div>
+  </div>`;
+}
+
+// A past year: the same tables, read-only
+function readOnlyAssess() {
+  const st = stageOpt(S.stage);
+  const comps = stageComps(st);
+  const body = comps.map(c => {
+    const cells = st.classes.map(cls => {
+      const a = S.data.assessments.find(x => x.competency === c.code && x.cls === cls);
+      return `<td>${a ? `${esc(a.teacher)} · ${esc(fmtDay(a.dates.A))}` : `<span class="meta">Not assigned</span>`}</td>`;
+    }).join("");
+    return `<tr><td class="code">${esc(c.code)}</td><td>${esc(c.name)}</td>${cells}</tr>`;
+  }).join("");
+  const head = `<tr><th>Code</th><th>Competency</th>${st.classes.map(c => `<th>${esc(c)}</th>`).join("")}</tr>`;
+  return `<div class="newBar">${stageTabsHtml(st)}</div>
+    <div class="empty">${esc(S.data.year)} is a past year. Read-only.</div>
+    <div class="tableWrap"><table class="dash assess">${head}${body}</table></div>`;
+}
+
+// Teacher: the assessments assigned to me, with counts of students
+function myAssessHtml() {
+  const rows = S.data.assessments.slice().sort((p, q) =>
+    classRank(p.cls) - classRank(q.cls) || p.competency.localeCompare(q.competency, undefined, { numeric: true }));
+  if (!rows.length) return `<div class="empty">No assessments are assigned to you.</div>`;
+
+  const head = `<tr><th>Competency</th><th>Class</th><th>Attempt A</th><th>Open now</th><th>Waiting for Senior</th><th>Passed</th><th>Failed final</th><th></th></tr>`;
+  const body = rows.map(a => {
+    const mine = S.data.attempts.filter(x => x.assessmentId === a.id);
+    const count = pred => new Set(mine.filter(pred).map(x => x.student)).size;
+    return `<tr>
+      <td><div class="name">${esc(compName(a.competency))}</div><div class="sub">${esc(a.competency)}</div></td>
+      <td>${esc(a.cls)}</td>
+      <td>${esc(fmtDay(a.dates.A))}</td>
+      <td>${count(x => x.status === "Open")}</td>
+      <td>${count(x => x.status === "On hold" || x.status === "Disputed")}</td>
+      <td>${count(x => x.status === "Passed")}</td>
+      <td>${count(x => x.trial === "D" && x.status === "Failed")}</td>
+      <td><button class="ghost xs" data-act="goAssess" data-id="${esc(a.id)}">Open</button></td>
+    </tr>`;
+  }).join("");
+  return `<div class="tableWrap"><table class="dash">${head}${body}</table></div>`;
+}
+
+// ----- Dashboard (Senior only) -----
+// Three ways to read the same data: by class, by stage, and by academic year.
+// The screen and the Excel export are both built from the same blocks, so they always match.
+
+// Blocks for one mode. Each row has one cell per column; a null cell means that
+// competency is not assigned to the student's class.
+function dashBlocks(mode) {
+  const students = S.data.students || [];
+  const asm = S.data.assessments || [];
+  if (mode === "class") {
+    const classes = [...new Set([...students.map(s => s.cls), ...asm.map(a => a.cls)].filter(Boolean))]
+      .sort((p, q) => classRank(p) - classRank(q) || p.localeCompare(q));
+    return classes.map(c => {
+      const list = asm.filter(a => a.cls === c);
+      const names = students.filter(s => s.cls === c).map(s => s.name).sort();
+      return {
+        title: `${c} · ${names.length} students`,
+        sheet: c,
+        showClass: false,
+        cols: list.map(a => ({ label: compName(a.competency) || a.name, code: a.competency, dA: a.dates.A })),
+        rows: names.map(n => ({ name: n, cls: c, cells: list.slice() }))
+      };
     });
-
-    const old = existing.get(normKey(title));
-    items.push({ col, title, type, date, max, scores, id: old ? old.id : '', replaces: !!old });
   }
-  if (!students.length) errors.push(`No students of ${cls} were found in column A from row ${UP_FIRST_STUDENT_ROW}.`);
-  if (!items.length) errors.push('No quiz or assignment found. Put a title in row 1, from column B onwards.');
-  const missing = roster.filter(n => !seen.has(n));
-  return { cls, items, errors, missing, studentCount: students.length };
-}
-
-function renderUpPlan() {
-  const box = $('upPreview');
-  const save = $('upSave');
-  if (!upPlan) { box.innerHTML = ''; save.hidden = true; return; }
-  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const rows = upPlan.items.map(i => {
-    const scored = i.scores.filter(x => !x.absent);
-    const absent = i.scores.length - scored.length;
-    const avg = scored.length ? scored.reduce((t, x) => t + x.score, 0) / scored.length : null;
-    return `<tr><td>${esc(i.col)}</td><td><b>${esc(i.title)}</b>${i.replaces ? '<div class="rec-meta on">updates the existing one</div>' : '<div class="rec-meta">new</div>'}</td>
-      <td>${esc(i.type || '?')}</td><td>${esc(i.date || '?')}</td><td>${i.max > 0 ? esc(i.max) : '?'}</td>
-      <td>${i.scores.length} / ${upPlan.studentCount}${absent ? `<div class="rec-meta">${absent} absent</div>` : ''}</td>
-      <td>${avg === null ? '—' : fmtScore(avg)}</td></tr>`;
-  }).join('');
-  const table = upPlan.items.length ? `<div class="tablewrap"><table>
-    <tr><th>Column</th><th>Title</th><th>Type</th><th>Date</th><th>Out of</th><th>Graded</th><th>Average</th></tr>${rows}</table></div>` : '';
-  const errs = upPlan.errors.length
-    ? `<div class="msg err"><b>Fix these in the file, then choose it again:</b><ul style="margin:6px 0 0 18px;padding:0">${
-        upPlan.errors.slice(0, 30).map(e => `<li>${esc(e)}</li>`).join('')}${upPlan.errors.length > 30 ? `<li>and ${upPlan.errors.length - 30} more</li>` : ''}</ul></div>`
-    : `<div class="msg ok">Checked: ${upPlan.items.length} quiz(zes) or assignment(s) for ${esc(upPlan.cls)}, ready to save.</div>`;
-  const miss = upPlan.missing.length
-    ? `<p class="hint">Not in the file, so left ungraded: ${esc(upPlan.missing.join(', '))}</p>` : '';
-  box.innerHTML = errs + table + miss;
-  save.hidden = upPlan.errors.length > 0 || !upPlan.items.length;
-}
-
-$('upSave').onclick = async () => {
-  if (!upPlan || upPlan.errors.length) return;
-  const n = upPlan.items.length;
-  const upd = upPlan.items.filter(i => i.replaces).length;
-  if (!window.confirm(`Save ${n} quiz(zes)/assignment(s) for ${upPlan.cls}?` + (upd ? `\n${upd} will replace the scores already saved under the same title.` : ''))) return;
-  const btn = $('upSave');
-  btn.disabled = true;
-  btn.textContent = 'Saving…';
-  try {
-    const out = await post('saveGradeItems', {
-      ...session(),
-      items: upPlan.items.map(i => ({
-        item: { id: i.id, ...groupParts(upPlan.cls), type: i.type, title: i.title, date: i.date, max: i.max },
-        scores: i.scores
+  return STAGE_OPTIONS.map(st => {
+    const studs = students.filter(s => st.classes.includes(s.cls))
+      .sort((p, q) => classRank(p.cls) - classRank(q.cls) || p.name.localeCompare(q.name));
+    const codes = [...new Set(asm.filter(a => st.classes.includes(a.cls)).map(a => a.competency))]
+      .sort((p, q) => p.localeCompare(q, undefined, { numeric: true }));
+    return {
+      title: `${st.label} · ${studs.length} students`,
+      sheet: st.label.replace(/\s*\(.*\)$/, ""),
+      showClass: true,
+      cols: codes.map(code => ({ label: compName(code) || code, code, dA: null })),
+      rows: studs.map(s => ({
+        name: s.name,
+        cls: s.cls,
+        cells: codes.map(code => asm.find(a => a.competency === code && a.cls === s.cls) || null)
       }))
-    });
-    const cls = upPlan.cls;
-    upPlan = null;
-    gDirty = false;
-    $('upFile').value = '';
-    renderUpPlan();
-    showIn($('upMsg'), `Uploaded ${out.saved || n} quiz(zes)/assignment(s) for ${cls}. They count in the Summary.`, true);
-    loadGradeItemsQuietly();
+    };
+  });
+}
+
+// Passed results and assigned students for each column of a block
+function blockTotals(b) {
+  return b.cols.map((c, i) => {
+    const cells = b.rows.filter(r => r.cells[i]);
+    const passed = cells.filter(r => cellState(r.name, r.cells[i]).kind === "good").length;
+    return { passed, of: cells.length };
+  });
+}
+
+function exportBar(mode, note) {
+  return `<div class="exportBar"><button data-act="export" data-mode="${esc(mode)}">Export to Excel</button>` +
+    `<span class="meta">${esc(note)} · for the board</span></div>`;
+}
+
+function dashboardHtml(mode) {
+  const blocks = dashBlocks(mode);
+  const bar = exportBar(mode, mode === "class" ? "one sheet per class" : "one sheet per stage");
+  if (!blocks.some(b => b.rows.length)) {
+    return bar + `<div class="empty">No students in this year yet. Open Settings to add students, then Assessments.</div>`;
+  }
+  return bar + blocks.map(b => {
+    const title = `<h3 class="mh">${esc(b.title)}</h3>`;
+    if (!b.rows.length) return title + `<div class="empty">No students in this block yet.</div>`;
+    if (!b.cols.length) return title + `<div class="empty">No competencies assigned yet.</div>`;
+    const head = `<tr><th>Student</th>${b.showClass ? "<th>Class</th>" : ""}${b.cols.map(c =>
+      `<th>${esc(c.label)}<div class="sub">${esc(c.code)}${c.dA ? " · A " + esc(c.dA) : ""}</div></th>`).join("")}</tr>`;
+    const body = b.rows.map(r =>
+      `<tr><td class="sname">${esc(r.name)}</td>${b.showClass ? `<td>${esc(r.cls)}</td>` : ""}` +
+      r.cells.map(a => `<td>${cellHtml(r.name, a)}</td>`).join("") + `</tr>`).join("");
+    const totals = `<tr class="tot"><td>Passed</td>${b.showClass ? "<td></td>" : ""}${blockTotals(b).map(t =>
+      `<td>${t.passed} / ${t.of}</td>`).join("")}</tr>`;
+    return title + `<div class="tableWrap"><table class="dash">${head}${body}${totals}</table></div>`;
+  }).join("");
+}
+
+// What one student shows for one competency, as text and a colour kind
+function cellState(name, a) {
+  const mine = S.data.attempts.filter(x => x.assessmentId === a.id && x.student === name);
+  if (!mine.length) return { kind: "none", text: "—" };
+  const passed = mine.find(x => x.status === "Passed");
+  if (passed) return { kind: "good", text: `Passed · Attempt ${passed.trial}` };
+  if (mine.some(x => x.trial === "D" && x.status === "Failed")) return { kind: "bad", text: "Failed final" };
+  const current = mine
+    .filter(x => ["Open", "On hold", "Disputed"].indexOf(x.status) !== -1)
+    .sort((p, q) => p.trial < q.trial ? -1 : 1)[0];
+  if (current) {
+    return { kind: "", text: current.status === "Open" ? `Attempt ${current.trial} open` : `Attempt ${current.trial} · with Senior` };
+  }
+  return { kind: "none", text: "Waiting" };
+}
+
+function cellHtml(name, a) {
+  if (!a) return `<span class="meta">Not assigned</span>`;
+  const s = cellState(name, a);
+  if (s.kind === "none") return `<span class="meta">${esc(s.text)}</span>`;
+  return `<span class="chip ${s.kind}">${esc(s.text)}</span>`;
+}
+
+// ----- Requests (Senior only): holds and disputes across the whole year -----
+function requestsHtml() {
+  const pending = S.data.attempts.filter(x => x.status === "On hold");
+  const disputes = S.data.attempts.filter(x => x.status === "Disputed");
+  if (!pending.length && !disputes.length) return `<div class="empty">Nothing is waiting for a decision.</div>`;
+  const group = (title, list) => {
+    if (!list.length) return "";
+    const sorted = list.slice().sort((p, q) => p.student.localeCompare(q.student));
+    return `<h3 class="mh">${esc(title)} · ${list.length}</h3>` + sorted.map(x => {
+      const a = assessById(x.assessmentId);
+      if (!a) return "";
+      return `<div class="meta" style="margin-top:8px">${esc(assessLabel(a))}</div>` + rowHtml(x, a);
+    }).join("");
+  };
+  return group("On hold (Senior decides)", pending) + group("Disputed", disputes);
+}
+
+// ----- History by academic year: one summary row per year -----
+// Loads each year once; the cache is cleared whenever the data reloads.
+async function loadYears() {
+  if (S.yearLoading) return;
+  S.yearLoading = true;
+  try {
+    const out = [];
+    for (const y of S.data.years) {
+      const d = y.year === S.data.year ? S.data : await call("seniorData", { year: y.year });
+      out.push({
+        year: y.year,
+        status: y.status,
+        students: (d.students || []).length,
+        assessments: (d.assessments || []).length,
+        passed: d.attempts.filter(x => x.status === "Passed").length,
+        failed: d.attempts.filter(x => x.trial === "D" && x.status === "Failed").length,
+        pending: d.attempts.filter(x => x.status === "On hold" || x.status === "Disputed").length
+      });
+    }
+    S.yearCache = out;
   } catch (err) {
-    if (isAuthError(err)) return signOut(err.message);
-    showIn($('upMsg'), `Not saved (${err.message}). Press Save again to retry.`, false);
+    msg(err.message, true);
   } finally {
-    btn.disabled = false;
-    btn.textContent = 'Save all';
+    S.yearLoading = false;
   }
-};
-
-// Date cell: an Excel date number, or text like 2026-11-22 or 22/11/2026
-function excelDate(v) {
-  if (typeof v === 'number' && v > 20000 && v < 80000) {
-    const d = new Date(Math.round((v - 25569) * 86400000));
-    return d.toISOString().slice(0, 10);
-  }
-  const t = String(v).trim();
-  let m = /^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/.exec(t);
-  if (m) return `${m[1]}-${m[2].padStart(2, '0')}-${m[3].padStart(2, '0')}`;
-  m = /^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})/.exec(t);
-  if (m) return `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`;
-  return '';
+  if (S.view === "hist-year") render();
 }
 
-function parseCsv(text) {
-  const rows = [];
-  let row = [], cur = '', q = false;
-  text = text.replace(/^﻿/, '');
-  const sep = (text.split('\n')[0].match(/;/g) || []).length > (text.split('\n')[0].match(/,/g) || []).length ? ';' : ',';
-  for (let i = 0; i < text.length; i++) {
-    const ch = text[i];
-    if (q) {
-      if (ch === '"' && text[i + 1] === '"') { cur += '"'; i++; }
-      else if (ch === '"') q = false;
-      else cur += ch;
-    } else if (ch === '"') q = true;
-    else if (ch === sep) { row.push(cur); cur = ''; }
-    else if (ch === '\n' || ch === '\r') {
-      if (ch === '\r' && text[i + 1] === '\n') i++;
-      row.push(cur); rows.push(row); row = []; cur = '';
-    } else cur += ch;
-  }
-  if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
-  return rows;
+function yearTable(rows) {
+  const head = `<tr><th>Academic year</th><th>Status</th><th>Students</th><th>Competencies assigned</th><th>Passed (results)</th><th>Failed final</th><th>Waiting for Senior</th></tr>`;
+  const body = rows.map(r =>
+    `<tr><td class="sname">${esc(r.year)}</td><td>${esc(r.status)}</td><td>${r.students}</td><td>${r.assessments}</td>` +
+    `<td>${r.passed}</td><td>${r.failed}</td><td>${r.pending}</td></tr>`).join("");
+  return exportBar("year", "one sheet, one row per year") +
+    `<div class="tableWrap"><table class="dash">${head}${body}</table></div>`;
 }
 
-// Reads the first sheet of an .xlsx file into a grid of values (numbers stay numbers)
-async function readXlsxFirstSheet(buf) {
-  const files = await unzip(buf);
-  const text = name => files[name] ? new TextDecoder().decode(files[name]) : '';
-  const xml = s => new DOMParser().parseFromString(s, 'application/xml');
-  if (!files['xl/workbook.xml']) throw new Error('this is not an Excel .xlsx file');
-
-  // First sheet's file, via the workbook relationships
-  const wb = xml(text('xl/workbook.xml'));
-  const first = wb.getElementsByTagName('sheet')[0];
-  let path = 'xl/worksheets/sheet1.xml';
-  if (first) {
-    const rid = first.getAttribute('r:id') || first.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id');
-    const rels = xml(text('xl/_rels/workbook.xml.rels')).getElementsByTagName('Relationship');
-    for (const r of rels) {
-      if (r.getAttribute('Id') === rid) {
-        const t = r.getAttribute('Target').replace(/^\//, '');
-        path = t.startsWith('xl/') ? t : 'xl/' + t;
-      }
-    }
-  }
-  const shared = [];
-  if (files['xl/sharedStrings.xml']) {
-    for (const si of xml(text('xl/sharedStrings.xml')).getElementsByTagName('si')) {
-      shared.push([...si.getElementsByTagName('t')].map(t => t.textContent).join(''));
-    }
-  }
-  const sheet = xml(text(path));
-  const grid = [];
-  for (const c of sheet.getElementsByTagName('c')) {
-    const ref = c.getAttribute('r') || '';
-    const m = /^([A-Z]+)(\d+)$/.exec(ref);
-    if (!m) continue;
-    const col = [...m[1]].reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0) - 1;
-    const row = Number(m[2]) - 1;
-    const t = c.getAttribute('t');
-    const vEl = c.getElementsByTagName('v')[0];
-    let v = vEl ? vEl.textContent : '';
-    if (t === 's') v = shared[Number(v)] ?? '';
-    else if (t === 'inlineStr') v = [...c.getElementsByTagName('t')].map(x => x.textContent).join('');
-    else if (t === 'str' || t === 'e') v = v;
-    else if (t === 'b') v = v === '1' ? 'TRUE' : 'FALSE';
-    else if (v !== '') v = Number(v);
-    (grid[row] = grid[row] || [])[col] = v;
-  }
-  for (let i = 0; i < grid.length; i++) grid[i] = grid[i] || [];
-  return grid;
-}
-
-// Minimal zip reader (stored and deflated entries), using the browser's own decompressor
-async function unzip(buf) {
-  const dv = new DataView(buf);
-  const u8 = new Uint8Array(buf);
-  let eocd = -1;
-  for (let i = buf.byteLength - 22; i >= Math.max(0, buf.byteLength - 65557); i--) {
-    if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
-  }
-  if (eocd < 0) throw new Error('this is not an Excel .xlsx file');
-  const count = dv.getUint16(eocd + 10, true);
-  let p = dv.getUint32(eocd + 16, true);
-  const out = {};
-  const dec = new TextDecoder();
-  for (let k = 0; k < count; k++) {
-    if (dv.getUint32(p, true) !== 0x02014b50) break;
-    const method = dv.getUint16(p + 10, true);
-    const csize = dv.getUint32(p + 20, true);
-    const nlen = dv.getUint16(p + 28, true), xlen = dv.getUint16(p + 30, true), clen = dv.getUint16(p + 32, true);
-    const local = dv.getUint32(p + 42, true);
-    const name = dec.decode(u8.subarray(p + 46, p + 46 + nlen));
-    p += 46 + nlen + xlen + clen;
-    if (!/^(xl\/workbook\.xml|xl\/_rels\/workbook\.xml\.rels|xl\/sharedStrings\.xml|xl\/worksheets\/[^/]+\.xml)$/.test(name)) continue;
-    const start = local + 30 + dv.getUint16(local + 26, true) + dv.getUint16(local + 28, true);
-    const data = u8.subarray(start, start + csize);
-    if (method === 0) out[name] = data;
-    else if (method === 8) {
-      if (typeof DecompressionStream === 'undefined') throw new Error('this browser is too old to read Excel files; save the sheet as CSV instead');
-      const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
-      out[name] = new Uint8Array(await new Response(stream).arrayBuffer());
-    }
-  }
-  return out;
+// ----- Settings: class overview -----
+function classesHtml() {
+  const students = S.data.students || [];
+  const asm = S.data.assessments || [];
+  const classes = [...new Set([...CLASS_ORDER, ...students.map(s => s.cls), ...asm.map(a => a.cls)].filter(Boolean))]
+    .sort((p, q) => classRank(p) - classRank(q) || p.localeCompare(q));
+  const head = `<tr><th>Class</th><th>Stage</th><th>Students</th><th>Competencies</th><th>Assessors</th></tr>`;
+  const body = classes.map(c => {
+    const st = STAGE_OPTIONS.find(s => s.classes.includes(c));
+    const list = asm.filter(a => a.cls === c);
+    const teachers = [...new Set(list.map(a => a.teacher).filter(Boolean))];
+    return `<tr><td class="sname">${esc(c)}</td><td>${esc(st ? st.label : "—")}</td>` +
+      `<td>${students.filter(s => s.cls === c).length}</td><td>${list.length}</td>` +
+      `<td>${teachers.length ? esc(teachers.join(", ")) : `<span class="meta">none yet</span>`}</td></tr>`;
+  }).join("");
+  return `<p class="meta">Classes of this year. To move a student, change their class in Teachers & students. Assessors are set on Assessments.</p>` +
+    `<div class="tableWrap"><table class="dash">${head}${body}</table></div>`;
 }
 
 // ----- Excel export (.xlsx, built in the browser; no library needed) -----
@@ -1221,937 +1101,384 @@ function xlsxBlob(sheets) {
       `<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>` +
       `<cellXfs count="2"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>` +
       `<xf numFmtId="0" fontId="1" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs>` +
-      `<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>` +
       `</styleSheet>`) },
     ...sheets.map((s, i) => ({ name: `xl/worksheets/sheet${i + 1}.xml`, data: enc.encode(sheetXml({ ...s, name: names[i] })) }))
   ];
   return zipFiles(files);
 }
 
-// ---------- grading: daily sessions ----------
-// Session times decide which session is picked by default. Change them in config.js for
-// Ramadan and similar periods (see the sessions line there); these are the normal times.
-const SESSION_TIMES = (CFG.sessions && CFG.sessions.length === 8) ? CFG.sessions : [
-  ['07:30', '08:25'], ['08:25', '09:20'], ['09:20', '10:15'], ['10:45', '11:40'],
-  ['11:40', '12:35'], ['12:35', '13:30'], ['14:00', '14:55'], ['14:55', '15:50']
-];
-const ATT = {
-  P: { label: 'Present', pts: 10, cls: '' },
-  L: { label: 'Late', pts: 5, cls: 'late' },
-  A: { label: 'Absent', pts: 0, cls: 'abs' }
-};
-const ATT_NEXT = { P: 'L', L: 'A', A: 'P' };
-// Criteria after attendance, 10 marks each. Behaviour and participation start on; assignment and
-// quiz start off and need a title. The teacher's on/off choice is remembered per class.
-const CRIT = [
-  { k: 'behaviour', label: 'Behaviour', titled: false, def: true },
-  { k: 'participation', label: 'Participation', titled: false, def: true },
-  { k: 'assignment', label: 'Assignment', plural: 'Assignments', titled: true, def: false },
-  { k: 'quiz', label: 'Quiz', plural: 'Quizzes', titled: true, def: false }
-];
-const D = { data: null, session: 0, rows: [], on: {}, title: { assignment: '', quiz: '' }, isEdit: false, loadSeq: 0 };
-const D_CACHE = new Map();     // "class|date" → last reply from the Sheet, for instant switching
-let dPrev = { grp: '', date: '' };   // to undo a class or date change the teacher cancels
-
-// The session running now; between sessions the next one; before the day 1, after it 8
-function currentSession(now = new Date()) {
-  const m = now.getHours() * 60 + now.getMinutes();
-  const mins = t => { const [h, mm] = t.split(':').map(Number); return h * 60 + mm; };
-  for (let i = 0; i < 8; i++) if (m < mins(SESSION_TIMES[i][1])) return i + 1;
-  return 8;
-}
-
-function fmtTime(t) {
-  const [h, m] = t.split(':').map(Number);
-  return `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')}`;
-}
-
-// Behaviour / participation on-off for a class, remembered on this device per teacher
-function critPrefKey(grp) { return `crit:${me}:${grp}`; }
-function critPref(grp) {
-  let p = {};
-  try { p = JSON.parse(localStorage.getItem(critPrefKey(grp)) || '{}'); } catch (e) { p = {}; }
-  const out = {};
-  CRIT.forEach(c => { out[c.k] = c.titled ? false : (c.k in p ? !!p[c.k] : c.def); });
-  return out;
-}
-function saveCritPref() {
-  const p = {};
-  CRIT.filter(c => !c.titled).forEach(c => { p[c.k] = !!D.on[c.k]; });
-  try { localStorage.setItem(critPrefKey($('dGrp').value), JSON.stringify(p)); } catch (e) { /* private mode */ }
-}
-
-function dInit() {
-  fillGradeClasses();
-  const last = localStorage.getItem('lastGrp');
-  if (!$('dGrp').value && last && GROUPS[last]) $('dGrp').value = last;
-  if (!$('dDate').value) $('dDate').value = new Date().toLocaleDateString('en-CA');
-  dLoadDay(currentSession());
-}
-
-// Loads the teacher's sessions of this class on this date, then opens the given session
-async function dLoadDay(openSession) {
-  const key = $('dGrp').value, date = $('dDate').value;
-  const seq = ++D.loadSeq;
-  dPrev = { grp: key, date };
-  if (key) localStorage.setItem('lastGrp', key);
-  D.data = null;
-  D.rows = [];
-  if (openSession) D.session = openSession;
-  renderDaily();
-  if (!key || !date) return;
-  const ck = key + '|' + date;
-  const cached = D_CACHE.get(ck);
-  if (cached) {                                // show the saved copy straight away
-    D.data = cached;
-    showIn($('dMsg'), '', true);
-    dOpen(D.session || currentSession());
-  } else {
-    showIn($('dMsg'), 'Loading…', true);
+// The sheets for one export. Returns null while the academic-year summary is still loading.
+function sheetsFor(mode) {
+  if (mode === "year") {
+    if (!S.yearCache) return null;
+    const header = ["Academic year", "Status", "Students", "Competencies assigned", "Passed (results)", "Failed final", "Waiting for Senior"];
+    const rows = [[`Academic years summary`], [], header,
+      ...S.yearCache.map(r => [String(r.year), r.status, r.students, r.assessments, r.passed, r.failed, r.pending])];
+    return [{ name: "By academic year", rows, bold: [0, 2] }];
   }
-  try {
-    const g = groupParts(key);
-    const out = await post('dailyGet', { ...session(), cls: g.cls, dept: g.dept, date });
-    D_CACHE.set(ck, out);
-    if (seq !== D.loadSeq) return;             // a newer choice replaced this one
-    if (cached && JSON.stringify(cached) === JSON.stringify(out)) return;   // nothing changed
-    if (cached && gDirty) return;              // never overwrite marks being typed
-    D.data = out;
-    showIn($('dMsg'), '', true);
-    dOpen(D.session || currentSession());
-  } catch (err) {
-    if (isAuthError(err)) return signOut(err.message);
-    if (!cached) showIn($('dMsg'), err.message, false);
-  }
-}
-
-// Fills the table from the saved session, or a fresh one where everyone is present
-function dOpen(n) {
-  if (n !== D.session) showIn($('dMsg'), '', true);   // a message belongs to the session it was about
-  D.session = n;
-  const ses = D.data && D.data.sessions.find(s => s.session === n);
-  const saved = {};
-  (ses ? ses.rows : []).forEach(r => { saved[r.student] = r; });
-  const names = [...new Set([...groupStudents($('dGrp').value), ...Object.keys(saved)])];
-  D.rows = names.map(name => {
-    const r = saved[name];
-    const row = { name, att: r ? r.att : 'P' };
-    CRIT.forEach(c => {
-      const v = r ? r[c.k] : '';
-      row[c.k] = (v === 'A' || v === null || v === undefined) ? '' : v;
-    });
-    return row;
+  return dashBlocks(mode).filter(b => b.rows.length).map(b => {
+    const totals = blockTotals(b);
+    const header = ["Student", ...(b.showClass ? ["Class"] : []),
+      ...b.cols.map(c => c.label + (c.code ? " (" + c.code + ")" : ""))];
+    const body = b.rows.map(r => [r.name, ...(b.showClass ? [r.cls] : []),
+      ...r.cells.map(a => a ? cellState(r.name, a).text : "Not assigned")]);
+    const foot = ["Passed", ...(b.showClass ? [""] : []), ...totals.map(t => `${t.passed} / ${t.of}`)];
+    const rows = [[`${b.title} · academic year ${S.data.year}`], [], header, ...body, foot];
+    return { name: b.sheet, rows, bold: [0, 2, rows.length - 1] };
   });
-  D.isEdit = !!ses;
-  D.on = ses ? { ...ses.on } : critPref($('dGrp').value);
-  D.title = { assignment: ses ? ses.assignment : '', quiz: ses ? ses.quiz : '' };
-  gDirty = false;
-  renderDaily();
 }
 
-const dActive = () => CRIT.filter(c => D.on[c.k]);
-function dOutOf() { return 10 + 10 * dActive().length; }
-
-function dTotal(r) {
-  if (r.att === 'A') return 0;
-  const parts = dActive().map(c => r[c.k]);
-  if (parts.some(x => x === '' || x === null)) return null;
-  return ATT[r.att].pts + parts.reduce((t, x) => t + Number(x), 0);
-}
-
-function renderDaily() {
-  // session buttons: a tick for the teacher's graded sessions
-  const box = $('dSes');
-  box.innerHTML = '';
-  const mine = new Set(D.data ? D.data.sessions.map(s => s.session) : []);
-  for (let i = 1; i <= 8; i++) {
-    const b = document.createElement('button');
-    b.type = 'button';
-    b.className = 'sesBtn' + (i === D.session ? ' on' : '') + (mine.has(i) ? ' done' : '');
-    b.innerHTML = `<b>${i}</b><small>${fmtTime(SESSION_TIMES[i - 1][0])}</small>`;
-    b.title = `Session ${i}: ${SESSION_TIMES[i - 1][0]}–${SESSION_TIMES[i - 1][1]}` + (mine.has(i) ? ' · graded' : '');
-    b.onclick = () => {
-      if (i === D.session) return;
-      if (!D.data) { D.session = i; renderDaily(); return; }
-      if (gDirty && !window.confirm('You have unsaved marks in this session. Discard them?')) return;
-      dOpen(i);
-    };
-    box.appendChild(b);
-  }
-
-  const ready = !!D.data && D.rows.length > 0;
-  $('dBody').hidden = !ready;
-  const note = $('dNote');
-  if (!D.data) { note.hidden = true; }
-  else if (!D.rows.length) {
-    note.hidden = false; note.className = 'msg err';
-    note.textContent = 'No students in this class yet.';
-  } else {
-    const other = D.data.others.find(o => o.session === D.session);
-    note.hidden = false;
-    note.className = 'msg ' + (D.isEdit ? 'info' : 'ok');
-    note.textContent = (D.isEdit
-      ? `Session ${D.session} is already graded. Saving updates it, it never adds a copy.`
-      : `New grading for session ${D.session}. Everyone starts present.`) +
-      (other ? ` ${other.teachers.join(', ')} also graded this class in session ${D.session}.` : '');
-  }
-  if (!ready) return;
-
-  // criteria switches (attendance is always on), titles, fill buttons
-  CRIT.forEach(c => {
-    $('dOn_' + c.k).checked = !!D.on[c.k];
-    if (c.titled) {
-      $('dT_' + c.k).hidden = !D.on[c.k];
-      $('dT_' + c.k).value = D.title[c.k];
-    }
-    $('dFill_' + c.k).hidden = !D.on[c.k];
-  });
-  $('dSave').textContent = D.isEdit ? 'Save changes' : 'Save session';
-
-  const act = dActive();
-  $('dHead').innerHTML = '<th>Student</th><th>Attendance</th>' +
-    act.map(c => `<th>${c.label} /10</th>`).join('') + `<th>Day /${dOutOf()}</th>`;
-
-  const tb = $('dRows');
-  tb.innerHTML = '';
-  D.rows.forEach(r => {
-    const tr = document.createElement('tr');
-    tr.className = ATT[r.att].cls;
-    const td = el => { const c = document.createElement('td'); if (el) c.append(el); tr.appendChild(c); return c; };
-
-    td(document.createTextNode(r.name)).className = 'dname';
-    const att = document.createElement('button');
-    att.type = 'button';
-    att.className = 'att ' + ATT[r.att].cls;
-    att.textContent = ATT[r.att].label;
-    att.setAttribute('aria-label', `Attendance for ${r.name}: ${ATT[r.att].label}. Tap to change.`);
-    att.onclick = () => { r.att = ATT_NEXT[r.att]; gDirty = true; renderDaily(); };
-    td(att);
-
-    act.forEach(c => {
-      if (r.att === 'A') { const s = document.createElement('span'); s.className = 'aMark'; s.textContent = 'A'; td(s); return; }
-      const inp = document.createElement('input');
-      inp.type = 'number'; inp.min = '0'; inp.max = '10'; inp.step = '0.5'; inp.inputMode = 'decimal';
-      inp.value = r[c.k];
-      inp.setAttribute('aria-label', `${r.name} ${c.label.toLowerCase()}`);
-      inp.oninput = () => {
-        r[c.k] = inp.value === '' ? '' : Number(inp.value);
-        gDirty = true;
-        inp.classList.toggle('bad', r[c.k] !== '' && (isNaN(r[c.k]) || r[c.k] < 0 || r[c.k] > 10));
-        tr.lastChild.innerHTML = dTotalHtml(r);
-        dCounts();
-      };
-      td(inp);
-    });
-    td().innerHTML = dTotalHtml(r);
-    tb.appendChild(tr);
-  });
-  dCounts();
-}
-
-function dTotalHtml(r) {
-  if (r.att === 'A') return `<span class="aMark">A</span>`;
-  const t = dTotal(r);
-  return t === null ? '<span class="rec-meta">…</span>' : `<b>${fmtScore(t)}</b>`;
-}
-
-function dCounts() {
-  const c = { P: 0, L: 0, A: 0 };
-  D.rows.forEach(r => c[r.att]++);
-  const done = D.rows.filter(r => dTotal(r) !== null).length;
-  $('dCounts').innerHTML =
-    `<span class="chipP">${c.P} present</span><span class="chipL">${c.L} late</span><span class="chipA">${c.A} absent</span>` +
-    `<span class="rec-meta">${done} of ${D.rows.length} complete · day out of ${dOutOf()}</span>`;
-}
-
-$('dGrp').onchange = () => {
-  if (gDirty && !window.confirm('You have unsaved marks. Discard them?')) { $('dGrp').value = dPrev.grp; return; }
-  gDirty = false;
-  dLoadDay(D.session || currentSession());
-};
-$('dDate').onchange = () => {
-  if (gDirty && !window.confirm('You have unsaved marks. Discard them?')) { $('dDate').value = dPrev.date; return; }
-  gDirty = false;
-  dLoadDay(D.session || currentSession());
-};
-CRIT.forEach(c => {
-  $('dOn_' + c.k).onchange = () => {
-    D.on[c.k] = $('dOn_' + c.k).checked;
-    gDirty = true;
-    if (!c.titled) saveCritPref();
-    renderDaily();
-    if (c.titled && D.on[c.k]) $('dT_' + c.k).focus();
-  };
-  if (c.titled) $('dT_' + c.k).oninput = () => { D.title[c.k] = $('dT_' + c.k).value; gDirty = true; };
-  // Fill empty marks of present and late students only; typed marks stay
-  $('dFill_' + c.k).onclick = () => {
-    let n = 0;
-    D.rows.forEach(r => { if (r.att !== 'A' && r[c.k] === '') { r[c.k] = 10; n++; } });
-    if (n) gDirty = true;
-    renderDaily();
-  };
-});
-$('dAllP').onclick = () => { D.rows.forEach(r => { r.att = 'P'; }); gDirty = true; renderDaily(); };
-
-$('dSave').onclick = async () => {
-  const msgBox = $('dMsg');
-  const titles = { assignment: D.title.assignment.trim(), quiz: D.title.quiz.trim() };
-  for (const c of CRIT.filter(x => x.titled && D.on[x.k])) {
-    if (!titles[c.k]) return showIn(msgBox, `Type the ${c.k} title.`, false);
-    // Each assignment and quiz title is saved once per class
-    const used = D.data.used[c.k].find(u => normKey(u.title) === normKey(titles[c.k]) &&
-      !(u.date === D.data.date && u.session === D.session));
-    if (used) return showIn(msgBox, `"${titles[c.k]}" was already saved on ${used.date}, session ${used.session}. Use a new title.`, false);
-  }
-  for (const r of D.rows) {
-    if (r.att === 'A') continue;
-    for (const c of dActive()) {
-      const v = r[c.k];
-      if (v === '' || isNaN(v) || v < 0 || v > 10) return showIn(msgBox, `${r.name}: type the ${c.label.toLowerCase()} mark (0 to 10).`, false);
-    }
-  }
-  const cnt = { P: 0, L: 0, A: 0 };
-  D.rows.forEach(r => cnt[r.att]++);
-  const g = groupParts($('dGrp').value);
-  const list = ['Attendance', ...dActive().map(c => c.titled ? `${c.label} "${titles[c.k]}"` : c.label)].join(', ');
-  if (!window.confirm(`Save session ${D.session} on ${$('dDate').value} for ${$('dGrp').value}?\n\n` +
-      `${list}. Day out of ${dOutOf()}.\n${cnt.P} present, ${cnt.L} late, ${cnt.A} absent.`)) return;
-
-  const btn = $('dSave');
-  btn.disabled = true;
-  btn.textContent = 'Saving…';
-  try {
-    await post('dailySave', {
-      ...session(), cls: g.cls, dept: g.dept, date: $('dDate').value, session: D.session,
-      criteria: { behaviour: !!D.on.behaviour, participation: !!D.on.participation },
-      hasAssignment: !!D.on.assignment, assignment: D.on.assignment ? titles.assignment : '',
-      hasQuiz: !!D.on.quiz, quiz: D.on.quiz ? titles.quiz : '',
-      rows: D.rows.map(r => {
-        const o = { student: r.name, att: r.att };
-        CRIT.forEach(c => { o[c.k] = (r.att === 'A' || !D.on[c.k]) ? null : r[c.k]; });
-        return o;
-      })
-    });
-    gDirty = false;
-    const done = D.session;
-    D_CACHE.delete($('dGrp').value + '|' + $('dDate').value);
-    await dLoadDay(done);
-    showIn($('dMsg'), `Saved session ${done} for ${$('dGrp').value}.`, true);
-  } catch (err) {
-    if (isAuthError(err)) return signOut(err.message);
-    showIn(msgBox, `Not saved (${err.message}). Press Save again to retry.`, false);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = D.isEdit ? 'Save changes' : 'Save session';
-  }
-};
-
-// ---------- grading: summary of the teacher's sessions ----------
-// Attendance = average of P 10, L 5, A 0 over all sessions.
-// Each other criterion = average over the sessions where it was on; absent counts 0.
-// Total = attendance plus the criteria used in the period, 10 each.
-let S2 = { rows: [], items: [], from: '', to: '' };
-
-function sumRange(kind) {
-  const today = new Date();
-  const iso = d => d.toLocaleDateString('en-CA');
-  if (kind === 'week') {             // school week starts on Sunday
-    const s = new Date(today); s.setDate(today.getDate() - today.getDay());
-    return [iso(s), iso(today)];
-  }
-  if (kind === 'month') return [iso(new Date(today.getFullYear(), today.getMonth(), 1)), iso(today)];
-  const y = today.getMonth() >= 8 ? today.getFullYear() : today.getFullYear() - 1;   // school year from 1 September
-  return [`${y}-09-01`, iso(today)];
-}
-
-function sInit() {
-  fillGradeClasses();
-  const last = localStorage.getItem('lastGrp');
-  if (!$('sGrp').value && last && GROUPS[last]) $('sGrp').value = last;
-  if (!$('sFrom').value) { const [f, t] = sumRange('month'); $('sFrom').value = f; $('sTo').value = t; }
-  sLoad();
-}
-
-document.querySelectorAll('#sQuick button[data-r]').forEach(b => {
-  b.onclick = () => { const [f, t] = sumRange(b.dataset.r); $('sFrom').value = f; $('sTo').value = t; sLoad(); };
-});
-$('sGrp').onchange = sLoad;
-$('sFrom').onchange = sLoad;
-$('sTo').onchange = sLoad;
-
-async function sLoad() {
-  const key = $('sGrp').value, from = $('sFrom').value, to = $('sTo').value;
-  $('sOut').innerHTML = '';
-  if (!key) return showIn($('sMsg'), 'Choose a class.', true);
-  if (!from || !to || from > to) return showIn($('sMsg'), 'Choose a start date before the end date.', false);
-  showIn($('sMsg'), 'Loading…', true);
-  try {
-    const g = groupParts(key);
-    const [out, up] = await Promise.all([
-      post('dailyRows', { ...session(), cls: g.cls, dept: g.dept, from, to }),
-      post('myGradeItems', session())
-    ]);
-    if ($('sGrp').value !== key || $('sFrom').value !== from || $('sTo').value !== to) return;
-    gItems = up.items || [];
-    // uploaded quizzes and assignments of this class in the period
-    const items = gItems.filter(i => itemKey(i) === key && i.date >= from && i.date <= to);
-    S2 = { rows: out.rows || [], items, from, to, key };
-    showIn($('sMsg'), '', true);
-    renderSummary();
-  } catch (err) {
-    if (isAuthError(err)) return signOut(err.message);
-    showIn($('sMsg'), err.message, false);
-  }
-}
-
-function summaryData() {
-  const sesKey = r => r.date + '|' + r.session;
-  const sessions = new Set(S2.rows.map(sesKey));
-  // sessions in which each criterion was on (a mark or an A for at least one student)
-  const used = {};
-  CRIT.forEach(c => { used[c.k] = new Set(S2.rows.filter(r => r[c.k] !== '').map(sesKey)); });
-  // Uploaded quizzes and assignments: each score becomes a mark out of 10; absent counts 0;
-  // a student with no score yet is left out of that item
-  const upMarks = {};      // student → criterion → [marks /10]
-  (S2.items || []).forEach(i => {
-    const k = i.type === 'Quiz' ? 'quiz' : 'assignment';
-    used[k].add('up|' + i.id);
-    i.scores.forEach(x => {
-      const v = x.absent ? 0 : (x.score === null || x.score === '' ? null : Number(x.score) / Number(i.max) * 10);
-      if (v === null || isNaN(v)) return;
-      ((upMarks[x.student] = upMarks[x.student] || {})[k] = upMarks[x.student][k] || []).push(v);
-    });
-  });
-  const by = {};
-  S2.rows.forEach(r => { (by[r.student] = by[r.student] || []).push(r); });
-  const names = [...new Set([...groupStudents(S2.key), ...Object.keys(by), ...Object.keys(upMarks)])];
-  const avg = list => list.length ? list.reduce((t, x) => t + x, 0) / list.length : null;
-  const students = names.map(name => {
-    const rs = by[name] || [];
-    const c = { P: 0, L: 0, A: 0 };
-    rs.forEach(r => { c[r.att] = (c[r.att] || 0) + 1; });
-    const out = { name, c, att: avg(rs.map(r => ATT[r.att] ? ATT[r.att].pts : 0)) };
-    CRIT.forEach(cr => {
-      out[cr.k] = avg(rs.filter(r => r[cr.k] !== '').map(r => r[cr.k] === 'A' ? 0 : Number(r[cr.k]))
-        .concat((upMarks[name] && upMarks[name][cr.k]) || []));
-    });
-    const parts = [out.att, ...CRIT.map(cr => out[cr.k])].filter(x => x !== null);
-    out.total = parts.length ? parts.reduce((t, x) => t + x, 0) : null;
-    return out;
-  });
-  const shown = CRIT.filter(c => used[c.k].size);
-  return { students, sessions: sessions.size, uploads: (S2.items || []).length, used, shown, outOf: 10 + 10 * shown.length };
-}
-
-function renderSummary() {
-  const d = summaryData();
-  const box = $('sOut');
-  if (!d.sessions && !d.uploads) {
-    box.innerHTML = '<p class="hint">No graded sessions or uploaded marks for this class in this period.</p>';
-    return;
-  }
-  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const r1 = v => fmtScore(Math.round(v * 10) / 10);
-  const f = v => v === null ? '—' : `<span class="${v < 5 ? 'low' : ''}">${r1(v)}</span>`;
-  const totals = d.students.filter(s => s.total !== null).map(s => s.total);
-  const classAvg = totals.length ? totals.reduce((t, x) => t + x, 0) / totals.length : null;
-  box.innerHTML = `
-    <div class="stats">
-      <div><span>Sessions</span><b>${d.sessions}</b></div>
-      <div><span>Assignments</span><b>${d.used.assignment.size}</b></div>
-      <div><span>Quizzes</span><b>${d.used.quiz.size}</b></div>
-      <div><span>Class average</span><b>${classAvg === null ? '—' : r1(classAvg)} / ${d.outOf}</b></div>
-    </div>
-    <div class="tablewrap"><table>
-      <tr><th>Student</th><th>Attendance /10</th>${d.shown.map(c => `<th>${c.plural || c.label} /10</th>`).join('')}<th>Total /${d.outOf}</th></tr>
-      ${d.students.map(s => `<tr>
-        <td><b>${esc(s.name)}</b></td>
-        <td>${f(s.att)}<div class="rec-meta">${s.c.P} present · ${s.c.L} late · ${s.c.A} absent</div></td>
-        ${d.shown.map(c => `<td>${f(s[c.k])}</td>`).join('')}
-        <td><b>${s.total === null ? '—' : r1(s.total)}</b></td></tr>`).join('')}
-    </table></div>
-    ${d.uploads ? `<p class="hint">Includes ${d.uploads} uploaded quiz(zes)/assignment(s), each converted to a mark out of 10.</p>` : ''}
-    <p class="hint">Attendance: present 10, late 5, absent 0. Each other criterion averages the sessions where it was used, and absent counts 0. A criterion not used in this period is left out of the total. Marks below 5 are in red.</p>`;
-}
-
-$('sExport').onclick = () => {
-  if (!S2.rows.length && !(S2.items || []).length) return showIn($('sMsg'), 'Nothing to export for this period.', false);
-  const d = summaryData();
-  const r1 = v => v === null ? '' : Math.round(v * 10) / 10;
-  const summary = [
-    [`${S2.key} · ${S2.from} to ${S2.to} · ${me}`], [],
-    ['Student', 'Present', 'Late', 'Absent', 'Attendance /10', ...d.shown.map(c => `${c.plural || c.label} /10`), `Total /${d.outOf}`],
-    ...d.students.map(s => [s.name, s.c.P, s.c.L, s.c.A, r1(s.att), ...d.shown.map(c => r1(s[c.k])), r1(s.total)])
-  ];
-  const cell = (r, k) => r[k] === '' ? '' : r[k];
-  const sessions = [
-    ['Every session'], [],
-    ['Date', 'Session', 'Student', 'Attendance', 'Behaviour', 'Participation', 'Assignment', 'Assignment title', 'Quiz', 'Quiz title'],
-    ...S2.rows.slice().sort((a, b) => a.date.localeCompare(b.date) || a.session - b.session || a.student.localeCompare(b.student))
-      .map(r => [r.date, r.session, r.student, ATT[r.att] ? ATT[r.att].label : r.att,
-        cell(r, 'behaviour'), cell(r, 'participation'), cell(r, 'assignment'), r.assignmentTitle, cell(r, 'quiz'), r.quizTitle])
-  ];
-  const uploaded = [
-    ['Uploaded quizzes and assignments'], [],
-    ['Date', 'Type', 'Title', 'Student', 'Score', 'Out of', 'Mark /10'],
-    ...(S2.items || []).slice().sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title))
-      .flatMap(i => i.scores.map(x => [i.date, i.type, i.title, x.student,
-        x.absent ? 'A' : (x.score ?? ''), i.max,
-        x.absent ? 0 : (x.score === null || x.score === '' ? '' : Math.round(x.score / i.max * 100) / 10)]))
-  ];
-  const sheets = [
-    { name: 'Summary', rows: summary, bold: [0, 2] },
-    { name: 'Sessions', rows: sessions, bold: [0, 2] }
-  ];
-  if ((S2.items || []).length) sheets.push({ name: 'Uploaded', rows: uploaded, bold: [0, 2] });
+function exportDashboard(mode) {
+  const sheets = sheetsFor(mode);
+  if (!sheets) return msg("Still loading the academic years. Try again in a moment.", true);
+  if (!sheets.length) return msg("Nothing to export yet.", true);
   const blob = xlsxBlob(sheets);
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `Summary - ${S2.key} - ${S2.from} to ${S2.to}.xlsx`;
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const what = mode === "year" ? "academic-years" : mode === "class" ? "by-class" : "by-stage";
+  a.href = url;
+  a.download = `EVA-${what}-${S.data.year}.xlsx`;
   document.body.appendChild(a);
   a.click();
   a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-};
-
-// ---------- rendering: one card per student ----------
-function render() {
-  rowsBox.innerHTML = '';
-  rows.forEach(r => {
-    const card = document.createElement('div');
-    card.className = 'stu' + (r.inc > 0 ? ' incident' : '');
-
-    // top line: select, name (red mark if incidents), incident button and undo
-    const top = document.createElement('div');
-    top.className = 'stu-top';
-
-    const cb = document.createElement('input');
-    cb.type = 'checkbox';
-    cb.checked = r.sel;
-    cb.title = 'Select';
-    cb.onchange = () => { r.sel = cb.checked; updateSelCount(); syncSelectAll(); };
-
-    const name = document.createElement('div');
-    name.className = 'stu-name';
-    if (r.inc > 0) {
-      const dot = document.createElement('span');
-      dot.className = 'flag';
-      dot.title = `${r.inc} incident(s)`;
-      name.appendChild(dot);
-    }
-    name.appendChild(document.createTextNode(r.name));
-
-    const incBtn = document.createElement('button');
-    incBtn.className = 'incbtn';
-    incBtn.textContent = `Incident −${INCIDENT_PENALTY}${r.inc ? ' ×' + r.inc : ''}`;
-    // Absent students cannot have incidents
-    incBtn.disabled = r.ev === 'absent';
-    incBtn.title = r.ev === 'absent' ? "Absent students can't have incidents" : '';
-    incBtn.onclick = () => {
-      // Every incident needs a reason in the comment
-      if (!r.com.trim()) {
-        const reason = window.prompt(`Reason for the incident (${r.name}):`, '');
-        if (!reason || !reason.trim()) return;
-        r.com = reason.trim();
-      }
-      r.inc++;
-      markDirty();
-      render();
-    };
-    top.append(cb, name, incBtn);
-
-    if (r.inc > 0) {
-      const undo = document.createElement('button');
-      undo.className = 'undo';
-      undo.title = 'Remove last incident';
-      undo.setAttribute('aria-label', 'Remove last incident');
-      undo.textContent = '↺';
-      undo.onclick = () => { r.inc--; markDirty(); render(); };
-      top.appendChild(undo);
-    }
-
-    // evaluation: round letter buttons
-    const dots = document.createElement('div');
-    dots.className = 'dots';
-    DOT_ORDER.forEach(e => {
-      const b = document.createElement('button');
-      b.className = 'dot' + (r.ev === e.key ? ' on' : '');
-      b.textContent = e.letter;
-      b.title = e.en;
-      b.setAttribute('aria-label', e.en);
-      b.style.setProperty('--c', e.c);
-      b.style.setProperty('--c8', e.c8);
-      b.style.setProperty('--bg-opt', e.bg);
-      b.onclick = () => {
-        const next = r.ev === e.key ? null : e.key;   // tap again to clear
-        if (next === 'absent' && r.inc > 0) {
-          if (!window.confirm(`${r.name} has ${r.inc} incident(s). Absent students can't have incidents. Remove them?`)) return;
-          r.inc = 0;
-        }
-        r.ev = next;
-        markDirty();
-        render();
-      };
-      dots.appendChild(b);
-    });
-
-    // label under the buttons
-    const label = document.createElement('div');
-    label.className = 'evlabel';
-    const e = r.ev ? evObj(r.ev) : null;
-    label.textContent = e ? `${e.en} · ${e.ar} · ${scoreOf(r)} pts` : 'Not rated';
-
-    // comment: free typing
-    const com = document.createElement('textarea');
-    com.className = 'com';
-    com.placeholder = 'Comment…';
-    com.value = r.com;
-    com.oninput = () => { r.com = com.value; markDirty(); };
-
-    card.append(top, dots, label, com);
-    rowsBox.appendChild(card);
-  });
-  updateSelCount();
-  updateProgress();
-  syncSelectAll();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  msg(`Exported ${sheets.length} sheet(s).`);
 }
 
-// "X of Y rated · N incidents" above the cards
-function updateProgress() {
-  const rated = rows.filter(r => r.ev !== null).length;
-  const inc = rows.reduce((s, r) => s + r.inc, 0);
-  $('progress').textContent = rows.length
-    ? `${rated} of ${rows.length} rated · ${inc} incident(s)`
-    : '';
-}
-
-function updateSelCount() {
-  const n = rows.filter(r => r.sel).length;
-  $('selCount').textContent = n ? `${n} selected` : 'No rows selected (bulk applies to all students)';
-}
-
-function syncSelectAll() {
-  selectAll.checked = rows.length > 0 && rows.every(r => r.sel);
-}
-
-selectAll.onchange = () => {
-  rows.forEach(r => r.sel = selectAll.checked);
-  render();
-};
-
-bulkCol.onchange = fillBulkValues;
-
-$('applyBulk').onclick = () => {
-  if (!rows.length) return;
-  let targets = rows.filter(r => r.sel);
-  if (!targets.length) {
-    if (!window.confirm(`No rows selected. Apply to all ${rows.length} students?`)) return;
-    targets = rows;
-  }
-  if (bulkCol.value === 'ev') {
-    const raw = bulkVal.value;
-    if (raw === 'null') {
-      targets.forEach(r => r.ev = null);
-    } else {
-      // Only fill cards that are still unrated; rated cards keep their choice
-      const blank = targets.filter(r => r.ev === null);
-      const kept = targets.length - blank.length;
-      const withIncidents = blank.filter(r => raw === 'absent' && r.inc > 0);
-      if (withIncidents.length && !window.confirm(
-          `${withIncidents.length} student(s) have incidents. Absent students can't have incidents. Remove them?`)) return;
-      blank.forEach(r => {
-        r.ev = raw;
-        if (raw === 'absent') r.inc = 0;
-      });
-      if (kept) showMsg(`${kept} already rated and left unchanged. Tap a letter to change one.`, true);
-    }
-  } else {
-    const text = bulkText.value;
-    targets.forEach(r => r.com = text);
-  }
-  markDirty();
-  render();
-};
-
-// ---------- save new evaluations ----------
-saveBtn.onclick = async () => {
-  if (!dateEl.value) return showMsg('Please choose a date.', false);
-  if (!rows.length) return showMsg('Choose a class first.', false);
-
-  for (const r of rows) {
-    if (r.ev === null) return showMsg(`Choose an evaluation for ${r.name}.`, false);
-  }
-  for (const r of rows) {
-    if (r.inc > 0 && !r.com.trim()) return showMsg(`Add a reason in the comment for ${r.name}'s incident.`, false);
-  }
-
-  // Confirm the totals before anything is sent
-  const counts = {};
-  EVALUATIONS.forEach(e => counts[e.key] = 0);
-  rows.forEach(r => counts[r.ev]++);
-  const summary = EVALUATIONS.filter(e => counts[e.key])
-    .map(e => `${counts[e.key]} ${e.en}`).join(', ');
-  const incTotal = rows.reduce((s, r) => s + r.inc, 0);
-  if (!window.confirm(`Save for ${clsSel.value}?\n\n${rows.length} students: ${summary}.\nIncidents: ${incTotal}.`)) return;
-
-  if (!pendingSaveId) pendingSaveId = newSaveId();
-
-  const now = new Date();
-  const pad = n => String(n).padStart(2, '0');
-  const payload = {
-    saveId: pendingSaveId,
-    uploadedAt: `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`,
-    class: clsSel.value,
-    rows: rows.map(r => ({
-      date: dateEl.value,
-      student: r.name,
-      score: EV_NUMBER[r.ev],
-      evaluation: evObj(r.ev).en,
-      incidents: r.inc,
-      comment: r.com
+// ----- Manage tab (Senior only): teachers and students of the year on screen -----
+// Edits a copy of the lists in S.manage. Assessments are edited on their own tab, and the
+// two share one copy, so a save sends everything together.
+function manageInit() {
+  if (S.manage) return;
+  S.manage = {
+    teachers: S.data.teachers.map(t => ({ name: t.name, pin: t.pin })),
+    students: S.data.students.map(s => ({ name: s.name, cls: s.cls })),
+    assessments: S.data.assessments.map(a => ({
+      id: a.id, cls: a.cls, competency: a.competency || "", teacher: a.teacher, dA: a.dates.A || ""
     }))
   };
+}
 
-  saveBtn.disabled = true;
-  saveBtn.textContent = 'Saving…';
+// Assessor choices come from the Teachers list
+function teacherOpts(sel) {
+  manageInit();
+  return ['<option value="">Choose assessor</option>']
+    .concat(S.manage.teachers.map(t => t.name).filter(Boolean)
+      .map(n => `<option value="${esc(n)}" ${n === sel ? "selected" : ""}>${esc(n)}</option>`))
+    .join("");
+}
+
+function manageHtml() {
+  if (!canEdit()) return readOnlyManage();
+  manageInit();
+  const m = S.manage;
+  const classNames = [...new Set(CLASS_ORDER.concat(m.students.map(s => s.cls)).filter(Boolean))];
+
+  const teachers = m.teachers.map((t, i) => `
+    <div class="mrow">
+      <input data-k="teachers" data-i="${i}" data-f="name" value="${esc(t.name)}" placeholder="Name">
+      <input data-k="teachers" data-i="${i}" data-f="pin" value="${esc(t.pin)}" placeholder="PIN (4 to 6 digits)" inputmode="numeric">
+      <button class="ghost" data-act="mDel" data-k="teachers" data-i="${i}">Remove</button>
+    </div>`).join("");
+
+  const students = m.students.map((s, i) => `
+    <div class="mrow">
+      <input data-k="students" data-i="${i}" data-f="name" value="${esc(s.name)}" placeholder="Student name">
+      <input data-k="students" data-i="${i}" data-f="cls" value="${esc(s.cls)}" placeholder="Class" list="clsList">
+      <button class="ghost" data-act="mDel" data-k="students" data-i="${i}">Remove</button>
+    </div>`).join("");
+
+  const bulkStudents = `
+    <div class="bulkBox">
+      <label>Class for these students</label>
+      <input id="bulkCls" type="text" list="clsList" placeholder="e.g. Wheeler 2">
+      <datalist id="clsList">${classNames.map(c => `<option value="${esc(c)}">`).join("")}</datalist>
+      <label>Paste names, one per line. To set the class per line, write "Name, Class".</label>
+      <textarea id="bulkNames" placeholder="Ahmed Ali&#10;Sara Mostafa&#10;Omar Hassan, Senior 1 - Utilities"></textarea>
+      <div style="margin-top:8px"><button class="ghost" data-act="mBulk">Add to list</button></div>
+      <div class="meta" style="margin-top:6px">Names already in the list for the same class are skipped. Press Save all changes after adding.</div>
+    </div>`;
+
+  return `
+    <h3 class="mh">Teachers</h3>${teachers}
+    <button class="ghost" data-act="mAdd" data-k="teachers">+ Add teacher</button>
+
+    <h3 class="mh">Students (${esc(S.data.year)})</h3>${bulkStudents}${students}
+    <button class="ghost" data-act="mAdd" data-k="students">+ Add student</button>
+
+    <div style="margin-top:16px"><button data-act="aSave">Save all changes</button></div>
+    <div class="meta" style="margin-top:8px">Removing a student is refused if they already have recorded results.</div>`;
+}
+
+// A past year: show what it contains, nothing to change
+function readOnlyManage() {
+  return `<div class="empty">${esc(S.data.year)} is a past year. Its lists and results are read-only.</div>
+    <h3 class="mh">Students</h3><div class="empty">${S.data.students.length} students.</div>`;
+}
+
+// Typing and picking update the copy in memory (no redraw, so the cursor stays)
+function manageField(e) {
+  const t = e.target;
+  const k = t.dataset.k;
+  if (!k || !S.manage) return;
+  const i = Number(t.dataset.i);
+  const f = t.dataset.f;
+  const row = S.manage[k] && S.manage[k][i];
+  if (!row || !f) return;
+  row[f] = t.value;
+  S.dirty = true;
+}
+
+// Paste many students at once. "Name" uses the class box; "Name, Class" sets it per line.
+function bulkAddStudents() {
+  const cls = el("bulkCls").value.trim();
+  const lines = el("bulkNames").value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  let added = 0;
+  let skipped = 0;
+  const keep = [];
+
+  lines.forEach(line => {
+    const parts = line.split(/[,\t]/).map(s => s.trim());
+    const name = parts[0];
+    const c = parts.length >= 2 && parts[1] ? parts[1] : cls;
+    if (!name) return;
+    if (!c) { keep.push(line); return; }
+    const dup = S.manage.students.some(s =>
+      s.name.toLowerCase() === name.toLowerCase() && s.cls.toLowerCase() === c.toLowerCase());
+    if (dup) { skipped++; return; }
+    S.manage.students.push({ name: name, cls: c });
+    added++;
+  });
+
+  render();
+  el("bulkNames").value = keep.join("\n");
+  el("bulkCls").value = cls;
+  const note = keep.length ? ` ${keep.length} line(s) need a class and were kept in the box.` : "";
+  msg(`Added ${added}. Skipped ${skipped} already in the list.${note} Press Save all changes.`, keep.length > 0);
+}
+
+// Saves teachers, students and assessments of the year on screen. The copy is kept if the save fails.
+async function saveAll() {
+  manageInit();
+  const m = S.manage;
   try {
-    const out = await post('saveEvaluations', { ...session(), ...payload });
-    showMsg(out.duplicate
-      ? `These evaluations for ${clsSel.value} were already saved.`
-      : `Saved ${rows.length} evaluation(s) for ${clsSel.value} by ${me}.`, true);
-    pendingSaveId = null;
-    dirty = false;
-    panel.hidden = true;
-    rows = [];
-    clsSel.value = '';
-    lastCls = '';
-    localStorage.setItem('lastCls', lastCls);
+    msg("Saving…");
+    await call("seniorSave", {
+      year: S.year,
+      teachers: m.teachers,
+      students: m.students,
+      assessments: m.assessments.map(a => ({ id: a.id, cls: a.cls, competency: a.competency, teacher: a.teacher, dA: a.dA }))
+    });
+    S.manage = null;
+    S.newAsm = null;
+    S.dirty = false;
+    await reload();
+    msg("Saved.");
   } catch (err) {
-    if (isAuthError(err)) return signOut(err.message);
-    showMsg(`Not saved (${err.message}). Press Save again to retry. Nothing will be saved twice.`, false);
-  } finally {
-    saveBtn.disabled = false;
-    saveBtn.textContent = 'Save evaluation';
-  }
-};
-
-// ---------- my evaluations ----------
-async function loadMine() {
-  showIn(mineMsg, 'Loading…', true);
-  mineRows.innerHTML = '';
-  try {
-    mineRecords = await post('myEvaluations', session());
-    renderMine();
-    showIn(mineMsg, '', true);
-  } catch (e) {
-    if (isAuthError(e)) return signOut(e.message);
-    showIn(mineMsg, 'Could not load your evaluations: ' + e.message, false);
+    msg(err.message, true);
   }
 }
 
-// My evaluations: one toggle per date (newest first). Open a date to see its classes and evaluations.
-function renderMine() {
-  mineRows.innerHTML = '';
-  const filter = mineCls.value;
-  const list = mineRecords.filter(r => !filter || r.class === filter);
-  if (!list.length) {
-    const empty = document.createElement('div');
-    empty.className = 'hint';
-    empty.textContent = 'No evaluations yet.';
-    mineRows.appendChild(empty);
+async function manageClick(b) {
+  manageInit();
+  const k = b.dataset.k;
+  const i = Number(b.dataset.i);
+  if (b.dataset.act === "mBulk") return bulkAddStudents();
+  if (b.dataset.act === "aSave") return saveAll();
+  if (b.dataset.act === "mAdd") {
+    S.manage[k].push(k === "teachers" ? { name: "", pin: "" } : { name: "", cls: "" });
+    render();
+  }
+  if (b.dataset.act === "mDel") {
+    if (!confirm("Remove this row? It is saved when you press Save all changes.")) return;
+    S.manage[k].splice(i, 1);
+    render();
+  }
+}
+
+// Assessments tab buttons
+async function assessClick(b) {
+  manageInit();
+  const i = Number(b.dataset.i);
+  const a = b.dataset.act;
+  if (a === "stage") {
+    S.stage = b.dataset.key;
+    if (S.newAsm) S.newAsm = { stage: S.stage, code: "" };
+    return render();
+  }
+  if (a === "aNew") { S.newAsm = { stage: S.stage, code: "" }; return render(); }
+  if (a === "aAssign") {
+    S.newAsm = { stage: S.stage, code: b.dataset.code };
+    render();
+    return window.scrollTo(0, 0);
+  }
+  if (a === "aCancel") { S.newAsm = null; return render(); }
+  if (a === "aSave") return saveAll();
+  if (a === "aRemove") {
+    if (!confirm("Remove this class from the assessment? It is saved when you press Save changes.")) return;
+    S.manage.assessments.splice(i, 1);
+    S.dirty = true;
+    return render();
+  }
+  if (a === "aAdd") {
+    const st = stageOpt(S.newAsm.stage);
+    const code = el("naComp") ? el("naComp").value : "";
+    if (!code) return msg("Choose a competency.", true);
+    const classes = st.classes.filter(cls => assignedIndex(code, cls) === -1);
+    if (!classes.length) return msg("Already assigned to every class of this stage.", true);
+    const rows = classes.map(cls => ({
+      id: "", cls: cls, competency: code,
+      teacher: el("naT_" + keyOf(cls)).value,
+      dA: el("naD_" + keyOf(cls)).value
+    }));
+    if (rows.some(r => !r.teacher)) return msg("Choose an assessor for each class.", true);
+    if (rows.some(r => !r.dA)) return msg("Set the Attempt A date for each class.", true);
+    S.manage.assessments.push(...rows);
+    S.newAsm = null;
+    return saveAll();
+  }
+}
+
+// ----- row actions (attempt lists, Assessments and Manage) -----
+el("list").onclick = async e => {
+  const b = e.target.closest("button[data-act]");
+  if (!b) return;
+  if (b.dataset.act === "export") return exportDashboard(b.dataset.mode);
+  if (b.dataset.act === "goAssess") {
+    S.assessId = b.dataset.id;
+    el("assess").value = S.assessId;
+    resetView("A");
+    return render();
+  }
+  if (S.view === "set-people") return manageClick(b);
+  if (S.view === "assess") return assessClick(b);
+
+  const act_ = b.dataset.act;
+  const id = b.dataset.id;
+  const x = id ? S.data.attempts.find(r => r.rowId === id) : null;
+
+  try {
+    if (act_ === "absent") { S.absentPick = id; render(); return; }
+    if (act_ === "absentCancel") { S.absentPick = null; render(); return; }
+
+    if (act_ === "absentYes" || act_ === "absentNo") {
+      let excuse = "";
+      if (act_ === "absentYes") {
+        excuse = (prompt("Sick-leave note reference:") || "").trim();
+        if (!excuse) return;
+      }
+      const result = act_ === "absentYes" ? "Absent (excused)" : "Absent (unexcused)";
+      if (!confirm(`${x.student} · Attempt ${x.trial}\n${result}. It goes to the Senior to decide Pass or Fail.`)) return;
+      msg("Saving…");
+      await call(act("record"), { rowId: id, result, excuse });
+      S.absentPick = null;
+      await reload();
+      msg("Saved. Sent to the Senior.");
+      return;
+    }
+
+    if (act_ === "dispute") {
+      const note = await askText("Reason for dispute",
+        `${x.student} · Attempt ${x.trial}. The attempt freezes until the Senior decides.`);
+      if (!note) return;
+      msg("Sending dispute…");
+      await call("dispute", { rowId: id, note });
+      await reload();
+      msg("Dispute sent. The attempt is frozen until the Senior decides.");
+      return;
+    }
+
+    if (act_ === "rec") {
+      const res = b.dataset.res;
+      let comment = "";
+      if (res === "Fail") {
+        comment = await askText("Why did the student fail?", `${x.student} · Attempt ${x.trial}`);
+        if (!comment) return;
+      } else if (!confirm(`${x.student} · Attempt ${x.trial}\n→ ${res}?`)) {
+        return;
+      }
+      msg("Saving…");
+      await call(act("record"), { rowId: id, result: res, comment });
+      await reload();
+      msg("Saved.");
+      return;
+    }
+
+    if (act_ === "decide") {
+      const res = b.dataset.res;
+      let comment = "";
+      if (res === "Fail") {
+        comment = await askText("Why did the student fail?", `${x.student} · Attempt ${x.trial}`);
+        if (!comment) return;
+      } else if (!confirm(`${x.student} · Attempt ${x.trial}\n→ ${res}?`)) {
+        return;
+      }
+      msg("Saving…");
+      await call("seniorDecide", { rowId: id, result: res, comment });
+      await reload();
+      msg("Saved.");
+      return;
+    }
+  } catch (err) {
+    msg(err.message, true);
+  }
+};
+
+// Typing updates memory only; a change (select, date, or leaving a field) also redraws the rows
+el("list").oninput = e => {
+  if (S.view === "set-people" || S.view === "assess") manageField(e);
+};
+
+el("list").onchange = e => {
+  // New assessment form: the stage decides which competencies are offered
+  if (e.target.id === "naStage") {
+    S.stage = e.target.value;
+    S.newAsm = { stage: S.stage, code: "" };
+    return render();
+  }
+  if (e.target.id === "naComp") { S.newAsm.code = e.target.value; return render(); }
+
+  if (S.view === "set-people" || S.view === "assess") {
+    if (e.target.dataset.k) { manageField(e); render(); }   // only fields of the copy, never the bulk box
     return;
   }
-
-  const byDate = {};
-  list.forEach(rec => { (byDate[rec.date] = byDate[rec.date] || []).push(rec); });
-  Object.keys(byDate).sort().reverse().forEach((day, i) => {
-    const recs = byDate[day];
-    const classes = [...new Set(recs.map(r => r.class))];
-
-    const det = document.createElement('details');
-    det.className = 'daycard';
-    det.open = i === 0;                 // the newest date starts open
-
-    const sum = document.createElement('summary');
-    const head = document.createElement('span');
-    head.textContent = day;
-    const meta = document.createElement('span');
-    meta.className = 'daymeta';
-    meta.textContent = `${recs.length} evaluation(s) · ${classes.join(', ')}`;
-    sum.append(head, meta);
-    det.appendChild(sum);
-
-    classes.forEach(cls => {
-      const clsRecs = recs.filter(r => r.class === cls);
-      const ch = document.createElement('div');
-      ch.className = 'clshead';
-      ch.textContent = `${cls} · ${clsRecs.length}`;
-      det.appendChild(ch);
-      clsRecs.forEach(rec => det.appendChild(recCard(rec)));
-    });
-
-    mineRows.appendChild(det);
-  });
-}
-
-// One evaluation inside a date
-function recCard(rec) {
-  const card = document.createElement('div');
-  card.className = 'rec' + (rec.incidents > 0 ? ' inc' : '');
-
-  const top = document.createElement('div');
-  top.className = 'rec-top';
-  const name = document.createElement('div');
-  name.className = 'rec-name';
-  name.textContent = rec.student;
-  const score = document.createElement('div');
-  score.className = 'rec-score';
-  score.textContent = `${rec.evaluation} · ${rec.score}/5`;
-  top.append(name, score);
-
-  const meta = document.createElement('div');
-  meta.className = 'rec-meta' + (rec.incidents > 0 ? ' on' : '');
-  meta.textContent = `Incidents: ${rec.incidents}`;
-  card.append(top, meta);
-
-  if (rec.comment) {
-    const com = document.createElement('div');
-    com.className = 'rec-com';
-    com.textContent = rec.comment;
-    card.appendChild(com);
-  }
-
-  const act = document.createElement('div');
-  act.className = 'rec-act';
-  if (rec.editable) {
-    const b = document.createElement('button');
-    b.className = 'small';
-    b.textContent = 'Edit';
-    b.onclick = () => openEdit(rec);
-    act.appendChild(b);
-  } else {
-    const s = document.createElement('span');
-    s.className = 'closed';
-    s.textContent = rec.id ? 'Closed' : 'Read only';
-    act.appendChild(s);
-  }
-  card.appendChild(act);
-  return card;
-}
-
-mineCls.onchange = renderMine;
-$('refresh').onclick = loadMine;
-
-function openEdit(rec) {
-  editing = rec;
-  editTitle.textContent = `${rec.student} · ${rec.class} · ${rec.date}`;
-  editEv.value = evKeyByName(rec.evaluation);
-  editInc.value = rec.incidents;
-  editCom.value = rec.comment;
-  editMsg.innerHTML = '';
-  editCard.hidden = false;
-  editCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-}
-
-$('editCancel').onclick = () => {
-  editing = null;
-  editCard.hidden = true;
-  editMsg.innerHTML = '';
+  if (!e.target.classList.contains("pick")) return;
+  const id = e.target.dataset.id;
+  if (e.target.checked) S.selected.add(id); else S.selected.delete(id);
+  render();
 };
 
-$('editSave').onclick = async () => {
-  if (!editing) return;
-  const key = editEv.value;
-  if (!key) return showIn(editMsg, 'Choose an evaluation.', false);
-  const inc = Number(editInc.value);
-  if (!Number.isInteger(inc) || inc < 0) return showIn(editMsg, 'Incidents must be 0 or more.', false);
+// ----- start -----
+(async function start() {
+  const saved = sessionStorage.getItem("trials");
+  if (!saved) return;
+  Object.assign(S, JSON.parse(saved));
+  if (S.senior) resetView("assess");
 
-  const btn = $('editSave');
-  btn.disabled = true;
+  // Show the last data straight away, then refresh it in the background
+  const cached = sessionStorage.getItem("trialsData");
+  if (cached) {
+    S.data = JSON.parse(cached);
+    showApp();
+    msg("Updating…");
+  }
   try {
-    await post('updateEvaluation', {
-      ...session(),
-      recordId: editing.id,
-      score: EV_NUMBER[key],
-      evaluation: evObj(key).en,
-      incidents: inc,
-      comment: editCom.value
-    });
-    editing = null;
-    editCard.hidden = true;
-    showIn(mineMsg, 'Evaluation updated.', true);
-    loadMine();
+    S.data = await loadData();
+    if (S.senior) S.year = S.data.year;
+    if (!S.senior) S.teacher = S.data.teacher;
+    persistData();
+    saveSession();
+    showApp();
+    msg("");
   } catch (e) {
-    if (isAuthError(e)) return signOut(e.message);
-    showIn(editMsg, 'Not saved: ' + e.message, false);
-  } finally {
-    btn.disabled = false;
+    if (!cached) {
+      sessionStorage.removeItem("trials");
+      S.senior = null;
+    } else {
+      msg("Could not refresh. Showing the last loaded data.", true);
+    }
   }
-};
-
-// ---------- class selection ----------
-clsSel.onchange = () => {
-  if (!confirmDiscard()) { clsSel.value = lastCls; return; }
-  lastCls = clsSel.value;
-  localStorage.setItem('lastCls', lastCls);
-  loadStudents();
-};
-
-// ---------- start ----------
-// Teachers, classes and students rarely change, so the page opens with the copy saved on this
-// device and checks the Sheet in the background. If the Sheet differs, the lists are updated in place.
-async function fetchLists() {
-  if (!SHEET_URL) throw new Error('no url');
-  const t0 = performance.now();
-  const res = await fetch(`${SHEET_URL}?action=lists&key=${encodeURIComponent(SHEET_KEY)}`);
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  const data = await res.json();
-  console.info(`[timing] lists: ${Math.round(performance.now() - t0)} ms`);
-  if (!Array.isArray(data)) throw new Error(data.error || 'unexpected reply');
-  return data;
-}
-
-function startWith(list, note) {
-  buildLists(list);
-  if (me && TEACHERS.includes(me) && sessionStorage.getItem('pin')) showApp();
-  else showGate(note);
-}
-
-// Fresh lists arrived while the page is open: update the dropdowns, keep what the teacher chose
-function applyFreshLists(list) {
-  buildLists(list);
-  if (!app.hidden) {
-    if (!dirty) fillClassSelect();        // evaluation cards are rebuilt only when nothing is unsaved
-    fillMineClasses();
-    fillGradeClasses();
-  } else {
-    const chosen = gName.value;
-    gName.innerHTML = '';
-    TEACHERS.forEach(n => gName.add(new Option(n, n)));
-    if (TEACHERS.includes(chosen)) gName.value = chosen;
-  }
-}
-
-async function loadLists() {
-  let cachedText = localStorage.getItem('listsCache');
-  let cached = null;
-  try { cached = cachedText ? JSON.parse(cachedText) : null; } catch (e) { cached = null; }
-  if (cached) startWith(cached, '');
-  try {
-    const list = await fetchLists();
-    const text = JSON.stringify(list);
-    localStorage.setItem('listsCache', text);
-    if (!cached) startWith(list, '');
-    else if (text !== cachedText) applyFreshLists(list);
-  } catch (e) {
-    if (!cached) startWith([], 'Could not load the names from Google Sheets. Check config.js.');
-  }
-}
-
-dateEl.value = new Date().toLocaleDateString('en-CA'); // today, YYYY-MM-DD, editable
-fillBulkValues();
-fillEditOptions();
-loadLists();
+})();
 </script>
 </body>
 </html>
