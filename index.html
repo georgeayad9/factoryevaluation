@@ -485,6 +485,7 @@ function session() {
 // One POST to the sheet. Errors from the server are thrown with their message.
 async function post(action, data) {
   if (!SHEET_URL) throw new Error('Sheet link not set. Edit config.js.');
+  const t0 = performance.now();
   const res = await fetch(SHEET_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },   // avoids a browser preflight request
@@ -492,6 +493,7 @@ async function post(action, data) {
   });
   if (!res.ok) throw new Error('HTTP ' + res.status);
   const out = await res.json();
+  console.info(`[timing] ${action}: ${Math.round(performance.now() - t0)} ms`);
   if (out.error) throw new Error(out.error);
   return out;
 }
@@ -569,7 +571,7 @@ function signOut(note) {
   gDirty = false;
   upPlan = null;
   upGrid = null;
-  D.data = null; D.rows = []; D.session = 0;
+  D.data = null; D.rows = []; D.session = 0; D_CACHE.clear();
   S2 = { rows: [], items: [], from: '', to: '' };
   showGate(note);
 }
@@ -1248,6 +1250,7 @@ const CRIT = [
   { k: 'quiz', label: 'Quiz', plural: 'Quizzes', titled: true, def: false }
 ];
 const D = { data: null, session: 0, rows: [], on: {}, title: { assignment: '', quiz: '' }, isEdit: false, loadSeq: 0 };
+const D_CACHE = new Map();     // "class|date" → last reply from the Sheet, for instant switching
 let dPrev = { grp: '', date: '' };   // to undo a class or date change the teacher cancels
 
 // The session running now; between sessions the next one; before the day 1, after it 8
@@ -1297,17 +1300,28 @@ async function dLoadDay(openSession) {
   if (openSession) D.session = openSession;
   renderDaily();
   if (!key || !date) return;
-  showIn($('dMsg'), 'Loading…', true);
+  const ck = key + '|' + date;
+  const cached = D_CACHE.get(ck);
+  if (cached) {                                // show the saved copy straight away
+    D.data = cached;
+    showIn($('dMsg'), '', true);
+    dOpen(D.session || currentSession());
+  } else {
+    showIn($('dMsg'), 'Loading…', true);
+  }
   try {
     const g = groupParts(key);
     const out = await post('dailyGet', { ...session(), cls: g.cls, dept: g.dept, date });
-    if (seq !== D.loadSeq) return;            // a newer choice replaced this one
+    D_CACHE.set(ck, out);
+    if (seq !== D.loadSeq) return;             // a newer choice replaced this one
+    if (cached && JSON.stringify(cached) === JSON.stringify(out)) return;   // nothing changed
+    if (cached && gDirty) return;              // never overwrite marks being typed
     D.data = out;
     showIn($('dMsg'), '', true);
     dOpen(D.session || currentSession());
   } catch (err) {
     if (isAuthError(err)) return signOut(err.message);
-    showIn($('dMsg'), err.message, false);
+    if (!cached) showIn($('dMsg'), err.message, false);
   }
 }
 
@@ -1520,6 +1534,7 @@ $('dSave').onclick = async () => {
     });
     gDirty = false;
     const done = D.session;
+    D_CACHE.delete($('dGrp').value + '|' + $('dDate').value);
     await dLoadDay(done);
     showIn($('dMsg'), `Saved session ${done} for ${$('dGrp').value}.`, true);
   } catch (err) {
@@ -2083,27 +2098,54 @@ clsSel.onchange = () => {
 };
 
 // ---------- start ----------
-async function loadLists() {
-  let list = null;
-  let loadError = '';
-  try {
-    if (!SHEET_URL) throw new Error('no url');
-    const res = await fetch(`${SHEET_URL}?action=lists&key=${encodeURIComponent(SHEET_KEY)}`);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    if (!Array.isArray(data)) throw new Error(data.error || 'unexpected reply');
-    list = data;
-    localStorage.setItem('listsCache', JSON.stringify(list));
-  } catch (e) {
-    const cached = localStorage.getItem('listsCache');  // fall back to the last good copy
-    if (cached) list = JSON.parse(cached);
-    else loadError = 'Could not load the names from Google Sheets. Check config.js.';
-  }
+// Teachers, classes and students rarely change, so the page opens with the copy saved on this
+// device and checks the Sheet in the background. If the Sheet differs, the lists are updated in place.
+async function fetchLists() {
+  if (!SHEET_URL) throw new Error('no url');
+  const t0 = performance.now();
+  const res = await fetch(`${SHEET_URL}?action=lists&key=${encodeURIComponent(SHEET_KEY)}`);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const data = await res.json();
+  console.info(`[timing] lists: ${Math.round(performance.now() - t0)} ms`);
+  if (!Array.isArray(data)) throw new Error(data.error || 'unexpected reply');
+  return data;
+}
 
-  buildLists(list || []);
-
+function startWith(list, note) {
+  buildLists(list);
   if (me && TEACHERS.includes(me) && sessionStorage.getItem('pin')) showApp();
-  else showGate(loadError);
+  else showGate(note);
+}
+
+// Fresh lists arrived while the page is open: update the dropdowns, keep what the teacher chose
+function applyFreshLists(list) {
+  buildLists(list);
+  if (!app.hidden) {
+    if (!dirty) fillClassSelect();        // evaluation cards are rebuilt only when nothing is unsaved
+    fillMineClasses();
+    fillGradeClasses();
+  } else {
+    const chosen = gName.value;
+    gName.innerHTML = '';
+    TEACHERS.forEach(n => gName.add(new Option(n, n)));
+    if (TEACHERS.includes(chosen)) gName.value = chosen;
+  }
+}
+
+async function loadLists() {
+  let cachedText = localStorage.getItem('listsCache');
+  let cached = null;
+  try { cached = cachedText ? JSON.parse(cachedText) : null; } catch (e) { cached = null; }
+  if (cached) startWith(cached, '');
+  try {
+    const list = await fetchLists();
+    const text = JSON.stringify(list);
+    localStorage.setItem('listsCache', text);
+    if (!cached) startWith(list, '');
+    else if (text !== cachedText) applyFreshLists(list);
+  } catch (e) {
+    if (!cached) startWith([], 'Could not load the names from Google Sheets. Check config.js.');
+  }
 }
 
 dateEl.value = new Date().toLocaleDateString('en-CA'); // today, YYYY-MM-DD, editable
