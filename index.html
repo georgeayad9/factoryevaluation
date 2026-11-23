@@ -114,6 +114,7 @@
   table.tGrid td.abs b{color:var(--err-ink);text-decoration:line-through}
   table.tGrid td.sub{background:var(--ok-bg)}
   table.tGrid td.sub small{color:var(--ok-ink)}
+  table.tGrid td.fac{background:repeating-linear-gradient(45deg,transparent 0 6px,var(--line) 6px 7px);color:var(--muted)}
   table.tGrid tr.today th.d{color:var(--brand-dark)}
 
   /* student cards */
@@ -1774,11 +1775,12 @@ $('tNext').onclick = () => tLoad(tAdd($('tDate').value || tIso(new Date()), 7));
 $('tToday').onclick = () => tLoad(tIso(new Date()));
 
 function tRender(w) {
-  const c = w.counts || { planned: 0, absent: 0, subs: 0, total: 0 };
+  const c = w.counts || { planned: 0, absent: 0, subs: 0, extra: 0, total: 0 };
+  const added = (c.subs || 0) + (c.extra || 0);
   $('tStats').innerHTML =
-    `<div><span>Planned</span><b>${c.planned}</b></div>` +
+    `<div><span>Classes</span><b>${c.planned}</b></div>` +
     `<div><span>Absent</span><b>${c.absent ? '−' + c.absent : 0}</b></div>` +
-    `<div><span>Substitutions</span><b>${c.subs ? '+' + c.subs : 0}</b></div>` +
+    `<div><span>Substitutions + extra</span><b>${added ? '+' + added : 0}</b></div>` +
     `<div><span>Total this week${c.max !== undefined ? ' · max ' + c.max : ''}</span><b>${c.total}</b></div>`;
   const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
   const today = tIso(new Date());
@@ -1790,20 +1792,26 @@ function tRender(w) {
     for (let s = 1; s <= 8; s++) {
       const mine = w.classes.find(x => x.day === day && x.session === s);
       const sub = w.subs.find(x => x.day === day && x.session === s);
-      if (mine) {
+      if (mine && mine.factory) {
+        html += `<td class="fac" title="Factory day: field training all day, not counted as classes"><b>${esc(mine.cls)}</b><small>factory day</small></td>`;
+      } else if (mine) {
         const note = mine.absent ? (mine.coveredBy ? 'absent · ' + esc(mine.coveredBy) + ' covers' : 'absent') : esc(mine.subject);
         html += `<td class="${mine.absent ? 'abs' : ''}"><b>${esc(mine.cls)}</b><small>${note}</small></td>`;
       } else if (sub) {
-        html += `<td class="sub" title="Substitution for ${esc(sub.forTeacher)}"><b>${esc(sub.cls)}</b><small>for ${esc(sub.forTeacher)}</small></td>`;
+        html += sub.type === 'Extra'
+          ? `<td class="sub" title="Extra class"><b>${esc(sub.cls)}</b><small>extra class</small></td>`
+          : `<td class="sub" title="Substitution for ${esc(sub.forTeacher)}"><b>${esc(sub.cls)}</b><small>for ${esc(sub.forTeacher)}</small></td>`;
       } else html += '<td></td>';
     }
     html += '</tr>';
   });
   $('tGrid').innerHTML = html;
-  $('tSubs').innerHTML = w.subs.length
-    ? `<p class="hint"><b>Your substitutions this week:</b> ` + w.subs.map(x =>
-        `${T_DAYS[x.day]} session ${x.session}, ${esc(x.cls)} for ${esc(x.forTeacher)}`).join(' · ') + '</p>'
-    : '';
+  const notes = [];
+  if (w.subs.length) notes.push(`<b>Added this week:</b> ` + w.subs.map(x =>
+    `${T_DAYS[x.day]} session ${x.session}, ${esc(x.cls)} ${x.type === 'Extra' ? '(extra class)' : 'for ' + esc(x.forTeacher)}`).join(' · '));
+  if (c.factoryDays) notes.push(`<b>Factory supervision:</b> ${c.factoryDays} day${c.factoryDays > 1 ? 's' : ''} this week (a full day of field training is not counted as classes).`);
+  if (c.busyDays && c.busyDays.length) notes.push(`<span class="low">⚠ ${c.busyDays.map(d => c.perDay[d] + ' classes on ' + T_DAYS[Math.round((new Date(d) - new Date(w.weekStart)) / 86400000)]).join(', ')}</span>`);
+  $('tSubs').innerHTML = notes.map(n => `<p class="hint">${n}</p>`).join('');
 }
 
 // ---------- rendering: one card per student ----------
