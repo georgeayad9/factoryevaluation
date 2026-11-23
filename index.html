@@ -60,6 +60,48 @@
   .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
   @media (max-width:700px){ .grid3{grid-template-columns:1fr} }
 
+  /* daily grading */
+  .sesRow{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:10px}
+  .sesBtn{height:48px;border-radius:8px;border:1px solid var(--border);background:var(--card);color:var(--ink);cursor:pointer;position:relative;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1}
+  .sesBtn b{font-size:16px}
+  .sesBtn small{font-size:11px;color:var(--muted)}
+  .sesBtn.on{background:var(--brand);border-color:var(--brand-dark);color:#1d1d1d}
+  .sesBtn.on small{color:#1d1d1d}
+  .sesBtn.done::after{content:"\2713";position:absolute;top:2px;right:5px;font-size:12px;color:var(--ok-ink)}
+  @media (max-width:560px){ .sesRow{grid-template-columns:repeat(4,1fr)} }
+  .msg.info{background:var(--brand-tint);color:var(--ink)}
+  .critBox{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0;padding:10px;border:1px solid var(--line);border-radius:10px}
+  .critHead{width:100%;font-size:13px;color:var(--muted);font-weight:600}
+  label.crit{display:flex;align-items:center;gap:6px;margin:0;padding:6px 10px;border:1px solid var(--line);border-radius:999px;font-size:14px;cursor:pointer}
+  label.crit input{width:18px;height:18px;margin:0}
+  label.crit.fixed{opacity:.75;cursor:default}
+  .critBox input[type=text]{width:auto;flex:1 1 160px}
+  .dTools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0}
+  .dTools input[type=text]{width:auto;flex:1 1 180px}
+  .dCounts{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:6px 0 8px;font-size:13px}
+  .dCounts span[class^=chip]{padding:3px 10px;border-radius:999px;font-weight:600}
+  .chipP{background:var(--ok-bg);color:var(--ok-ink)}
+  .chipL{background:#FAEEDA;color:#854F0B}
+  .chipA{background:var(--err-bg);color:var(--err-ink)}
+  table.dTable{min-width:0}
+  table.dTable td{padding:6px}
+  table.dTable td.dname{font-weight:600;overflow-wrap:anywhere}
+  table.dTable input[type=number]{width:70px;padding:6px}
+  table.dTable input.bad{border-color:var(--red)}
+  table.dTable tr.late td{background:#FFF6E3}
+  table.dTable tr.abs td{background:var(--incident-bg)}
+  [data-theme="dark"] table.dTable tr.late td{background:#3a3018}
+  button.att{width:84px;height:36px;border-radius:8px;border:1px solid var(--ok-ink);background:var(--ok-bg);color:var(--ok-ink);font-weight:600;cursor:pointer}
+  button.att.late{border-color:#B07A1A;background:#FAEEDA;color:#854F0B}
+  button.att.abs{border-color:var(--red);background:var(--err-bg);color:var(--err-ink)}
+  .aMark{display:inline-block;width:70px;text-align:center;color:var(--red);font-weight:700}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:10px 0}
+  .stats div{background:var(--brand-tint);border-radius:10px;padding:10px}
+  .stats span{display:block;font-size:12px;color:var(--muted)}
+  .stats b{font-size:20px}
+  @media (max-width:560px){ .stats{grid-template-columns:1fr 1fr} }
+  .low{color:var(--red);font-weight:600}
+
   /* student cards */
   .cards{display:grid;grid-template-columns:1fr;gap:10px}
   @media (min-width:760px){ .cards{grid-template-columns:1fr 1fr} }
@@ -166,7 +208,9 @@
 
     <!-- Grading sub-tabs -->
     <div class="tabs sub" id="gradeTabs" hidden>
-      <button class="tab on" id="tabGMine" type="button">My grades</button>
+      <button class="tab on" id="tabGDaily" type="button">Daily grading</button>
+      <button class="tab" id="tabGSum" type="button">Summary</button>
+      <button class="tab" id="tabGMine" type="button">My grades</button>
       <button class="tab" id="tabGNew" type="button">New grading</button>
       <button class="tab" id="tabGUp" type="button">Upload Excel</button>
     </div>
@@ -253,6 +297,79 @@
         </div>
         <div id="editMsg"></div>
       </div>
+    </div>
+
+    <!-- GRADING: DAILY (one session of one class) -->
+    <div class="card" id="gDaily" hidden>
+      <div class="top">
+        <div>
+          <label for="dGrp">Class</label>
+          <select id="dGrp"></select>
+        </div>
+        <div>
+          <label for="dDate">Date</label>
+          <input type="date" id="dDate">
+        </div>
+      </div>
+      <label style="margin-top:12px">Session</label>
+      <div class="sesRow" id="dSes"></div>
+      <div id="dNote" class="msg" hidden></div>
+
+      <div id="dBody" hidden>
+        <div class="critBox">
+          <span class="critHead">Today's criteria (10 each)</span>
+          <label class="crit fixed"><input type="checkbox" checked disabled> Attendance</label>
+          <label class="crit"><input type="checkbox" id="dOn_behaviour"> Behaviour</label>
+          <label class="crit"><input type="checkbox" id="dOn_participation"> Participation</label>
+          <label class="crit"><input type="checkbox" id="dOn_assignment"> Assignment</label>
+          <input type="text" id="dT_assignment" placeholder="Assignment title, e.g. HW 3" maxlength="80" hidden>
+          <label class="crit"><input type="checkbox" id="dOn_quiz"> Quiz</label>
+          <input type="text" id="dT_quiz" placeholder="Quiz title, e.g. Quiz 2" maxlength="80" hidden>
+        </div>
+        <div class="dTools">
+          <span class="hint" style="margin:0">Fill empty marks with 10:</span>
+          <button class="small" id="dFill_behaviour" type="button">Behaviour</button>
+          <button class="small" id="dFill_participation" type="button">Participation</button>
+          <button class="small" id="dFill_assignment" type="button" hidden>Assignment</button>
+          <button class="small" id="dFill_quiz" type="button" hidden>Quiz</button>
+          <button class="small" id="dAllP" type="button">Everyone present</button>
+        </div>
+        <div class="dCounts" id="dCounts"></div>
+        <div class="tablewrap"><table class="dTable">
+          <thead><tr id="dHead"></tr></thead>
+          <tbody id="dRows"></tbody>
+        </table></div>
+        <p class="hint">Tap the attendance button to change it: Present (10) → Late (5) → Absent (A, counts 0). Absent students get A in every mark.</p>
+        <button class="primary" id="dSave" type="button">Save session</button>
+      </div>
+      <div id="dMsg"></div>
+    </div>
+
+    <!-- GRADING: SUMMARY -->
+    <div class="card" id="gSum" hidden>
+      <div class="grid3" style="margin-top:0">
+        <div>
+          <label for="sGrp">Class</label>
+          <select id="sGrp"></select>
+        </div>
+        <div>
+          <label for="sFrom">From</label>
+          <input type="date" id="sFrom">
+        </div>
+        <div>
+          <label for="sTo">To</label>
+          <input type="date" id="sTo">
+        </div>
+      </div>
+      <div class="dTools" id="sQuick">
+        <button class="small" type="button" data-r="week">This week</button>
+        <button class="small" type="button" data-r="month">This month</button>
+        <button class="small" type="button" data-r="year">This school year</button>
+        <span style="flex:1"></span>
+        <button class="secondary" id="sExport" type="button">Export to Excel</button>
+      </div>
+      <div id="sMsg"></div>
+      <div id="sOut"></div>
     </div>
 
     <!-- GRADING: MY GRADES -->
@@ -517,6 +634,8 @@ function signOut(note) {
   gDirty = false;
   upPlan = null;
   upGrid = null;
+  D.data = null; D.rows = []; D.session = 0;
+  S2 = { rows: [], from: '', to: '' };
   showGate(note);
 }
 
@@ -621,7 +740,7 @@ tabMine.onclick = () => setMode('mine');
 
 // ---------- main sections ----------
 let section = 'eval';          // eval | grade | time | assess
-let gMode = 'mine';            // grading sub-tab: mine | new
+let gMode = 'daily';           // grading sub-tab: daily | sum | mine | new | up
 let gItems = [];               // the teacher's quizzes and assignments
 let gForm = null;              // { id, rows: [{ name, score, absent }] } while grading
 let gDirty = false;
@@ -654,7 +773,7 @@ function showSection() {
     topCard.hidden = true; panel.hidden = true; mine.hidden = true;
   }
   if (isGrade) applyGMode(gMode);
-  else { $('gMine').hidden = true; $('gNew').hidden = true; $('gUp').hidden = true; }
+  else { ['gDaily', 'gSum', 'gMine', 'gNew', 'gUp'].forEach(id => { $(id).hidden = true; }); }
 }
 
 document.querySelectorAll('#nav .tab').forEach(b => { b.onclick = () => setSection(b.dataset.sec); });
@@ -669,12 +788,18 @@ function confirmGradeDiscard() {
 
 function applyGMode(m) {
   gMode = m;
+  $('tabGDaily').classList.toggle('on', m === 'daily');
+  $('tabGSum').classList.toggle('on', m === 'sum');
   $('tabGMine').classList.toggle('on', m === 'mine');
   $('tabGNew').classList.toggle('on', m === 'new');
   $('tabGUp').classList.toggle('on', m === 'up');
+  $('gDaily').hidden = m !== 'daily';
+  $('gSum').hidden = m !== 'sum';
   $('gMine').hidden = m !== 'mine';
   $('gNew').hidden = m !== 'new';
   $('gUp').hidden = m !== 'up';
+  if (m === 'daily') dInit();
+  if (m === 'sum') sInit();
   if (m === 'mine') loadGrades();
   if (m === 'up') {
     fillGradeClasses();
@@ -695,6 +820,8 @@ function setGMode(m) {
   upPlan = null;
   applyGMode(m);
 }
+$('tabGDaily').onclick = () => setGMode('daily');
+$('tabGSum').onclick = () => setGMode('sum');
 $('tabGMine').onclick = () => setGMode('mine');
 $('tabGNew').onclick = () => setGMode('new');
 $('tabGUp').onclick = () => setGMode('up');
@@ -710,6 +837,8 @@ function fillGradeClasses() {
   opts($('gCls'));
   opts($('gMineCls'));
   opts($('upCls'));
+  opts($('dGrp'));
+  opts($('sGrp'));
 }
 
 // Empty form for a new quiz or assignment
@@ -748,6 +877,10 @@ function openGradeItem(item) {
   $('tabGMine').classList.remove('on');
   $('tabGNew').classList.add('on');
   $('tabGUp').classList.remove('on');
+  $('tabGDaily').classList.remove('on');
+  $('tabGSum').classList.remove('on');
+  $('gDaily').hidden = true;
+  $('gSum').hidden = true;
   $('gUp').hidden = true;
   $('gMine').hidden = true;
   $('gNew').hidden = false;
@@ -1401,6 +1534,449 @@ function xlsxBlob(sheets) {
   ];
   return zipFiles(files);
 }
+
+// ---------- grading: daily sessions ----------
+// Session times decide which session is picked by default. Change them in config.js for
+// Ramadan and similar periods (see the sessions line there); these are the normal times.
+const SESSION_TIMES = (CFG.sessions && CFG.sessions.length === 8) ? CFG.sessions : [
+  ['07:30', '08:25'], ['08:25', '09:20'], ['09:20', '10:15'], ['10:45', '11:40'],
+  ['11:40', '12:35'], ['12:35', '13:30'], ['14:00', '14:55'], ['14:55', '15:50']
+];
+const ATT = {
+  P: { label: 'Present', pts: 10, cls: '' },
+  L: { label: 'Late', pts: 5, cls: 'late' },
+  A: { label: 'Absent', pts: 0, cls: 'abs' }
+};
+const ATT_NEXT = { P: 'L', L: 'A', A: 'P' };
+// Criteria after attendance, 10 marks each. Behaviour and participation start on; assignment and
+// quiz start off and need a title. The teacher's on/off choice is remembered per class.
+const CRIT = [
+  { k: 'behaviour', label: 'Behaviour', titled: false, def: true },
+  { k: 'participation', label: 'Participation', titled: false, def: true },
+  { k: 'assignment', label: 'Assignment', plural: 'Assignments', titled: true, def: false },
+  { k: 'quiz', label: 'Quiz', plural: 'Quizzes', titled: true, def: false }
+];
+const D = { data: null, session: 0, rows: [], on: {}, title: { assignment: '', quiz: '' }, isEdit: false, loadSeq: 0 };
+let dPrev = { grp: '', date: '' };   // to undo a class or date change the teacher cancels
+
+// The session running now; between sessions the next one; before the day 1, after it 8
+function currentSession(now = new Date()) {
+  const m = now.getHours() * 60 + now.getMinutes();
+  const mins = t => { const [h, mm] = t.split(':').map(Number); return h * 60 + mm; };
+  for (let i = 0; i < 8; i++) if (m < mins(SESSION_TIMES[i][1])) return i + 1;
+  return 8;
+}
+
+function fmtTime(t) {
+  const [h, m] = t.split(':').map(Number);
+  return `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')}`;
+}
+
+// Behaviour / participation on-off for a class, remembered on this device per teacher
+function critPrefKey(grp) { return `crit:${me}:${grp}`; }
+function critPref(grp) {
+  let p = {};
+  try { p = JSON.parse(localStorage.getItem(critPrefKey(grp)) || '{}'); } catch (e) { p = {}; }
+  const out = {};
+  CRIT.forEach(c => { out[c.k] = c.titled ? false : (c.k in p ? !!p[c.k] : c.def); });
+  return out;
+}
+function saveCritPref() {
+  const p = {};
+  CRIT.filter(c => !c.titled).forEach(c => { p[c.k] = !!D.on[c.k]; });
+  try { localStorage.setItem(critPrefKey($('dGrp').value), JSON.stringify(p)); } catch (e) { /* private mode */ }
+}
+
+function dInit() {
+  fillGradeClasses();
+  const last = localStorage.getItem('lastGrp');
+  if (!$('dGrp').value && last && GROUPS[last]) $('dGrp').value = last;
+  if (!$('dDate').value) $('dDate').value = new Date().toLocaleDateString('en-CA');
+  dLoadDay(currentSession());
+}
+
+// Loads the teacher's sessions of this class on this date, then opens the given session
+async function dLoadDay(openSession) {
+  const key = $('dGrp').value, date = $('dDate').value;
+  const seq = ++D.loadSeq;
+  dPrev = { grp: key, date };
+  if (key) localStorage.setItem('lastGrp', key);
+  D.data = null;
+  D.rows = [];
+  if (openSession) D.session = openSession;
+  renderDaily();
+  if (!key || !date) return;
+  showIn($('dMsg'), 'Loading…', true);
+  try {
+    const g = groupParts(key);
+    const out = await post('dailyGet', { ...session(), cls: g.cls, dept: g.dept, date });
+    if (seq !== D.loadSeq) return;            // a newer choice replaced this one
+    D.data = out;
+    showIn($('dMsg'), '', true);
+    dOpen(D.session || currentSession());
+  } catch (err) {
+    if (isAuthError(err)) return signOut(err.message);
+    showIn($('dMsg'), err.message, false);
+  }
+}
+
+// Fills the table from the saved session, or a fresh one where everyone is present
+function dOpen(n) {
+  if (n !== D.session) showIn($('dMsg'), '', true);   // a message belongs to the session it was about
+  D.session = n;
+  const ses = D.data && D.data.sessions.find(s => s.session === n);
+  const saved = {};
+  (ses ? ses.rows : []).forEach(r => { saved[r.student] = r; });
+  const names = [...new Set([...groupStudents($('dGrp').value), ...Object.keys(saved)])];
+  D.rows = names.map(name => {
+    const r = saved[name];
+    const row = { name, att: r ? r.att : 'P' };
+    CRIT.forEach(c => {
+      const v = r ? r[c.k] : '';
+      row[c.k] = (v === 'A' || v === null || v === undefined) ? '' : v;
+    });
+    return row;
+  });
+  D.isEdit = !!ses;
+  D.on = ses ? { ...ses.on } : critPref($('dGrp').value);
+  D.title = { assignment: ses ? ses.assignment : '', quiz: ses ? ses.quiz : '' };
+  gDirty = false;
+  renderDaily();
+}
+
+const dActive = () => CRIT.filter(c => D.on[c.k]);
+function dOutOf() { return 10 + 10 * dActive().length; }
+
+function dTotal(r) {
+  if (r.att === 'A') return 0;
+  const parts = dActive().map(c => r[c.k]);
+  if (parts.some(x => x === '' || x === null)) return null;
+  return ATT[r.att].pts + parts.reduce((t, x) => t + Number(x), 0);
+}
+
+function renderDaily() {
+  // session buttons: a tick for the teacher's graded sessions
+  const box = $('dSes');
+  box.innerHTML = '';
+  const mine = new Set(D.data ? D.data.sessions.map(s => s.session) : []);
+  for (let i = 1; i <= 8; i++) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'sesBtn' + (i === D.session ? ' on' : '') + (mine.has(i) ? ' done' : '');
+    b.innerHTML = `<b>${i}</b><small>${fmtTime(SESSION_TIMES[i - 1][0])}</small>`;
+    b.title = `Session ${i}: ${SESSION_TIMES[i - 1][0]}–${SESSION_TIMES[i - 1][1]}` + (mine.has(i) ? ' · graded' : '');
+    b.onclick = () => {
+      if (i === D.session) return;
+      if (!D.data) { D.session = i; renderDaily(); return; }
+      if (gDirty && !window.confirm('You have unsaved marks in this session. Discard them?')) return;
+      dOpen(i);
+    };
+    box.appendChild(b);
+  }
+
+  const ready = !!D.data && D.rows.length > 0;
+  $('dBody').hidden = !ready;
+  const note = $('dNote');
+  if (!D.data) { note.hidden = true; }
+  else if (!D.rows.length) {
+    note.hidden = false; note.className = 'msg err';
+    note.textContent = 'No students in this class yet.';
+  } else {
+    const other = D.data.others.find(o => o.session === D.session);
+    note.hidden = false;
+    note.className = 'msg ' + (D.isEdit ? 'info' : 'ok');
+    note.textContent = (D.isEdit
+      ? `Session ${D.session} is already graded. Saving updates it, it never adds a copy.`
+      : `New grading for session ${D.session}. Everyone starts present.`) +
+      (other ? ` ${other.teachers.join(', ')} also graded this class in session ${D.session}.` : '');
+  }
+  if (!ready) return;
+
+  // criteria switches (attendance is always on), titles, fill buttons
+  CRIT.forEach(c => {
+    $('dOn_' + c.k).checked = !!D.on[c.k];
+    if (c.titled) {
+      $('dT_' + c.k).hidden = !D.on[c.k];
+      $('dT_' + c.k).value = D.title[c.k];
+    }
+    $('dFill_' + c.k).hidden = !D.on[c.k];
+  });
+  $('dSave').textContent = D.isEdit ? 'Save changes' : 'Save session';
+
+  const act = dActive();
+  $('dHead').innerHTML = '<th>Student</th><th>Attendance</th>' +
+    act.map(c => `<th>${c.label} /10</th>`).join('') + `<th>Day /${dOutOf()}</th>`;
+
+  const tb = $('dRows');
+  tb.innerHTML = '';
+  D.rows.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.className = ATT[r.att].cls;
+    const td = el => { const c = document.createElement('td'); if (el) c.append(el); tr.appendChild(c); return c; };
+
+    td(document.createTextNode(r.name)).className = 'dname';
+    const att = document.createElement('button');
+    att.type = 'button';
+    att.className = 'att ' + ATT[r.att].cls;
+    att.textContent = ATT[r.att].label;
+    att.setAttribute('aria-label', `Attendance for ${r.name}: ${ATT[r.att].label}. Tap to change.`);
+    att.onclick = () => { r.att = ATT_NEXT[r.att]; gDirty = true; renderDaily(); };
+    td(att);
+
+    act.forEach(c => {
+      if (r.att === 'A') { const s = document.createElement('span'); s.className = 'aMark'; s.textContent = 'A'; td(s); return; }
+      const inp = document.createElement('input');
+      inp.type = 'number'; inp.min = '0'; inp.max = '10'; inp.step = '0.5'; inp.inputMode = 'decimal';
+      inp.value = r[c.k];
+      inp.setAttribute('aria-label', `${r.name} ${c.label.toLowerCase()}`);
+      inp.oninput = () => {
+        r[c.k] = inp.value === '' ? '' : Number(inp.value);
+        gDirty = true;
+        inp.classList.toggle('bad', r[c.k] !== '' && (isNaN(r[c.k]) || r[c.k] < 0 || r[c.k] > 10));
+        tr.lastChild.innerHTML = dTotalHtml(r);
+        dCounts();
+      };
+      td(inp);
+    });
+    td().innerHTML = dTotalHtml(r);
+    tb.appendChild(tr);
+  });
+  dCounts();
+}
+
+function dTotalHtml(r) {
+  if (r.att === 'A') return `<span class="aMark">A</span>`;
+  const t = dTotal(r);
+  return t === null ? '<span class="rec-meta">…</span>' : `<b>${fmtScore(t)}</b>`;
+}
+
+function dCounts() {
+  const c = { P: 0, L: 0, A: 0 };
+  D.rows.forEach(r => c[r.att]++);
+  const done = D.rows.filter(r => dTotal(r) !== null).length;
+  $('dCounts').innerHTML =
+    `<span class="chipP">${c.P} present</span><span class="chipL">${c.L} late</span><span class="chipA">${c.A} absent</span>` +
+    `<span class="rec-meta">${done} of ${D.rows.length} complete · day out of ${dOutOf()}</span>`;
+}
+
+$('dGrp').onchange = () => {
+  if (gDirty && !window.confirm('You have unsaved marks. Discard them?')) { $('dGrp').value = dPrev.grp; return; }
+  gDirty = false;
+  dLoadDay(D.session || currentSession());
+};
+$('dDate').onchange = () => {
+  if (gDirty && !window.confirm('You have unsaved marks. Discard them?')) { $('dDate').value = dPrev.date; return; }
+  gDirty = false;
+  dLoadDay(D.session || currentSession());
+};
+CRIT.forEach(c => {
+  $('dOn_' + c.k).onchange = () => {
+    D.on[c.k] = $('dOn_' + c.k).checked;
+    gDirty = true;
+    if (!c.titled) saveCritPref();
+    renderDaily();
+    if (c.titled && D.on[c.k]) $('dT_' + c.k).focus();
+  };
+  if (c.titled) $('dT_' + c.k).oninput = () => { D.title[c.k] = $('dT_' + c.k).value; gDirty = true; };
+  // Fill empty marks of present and late students only; typed marks stay
+  $('dFill_' + c.k).onclick = () => {
+    let n = 0;
+    D.rows.forEach(r => { if (r.att !== 'A' && r[c.k] === '') { r[c.k] = 10; n++; } });
+    if (n) gDirty = true;
+    renderDaily();
+  };
+});
+$('dAllP').onclick = () => { D.rows.forEach(r => { r.att = 'P'; }); gDirty = true; renderDaily(); };
+
+$('dSave').onclick = async () => {
+  const msgBox = $('dMsg');
+  const titles = { assignment: D.title.assignment.trim(), quiz: D.title.quiz.trim() };
+  for (const c of CRIT.filter(x => x.titled && D.on[x.k])) {
+    if (!titles[c.k]) return showIn(msgBox, `Type the ${c.k} title.`, false);
+    // Each assignment and quiz title is saved once per class
+    const used = D.data.used[c.k].find(u => normKey(u.title) === normKey(titles[c.k]) &&
+      !(u.date === D.data.date && u.session === D.session));
+    if (used) return showIn(msgBox, `"${titles[c.k]}" was already saved on ${used.date}, session ${used.session}. Use a new title.`, false);
+  }
+  for (const r of D.rows) {
+    if (r.att === 'A') continue;
+    for (const c of dActive()) {
+      const v = r[c.k];
+      if (v === '' || isNaN(v) || v < 0 || v > 10) return showIn(msgBox, `${r.name}: type the ${c.label.toLowerCase()} mark (0 to 10).`, false);
+    }
+  }
+  const cnt = { P: 0, L: 0, A: 0 };
+  D.rows.forEach(r => cnt[r.att]++);
+  const g = groupParts($('dGrp').value);
+  const list = ['Attendance', ...dActive().map(c => c.titled ? `${c.label} "${titles[c.k]}"` : c.label)].join(', ');
+  if (!window.confirm(`Save session ${D.session} on ${$('dDate').value} for ${$('dGrp').value}?\n\n` +
+      `${list}. Day out of ${dOutOf()}.\n${cnt.P} present, ${cnt.L} late, ${cnt.A} absent.`)) return;
+
+  const btn = $('dSave');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  try {
+    await post('dailySave', {
+      ...session(), cls: g.cls, dept: g.dept, date: $('dDate').value, session: D.session,
+      criteria: { behaviour: !!D.on.behaviour, participation: !!D.on.participation },
+      hasAssignment: !!D.on.assignment, assignment: D.on.assignment ? titles.assignment : '',
+      hasQuiz: !!D.on.quiz, quiz: D.on.quiz ? titles.quiz : '',
+      rows: D.rows.map(r => {
+        const o = { student: r.name, att: r.att };
+        CRIT.forEach(c => { o[c.k] = (r.att === 'A' || !D.on[c.k]) ? null : r[c.k]; });
+        return o;
+      })
+    });
+    gDirty = false;
+    const done = D.session;
+    await dLoadDay(done);
+    showIn($('dMsg'), `Saved session ${done} for ${$('dGrp').value}.`, true);
+  } catch (err) {
+    if (isAuthError(err)) return signOut(err.message);
+    showIn(msgBox, `Not saved (${err.message}). Press Save again to retry.`, false);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = D.isEdit ? 'Save changes' : 'Save session';
+  }
+};
+
+// ---------- grading: summary of the teacher's sessions ----------
+// Attendance = average of P 10, L 5, A 0 over all sessions.
+// Each other criterion = average over the sessions where it was on; absent counts 0.
+// Total = attendance plus the criteria used in the period, 10 each.
+let S2 = { rows: [], from: '', to: '' };
+
+function sumRange(kind) {
+  const today = new Date();
+  const iso = d => d.toLocaleDateString('en-CA');
+  if (kind === 'week') {             // school week starts on Sunday
+    const s = new Date(today); s.setDate(today.getDate() - today.getDay());
+    return [iso(s), iso(today)];
+  }
+  if (kind === 'month') return [iso(new Date(today.getFullYear(), today.getMonth(), 1)), iso(today)];
+  const y = today.getMonth() >= 8 ? today.getFullYear() : today.getFullYear() - 1;   // school year from 1 September
+  return [`${y}-09-01`, iso(today)];
+}
+
+function sInit() {
+  fillGradeClasses();
+  const last = localStorage.getItem('lastGrp');
+  if (!$('sGrp').value && last && GROUPS[last]) $('sGrp').value = last;
+  if (!$('sFrom').value) { const [f, t] = sumRange('month'); $('sFrom').value = f; $('sTo').value = t; }
+  sLoad();
+}
+
+document.querySelectorAll('#sQuick button[data-r]').forEach(b => {
+  b.onclick = () => { const [f, t] = sumRange(b.dataset.r); $('sFrom').value = f; $('sTo').value = t; sLoad(); };
+});
+$('sGrp').onchange = sLoad;
+$('sFrom').onchange = sLoad;
+$('sTo').onchange = sLoad;
+
+async function sLoad() {
+  const key = $('sGrp').value, from = $('sFrom').value, to = $('sTo').value;
+  $('sOut').innerHTML = '';
+  if (!key) return showIn($('sMsg'), 'Choose a class.', true);
+  if (!from || !to || from > to) return showIn($('sMsg'), 'Choose a start date before the end date.', false);
+  showIn($('sMsg'), 'Loading…', true);
+  try {
+    const g = groupParts(key);
+    const out = await post('dailyRows', { ...session(), cls: g.cls, dept: g.dept, from, to });
+    if ($('sGrp').value !== key || $('sFrom').value !== from || $('sTo').value !== to) return;
+    S2 = { rows: out.rows || [], from, to, key };
+    showIn($('sMsg'), '', true);
+    renderSummary();
+  } catch (err) {
+    if (isAuthError(err)) return signOut(err.message);
+    showIn($('sMsg'), err.message, false);
+  }
+}
+
+function summaryData() {
+  const sesKey = r => r.date + '|' + r.session;
+  const sessions = new Set(S2.rows.map(sesKey));
+  // sessions in which each criterion was on (a mark or an A for at least one student)
+  const used = {};
+  CRIT.forEach(c => { used[c.k] = new Set(S2.rows.filter(r => r[c.k] !== '').map(sesKey)); });
+  const by = {};
+  S2.rows.forEach(r => { (by[r.student] = by[r.student] || []).push(r); });
+  const names = [...new Set([...groupStudents(S2.key), ...Object.keys(by)])];
+  const avg = list => list.length ? list.reduce((t, x) => t + x, 0) / list.length : null;
+  const students = names.map(name => {
+    const rs = by[name] || [];
+    const c = { P: 0, L: 0, A: 0 };
+    rs.forEach(r => { c[r.att] = (c[r.att] || 0) + 1; });
+    const out = { name, c, att: avg(rs.map(r => ATT[r.att] ? ATT[r.att].pts : 0)) };
+    CRIT.forEach(cr => {
+      out[cr.k] = avg(rs.filter(r => r[cr.k] !== '').map(r => r[cr.k] === 'A' ? 0 : Number(r[cr.k])));
+    });
+    const parts = [out.att, ...CRIT.map(cr => out[cr.k])].filter(x => x !== null);
+    out.total = parts.length ? parts.reduce((t, x) => t + x, 0) : null;
+    return out;
+  });
+  const shown = CRIT.filter(c => used[c.k].size);
+  return { students, sessions: sessions.size, used, shown, outOf: 10 + 10 * shown.length };
+}
+
+function renderSummary() {
+  const d = summaryData();
+  const box = $('sOut');
+  if (!d.sessions) {
+    box.innerHTML = '<p class="hint">No graded sessions for this class in this period.</p>';
+    return;
+  }
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const r1 = v => fmtScore(Math.round(v * 10) / 10);
+  const f = v => v === null ? '—' : `<span class="${v < 5 ? 'low' : ''}">${r1(v)}</span>`;
+  const totals = d.students.filter(s => s.total !== null).map(s => s.total);
+  const classAvg = totals.length ? totals.reduce((t, x) => t + x, 0) / totals.length : null;
+  box.innerHTML = `
+    <div class="stats">
+      <div><span>Sessions</span><b>${d.sessions}</b></div>
+      <div><span>Assignments</span><b>${d.used.assignment.size}</b></div>
+      <div><span>Quizzes</span><b>${d.used.quiz.size}</b></div>
+      <div><span>Class average</span><b>${classAvg === null ? '—' : r1(classAvg)} / ${d.outOf}</b></div>
+    </div>
+    <div class="tablewrap"><table>
+      <tr><th>Student</th><th>Attendance /10</th>${d.shown.map(c => `<th>${c.plural || c.label} /10</th>`).join('')}<th>Total /${d.outOf}</th></tr>
+      ${d.students.map(s => `<tr>
+        <td><b>${esc(s.name)}</b></td>
+        <td>${f(s.att)}<div class="rec-meta">${s.c.P} present · ${s.c.L} late · ${s.c.A} absent</div></td>
+        ${d.shown.map(c => `<td>${f(s[c.k])}</td>`).join('')}
+        <td><b>${s.total === null ? '—' : r1(s.total)}</b></td></tr>`).join('')}
+    </table></div>
+    <p class="hint">Attendance: present 10, late 5, absent 0. Each other criterion averages the sessions where it was used, and absent counts 0. A criterion not used in this period is left out of the total. Marks below 5 are in red.</p>`;
+}
+
+$('sExport').onclick = () => {
+  if (!S2.rows.length) return showIn($('sMsg'), 'Nothing to export for this period.', false);
+  const d = summaryData();
+  const r1 = v => v === null ? '' : Math.round(v * 10) / 10;
+  const summary = [
+    [`${S2.key} · ${S2.from} to ${S2.to} · ${me}`], [],
+    ['Student', 'Present', 'Late', 'Absent', 'Attendance /10', ...d.shown.map(c => `${c.plural || c.label} /10`), `Total /${d.outOf}`],
+    ...d.students.map(s => [s.name, s.c.P, s.c.L, s.c.A, r1(s.att), ...d.shown.map(c => r1(s[c.k])), r1(s.total)])
+  ];
+  const cell = (r, k) => r[k] === '' ? '' : r[k];
+  const sessions = [
+    ['Every session'], [],
+    ['Date', 'Session', 'Student', 'Attendance', 'Behaviour', 'Participation', 'Assignment', 'Assignment title', 'Quiz', 'Quiz title'],
+    ...S2.rows.slice().sort((a, b) => a.date.localeCompare(b.date) || a.session - b.session || a.student.localeCompare(b.student))
+      .map(r => [r.date, r.session, r.student, ATT[r.att] ? ATT[r.att].label : r.att,
+        cell(r, 'behaviour'), cell(r, 'participation'), cell(r, 'assignment'), r.assignmentTitle, cell(r, 'quiz'), r.quizTitle])
+  ];
+  const blob = xlsxBlob([
+    { name: 'Summary', rows: summary, bold: [0, 2] },
+    { name: 'Sessions', rows: sessions, bold: [0, 2] }
+  ]);
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `Summary - ${S2.key} - ${S2.from} to ${S2.to}.xlsx`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
 
 // ---------- rendering: one card per student ----------
 function render() {
