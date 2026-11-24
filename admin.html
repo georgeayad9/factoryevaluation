@@ -226,6 +226,44 @@ main.wide{max-width:1200px}
 .exList button{display:block;width:100%;text-align:left;background:transparent;border:0;color:var(--ink);padding:9px 10px;border-radius:8px;font-size:14px;cursor:pointer}
 .exList button:hover{background:var(--bg)}
 .exList small{display:block;color:var(--muted);font-size:12px}
+/* teachers: weekly dashboard and portfolio */
+.pfTop{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pfTop h2{margin:0;flex:1;min-width:180px}
+.pfT{width:100%;border-collapse:collapse;font-size:13px;min-width:680px}
+.pfT th{font-size:11px;color:var(--muted);text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);font-weight:600;white-space:nowrap}
+.pfT td{padding:9px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
+.pfT tr.r{cursor:pointer}.pfT tr.r:hover td,.pfT tr.sel td{background:var(--bg)}
+.pfC{display:inline-flex;align-items:center;gap:6px}
+.pfC small{color:var(--muted);font-size:11px}
+.pfScore{font-weight:700;font-size:15px}
+.pfPts{font-weight:600}.pfPts.pos{color:var(--ok-ink)}.pfPts.neg{color:var(--danger)}
+.pfDays{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:10px 0}
+@media (max-width:620px){.pfDays{grid-template-columns:1fr 1fr}}
+.pfDay{background:var(--bg);border-radius:10px;padding:8px 9px}
+.pfDay b{display:block;font-size:12px;margin-bottom:5px}
+.pfIt{font-size:12px;display:flex;gap:6px;align-items:center;margin:3px 0}
+.pfIt i{font-style:normal;width:16px;height:16px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.pfIt.done i{background:var(--ok-bg);color:var(--ok-ink)}.pfIt.missing i{background:var(--err-bg);color:var(--err-ink)}.pfIt.pending i{background:var(--line);color:var(--muted)}
+.pfIt.pending{color:var(--muted)}
+.pfWeeks{display:flex;align-items:flex-end;gap:6px;height:84px;margin:8px 0 22px}
+.pfWeeks div{flex:1;border-radius:4px 4px 0 0;position:relative;min-height:3px}
+.pfWeeks span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-size:10px;color:var(--muted)}
+.pfWeeks em{position:absolute;top:-16px;left:0;right:0;text-align:center;font-size:10px;font-style:normal;color:var(--muted)}
+.pfTot{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:560px){.pfTot{grid-template-columns:1fr 1fr}}
+.pfTot div{background:var(--bg);border-radius:10px;padding:9px 11px}.pfTot b{display:block;font-size:19px}.pfTot span{font-size:12px;color:var(--muted)}
+.pfSeg{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}
+.pfSeg button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:9px;font-weight:600;cursor:pointer}
+.pfSeg button.neg.on{background:var(--err-bg);color:var(--err-ink);border-color:var(--err-ink)}
+.pfSeg button.pos.on{background:var(--ok-bg);color:var(--ok-ink);border-color:var(--ok-ink)}
+.pfCats{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+.pfNote{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);align-items:flex-start}
+.pfNote .ic{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700}
+.pfNote .ic.Concern{background:var(--err-bg);color:var(--err-ink)}.pfNote .ic.Credit{background:var(--ok-bg);color:var(--ok-ink)}
+.pfNote .pt{margin-left:auto;font-weight:700;white-space:nowrap;display:flex;gap:8px;align-items:center}
+.pfNote .del{background:transparent;border:0;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px}
+.pfSum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:8px 0}
+.pfSum div{background:var(--bg);border-radius:10px;padding:9px 11px}.pfSum b{display:block;font-size:19px}.pfSum span{font-size:12px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -268,6 +306,7 @@ main.wide{max-width:1200px}
   </div>
   <nav class="ptabs">
     <button type="button" id="tabStudents">Students</button>
+    <button type="button" id="tabTeachers">Teachers</button>
     <button type="button" id="tabLists" class="on">Teachers, classes and students</button>
     <button type="button" id="tabTT">Timetable</button>
     <button type="button" id="tabEvalAll">Evaluations<small>class or factory</small></button>
@@ -490,6 +529,29 @@ main.wide{max-width:1200px}
       <div class="ttWrap"><table class="stT" id="stT"></table></div>
       <p class="hint" id="stHint">Tap a column to sort. Tap a student to open the profile.</p>
     </div>
+  </div>
+
+  <!-- ===================== TEACHERS: weekly dashboard, portfolio, conduct log ===================== -->
+  <div id="paneTeachers" hidden>
+    <div class="card">
+      <div class="pfTop">
+        <h2 id="pfTitle">Teachers</h2>
+        <button class="btn alt small" id="pfPrev" type="button">‹ Previous</button>
+        <button class="btn alt small" id="pfNow" type="button">This week</button>
+        <button class="btn alt small" id="pfNext" type="button">Next ›</button>
+        <div class="exMenu">
+          <button class="btn alt small" id="pfExBtn" type="button" aria-expanded="false">⤓ Export</button>
+          <div class="exList" id="pfExList" hidden>
+            <button type="button" data-ex="xlsx">Excel<small>This week's numbers for every teacher</small></button>
+            <button type="button" data-ex="print">Print / PDF<small>This week's dashboard as a report</small></button>
+          </div>
+        </div>
+      </div>
+      <div class="ttWrap" style="margin-top:10px"><table class="pfT" id="pfT"></table></div>
+      <p class="hint" id="pfHint">Expected numbers come from each teacher's timetable for the week, with absences, substitutions,
+        extra classes and factory days. A day counts from 5 pm; until then its items are pending (grey). Tap a teacher to open their portfolio.</p>
+    </div>
+    <div class="card" id="pfCard" hidden></div>
   </div>
 
   <!-- ===================== TEAM HUB ===================== -->
@@ -998,7 +1060,7 @@ const PDFJS_BASES = [`https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/b
 // ---------- page tabs: lists | timetable ----------
 const PANES = { lists: ['paneLists', 'tabLists'], tt: ['paneTT', 'tabTT'], grades: ['paneGrades', 'tabGrades'],
   evals: ['paneEvals', 'tabEvals'], assess: ['paneAssess', 'tabAssess'], team: ['paneTeam', 'tabTeam'],
-  students: ['paneStudents', 'tabStudents'] };
+  students: ['paneStudents', 'tabStudents'], teachers: ['paneTeachers', 'tabTeachers'] };
 function showPane(p) {
   if (!PANES[p]) p = 'lists';
   Object.keys(PANES).forEach(k => {
@@ -1016,6 +1078,7 @@ function showPane(p) {
   if (p === 'tt' && !W.loaded) loadWeek();
   if (p === 'grades') grInit();
   if (p === 'students') stInit();
+  if (p === 'teachers') pfInit();
   if (p === 'evals') evInit();
 }
 Object.keys(PANES).forEach(k => { $(PANES[k][1]).onclick = () => showPane(k); });
@@ -1200,11 +1263,12 @@ function dayAbsent(t, date) {
   markAllAbsent(t, date);
   return true;
 }
-function dayFactory(t, date) {
+// cls = the class the teacher evaluates at the factory that day (their factory evaluation counts against it)
+function dayFactory(t, date, cls) {
   if (atFactory(t, date)) return true;
   if (!freeUp(t, date, 'A factory day')) return false;
   markAllAbsent(t, date);
-  W.cover.push({ type: 'Factory', teacher: t, date, session: 0, cls: '', subject: 'تدريب ميداني', substitute: '' });
+  W.cover.push({ type: 'Factory', teacher: t, date, session: 0, cls: cls || '', subject: 'تدريب ميداني', substitute: '' });
   shiftLimit(t, -1);
   return true;
 }
@@ -1219,10 +1283,18 @@ function dayRestorePdf(t, date) {
   shiftLimit(t, -1);
   return true;
 }
-// Someone else goes to the factory instead of t
+// The class of t's factory day: the timetable's field-training class, or the class picked when it was given
+function factoryClass(t, date) {
+  const g = W.cover.find(c => c.type === 'Factory' && c.teacher === t && c.date === date);
+  if (g) return g.cls || '';
+  const p = W.plannedAll.find(x => x.teacher === t && x.date === date && x.factory);
+  return p ? String(p.cls || '').toUpperCase() : '';
+}
+// Someone else goes to the factory instead of t, for the same class
 function dayMove(t, date, to) {
+  const cls = factoryClass(t, date);
   const ok = pdfFactory(t, date) && !cancelledFactory(t, date) ? dayCancelPdf(t, date) : dayNormal(t, date);
-  return ok && dayFactory(to, date);
+  return ok && dayFactory(to, date, cls);
 }
 function changeDay(fn) {
   const before = { cover: W.cover.map(c => ({ ...c })), limits: JSON.parse(JSON.stringify(W.limits)) };
@@ -1262,7 +1334,8 @@ function renderFactoryList() {
     names.forEach(n => {
       if (off.includes(n)) return;
       const why = givenFactory(n, date) ? (off.length ? 'instead of ' + off.join(', ') : 'added by you') : 'from the timetable';
-      going.push(`<b>${esc(n)}</b> <small>${why}</small>`);
+      const fc = factoryClass(n, date);
+      going.push(`<b>${esc(n)}</b>${fc ? ' · ' + esc(fc) : ''} <small>${why}</small>`);
     });
     off.filter(n => !W.cover.some(c => c.type === 'Factory' && c.date === date)).forEach(n => going.push(`<s>${esc(n)}</s> <small>not going, nobody instead</small>`));
     if (going.length) lines.push(`<div class="facRow"><span>${dn.slice(0, 3)} ${shortDate(date)}</span><div>${going.join(' · ')}</div></div>`);
@@ -1378,7 +1451,19 @@ function renderWeek() {
     if (t && menu) {
       const sel = document.createElement('select');
       sel.onclick = e => e.stopPropagation();
-      if (menu.move) {
+      if (menu.pickClass) {
+        // a factory day: which class does the teacher evaluate there?
+        sel.setAttribute('aria-label', `Which class does ${t} evaluate at the factory on ${dn}`);
+        sel.add(new Option('Which class?', ''));
+        W.extraClasses.forEach(k => sel.add(new Option(k, k)));
+        sel.add(new Option('Cancel', '-'));
+        sel.onchange = () => {
+          const k = sel.value;
+          W.dayMenu = null;
+          if (!k || k === '-') { renderWeek(); return; }
+          changeDay(() => dayFactory(t, date, k));
+        };
+      } else if (menu.move) {
         // move the factory day: who goes instead
         sel.setAttribute('aria-label', `Who goes to the factory on ${dn} instead of ${t}`);
         sel.add(new Option('Instead of ' + t.split(' ')[0] + '…', ''));
@@ -1403,13 +1488,14 @@ function renderWeek() {
           W.dayMenu = null;
           if (!v || v === '-') { renderWeek(); return; }
           if (v === 'move') { W.dayMenu = { date, move: true }; renderWeek(); return; }
+          if (v === 'factory') { W.dayMenu = { date, pickClass: true }; renderWeek(); return; }
           changeDay(() => ({ absent: dayAbsent, factory: dayFactory, normal: dayNormal, cancel: dayCancelPdf, restore: dayRestorePdf }[v])(t, date));
         };
       }
       th.appendChild(sel);
       setTimeout(() => sel.focus(), 0);
     } else {
-      th.innerHTML = `${dn}<small>${shortDate(date)}${given ? ' · factory day' : moved ? ' · no factory' : offAll ? ' · absent' : factoryDay ? ' · factory' : n ? ' · ' + n + ' classes' : ''}</small>`;
+      th.innerHTML = `${dn}<small>${shortDate(date)}${given ? ' · factory day' + (factoryClass(t, date) ? ' (' + esc(factoryClass(t, date)) + ')' : '') : moved ? ' · no factory' : offAll ? ' · absent' : factoryDay ? ' · factory' : n ? ' · ' + n + ' classes' : ''}</small>`;
       if (t) {
         th.title = factoryDay || given ? 'Move or cancel this factory day' : 'Absent all day, factory day, or normal day';
         th.onclick = () => { W.adding = null; W.dayMenu = { date }; renderWeek(); };
@@ -2613,6 +2699,184 @@ $('stExList').onclick = async ev => {
     }
   }
 };
+
+
+// ===================== TEACHERS: weekly dashboard, portfolio and conduct log =====================
+const PF = { week: '', rows: [], sel: '', detail: null, kind: 'Concern', cat: '', editCats: false };
+const PF_KIND = { grading: 'grading', factory: 'factory evaluation', quiz: 'quiz', assignment: 'assignment' };
+const pfShort = ymd => { const [y, m, d] = ymd.split('-').map(Number); return `${d}/${m}`; };
+const pfDayName = ymd => { const [y, m, d] = ymd.split('-').map(Number); return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date(y, m - 1, d).getDay()]; };
+const pfColor = p => p === null ? 'var(--line)' : p >= 100 ? '#1D9E75' : p >= 70 ? '#EF9F27' : '#E24B4A';
+function pfCell(c) {
+  if (!c.expected && !c.pending) return '<span class="hint" style="margin:0">—</span>';
+  const p = c.expected ? Math.round(c.done / c.expected * 100) : null;
+  return `<span class="pfC"><span class="mBar"><i style="width:${p === null ? 0 : Math.min(100, p)}%;background:${pfColor(p)}"></i></span>` +
+    `${c.done}/${c.expected}${c.pending ? ` <small>+${c.pending} pending</small>` : ''}</span>`;
+}
+const pfPts = n => `<span class="pfPts ${n > 0 ? 'pos' : n < 0 ? 'neg' : ''}">${n > 0 ? '+' : ''}${n}</span>`;
+function pfRender() {
+  $('pfTitle').textContent = `Teachers · week of ${pfDayName(PF.week)} ${pfShort(PF.week)}`;
+  $('pfT').innerHTML = '<tr><th>Teacher</th><th>Class grading</th><th>Factory evaluations</th><th>Quizzes</th><th>Assignments</th><th>Score</th><th>Points</th></tr>' +
+    PF.rows.map(r => `<tr class="r${r.teacher === PF.sel ? ' sel' : ''}" data-t="${esc(r.teacher)}"><td><b>${esc(r.teacher)}</b></td>` +
+      `<td>${pfCell(r.counts.grading)}</td><td>${pfCell(r.counts.factory)}</td><td>${pfCell(r.counts.quiz)}</td><td>${pfCell(r.counts.assignment)}</td>` +
+      `<td><span class="pfScore" style="color:${pfColor(r.score)}">${r.score === null ? '—' : r.score + '%'}</span></td>` +
+      `<td>${r.credits || r.concerns ? pfPts(r.points) + ` <small class="hint" style="margin:0">${r.credits}↑ ${r.concerns}↓</small>` : '<span class="hint" style="margin:0">—</span>'}</td></tr>`).join('');
+}
+async function pfLoad(date) {
+  $('pfHint').dataset.keep = $('pfHint').dataset.keep || $('pfHint').textContent;
+  $('pfT').innerHTML = '<tr><td class="empty">Loading…</td></tr>';
+  try {
+    const out = await post('pfWeek', { date: date || '' });
+    PF.week = out.weekStart;
+    PF.rows = out.rows;
+    pfRender();
+    if (PF.sel) pfOpen(PF.sel);
+  } catch (e) {
+    $('pfT').innerHTML = `<tr><td><div class="msg err">Could not load the teachers: ${esc(e.message)}</div></td></tr>`;
+  }
+}
+function pfInit() { if (!PF.week) pfLoad(); }
+$('pfPrev').onclick = () => pfLoad(addDays(PF.week, -7));
+$('pfNext').onclick = () => pfLoad(addDays(PF.week, 7));
+$('pfNow').onclick = () => pfLoad();
+$('pfT').onclick = ev => { const r = ev.target.closest('tr.r'); if (!r) return; PF.sel = r.dataset.t; pfRender(); pfOpen(PF.sel); };
+
+async function pfOpen(t) {
+  const card = $('pfCard');
+  card.hidden = false;
+  card.innerHTML = `<h2>${esc(t)}</h2><div class="empty">Loading…</div>`;
+  try {
+    PF.detail = await post('pfTeacher', { teacher: t, date: PF.week });
+    if (!PF.cat) PF.cat = PF.detail.cats.neg[0];
+    pfDetail();
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch (e) {
+    card.innerHTML = `<h2>${esc(t)}</h2><div class="msg err">Could not load the portfolio: ${esc(e.message)}</div>`;
+  }
+}
+function pfItemHtml(x) {
+  const mark = { done: '✓', missing: '✕', pending: '·' }[x.state];
+  const label = x.kind === 'factory' ? `Factory day${x.code ? ' · ' + esc(x.code) + ' evaluation' : ' · evaluation'}` : `${esc(x.code)} · ${PF_KIND[x.kind]}`;
+  return `<div class="pfIt ${x.state}"><i>${mark}</i><span>${label}</span></div>`;
+}
+function pfDetail() {
+  const d = PF.detail, w = d.week, cats = d.cats;
+  const notes = d.notes;
+  const termStart = (() => { const [y, m] = w.weekStart.split('-').map(Number); const s = m >= 9 ? y : y - 1; return (m >= 9 || m === 1) ? `${s}-09-01` : `${s + 1}-02-01`; })();
+  const term = notes.filter(n => n.date >= termStart);
+  const sum = a => a.reduce((s, n) => s + n.points, 0);
+  const cr = term.filter(n => n.kind === 'Credit'), co = term.filter(n => n.kind === 'Concern');
+  const list = PF.kind === 'Credit' ? cats.pos : cats.neg;
+  if (!list.includes(PF.cat)) PF.cat = list[0];
+  let h = `<div class="pfTop"><h2>${esc(d.teacher)} · portfolio</h2>` +
+    `<span class="pfScore" style="color:${pfColor(w.score)}">${w.score === null ? '—' : w.score + '%'}</span>${w.points ? ' ' + pfPts(w.points) + ' pts' : ''}` +
+    `<button class="btn alt small" type="button" data-pf="print">Print / PDF</button></div>` +
+    `<p class="hint">Week of ${pfDayName(w.weekStart)} ${pfShort(w.weekStart)} · ${w.done} done of ${w.expected} expected</p>`;
+  h += '<div class="pfDays">' + w.days.filter(x => x.items.length || ['Sun', 'Mon', 'Tue', 'Wed', 'Thu'].includes(pfDayName(x.date))).map(x =>
+    `<div class="pfDay"><b>${pfDayName(x.date)} ${pfShort(x.date)}</b>${x.items.length ? x.items.map(pfItemHtml).join('') : '<div class="pfIt pending"><span>No classes</span></div>'}</div>`).join('') + '</div>';
+  if (w.extra.length) h += `<div style="display:flex;flex-wrap:wrap;gap:4px 16px">${w.extra.map(pfItemHtml).join('')}</div>`;
+  const mx = 100;
+  h += '<h3 style="margin:18px 0 0;font-size:15px">Last 8 weeks</h3><div class="pfWeeks">' + d.history.map((x, i) =>
+    `<div style="height:${x.score === null ? 3 : Math.max(3, x.score * 0.62)}px;background:${pfColor(x.score)}" title="${x.weekStart}: ${x.score === null ? 'nothing expected' : x.score + '%'}">` +
+    `<em>${x.score === null ? '' : x.score + '%'}</em><span>${i === d.history.length - 1 ? 'this' : pfShort(x.weekStart)}</span></div>`).join('') + '</div>';
+  h += `<div class="pfTot"><div><b>${d.totals.sessions}</b><span>Sessions graded (all time)</span></div><div><b>${d.totals.factory}</b><span>Factory evaluations</span></div>` +
+    `<div><b>${d.totals.quizzes}</b><span>Quizzes</span></div><div><b>${d.totals.assignments}</b><span>Assignments</span></div></div>`;
+  // conduct log
+  h += `<div class="pfTop" style="margin-top:22px"><h2 style="font-size:16px">Conduct log</h2><span class="hint" style="margin:0">Private · only the admin sees this</span>` +
+    `<button class="btn alt small" type="button" data-pf="cats">Edit categories</button></div>`;
+  if (PF.editCats) {
+    h += `<div class="nSet" style="padding:10px 12px"><p class="hint" style="margin:0 0 6px">One category per line. Notes keep their category even if you remove it here.</p>` +
+      `<div class="row"><div><label for="pfCatNeg">Concerns</label><textarea id="pfCatNeg" rows="8">${esc(cats.neg.join('\n'))}</textarea></div>` +
+      `<div><label for="pfCatPos">Credits</label><textarea id="pfCatPos" rows="8">${esc(cats.pos.join('\n'))}</textarea></div></div>` +
+      `<div style="display:flex;gap:8px;justify-content:flex-end"><button class="btn alt small" type="button" data-pf="catsCancel">Cancel</button>` +
+      `<button class="btn small" type="button" data-pf="catsSave">Save categories</button></div><div id="pfCatMsg"></div></div>`;
+  }
+  h += `<div class="pfSum"><div><b style="color:var(--ok-ink)">${cr.length}</b><span>Credits this term (${sum(cr) > 0 ? '+' : ''}${sum(cr)} pts)</span></div>` +
+    `<div><b style="color:var(--danger)">${co.length}</b><span>Concerns this term (${sum(co)} pts)</span></div>` +
+    `<div><b>${sum(term) > 0 ? '+' : ''}${sum(term)}</b><span>Balance this term</span></div></div>`;
+  h += `<div class="pfSeg"><button type="button" class="neg${PF.kind === 'Concern' ? ' on' : ''}" data-pf="kind" data-k="Concern">Concern</button>` +
+    `<button type="button" class="pos${PF.kind === 'Credit' ? ' on' : ''}" data-pf="kind" data-k="Credit">Credit</button></div>` +
+    `<div class="pfCats">${list.map(c => `<button type="button" class="stChip${c === PF.cat ? ' on' : ''}" data-pf="cat" data-c="${esc(c)}">${esc(c)}</button>`).join('')}</div>` +
+    `<div class="row"><div><label for="pfDate">Date</label><input type="date" id="pfDate" value="${isoDay(new Date())}"></div>` +
+    `<div><label for="pfPoints">Points</label><select id="pfPoints">${(PF.kind === 'Credit' ? [1, 2, 3, 0] : [-1, -2, -3, 0]).map(v => `<option value="${v}">${v > 0 ? '+' + v : v === 0 ? '0 (note only)' : '−' + -v}</option>`).join('')}</select></div></div>` +
+    `<label for="pfDetails">What happened</label><textarea id="pfDetails" rows="3" placeholder="${PF.kind === 'Credit' ? 'Organised a safety quiz competition for J1 and J2.' : 'Did not enter W2 in session 4; the students waited 20 minutes.'}"></textarea>` +
+    `<div id="pfNoteMsg"></div><div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn small" type="button" data-pf="save">Save note</button></div>`;
+  h += '<div style="margin-top:10px">' + (notes.length ? notes.map(n => `<div class="pfNote"><div class="ic ${n.kind}">${n.kind === 'Credit' ? '↑' : '!'}</div>` +
+    `<div><div><b>${esc(n.category)}</b></div><div class="hint" style="margin:0">${esc(n.date)} · ${esc(n.details)}</div></div>` +
+    `<div class="pt">${pfPts(n.points)}<button type="button" class="del" data-pf="del" data-id="${esc(n.id)}" aria-label="Delete this note">×</button></div></div>`).join('')
+    : '<div class="empty">No notes yet.</div>') + '</div>';
+  $('pfCard').innerHTML = h;
+}
+$('pfCard').addEventListener('click', async ev => {
+  const b = ev.target.closest('[data-pf]');
+  if (!b) return;
+  const a = b.dataset.pf, d = PF.detail;
+  if (a === 'kind') { PF.kind = b.dataset.k; PF.cat = (PF.kind === 'Credit' ? d.cats.pos : d.cats.neg)[0]; pfDetail(); }
+  else if (a === 'cat') { PF.cat = b.dataset.c; document.querySelectorAll('#pfCard [data-pf=cat]').forEach(x => x.classList.toggle('on', x === b)); }
+  else if (a === 'cats') { PF.editCats = !PF.editCats; pfDetail(); }
+  else if (a === 'catsCancel') { PF.editCats = false; pfDetail(); }
+  else if (a === 'catsSave') {
+    const split = v => v.split('\n').map(x => x.trim()).filter(Boolean);
+    try {
+      const out = await post('pfCats', { cats: { neg: split($('pfCatNeg').value), pos: split($('pfCatPos').value) } });
+      d.cats = out.cats; PF.editCats = false; pfDetail();
+    } catch (e) { $('pfCatMsg').innerHTML = `<div class="msg err">${esc(e.message)}</div>`; }
+  } else if (a === 'save') {
+    const details = $('pfDetails').value.trim();
+    if (!details) { $('pfNoteMsg').innerHTML = '<div class="msg err">Write what happened first.</div>'; return; }
+    b.disabled = true;
+    try {
+      await post('pfNoteSave', { note: { teacher: d.teacher, kind: PF.kind, category: PF.cat, date: $('pfDate').value, points: Number($('pfPoints').value), details } });
+      await pfLoad(PF.week);
+    } catch (e) { $('pfNoteMsg').innerHTML = `<div class="msg err">${esc(e.message)}</div>`; b.disabled = false; }
+  } else if (a === 'del') {
+    if (!window.confirm('Delete this note?')) return;
+    try { await post('pfNoteDelete', { id: b.dataset.id }); await pfLoad(PF.week); }
+    catch (e) { $('pfNoteMsg').innerHTML = `<div class="msg err">${esc(e.message)}</div>`; }
+  } else if (a === 'print') pfPrintTeacher();
+});
+$('pfCard').addEventListener('input', ev => { if (ev.target.id === 'pfDetails') $('pfNoteMsg').innerHTML = ''; });
+
+// ----- export -----
+function pfCellText(c) { return c.expected || c.pending ? `${c.done}/${c.expected}${c.pending ? ` (+${c.pending} pending)` : ''}` : '—'; }
+$('pfExBtn').onclick = ev => { ev.stopPropagation(); const l = $('pfExList'); l.hidden = !l.hidden; $('pfExBtn').setAttribute('aria-expanded', !l.hidden); };
+document.addEventListener('click', ev => { if (!ev.target.closest('.exMenu')) { $('pfExList').hidden = true; $('pfExBtn').setAttribute('aria-expanded', 'false'); } });
+$('pfExList').onclick = ev => {
+  const b = ev.target.closest('[data-ex]');
+  if (!b || !PF.rows.length) return;
+  $('pfExList').hidden = true;
+  const name = `Teachers - week of ${PF.week}`;
+  if (b.dataset.ex === 'xlsx') {
+    const n = c => [c.done, c.expected, c.pending];
+    prDownload(xlsxBlob([{ name: 'Teachers', bold: [0, 2], rows: [[`Teachers · week of ${PF.week}`], [],
+      ['Teacher', 'Grading done', 'Grading expected', 'Grading pending', 'Factory done', 'Factory expected', 'Factory pending',
+        'Quizzes done', 'Quizzes expected', 'Quizzes pending', 'Assignments done', 'Assignments expected', 'Assignments pending', 'Score %', 'Points', 'Credits', 'Concerns'],
+      ...PF.rows.map(r => [r.teacher, ...n(r.counts.grading), ...n(r.counts.factory), ...n(r.counts.quiz), ...n(r.counts.assignment),
+        r.score === null ? '' : r.score, r.points, r.credits, r.concerns])] }]), name + '.xlsx');
+  } else {
+    const html = '<table><thead><tr><th>Teacher</th><th>Class grading</th><th>Factory evaluations</th><th>Quizzes</th><th>Assignments</th><th>Score</th><th>Points</th></tr></thead><tbody>' +
+      PF.rows.map(r => `<tr><td><b>${esc(r.teacher)}</b></td><td>${pfCellText(r.counts.grading)}</td><td>${pfCellText(r.counts.factory)}</td>` +
+        `<td>${pfCellText(r.counts.quiz)}</td><td>${pfCellText(r.counts.assignment)}</td><td><b>${r.score === null ? '—' : r.score + '%'}</b></td>` +
+        `<td>${r.points > 0 ? '+' : ''}${r.points}</td></tr>`).join('') + '</tbody></table>' +
+      '<p style="font-size:9.5px;color:#444;margin-top:3mm">Expected numbers come from each teacher\'s timetable: 1 grading per class per day taught, 1 factory evaluation per factory day, and 1 quiz and 1 assignment per class per week. A day counts from 5 pm.</p>';
+    prPrint({ file: name, landscape: true, pages: [{ title: 'Teachers · weekly report', sub: `Week of ${pfDayName(PF.week)} ${PF.week}`, html }] });
+  }
+};
+function pfPrintTeacher() {
+  const d = PF.detail, w = d.week;
+  const it = x => `<div style="font-size:10px">${{ done: '✓', missing: '✕', pending: '·' }[x.state]} ${x.kind === 'factory' ? 'Factory day' + (x.code ? ' · ' + esc(x.code) : '') : esc(x.code) + ' · ' + PF_KIND[x.kind]}</div>`;
+  let html = `<div class="prKpis"><div><b>${w.score === null ? '—' : w.score + '%'}</b><span>Score this week</span></div><div><b>${w.done}/${w.expected}</b><span>Done / expected</span></div>` +
+    `<div><b>${w.points > 0 ? '+' : ''}${w.points}</b><span>Points this week</span></div><div><b>${d.totals.sessions}</b><span>Sessions graded (all time)</span></div></div>` +
+    '<table><thead><tr>' + w.days.map(x => `<th>${pfDayName(x.date)} ${pfShort(x.date)}</th>`).join('') + '</tr></thead><tbody><tr>' +
+    w.days.map(x => `<td style="vertical-align:top">${x.items.map(it).join('') || '—'}</td>`).join('') + '</tr></tbody></table>' +
+    (w.extra.length ? `<div style="margin-top:2mm">${w.extra.map(it).join('')}</div>` : '') +
+    '<h3>Last 8 weeks</h3><table><thead><tr>' + d.history.map(x => `<th>${pfShort(x.weekStart)}</th>`).join('') + '</tr></thead><tbody><tr>' +
+    d.history.map(x => `<td>${x.score === null ? '—' : x.score + '%'}</td>`).join('') + '</tr></tbody></table>' +
+    '<h3>Conduct log</h3>' + (d.notes.length ? '<table><thead><tr><th>Date</th><th>Kind</th><th>Category</th><th>Points</th><th>What happened</th></tr></thead><tbody>' +
+      d.notes.map(n => `<tr><td>${esc(n.date)}</td><td>${n.kind}</td><td>${esc(n.category)}</td><td>${n.points > 0 ? '+' : ''}${n.points}</td><td style="white-space:normal">${esc(n.details)}</td></tr>`).join('') +
+      '</tbody></table>' : '<p style="font-size:10px">No notes.</p>');
+  prPrint({ file: `Portfolio - ${d.teacher} - week of ${w.weekStart}`, pages: [{ title: `${d.teacher} · portfolio`, sub: `Week of ${pfDayName(w.weekStart)} ${w.weekStart} · private`, html }] });
+}
 
 // ===================== EVALUATIONS: the board inside the admin page =====================
 // A copy of the board page (board/index.html) is kept inside this file, so it always opens, wherever this
