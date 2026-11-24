@@ -111,6 +111,34 @@ main.wide{max-width:1200px}
 .upHead{display:grid;grid-template-columns:minmax(0,1fr) 220px auto;gap:10px;align-items:center}
 .upHead small{display:block;color:var(--muted);font-size:12px}
 @media (max-width:600px){.upHead{grid-template-columns:1fr}}
+/* team timetable */
+:root{--tm-c:#FDF1C8;--tm-c-ink:#5c4500;--tm-f:#E7E4DA;--tm-f-ink:#55524a;--tm-s:#DDEBF8;--tm-s-ink:#0C447C;--tm-e:#F6F3EA}
+[data-theme="dark"]{--tm-c:#4a3d12;--tm-c-ink:#FAD98A;--tm-f:#34343c;--tm-f-ink:#b8b8c0;--tm-s:#163352;--tm-s-ink:#B5D4F4;--tm-e:#1e1e24}
+.tmDays{display:flex;gap:4px;margin-bottom:10px}
+.tmDay{background:var(--card);color:var(--ink);border:1px solid var(--brand-dark);border-radius:8px;padding:5px 2px;font-size:13px;cursor:pointer;line-height:1.2;flex:1;min-width:0;max-width:120px}
+.tmDay small{display:block;font-size:11px;color:var(--muted)}
+.tmDay.on{background:var(--brand);color:#1d1d1d;font-weight:600}.tmDay.on small{color:#4a3d12}
+.tmWrap{overflow-x:auto}
+.tmGrid{width:100%;min-width:330px;border-collapse:separate;border-spacing:2px;table-layout:fixed;font-size:12px}
+.tmGrid th{border:0;font-weight:600;font-size:11px;color:var(--muted);text-align:center;padding:2px 0;white-space:nowrap}
+.tmGrid th small{display:block;font-weight:400}
+.tmGrid td{border:0;text-align:center;height:32px;border-radius:6px;padding:0 1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tmGrid .tmN{width:58px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;font-weight:600;color:var(--ink);padding-left:4px}
+.tmGrid .tmN small{font-weight:400;color:var(--muted)}
+.tmC{background:var(--tm-c);color:var(--tm-c-ink);font-weight:600}
+.tmS{background:var(--tm-s);color:var(--tm-s-ink);font-weight:600}
+.tmF{background:var(--tm-f);color:var(--tm-f-ink)}
+.tmX{background:var(--err-bg);color:var(--err-ink)}
+.tmA{background:var(--err-bg);color:var(--err-ink);text-decoration:line-through}
+.tmE{background:var(--tm-e)}
+.tmGrid tr.me td:not(.tmN){box-shadow:inset 0 0 0 1.5px var(--brand-dark)}
+.tmGrid tr.me .tmN{color:var(--brand-dark)}
+.tmGrid .tmFree td{background:transparent;height:20px;font-size:11px;color:var(--ok-ink);font-weight:600}
+.tmGrid .tmFree .tmN{color:var(--muted);font-weight:400}
+.tmLegend{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;font-size:11px;color:var(--muted)}
+.tmLegend span{display:inline-flex;align-items:center;gap:5px}
+.tmLegend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+.tmNone{font-size:13px;color:var(--muted);margin:8px 0 0}
 </style>
 </head>
 <body>
@@ -330,6 +358,14 @@ main.wide{max-width:1200px}
         4 = 20, 3 = 15); you can change the days or type any max for this week. Total = classes − absent + substitutions
         + extra classes; Left = max − total. ⚠ marks a teacher with 6 or more classes on a day.
         Press Save week to keep changes.</p>
+    </div>
+
+    <!-- TEAM: everyone's day, the same view the teachers see -->
+    <div class="card">
+      <h2>Team timetable</h2>
+      <p class="hint" style="margin-top:-6px">The same view teachers see under their timetable. It follows the week above,
+        including changes you have not saved yet.</p>
+      <div id="tmBox"></div>
     </div>
 
     <!-- UPLOAD a timetable PDF -->
@@ -937,7 +973,83 @@ function toggleDay(t, day) {
   markWeekDirty();
 }
 
+// ---------- team timetable: everyone's day, view only ----------
+// o = { weekStart, teachers, planned, cover, me, day } → HTML (day buttons + grid). The buttons carry data-tm-day.
+const TM_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu'];
+const tmFirst = n => String(n).trim().split(/\s+/)[0];
+function tmAdd(ymd, n) { const [y, m, d] = ymd.split('-').map(Number); const x = new Date(y, m - 1, d + n);
+  return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`; }
+function tmToday() { const x = new Date();
+  return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`; }
+// The day to open on: today if it is in this week (Sun–Thu), otherwise Sunday
+function tmDefaultDay(weekStart) {
+  const today = tmToday();
+  for (let d = 0; d < 5; d++) if (tmAdd(weekStart, d) === today) return d;
+  return 0;
+}
+function teamHTML(o) {
+  const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+  const today = tmToday();
+  const date = tmAdd(o.weekStart, o.day);
+  let html = '<div class="tmDays">' + TM_DAYS.map((dn, d) => {
+    const dt = tmAdd(o.weekStart, d);
+    const lbl = new Date(dt + 'T12:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    return `<button type="button" class="tmDay${d === o.day ? ' on' : ''}" data-tm-day="${d}">${dn}<small>${dt === today ? 'today' : lbl}</small></button>`;
+  }).join('') + '</div>';
+  const times = ['7:30', '8:25', '9:20', '10:45', '11:40', '12:35', '2:00', '2:55'];
+  html += '<div class="tmWrap"><table class="tmGrid"><tr><th class="tmN"></th>' +
+    times.map((t, i) => `<th title="${t}">${i + 1}<small>${t}</small></th>`).join('') + '</tr>';
+  const free = [0, 0, 0, 0, 0, 0, 0, 0];
+  const dayPlanned = o.planned.filter(p => p.date === date);
+  const dayCover = o.cover.filter(c => c.date === date);
+  let anything = false;
+  o.teachers.forEach(t => {
+    const mine = dayPlanned.filter(p => p.teacher === t);
+    const absent = dayCover.filter(c => c.type !== 'Extra' && c.teacher === t);
+    const covering = dayCover.filter(c => c.substitute === t);
+    const name = `<td class="tmN" title="${esc(t)}">${esc(tmFirst(t))}</td>`;
+    const rowCls = t === o.me ? ' class="me"' : '';
+    if (mine.length || covering.length) anything = true;
+    if (mine.some(p => p.factory)) { html += `<tr${rowCls}>${name}<td class="tmF" colspan="8">Factory day</td></tr>`; return; }
+    if (mine.length && mine.every(p => absent.some(a => a.session === p.session)) && !covering.length) {
+      html += `<tr${rowCls}>${name}<td class="tmX" colspan="8">Absent</td></tr>`; return;
+    }
+    html += `<tr${rowCls}>${name}`;
+    for (let s = 1; s <= 8; s++) {
+      const p = mine.find(x => x.session === s);
+      const c = covering.find(x => x.session === s);
+      if (c) html += `<td class="tmS" title="${c.type === 'Extra' ? 'Extra class' : 'Substitution for ' + esc(c.teacher)}">${esc(c.cls)}</td>`;
+      else if (p && absent.some(a => a.session === s)) html += `<td class="tmA" title="Absent">${esc(p.cls)}</td>`;
+      else if (p) html += `<td class="tmC">${esc(p.cls)}</td>`;
+      else { html += '<td class="tmE"></td>'; free[s - 1]++; }
+    }
+    html += '</tr>';
+  });
+  html += '<tr class="tmFree"><td class="tmN">Free</td>' + free.map(n => `<td>${n}</td>`).join('') + '</tr></table></div>';
+  html += '<div class="tmLegend"><span><i class="tmC"></i>Class</span><span><i class="tmF"></i>Factory</span>' +
+    '<span><i class="tmS"></i>Substitution / extra</span><span><i class="tmA"></i>Absent</span><span><i class="tmE"></i>Free</span></div>';
+  if (!anything) html += '<p class="tmNone">No classes on this day.</p>';
+  return html;
+}
+
+let TM_DAY = null, TM_WEEK = '';
+function tmDraw() {
+  if (!W.loaded) { $('tmBox').innerHTML = ''; return; }
+  if (TM_WEEK !== W.weekStart) { TM_WEEK = W.weekStart; TM_DAY = tmDefaultDay(W.weekStart); }
+  const names = W.teachers.slice();
+  W.planned.forEach(p => { if (!names.includes(p.teacher)) names.push(p.teacher); });
+  $('tmBox').innerHTML = teamHTML({ weekStart: W.weekStart, teachers: names, planned: W.planned, cover: W.cover,
+    me: $('wkTeacher').value, day: TM_DAY });
+}
+$('tmBox').addEventListener('click', e => {
+  const b = e.target.closest('[data-tm-day]');
+  if (!b) return;
+  TM_DAY = Number(b.dataset.tmDay);
+  tmDraw();
+});
+
 function renderWeek() {
+  tmDraw();
   const t = $('wkTeacher').value;
   const counts = weekCounts();
   const me = counts[t] || { planned: 0, absent: 0, subs: 0, extra: 0, total: 0, max: 0, room: 0, busyDays: [] };
