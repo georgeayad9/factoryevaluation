@@ -53,10 +53,13 @@
 
   /* main sections and their sub-tabs */
   .nav{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+  .tabs.kind{margin-bottom:10px;padding:6px;border-radius:12px;background:var(--brand-tint)}
+  .tabs.kind .tab{height:46px;font-size:15px;font-weight:600}
+  .tabs.kind .tab small{display:block;font-size:11px;font-weight:400;color:var(--muted)}
   .nav .tab{height:48px;font-size:15px;font-weight:600}
   .nav .tab small{display:block;font-size:11px;font-weight:400;color:var(--muted)}
   .tabs.sub .tab{height:38px;font-size:14px}
-  @media (max-width:560px){ .nav{grid-template-columns:1fr 1fr} }
+  @media (max-width:560px){ .nav{grid-template-columns:1fr 1fr} .nav .tab{font-size:14px} .nav .tab small{font-size:10px} }
   .soon{text-align:center;padding:40px 14px;color:var(--muted);font-size:15px}
   .grow{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
   .grow .gname{flex:1;font-size:15px;font-weight:600;min-width:0;overflow-wrap:anywhere}
@@ -245,10 +248,16 @@
 
     <!-- Main sections -->
     <div class="nav" id="nav">
-      <button class="tab on" data-sec="eval" type="button">Evaluations</button>
-      <button class="tab" data-sec="grade" type="button">Grading</button>
+      <button class="tab on" data-sec="evals" type="button">Evaluations<small>class or factory</small></button>
       <button class="tab" data-sec="time" type="button">Timetable</button>
       <button class="tab" data-sec="assess" type="button">Assessments<small>coming soon</small></button>
+      <button class="tab" data-sec="team" type="button">Team hub<small>coming soon</small></button>
+    </div>
+
+    <!-- Evaluations: class (daily grading) or factory -->
+    <div class="tabs kind" id="kindTabs">
+      <button class="tab" data-kind="grade" type="button">Class<small>daily grading</small></button>
+      <button class="tab" data-kind="eval" type="button">Factory<small>factory evaluations</small></button>
     </div>
 
     <!-- Evaluations sub-tabs -->
@@ -609,7 +618,7 @@ function showApp() {
   fillClassSelect();
   fillMineClasses();
   fillGradeClasses();
-  section = 'eval';
+  section = localStorage.getItem('evalKind') === 'eval' ? 'eval' : 'grade';   // the last one used; Class first time
   mode = 'new';
   showSection();
 }
@@ -760,7 +769,8 @@ let gForm = null;              // { id, rows: [{ name, score, absent }] } while 
 let gDirty = false;
 
 const SOON_TEXT = {
-  assess: 'Assessments will be added soon.'
+  assess: 'Assessments will be added soon.',
+  team: 'Team hub is coming soon: new rules for the team, class visits and tasks.'
 };
 
 function setSection(sec) {
@@ -768,12 +778,15 @@ function setSection(sec) {
   if (section === 'eval' && mode === 'new' && !confirmDiscard()) return;
   if (section === 'grade' && !confirmGradeDiscard()) return;
   section = sec;
+  if (sec === 'eval' || sec === 'grade') localStorage.setItem('evalKind', sec);
   showSection();
 }
 
 function showSection() {
-  document.querySelectorAll('#nav .tab').forEach(b => b.classList.toggle('on', b.dataset.sec === section));
   const isEval = section === 'eval', isGrade = section === 'grade';
+  document.querySelectorAll('#nav .tab').forEach(b => b.classList.toggle('on', b.dataset.sec === (isEval || isGrade ? 'evals' : section)));
+  $('kindTabs').hidden = !(isEval || isGrade);
+  document.querySelectorAll('#kindTabs .tab').forEach(b => b.classList.toggle('on', b.dataset.kind === section));
   $('evalTabs').hidden = !isEval;
   $('gradeTabs').hidden = !isGrade;
   const isTime = section === 'time';
@@ -792,7 +805,14 @@ function showSection() {
   else { ['gDaily', 'gSum', 'gUp'].forEach(id => { $(id).hidden = true; }); }
 }
 
-document.querySelectorAll('#nav .tab').forEach(b => { b.onclick = () => setSection(b.dataset.sec); });
+document.querySelectorAll('#nav .tab').forEach(b => {
+  b.onclick = () => {
+    if (b.dataset.sec !== 'evals') return setSection(b.dataset.sec);
+    if (section === 'eval' || section === 'grade') return;
+    setSection(localStorage.getItem('evalKind') === 'eval' ? 'eval' : 'grade');
+  };
+});
+document.querySelectorAll('#kindTabs .tab').forEach(b => { b.onclick = () => setSection(b.dataset.kind); });
 
 // ---------- grading ----------
 const num = v => (v === '' || v === null || v === undefined) ? null : Number(v);
