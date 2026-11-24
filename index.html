@@ -1858,6 +1858,7 @@ function tRender(w) {
   const notes = [];
   if (w.subs.length) notes.push(`<b>Added this week:</b> ` + w.subs.map(x =>
     `${T_DAYS[x.day]} session ${x.session}, ${esc(x.cls)} ${x.type === 'Extra' ? '(extra class)' : 'for ' + esc(x.forTeacher)}`).join(' · '));
+  if ((w.factoryCancelled || []).length) notes.push(`<b>No factory this week on:</b> ${w.factoryCancelled.map(d => T_DAYS[d]).join(', ')}. You are free those days.`);
   if (c.factoryDays) notes.push(`<b>Factory supervision:</b> ${c.factoryDays} day${c.factoryDays > 1 ? 's' : ''} this week (a full day of field training is not counted as classes).`);
   if (c.busyDays && c.busyDays.length) notes.push(`<span class="low">⚠ ${c.busyDays.map(d => c.perDay[d] + ' classes on ' + T_DAYS[Math.round((new Date(d) - new Date(w.weekStart)) / 86400000)]).join(', ')}</span>`);
   $('tSubs').innerHTML = notes.map(n => `<p class="hint">${n}</p>`).join('');
