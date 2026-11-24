@@ -167,6 +167,9 @@ main.wide{max-width:1200px}
 .pill.P,.pill.ok{background:var(--ok-bg);color:var(--ok-ink)}.pill.L{background:#FDF1C8;color:#5c4500}.pill.A,.pill.bad{background:var(--err-bg);color:var(--err-ink)}
 .pill.q{background:#FDF1C8;color:#5c4500}
 .profNote{font-size:12px;color:var(--muted);margin:10px 0 0}
+.profTools{display:flex;gap:6px;justify-content:flex-end;margin-top:10px}
+.profBtn{background:transparent;border:1px solid var(--brand-dark);color:var(--ink);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer}
+
 /* notification bell */
 .bellBtn{position:relative}
 .bellBadge{position:absolute;top:-7px;right:-7px;background:#C62828;color:#fff;border-radius:10px;font-size:11px;font-weight:700;padding:1px 6px;line-height:16px}
@@ -197,6 +200,32 @@ main.wide{max-width:1200px}
 .dots{display:flex;gap:3px;flex-wrap:wrap;max-width:420px}
 .dots i{width:15px;height:15px;border-radius:3px;font-style:normal;font-size:9px;font-weight:700;text-align:center;line-height:15px}
 .dots i.P{background:var(--ok-bg);color:var(--ok-ink)}.dots i.L{background:#FDF1C8;color:#5c4500}.dots i.A{background:var(--err-bg);color:var(--err-ink)}
+/* students screen */
+.stTop{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.stTop > div{flex:1;min-width:140px}
+.stTop .grow{flex:2;min-width:200px}
+.stChips{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0}
+.stChip{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 13px;font-size:13px;cursor:pointer;font-weight:500}
+.stChip.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.stChip .n{opacity:.7;margin-left:4px}
+.stSum{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.stSum div{background:var(--bg);border-radius:10px;padding:10px 12px}.stSum b{display:block;font-size:21px}.stSum span{font-size:12px;color:var(--muted)}
+@media (max-width:560px){.stSum{grid-template-columns:1fr 1fr}}
+.stT{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
+.stT th{font-size:11px;color:var(--muted);text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);font-weight:600;cursor:pointer;white-space:nowrap;user-select:none}
+.stT th.noSort{cursor:default}
+.stT td{padding:8px 6px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:middle}
+.stT tr:hover td{background:var(--bg)}
+.stT .sub{display:block;font-size:11px;color:var(--muted)}
+.mBar{display:inline-block;width:56px;height:6px;border-radius:3px;background:var(--line);overflow:hidden;vertical-align:middle;margin-right:6px}
+.mBar i{display:block;height:100%}
+.flag{display:inline-block;font-size:11px;font-weight:600;padding:2px 7px;border-radius:6px;margin-right:3px}
+.flag.r{background:var(--err-bg);color:var(--err-ink)}.flag.a{background:#FDF1C8;color:#5c4500}
+.exMenu{position:relative;display:inline-block}
+.exList{position:absolute;right:0;top:calc(100% + 6px);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px;z-index:30;min-width:290px;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.exList button{display:block;width:100%;text-align:left;background:transparent;border:0;color:var(--ink);padding:9px 10px;border-radius:8px;font-size:14px;cursor:pointer}
+.exList button:hover{background:var(--bg)}
+.exList small{display:block;color:var(--muted);font-size:12px}
 </style>
 </head>
 <body>
@@ -238,6 +267,7 @@ main.wide{max-width:1200px}
     <div class="nList" id="nList"></div>
   </div>
   <nav class="ptabs">
+    <button type="button" id="tabStudents">Students</button>
     <button type="button" id="tabLists" class="on">Teachers, classes and students</button>
     <button type="button" id="tabTT">Timetable</button>
     <button type="button" id="tabEvalAll">Evaluations<small>class or factory</small></button>
@@ -409,6 +439,57 @@ main.wide{max-width:1200px}
       <button class="btn save" id="evSave" type="button" hidden>Save evaluations</button>
     </details>
     <iframe id="boardFrame" title="Evaluations board" class="boardFrame"></iframe>
+  </div>
+
+  <!-- ===================== STUDENTS: everyone, filtered your way ===================== -->
+  <div id="paneStudents" hidden>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <h2 style="margin:0">Students</h2>
+        <div class="exMenu">
+          <button class="btn alt small" id="stExBtn" type="button" aria-expanded="false">⤓ Export</button>
+          <div class="exList" id="stExList" hidden>
+            <button type="button" data-ex="xlsx">Excel<small>Exactly what's on screen: filters, sorting and columns</small></button>
+            <button type="button" data-ex="print">Print / PDF<small>This list as a report with the school header</small></button>
+            <button type="button" data-ex="profiles">Student profiles (PDF)<small>One page per student in this list</small></button>
+          </div>
+        </div>
+      </div>
+      <div class="stTop" style="margin-top:12px">
+        <div class="grow">
+          <label for="stQ">Search</label>
+          <input type="search" id="stQ" placeholder="A student's name">
+        </div>
+        <div>
+          <label for="stCls">Class</label>
+          <select id="stCls"></select>
+        </div>
+        <div>
+          <label for="stPeriod">Dates</label>
+          <select id="stPeriod">
+            <option value="week">This week</option>
+            <option value="month" selected>This month</option>
+            <option value="term">This term</option>
+            <option value="year">This school year</option>
+            <option value="custom">Choose dates…</option>
+          </select>
+        </div>
+      </div>
+      <div class="row" id="stCustom" hidden style="margin-top:8px">
+        <div><label for="stFrom">From</label><input type="date" id="stFrom"></div>
+        <div><label for="stTo">To</label><input type="date" id="stTo"></div>
+      </div>
+      <div class="stChips" id="stChips">
+        <button type="button" class="stChip on" data-f="all">All</button>
+        <button type="button" class="stChip" data-f="abs">Absence alert</button>
+        <button type="button" class="stChip" data-f="low">Below 60%</button>
+        <button type="button" class="stChip" data-f="inc">Factory incident</button>
+        <button type="button" class="stChip" data-f="fab">Factory absent</button>
+      </div>
+      <div class="stSum" id="stSum"></div>
+      <div class="ttWrap"><table class="stT" id="stT"></table></div>
+      <p class="hint" id="stHint">Tap a column to sort. Tap a student to open the profile.</p>
+    </div>
   </div>
 
   <!-- ===================== TEAM HUB ===================== -->
@@ -916,7 +997,8 @@ const PDFJS_BASES = [`https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/b
 
 // ---------- page tabs: lists | timetable ----------
 const PANES = { lists: ['paneLists', 'tabLists'], tt: ['paneTT', 'tabTT'], grades: ['paneGrades', 'tabGrades'],
-  evals: ['paneEvals', 'tabEvals'], assess: ['paneAssess', 'tabAssess'], team: ['paneTeam', 'tabTeam'] };
+  evals: ['paneEvals', 'tabEvals'], assess: ['paneAssess', 'tabAssess'], team: ['paneTeam', 'tabTeam'],
+  students: ['paneStudents', 'tabStudents'] };
 function showPane(p) {
   if (!PANES[p]) p = 'lists';
   Object.keys(PANES).forEach(k => {
@@ -933,6 +1015,7 @@ function showPane(p) {
   localStorage.setItem('adminPane', p);
   if (p === 'tt' && !W.loaded) loadWeek();
   if (p === 'grades') grInit();
+  if (p === 'students') stInit();
   if (p === 'evals') evInit();
 }
 Object.keys(PANES).forEach(k => { $(PANES[k][1]).onclick = () => showPane(k); });
@@ -2082,7 +2165,8 @@ function profHTML(p) {
   const day = ymd => { const [y, m, dd] = String(ymd).split('-').map(Number); return isNaN(dd) ? ymd : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date(y, m - 1, dd).getDay()] + ' ' + dd + '/' + m + (y !== new Date().getFullYear() ? '/' + y : ''); };
   let h = `<div class="profHead"><div class="profAv">${e((p.student || '?').trim()[0])}</div><div><h2>${e(p.student)}</h2>` +
     `<small>${e(group || '')}${p.own ? ' · your grades and evaluations only' : ' · all teachers'}</small></div>` +
-    `<button class="profX" type="button" data-prof-close aria-label="Close">×</button></div>`;
+    `<button class="profX" type="button" data-prof-close aria-label="Close">×</button></div>` +
+    `<div class="profTools"><button type="button" class="profBtn" data-prof-print>Print / PDF</button><button type="button" class="profBtn" data-prof-xlsx>Excel</button></div>`;
   h += `<div class="profKpi"><div><b>${pct(got, outOf)}</b><span>Class average</span></div>` +
     `<div><b>${pct(att.P + att.L, d.length)}</b><span>Attendance (${att.P} present · ${att.L} late)</span></div>` +
     `<div><b>${att.A}</b><span>Absent sessions</span></div><div><b>${f.length}</b><span>Factory evaluations</span></div>` +
@@ -2122,11 +2206,109 @@ async function profShow(student) {
   card.innerHTML = `<div class="profHead"><h2>${String(student).replace(/</g, '&lt;')}</h2><button class="profX" type="button" data-prof-close aria-label="Close">×</button></div><p class="profNote">Loading…</p>`;
   try {
     const p = await post(PROF_ACTION, { student, ...PROF_EXTRA() });
+    PROF_LAST = p;
     card.innerHTML = profHTML(p);
   } catch (err) {
     card.innerHTML = `<div class="profHead"><h2>${String(student).replace(/</g, '&lt;')}</h2><button class="profX" type="button" data-prof-close aria-label="Close">×</button></div><p class="profNote">Could not load the profile: ${String(err.message).replace(/</g, '&lt;')}</p>`;
   }
 }
+
+// ---------- printing: the school header on every page, then the browser's Print → Save as PDF ----------
+// prPrint({ pages: [{ title, sub, html }], landscape }) — one A4 page (or more, if long) per entry.
+function prLogo() {
+  if (window.YW_TEMPLATE) return Promise.resolve(window.YW_TEMPLATE.logo);
+  return new Promise(ok => {
+    const s = document.createElement('script');
+    s.src = 'yearwork-template.js?v=2';
+    s.onload = () => ok(window.YW_TEMPLATE ? window.YW_TEMPLATE.logo : '');
+    s.onerror = () => ok('');            // still prints, without the logos
+    document.head.appendChild(s);
+  });
+}
+const prEsc = t => String(t === undefined || t === null ? '' : t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+function prToday() { const d = new Date(); return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`; }
+async function prPrint(o) {
+  const logo = await prLogo();
+  let css = $('prCss');
+  if (!css) { css = document.createElement('style'); css.id = 'prCss'; css.dataset.print = '1'; document.head.appendChild(css); }
+  css.textContent = `
+#prDoc{display:none}
+@media print{body>*:not(#prDoc){display:none!important}#prDoc{display:block!important}html,body{background:#fff!important;color:#000!important}}
+@page{size:A4 ${o.landscape ? 'landscape' : 'portrait'};margin:9mm 9mm 13mm;
+  @bottom-right{content:"Page " counter(page) " of " counter(pages);font:9px Arial,sans-serif;color:#555}
+  @bottom-left{content:"OMHG EVA SCHOOL · printed ${prToday()}";font:9px Arial,sans-serif;color:#555}}
+#prDoc{color:#000;font-family:Arial,"Segoe UI",Tahoma,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#prDoc *{text-transform:none!important;letter-spacing:normal!important}
+.prPage{break-after:page;page-break-after:always}.prPage:last-child{break-after:auto;page-break-after:auto}
+.prHead{display:flex;justify-content:space-between;align-items:center;gap:6mm;direction:rtl;border-bottom:1.2px solid #000;padding-bottom:2.5mm;margin-bottom:4mm}
+.prHead .t{font-weight:700;font-size:11.5px;line-height:1.5;white-space:nowrap}
+.prHead img{height:14mm;width:auto}
+.prTitle{font-size:16px;font-weight:700;margin:0 0 1mm}
+.prSub{font-size:11px;color:#333;margin:0 0 4mm}
+#prDoc table{width:100%;border-collapse:collapse;font-size:10px;min-width:0}
+#prDoc th{background:#f1f1f1;color:#000;text-align:left;border:.5px solid #999;padding:3px 4px;font-size:9.5px;white-space:nowrap}
+#prDoc td{border:.5px solid #bbb;padding:3px 4px;color:#000;background:#fff}
+#prDoc tr{break-inside:avoid;page-break-inside:avoid}
+#prDoc .pill{border:.5px solid #999}
+#prDoc .profX,#prDoc .profTools,#prDoc .noPrint{display:none!important}
+#prDoc .profHead{margin-bottom:3mm}#prDoc .profAv{width:11mm;height:11mm;font-size:15px;background:#f1f1f1}
+#prDoc .profKpi{display:grid;grid-template-columns:repeat(5,1fr);gap:2mm;margin:2mm 0 4mm}
+#prDoc .profKpi div{border:.5px solid #bbb;border-radius:2mm;background:#fff;padding:2mm}
+#prDoc .profKpi b{font-size:15px}#prDoc .profKpi span{font-size:9px;color:#333}
+#prDoc h3{font-size:12.5px;margin:4mm 0 1.5mm}
+#prDoc .profWrap{overflow:visible}
+#prDoc .prKpis{display:grid;grid-template-columns:repeat(4,1fr);gap:2mm;margin:0 0 4mm}
+#prDoc .prKpis div{border:.5px solid #bbb;border-radius:2mm;padding:2mm}#prDoc .prKpis b{display:block;font-size:15px}#prDoc .prKpis span{font-size:9px;color:#333}
+`;
+  let box = $('prDoc');
+  if (!box) { box = document.createElement('div'); box.id = 'prDoc'; document.body.appendChild(box); }
+  const head = `<div class="prHead"><div class="t"><div>وزارة التربية والتعليم والتعليم الفني</div>` +
+    `<div>وحدة تشغيل وإدارة مدارس التكنولوجيا التطبيقية</div><div>مدرسة إيفا الدولية للتكنولوجيا التطبيقية</div></div>` +
+    (logo ? `<img src="data:image/png;base64,${logo}" alt="">` : '') + '</div>';
+  box.innerHTML = o.pages.map(p => `<section class="prPage">${head}` +
+    (p.title ? `<div class="prTitle">${prEsc(p.title)}</div>` : '') + (p.sub ? `<div class="prSub">${prEsc(p.sub)}</div>` : '') +
+    p.html + '</section>').join('');
+  // only this page's print rules are active while printing
+  document.querySelectorAll('style[data-print]').forEach(x => { x.disabled = x.id !== 'prCss'; });
+  const title = document.title;
+  if (o.file) document.title = o.file;
+  setTimeout(() => { window.print(); document.title = title; }, 350);
+}
+function prDownload(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+// A profile as Excel: one sheet for class grades, one for factory evaluations
+function profSheets(p) {
+  const att = { P: 'Present', L: 'Late', A: 'Absent' };
+  const group = p.dept ? `${p.cls} ${p.dept}` : p.cls;
+  return [
+    { name: 'Class grades', bold: [0, 2], rows: [[`${p.student} · ${group}`], [],
+      ['Date', 'Session', 'Teacher', 'Class', 'Attendance', 'Behaviour', 'Participation', 'Assignment', 'Assignment title', 'Quiz', 'Quiz title', 'Total', 'Out of'],
+      ...p.daily.map(r => [r.date, r.session, r.teacher, r.dept ? `${r.cls} ${r.dept}` : r.cls, att[r.att] || r.att,
+        r.behaviour, r.participation, r.assignment, r.assignmentTitle || '', r.quiz, r.quizTitle || '', r.total, r.outOf])] },
+    { name: 'Factory evaluations', bold: [0, 2], rows: [[`${p.student} · ${group}`], [],
+      ['Date', 'Teacher', 'Class', 'Evaluation', 'Score /5', 'Incident', 'Comment'],
+      ...p.factory.map(x => [x.date, x.teacher, x.cls, x.evaluation, x.evaluation === 'Absent' ? '' : x.score, x.incidents ? 'Yes' : '', x.comment])] }
+  ];
+}
+
+let PROF_LAST = null;
+document.addEventListener('click', ev => {
+  if (!PROF_LAST) return;
+  const p = PROF_LAST, group = p.dept ? `${p.cls} ${p.dept}` : p.cls;
+  if (ev.target.closest('[data-prof-print]')) {
+    prPrint({ file: `Student profile - ${p.student}`, pages: [{ title: 'Student profile',
+      sub: `${p.own ? 'Your grades and evaluations only' : 'All teachers'} · printed ${prToday()}`, html: profHTML(p) }] });
+  } else if (ev.target.closest('[data-prof-xlsx]')) {
+    prDownload(xlsxBlob(profSheets(p)), `Student profile - ${p.student} - ${group}.xlsx`);
+  }
+});
 // any element with class "stLink" and data-st opens that student's profile
 document.addEventListener('click', ev => {
   const a = ev.target.closest('.stLink[data-st]');
@@ -2279,6 +2461,158 @@ document.querySelectorAll('#dbQuick button[data-r]').forEach(b => {
 });
 $('dbFrom').onchange = dbLoad;
 $('dbTo').onchange = dbLoad;
+
+
+// ===================== STUDENTS: one screen for every student =====================
+// Search, class, dates and filter chips narrow the list; the 4 numbers on top follow the list.
+// Export gives exactly what is on screen.
+const ST = { rows: [], from: '', to: '', filter: 'all', sort: 'name', dir: 1, loading: false };
+const ST_EV = { Outstanding: 'O', Proficient: 'P', Developing: 'D', 'Needs Improvement': 'N', Unsatisfactory: 'U', Absent: 'A' };
+function stRange(kind) {
+  const now = new Date(), y = now.getFullYear(), m = now.getMonth() + 1;
+  const today = isoDay(now);
+  if (kind === 'week') { const s = new Date(now); s.setDate(now.getDate() - now.getDay()); return [isoDay(s), today]; }
+  if (kind === 'month') return [`${y}-${String(m).padStart(2, '0')}-01`, today];
+  const start = m >= 9 ? y : y - 1;
+  if (kind === 'year') return [`${start}-09-01`, today];
+  // term 1 = September to January, term 2 = February to August
+  if (m >= 9 || m === 1) return [`${start}-09-01`, today];
+  return [`${start + 1}-02-01`, today];
+}
+const stGroup = r => r.dept ? `${r.cls} · ${r.dept}` : r.cls;
+const stPct = (a, b) => b ? Math.round(a / b * 100) : null;
+const stAtt = r => stPct(r.P + r.L, r.sessions);
+const stAvg = r => stPct(r.got, r.out);
+const stNeeds = r => r.absAlert || r.fInc > 0 || r.fAbsent;
+const ST_FILTERS = {
+  all: () => true,
+  abs: r => r.absAlert,
+  low: r => stAvg(r) !== null && stAvg(r) < 60,
+  inc: r => r.fInc > 0,
+  fab: r => r.fAbsent
+};
+function stShown() {
+  const q = $('stQ').value.trim().toLowerCase(), c = $('stCls').value;
+  const val = { name: r => r.name, cls: r => stGroup(r), att: r => stAtt(r) ?? -1, avg: r => stAvg(r) ?? -1,
+    abs: r => r.absDays.length, fac: r => r.fAvg === '' ? -1 : r.fAvg };
+  return ST.rows.filter(r => (!q || r.name.toLowerCase().includes(q)) && (!c || stGroup(r) === c) && ST_FILTERS[ST.filter](r))
+    .sort((a, b) => { const x = val[ST.sort](a), y = val[ST.sort](b); return (x > y ? 1 : x < y ? -1 : a.name.localeCompare(b.name)) * ST.dir; });
+}
+function stColor(p) { return p === null ? 'var(--line)' : p >= 85 ? '#1D9E75' : p >= 65 ? '#EF9F27' : '#E24B4A'; }
+function stFlags(r) {
+  return (r.absAlert ? `<span class="flag r">Absent ${r.absDays.length} days</span>` : '') +
+    (r.fInc ? `<span class="flag r">Incident${r.fInc > 1 ? ' ×' + r.fInc : ''}</span>` : '') +
+    (r.fAbsent ? '<span class="flag a">Factory absent</span>' : '');
+}
+function stRender() {
+  const base = ST.rows.filter(r => { const q = $('stQ').value.trim().toLowerCase(), c = $('stCls').value; return (!q || r.name.toLowerCase().includes(q)) && (!c || stGroup(r) === c); });
+  document.querySelectorAll('#stChips .stChip').forEach(b => {
+    const n = base.filter(ST_FILTERS[b.dataset.f]).length;
+    b.classList.toggle('on', b.dataset.f === ST.filter);
+    b.innerHTML = `${esc(b.textContent.replace(/\s*\d+$/, '').trim())}${b.dataset.f === 'all' ? '' : ` <span class="n">${n}</span>`}`;
+  });
+  const R = stShown();
+  const sumAtt = R.reduce((s, r) => s + r.P + r.L, 0), sumSes = R.reduce((s, r) => s + r.sessions, 0);
+  const sumGot = R.reduce((s, r) => s + r.got, 0), sumOut = R.reduce((s, r) => s + r.out, 0);
+  $('stSum').innerHTML = `<div><b>${R.length}</b><span>Students</span></div>` +
+    `<div><b>${stPct(sumAtt, sumSes) ?? '—'}${sumSes ? '%' : ''}</b><span>Attendance</span></div>` +
+    `<div><b>${stPct(sumGot, sumOut) ?? '—'}${sumOut ? '%' : ''}</b><span>Class average</span></div>` +
+    `<div><b style="color:${R.filter(stNeeds).length ? 'var(--danger)' : 'inherit'}">${R.filter(stNeeds).length}</b><span>Need attention</span></div>`;
+  const th = (k, l) => `<th data-k="${k}">${l}${ST.sort === k ? (ST.dir > 0 ? ' ↑' : ' ↓') : ''}</th>`;
+  $('stT').innerHTML = `<tr>${th('name', 'Student')}${th('att', 'Attendance')}${th('avg', 'Class average')}${th('abs', 'Absent days')}${th('fac', 'Factory')}<th class="noSort">Flags</th></tr>` +
+    (R.length ? R.map(r => {
+      const a = stAtt(r), g = stAvg(r);
+      return `<tr><td><span class="stLink" data-st="${esc(r.name)}"><b>${esc(r.name)}</b></span><span class="sub">${esc(stGroup(r))}</span></td>` +
+        `<td>${a === null ? '<span class="sub">—</span>' : `<span class="mBar"><i style="width:${a}%;background:${stColor(a)}"></i></span>${a}%`}</td>` +
+        `<td>${g === null ? '<span class="sub">—</span>' : `<b style="color:${g < 60 ? 'var(--danger)' : 'inherit'}">${g}%</b>`}</td>` +
+        `<td>${r.absDays.length || '—'}</td>` +
+        `<td>${r.fCount ? `${esc(ST_EV[r.fLast] || r.fLast)}${r.fAvg !== '' ? ` <span class="sub" style="display:inline">avg ${r.fAvg}/5</span>` : ''}` : '<span class="sub">—</span>'}</td>` +
+        `<td>${stFlags(r) || '<span class="sub">—</span>'}</td></tr>`;
+    }).join('') : '<tr><td colspan="6" class="empty">No students match.</td></tr>');
+}
+async function stLoad() {
+  let from, to;
+  if ($('stPeriod').value === 'custom') { from = $('stFrom').value; to = $('stTo').value; }
+  else [from, to] = stRange($('stPeriod').value);
+  $('stCustom').hidden = $('stPeriod').value !== 'custom';
+  if (!from || !to || from > to) return;
+  $('stFrom').value = from; $('stTo').value = to;
+  $('stHint').textContent = 'Loading…';
+  try {
+    const out = await post('adminStudents', { from, to });
+    if ($('stFrom').value !== from || $('stTo').value !== to) return;
+    ST.rows = out.students || [];
+    ST.from = out.from; ST.to = out.to;
+    const groups = [...new Set(ST.rows.map(stGroup))].sort();
+    const keep = $('stCls').value;
+    $('stCls').innerHTML = '<option value="">All classes</option>' + groups.map(g => `<option${g === keep ? ' selected' : ''}>${esc(g)}</option>`).join('');
+    $('stHint').textContent = `${ST.from} to ${ST.to}. Tap a column to sort. Tap a student to open the profile.`;
+    stRender();
+  } catch (e) {
+    $('stHint').textContent = 'Could not load the students: ' + e.message;
+  }
+}
+function stInit() { if (!ST.rows.length) stLoad(); else stRender(); }
+$('stQ').oninput = stRender;
+$('stCls').onchange = stRender;
+$('stPeriod').onchange = () => { if ($('stPeriod').value === 'custom') { $('stCustom').hidden = false; return; } stLoad(); };
+$('stFrom').onchange = stLoad;
+$('stTo').onchange = stLoad;
+$('stChips').onclick = ev => { const b = ev.target.closest('.stChip'); if (!b) return; ST.filter = b.dataset.f; stRender(); };
+$('stT').onclick = ev => {
+  const t = ev.target.closest('th[data-k]');
+  if (!t) return;
+  ST.dir = ST.sort === t.dataset.k ? -ST.dir : 1;
+  ST.sort = t.dataset.k;
+  stRender();
+};
+// ----- export -----
+function stFilterText() {
+  const parts = [`${ST.from} to ${ST.to}`, $('stCls').value || 'All classes'];
+  if (ST.filter !== 'all') parts.push(document.querySelector(`#stChips [data-f="${ST.filter}"]`).textContent.replace(/\s*\d+$/, '').trim());
+  if ($('stQ').value.trim()) parts.push(`search "${$('stQ').value.trim()}"`);
+  return parts.join(' · ');
+}
+function stRowsOut(R) {
+  return R.map(r => [r.name, stGroup(r), stAtt(r) ?? '', stAvg(r) ?? '', r.P, r.L, r.A, r.absDays.length, r.absDays.join(', '),
+    r.fCount, r.fLast, r.fAvg, r.fInc, r.fAbsent ? 'Yes' : '',
+    [r.absAlert ? 'Absence alert' : '', r.fInc ? 'Factory incident' : '', r.fAbsent ? 'Factory absent' : ''].filter(Boolean).join(', ')]);
+}
+const ST_HEAD = ['Student', 'Class', 'Attendance %', 'Class average %', 'Present', 'Late', 'Absent sessions', 'Absent days', 'Absent dates',
+  'Factory evaluations', 'Last factory result', 'Factory average /5', 'Factory incidents', 'Factory absent 8+ days', 'Flags'];
+$('stExBtn').onclick = ev => { ev.stopPropagation(); const l = $('stExList'); l.hidden = !l.hidden; $('stExBtn').setAttribute('aria-expanded', !l.hidden); };
+document.addEventListener('click', ev => { if (!ev.target.closest('.exMenu')) { $('stExList').hidden = true; $('stExBtn').setAttribute('aria-expanded', 'false'); } });
+$('stExList').onclick = async ev => {
+  const b = ev.target.closest('[data-ex]');
+  if (!b) return;
+  $('stExList').hidden = true;
+  const R = stShown();
+  if (!R.length) { $('stHint').textContent = 'Nothing to export: no students match.'; return; }
+  const name = `Students - ${$('stCls').value || 'All classes'} - ${ST.from} to ${ST.to}`;
+  if (b.dataset.ex === 'xlsx') {
+    prDownload(xlsxBlob([{ name: 'Students', bold: [0, 1, 3], rows: [['Students'], [stFilterText()], [], ST_HEAD, ...stRowsOut(R)] }]), name + '.xlsx');
+  } else if (b.dataset.ex === 'print') {
+    const sumAtt = R.reduce((s, r) => s + r.P + r.L, 0), sumSes = R.reduce((s, r) => s + r.sessions, 0);
+    const sumGot = R.reduce((s, r) => s + r.got, 0), sumOut = R.reduce((s, r) => s + r.out, 0);
+    const html = `<div class="prKpis"><div><b>${R.length}</b><span>Students</span></div><div><b>${stPct(sumAtt, sumSes) ?? '—'}%</b><span>Attendance</span></div>` +
+      `<div><b>${stPct(sumGot, sumOut) ?? '—'}%</b><span>Class average</span></div><div><b>${R.filter(stNeeds).length}</b><span>Need attention</span></div></div>` +
+      '<table><thead><tr><th>#</th><th>Student</th><th>Class</th><th>Attendance</th><th>Class average</th><th>Absent days</th><th>Factory</th><th>Flags</th></tr></thead><tbody>' +
+      R.map((r, i) => `<tr><td>${i + 1}</td><td><b>${esc(r.name)}</b></td><td>${esc(stGroup(r))}</td><td>${stAtt(r) ?? '—'}${stAtt(r) === null ? '' : '%'}</td>` +
+        `<td>${stAvg(r) ?? '—'}${stAvg(r) === null ? '' : '%'}</td><td>${r.absDays.length || '—'}</td>` +
+        `<td>${r.fCount ? esc(ST_EV[r.fLast] || r.fLast) + (r.fAvg !== '' ? ` (avg ${r.fAvg}/5)` : '') : '—'}</td><td>${stFlags(r) || '—'}</td></tr>`).join('') + '</tbody></table>';
+    prPrint({ file: name, landscape: true, pages: [{ title: 'Students report', sub: stFilterText(), html }] });
+  } else if (b.dataset.ex === 'profiles') {
+    if (R.length > 60 && !window.confirm(`Print ${R.length} profiles? That is about ${R.length} pages.`)) return;
+    $('stHint').textContent = `Getting ${R.length} profiles…`;
+    try {
+      const out = await post('adminProfiles', { students: R.map(r => r.name) });
+      $('stHint').textContent = `${out.profiles.length} profiles ready. In the print window choose "Save as PDF".`;
+      prPrint({ file: `Student profiles - ${$('stCls').value || 'All classes'}`, pages: out.profiles.map(p => ({ title: 'Student profile', sub: 'All teachers · printed ' + prToday(), html: profHTML(p) })) });
+    } catch (e) {
+      $('stHint').textContent = 'Could not get the profiles: ' + e.message;
+    }
+  }
+};
 
 // ===================== EVALUATIONS: the board inside the admin page =====================
 // A copy of the board page (board/index.html) is kept inside this file, so it always opens, wherever this
