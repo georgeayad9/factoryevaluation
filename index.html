@@ -417,6 +417,11 @@
         <span style="flex:1"></span>
         <button class="secondary" id="sExport" type="button">Export to Excel</button>
       </div>
+      <div class="dTools" style="margin-top:6px">
+        <span class="hint" style="margin:0">قوائم أعمال السنة (school sheet):</span>
+        <button class="small" id="ywXlsx" type="button">Excel</button>
+        <button class="small" id="ywPdf" type="button">PDF / print</button>
+      </div>
       <div id="sMsg"></div>
       <div id="sOut"></div>
     </div>
@@ -1788,6 +1793,283 @@ $('sExport').onclick = () => {
   a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 };
+
+
+// ---------- year-work sheet (قوائم أعمال السنة): the school's official sheet, filled from daily grading ----------
+// One page = up to 8 sessions and 25 students. More sessions or students make more pages.
+// Each session: attendance (present 10, late 5, absent غ), behaviour, participation, and the 4th column:
+// the quiz if there was one (column shaded and titled "quiz"), else the assignment, else 10 automatically.
+const TEACHER_AR = {
+  'george ayad': 'جورج عياد', 'ramy nabih': 'رامي نبيه', 'maria morcos': 'ماريا مرقس',
+  'dalia mahmoud': 'داليا محمود', 'sufian abdalla': 'سفيان عبدالله', 'jan ossama': 'جان اسامة'
+};
+const DEPT_AR = { operation: 'تشغيل', utilities: 'مرافق' };
+const AR_DAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+const AR_ORD = ['الأولى', 'الثانية', 'الثالثة', 'الرابعة', 'الخامسة', 'السادسة', 'السابعة', 'الثامنة'];
+const YW_BLOCKS = ['C', 'I', 'O', 'U', 'AA', 'AG', 'AM', 'AS'];
+
+// "Wheeler 1" → "W1", "Junior 2" → "J2"; Senior 1 adds the department in Arabic: "S1 تشغيل"
+function ywClassName(cls, dept) {
+  const words = String(cls).trim().split(/\s+/);
+  const code = words.map(w => /^\d+$/.test(w) ? w : w[0].toUpperCase()).join('');
+  const d = dept ? (DEPT_AR[String(dept).trim().toLowerCase()] || dept) : '';
+  return d ? `${code} ${d}` : code;
+}
+// School year from September; term 1 = September to January, term 2 = February to August
+function ywYearTerm(ymd) {
+  const [y, m] = ymd.split('-').map(Number);
+  const start = m >= 9 ? y : y - 1;
+  return { year: `${start}/${start + 1}`, term: (m >= 9 || m === 1) ? 'الفصل الدراسى الاول' : 'الفصل الدراسى الثانى' };
+}
+
+function ywPages() {
+  const key = S2.key;
+  const g = groupParts(key);
+  const sesKey = r => r.date + '|' + r.session;
+  const sessions = [...new Set(S2.rows.map(sesKey))].sort((a, b) => {
+    const [da, sa] = a.split('|'), [db, sb] = b.split('|');
+    return da.localeCompare(db) || Number(sa) - Number(sb);
+  }).map(k => {
+    const [date, session] = k.split('|');
+    const rows = S2.rows.filter(r => sesKey(r) === k);
+    return { key: k, date, session: Number(session), rows,
+      quiz: rows.some(r => r.quiz !== ''), assignment: rows.some(r => r.assignment !== '') };
+  });
+  const roster = groupStudents(key).slice();
+  S2.rows.forEach(r => { if (!roster.includes(r.student)) roster.push(r.student); });
+  const num = v => (v === '' || v === 'A' || v === null || v === undefined) ? '' : Number(v);
+  // the 5 cells of one student in one session
+  const cells = (ses, student) => {
+    const r = ses.rows.find(x => x.student === student);
+    if (!r) return null;
+    if (r.att === 'A') return ['غ', 'غ', 'غ', 'غ', 0];
+    const a = r.att === 'L' ? 5 : 10;
+    const w = ses.quiz ? num(r.quiz) : ses.assignment ? num(r.assignment) : 10;
+    const v = [a, num(r.behaviour), num(r.participation), w];
+    return v.concat(v.reduce((s, x) => s + (x === '' ? 0 : x), 0));
+  };
+  const { year, term } = ywYearTerm(S2.from);
+  const head = { year, term, cls: ywClassName(g.cls, g.dept), teacher: TEACHER_AR[String(me).trim().toLowerCase()] || me };
+  const pages = [];
+  for (let i = 0; i < Math.max(1, sessions.length); i += 8) {
+    const ss = sessions.slice(i, i + 8);
+    for (let j = 0; j < Math.max(1, roster.length); j += 25) {
+      const studs = roster.slice(j, j + 25);
+      pages.push({ ...head, sessions: ss, students: studs.map(n => {
+        const c = ss.map(s => cells(s, n));
+        const any = c.some(Boolean);
+        return { name: n, cells: c, total: any ? c.reduce((s, x) => s + (x ? x[4] : 0), 0) : '' };
+      }) });
+    }
+  }
+  return { pages, sessions: sessions.length };
+}
+const ywDate = ymd => { const [y, m, d] = ymd.split('-').map(Number); return `${d}/${m}/${y}`; };
+const ywDay = ymd => { const [y, m, d] = ymd.split('-').map(Number); return AR_DAYS[new Date(y, m - 1, d).getDay()]; };
+
+// loads yearwork-template.js (the school's sheet) the first time it is needed
+function ywTemplate() {
+  if (window.YW_TEMPLATE) return Promise.resolve(window.YW_TEMPLATE);
+  return new Promise((ok, fail) => {
+    const s = document.createElement('script');
+    s.src = 'yearwork-template.js?v=2';
+    s.onload = () => window.YW_TEMPLATE ? ok(window.YW_TEMPLATE) : fail(new Error('the sheet template did not load'));
+    s.onerror = () => fail(new Error('could not load yearwork-template.js — is it uploaded next to index.html?'));
+    document.head.appendChild(s);
+  });
+}
+
+function ywCheck() {
+  if (!S2.key) { showIn($('sMsg'), 'Choose a class first.', false); return null; }
+  const out = ywPages();
+  if (!out.sessions) { showIn($('sMsg'), 'No graded sessions for this class in these dates.', false); return null; }
+  return out;
+}
+
+// ----- Excel: the template's own sheet, one sheet per page -----
+const ywEsc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+function ywSet(xml, ref, value, style) {
+  const re = new RegExp(`<c r="${ref}"(?: s="(\\d+)")?[^>]*?(?:/>|>[\\s\\S]*?</c>)`);
+  return xml.replace(re, (m, s) => {
+    const st = style !== undefined ? style : s;
+    const sa = st !== undefined ? ` s="${st}"` : '';
+    if (value === '' || value === null || value === undefined) return `<c r="${ref}"${sa}/>`;
+    if (typeof value === 'number') return `<c r="${ref}"${sa}><v>${value}</v></c>`;
+    return `<c r="${ref}"${sa} t="inlineStr"><is><t xml:space="preserve">${ywEsc(value)}</t></is></c>`;
+  });
+}
+const ywCol = n => { let s = ''; n++; while (n) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; };
+const ywIdx = c => [...c].reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0) - 1;
+
+function ywSheetXml(T, p) {
+  let x = T.sheet;
+  x = ywSet(x, 'B4', 'قوائم أعمال السنه للعام الدراسى ' + p.year + ' — ' + p.term);
+  x = ywSet(x, 'B6', '');
+  x = ywSet(x, 'B8', 'الفصل : ' + p.cls);
+  x = ywSet(x, 'AM8', 'اسم المعلم : ' + p.teacher);
+  YW_BLOCKS.forEach((col, k) => {
+    const s = p.sessions[k];
+    x = ywSet(x, col + '9', 'اليوم : ' + (s ? ywDay(s.date) : ''));
+    x = ywSet(x, col + '10', 'التاريخ : ' + (s ? ywDate(s.date) : ''));
+    x = ywSet(x, col + '11', 'الحصة : ' + (s ? (AR_ORD[s.session - 1] || s.session) : ''));
+    const c0 = ywIdx(col);
+    const wCol = ywCol(c0 + 3);
+    if (s && s.quiz) {
+      for (let r = 12; r <= 38; r++) x = ywSet(x, wCol + r, r === 12 ? 'quiz' : r === 13 ? 10 : '', T.shade[wCol + r]);
+    }
+    p.students.forEach((st, i) => {
+      const v = st.cells[k];
+      if (!v) return;
+      v.forEach((val, j) => {
+        const ref = ywCol(c0 + j) + (14 + i);
+        x = ywSet(x, ref, val, s && s.quiz && j === 3 ? T.shade[ref] : undefined);
+      });
+    });
+  });
+  p.students.forEach((st, i) => {
+    x = ywSet(x, 'B' + (14 + i), st.name);
+    x = ywSet(x, 'AZ' + (14 + i), st.total);
+  });
+  return x;
+}
+
+async function ywExcel() {
+  const out = ywCheck();
+  if (!out) return;
+  showIn($('sMsg'), 'Making the sheet…', true);
+  try {
+    const T = await ywTemplate();
+    const enc = new TextEncoder();
+    const R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+    const head = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+    const n = out.pages.length;
+    const files = [];
+    const add = (name, text) => files.push({ name, data: enc.encode(text) });
+    add('[Content_Types].xml', head + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+      '<Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/>' +
+      '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+      '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+      '<Override PartName="/xl/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>' +
+      out.pages.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>` +
+        `<Override PartName="/xl/drawings/drawing${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>`).join('') +
+      '</Types>');
+    add('_rels/.rels', head + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${R}/officeDocument" Target="xl/workbook.xml"/></Relationships>`);
+    const name = i => n === 1 ? p0name : `${p0name} (${i + 1})`;
+    const p0name = out.pages[0].cls.replace(/[\[\]:*?\/\\]/g, '-').slice(0, 25);
+    add('xl/workbook.xml', head + `<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="${R}"><bookViews><workbookView activeTab="0"/></bookViews><sheets>` +
+      out.pages.map((_, i) => `<sheet name="${ywEsc(name(i))}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('') + '</sheets><definedNames>' +
+      out.pages.map((_, i) => `<definedName name="_xlnm.Print_Area" localSheetId="${i}">'${ywEsc(name(i))}'!$A$1:$AZ$41</definedName>`).join('') +
+      '</definedNames></workbook>');
+    add('xl/_rels/workbook.xml.rels', head + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      out.pages.map((_, i) => `<Relationship Id="rId${i + 1}" Type="${R}/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('') +
+      `<Relationship Id="rId${n + 1}" Type="${R}/styles" Target="styles.xml"/><Relationship Id="rId${n + 2}" Type="${R}/theme" Target="theme/theme1.xml"/></Relationships>`);
+    add('xl/styles.xml', T.styles);
+    add('xl/theme/theme1.xml', T.theme);
+    out.pages.forEach((p, i) => {
+      let xml = ywSheetXml(T, p);
+      add(`xl/worksheets/sheet${i + 1}.xml`, xml);
+      add(`xl/worksheets/_rels/sheet${i + 1}.xml.rels`, `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${R}/drawing" Target="/xl/drawings/drawing${i + 1}.xml"/></Relationships>`);
+      add(`xl/drawings/drawing${i + 1}.xml`, T.drawing);
+      add(`xl/drawings/_rels/drawing${i + 1}.xml.rels`, `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${R}/image" Target="/xl/media/image1.png"/></Relationships>`);
+    });
+    files.push({ name: 'xl/media/image1.png', data: Uint8Array.from(atob(T.logo), c => c.charCodeAt(0)) });
+    const blob = new Blob([zipFiles(files)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `قوائم أعمال السنة - ${out.pages[0].cls} - ${S2.from} to ${S2.to}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    showIn($('sMsg'), `Excel sheet ready: ${n} page${n > 1 ? 's' : ''}.`, true);
+  } catch (err) {
+    showIn($('sMsg'), 'Could not make the sheet: ' + err.message, false);
+  }
+}
+
+// ----- PDF: the same sheet drawn as a page, then the phone or computer's Print → Save as PDF -----
+function ywPageHtml(p, logo) {
+  const e = t => ywEsc(t === undefined || t === null ? '' : t);
+  let h = `<section class="ywPage"><div class="ywTop"><div class="ywTitles">` +
+    `<div>وزارة التربية والتعليم والتعليم الفني</div><div>وحدة تشغيل وإدارة مدارس التكنولوجيا التطبيقية</div>` +
+    `<div>مدرسة إيفا الدولية للتكنولوجيا التطبيقية</div><div>قوائم أعمال السنه للعام الدراسى ${e(p.year)} — ${e(p.term)}</div>` +
+    `</div><img src="data:image/png;base64,${logo}" alt=""></div>` +
+    `<div class="ywLine"><span>الفصل : <b>${e(p.cls)}</b></span><span>المادة :</span><span>اسم المعلم : <b>${e(p.teacher)}</b></span></div>` +
+    '<table class="ywT"><colgroup><col class="n"><col class="nm">' + YW_BLOCKS.map(() => '<col span="5" class="m">').join('') + '<col class="t"></colgroup>';
+  const blockRow = f => YW_BLOCKS.map((_, k) => `<td colspan="5" class="bh">${f(p.sessions[k])}</td>`).join('');
+  h += `<tr><td rowspan="3"></td><td rowspan="3"></td>${blockRow(s => 'اليوم : ' + (s ? ywDay(s.date) : ''))}<td rowspan="4" class="vt"><span>مجموع</span></td></tr>`;
+  h += `<tr>${blockRow(s => 'التاريخ : ' + (s ? ywDate(s.date) : ''))}</tr>`;
+  h += `<tr>${blockRow(s => 'الحصة : ' + (s ? (AR_ORD[s.session - 1] || s.session) : ''))}</tr>`;
+  h += '<tr><th rowspan="2">م</th><th rowspan="2">الاسم</th>' + YW_BLOCKS.map((_, k) => {
+    const q = p.sessions[k] && p.sessions[k].quiz;
+    return `<th class="sm">الغياب</th><th class="sm">السلوك</th><th class="sm">تفاعل</th><th class="sm${q ? ' q' : ''}">${q ? 'quiz' : 'واجب'}</th><th class="sm tt">مجموع</th>`;
+  }).join('') + '</tr>';
+  h += '<tr>' + YW_BLOCKS.map((_, k) => { const q = p.sessions[k] && p.sessions[k].quiz; return `<th>10</th><th>10</th><th>10</th><th${q ? ' class="q"' : ''}>10</th><th class="tt">40</th>`; }).join('') + '<th></th></tr>';
+  for (let i = 0; i < 25; i++) {
+    const st = p.students[i];
+    h += `<tr><td class="n">${i + 1}</td><td class="nm">${st ? e(st.name) : ''}</td>`;
+    YW_BLOCKS.forEach((_, k) => {
+      const q = p.sessions[k] && p.sessions[k].quiz;
+      const v = st && st.cells[k];
+      for (let j = 0; j < 5; j++) h += `<td class="${j === 3 && q ? 'q' : ''}${j === 4 ? ' tt' : ''}">${v ? e(v[j]) : ''}</td>`;
+    });
+    h += `<td class="tot">${st ? e(st.total) : ''}</td></tr>`;
+  }
+  h += '</table><div class="ywSign"><span>معلم المادة :</span><span>المدير الأكاديمي :</span></div></section>';
+  return h;
+}
+const YW_PRINT_CSS = `
+@page{size:A4 landscape;margin:7mm}
+#ywPrint{display:none}
+@media print{
+  body>*:not(#ywPrint){display:none!important}
+  #ywPrint{display:block!important}
+  html,body{background:#fff!important}
+}
+#ywPrint *{text-transform:none!important;letter-spacing:normal!important}
+#ywPrint{direction:rtl;font-family:Arial,"Segoe UI",Tahoma,sans-serif;color:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ywPage{page-break-after:always;break-after:page;width:283mm;height:195mm;overflow:hidden;box-sizing:border-box}
+.ywPage:last-child{page-break-after:auto;break-after:auto}
+.ywTop{display:flex;justify-content:space-between;align-items:center;gap:8mm}
+.ywTitles{font-weight:700;font-size:13px;line-height:1.5;white-space:nowrap}
+.ywTop img{height:17mm;width:auto}
+.ywLine{display:flex;justify-content:space-between;font-weight:700;font-size:13px;margin:2mm 0 1.5mm;padding:1.5mm 2mm 0;border-top:1.2px solid #000}
+.ywT{width:100%;border-collapse:collapse;table-layout:fixed;font-size:9px}
+.ywT col.n{width:5mm}.ywT col.nm{width:34mm}.ywT col.t{width:9mm}
+.ywT td,.ywT th{border:.6px solid #000;height:4.25mm;padding:0 1px;text-align:center;white-space:nowrap;overflow:hidden}
+.ywT td.nm{text-align:right;font-size:9.5px;padding-right:2px}
+.ywT td.bh{text-align:right;font-weight:700;font-size:8.5px;height:5.2mm;padding-right:3px}
+.ywT th{font-size:7px;font-weight:700}
+.ywT th.sm{font-size:6.3px}
+.ywT td.tt,.ywT th.tt{border-left:1.6px solid #000}
+.ywT .q{background:#FFE699}
+.ywT td.vt{font-weight:700;font-size:12px}
+.ywT td.vt span{display:inline-block;transform:rotate(-90deg)}
+.ywT td.tot{font-weight:700;font-size:10px}
+.ywSign{display:flex;gap:60mm;font-weight:700;font-size:13px;margin-top:4mm;padding-right:4mm}
+`;
+async function ywPdf() {
+  const out = ywCheck();
+  if (!out) return;
+  showIn($('sMsg'), 'Making the sheet…', true);
+  try {
+    const T = await ywTemplate();
+    if (!$('ywCss')) { const st = document.createElement('style'); st.id = 'ywCss'; st.textContent = YW_PRINT_CSS; document.head.appendChild(st); }
+    let box = $('ywPrint');
+    if (!box) { box = document.createElement('div'); box.id = 'ywPrint'; document.body.appendChild(box); }
+    box.innerHTML = out.pages.map(p => ywPageHtml(p, T.logo)).join('');
+    const n = out.pages.length;
+    showIn($('sMsg'), `${n} page${n > 1 ? 's' : ''}. In the print window choose "Save as PDF" (on iPhone: Share → Print, then Share → Save to Files).`, true);
+    const title = document.title;
+    document.title = `قوائم أعمال السنة - ${out.pages[0].cls} - ${S2.from} to ${S2.to}`;
+    setTimeout(() => { window.print(); document.title = title; }, 300);
+  } catch (err) {
+    showIn($('sMsg'), 'Could not make the sheet: ' + err.message, false);
+  }
+}
+$('ywXlsx').onclick = ywExcel;
+$('ywPdf').onclick = ywPdf;
 
 // ---------- timetable: the teacher's week ----------
 // Planned classes come from the timetable the admin uploaded; the admin marks absences and gives
