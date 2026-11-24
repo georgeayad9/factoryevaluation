@@ -61,6 +61,9 @@ li small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
 .ttGrid th.d.off{color:var(--danger)}
 .ttGrid th.d.fday{color:var(--brand-dark)}
 .ttGrid th.d select{padding:4px;font-size:12px}
+.facRow{display:flex;gap:12px;padding:6px 0;border-bottom:1px solid var(--line);font-size:14px}
+.facRow > span{min-width:90px;color:var(--muted)}
+.facRow small{color:var(--muted)}
 .ttGrid td{border:1px solid var(--line);height:44px;padding:3px;text-align:center;vertical-align:middle}
 .ttGrid td.click{cursor:pointer}
 .ttGrid td.click:hover{outline:2px solid var(--brand-dark);outline-offset:-2px}
@@ -346,9 +349,13 @@ main.wide{max-width:1200px}
       </div>
       <div class="ttStats" id="wkStats"></div>
       <div class="ttWrap"><table class="ttGrid" id="wkGrid"></table></div>
-      <p class="hint">Click a day name to make it an absent day, a factory day, or a normal day again. A factory day puts the
-        teacher's classes that day under Needs cover, and lowers their max by 5. Click a class to mark that session only absent; click again to undo.
+      <p class="hint">Click a day name to make it an absent day, a factory day, or a normal day again. On a factory day
+        (from the timetable or added), click the day name to move it to another teacher or cancel it. A factory day puts the
+        teacher's classes that day under Needs cover and lowers their max by 5; a cancelled one gives the 5 back. Click a class to mark that session only absent; click again to undo.
         Click a free session (+ extra) to give the teacher an extra class.</p>
+
+      <h2 style="margin-top:18px">Factory days this week</h2>
+      <div id="facList"></div>
 
       <h2 style="margin-top:18px" id="needHead">Needs cover</h2>
       <div id="needList"></div>
@@ -855,7 +862,7 @@ const shortDate = ymd => { const [y, m, d] = ymd.split('-').map(Number); return 
 //   { type: 'Extra', substitute: teacher, date, session, cls }               an extra class in a free session
 // A factory day (more than 7 field-training sessions, تدريب ميداني) is shown but is not classes; it lowers the
 // teacher's default days available (and max, 5 classes a day). Fewer field-training sessions are normal classes.
-const W = { loaded: false, weekStart: '', teachers: [], planned: [], cover: [], limits: {}, dirty: false, versions: [],
+const W = { loaded: false, weekStart: '', teachers: [], planned: [], plannedAll: [], cover: [], limits: {}, dirty: false, versions: [],
   extraClasses: ['J1', 'J2', 'W1', 'W2', 'S1'], perDay: 5, dayWarning: 6, adding: null };
 
 async function loadWeek(date) {
@@ -867,9 +874,10 @@ async function loadWeek(date) {
   ttMsg('Loading the week…', true);
   try {
     const out = await post('ttWeek', { date: want });
-    Object.assign(W, { dayMenu: null, loaded: true, weekStart: out.weekStart, teachers: out.teachers, planned: out.planned,
+    Object.assign(W, { dayMenu: null, loaded: true, weekStart: out.weekStart, teachers: out.teachers, plannedAll: out.planned,
       cover: out.cover, limits: out.limits || {}, versions: out.versions, dirty: false, adding: null,
       extraClasses: out.extraClasses || W.extraClasses, perDay: out.perDay || 5, dayWarning: out.dayWarning || 6 });
+    applyPlanned();
     $('wkSave').disabled = true;
     $('wkDate').value = out.weekStart;
     const sel = $('wkTeacher'), prev = sel.value || localStorage.getItem('ttTeacher');
@@ -893,7 +901,15 @@ const coverAt = (t, date, s) => W.cover.find(c => c.type === 'Absent' && c.teach
 // a factory day the admin gave this teacher (saved as a "Factory" row; their classes that day are absences to cover)
 const givenFactory = (t, date) => W.cover.some(c => c.type === 'Factory' && c.teacher === t && c.date === date);
 const dayIdx = date => Math.round((new Date(date) - new Date(W.weekStart)) / 86400000);
-const absentThatDay = (t, date) => W.cover.some(c => c.type !== 'Extra' && c.teacher === t && c.date === date);
+const absentThatDay = (t, date) => W.cover.some(c => (c.type === 'Absent' || c.type === 'Factory') && c.teacher === t && c.date === date);
+// factory days: from the timetable PDF, cancelled by the admin ("NoFactory"), or given by the admin ("Factory")
+const pdfFactory = (t, date) => W.plannedAll.some(p => p.teacher === t && p.date === date && p.factory);
+const cancelledFactory = (t, date) => W.cover.some(c => c.type === 'NoFactory' && c.teacher === t && c.date === date);
+const atFactory = (t, date) => (pdfFactory(t, date) && !cancelledFactory(t, date)) || givenFactory(t, date);
+// The timetable after the admin's changes: a cancelled factory day's field-training sessions are gone (free day)
+function applyPlanned() {
+  W.planned = W.plannedAll.filter(p => !(p.factory && cancelledFactory(p.teacher, p.date)));
+}
 
 // The teacher's factory days (the server marks their sessions: more than 7 of field training that day)
 function factoryDays(t) {
@@ -913,7 +929,7 @@ function weekCounts() {
     if (!coverAt(p.teacher, p.date, p.session)) add(p.teacher, p.date);
   });
   W.cover.forEach(r => {
-    if (r.type === 'Factory') return;
+    if (r.type === 'Factory' || r.type === 'NoFactory') return;
     if (r.type === 'Extra') { if (r.substitute) { get(r.substitute).extra++; add(r.substitute, r.date); } return; }
     get(r.teacher).absent++;
     if (r.substitute) { get(r.substitute).subs++; add(r.substitute, r.date); }
@@ -933,6 +949,7 @@ function weekCounts() {
 }
 
 function markWeekDirty() {
+  applyPlanned();
   W.dirty = true;
   $('wkSave').disabled = false;
   renderWeek();
@@ -949,7 +966,7 @@ function okToAdd(x, date, counts) {
 }
 
 function toggleAbsent(p) {
-  const i = W.cover.findIndex(c => c.type !== 'Extra' && c.teacher === p.teacher && c.date === p.date && c.session === p.session);
+  const i = W.cover.findIndex(c => c.type === 'Absent' && c.teacher === p.teacher && c.date === p.date && c.session === p.session);
   if (i !== -1) {
     if (W.cover[i].substitute && !window.confirm(`${W.cover[i].substitute} is covering this class. Remove the absence and the substitution?`)) return;
     W.cover.splice(i, 1);
@@ -962,30 +979,108 @@ function toggleAbsent(p) {
   markWeekDirty();
 }
 
-// A whole day for one teacher: 'absent' (all classes absent), 'factory' (a factory day: all classes need cover,
-// and the max drops by one day), or 'normal' (undo either)
-function setDay(t, day, kind) {
-  const date = addDays(W.weekStart, day);
-  const mine = W.planned.filter(p => p.teacher === t && p.date === date && !p.factory);
-  const dn = TT_DAYS[day];
-  // a factory day takes one day (5 classes) off this week's days and max; undoing it gives them back
-  const wasFactory = givenFactory(t, date);
-  const shift = (kind === 'factory' ? 1 : 0) - (wasFactory ? 1 : 0);
-  const l = W.limits[t] && W.limits[t].saved ? W.limits[t] : null;
-  if (kind === 'normal') {
-    const covered = mine.filter(p => coverAt(t, date, p.session) && coverAt(t, date, p.session).substitute).length;
-    if (covered && !window.confirm(`Make ${dn} a normal day for ${t}? ${covered} substitution(s) that day are removed too.`)) return;
-    W.cover = W.cover.filter(c => !(c.type !== 'Extra' && c.teacher === t && c.date === date));
-  } else {
-    const busy = W.cover.filter(c => c.type !== 'Factory' && c.substitute === t && c.date === date);
-    if (busy.length && !window.confirm(`${t} covers or has ${busy.length} extra class(es) on ${dn}. ${kind === 'factory' ? 'A factory day' : 'Marking the day absent'} removes them. Continue?`)) return;
-    W.cover = W.cover.filter(c => !busy.includes(c) && !(c.type === 'Factory' && c.teacher === t && c.date === date));
-    busy.filter(c => c.type === 'Absent').forEach(c => { c.substitute = ''; W.cover.push(c); });   // those classes need cover again
-    mine.forEach(p => { if (!coverAt(t, date, p.session)) W.cover.push({ type: 'Absent', teacher: t, date, session: p.session, cls: p.cls, subject: p.subject, substitute: '' }); });
-    if (kind === 'factory') W.cover.push({ type: 'Factory', teacher: t, date, session: 0, cls: '', subject: 'تدريب ميداني', substitute: '' });
-  }
-  if (l && shift) W.limits[t] = { ...l, days: Math.min(5, Math.max(0, l.days - shift)), max: Math.max(0, l.max - shift * W.perDay) };
+// ---------- whole days: absent, factory day, normal day ----------
+// Each step changes W.cover (and this week's days/max when they were set by hand) and returns false if the
+// admin says no to a question. changeDay() undoes everything when a step returns false.
+
+// One day (5 classes) more (+1) or less (−1) for a teacher whose days/max were set by hand this week
+function shiftLimit(t, delta) {
+  const l = W.limits[t];
+  if (l && l.saved) W.limits[t] = { ...l, days: Math.min(5, Math.max(0, l.days + delta)), max: Math.max(0, l.max + delta * W.perDay) };
+}
+// Classes the teacher covers or extra classes they have that day: they go back to "needs cover" / are removed
+function freeUp(t, date, why) {
+  const busy = W.cover.filter(c => (c.type === 'Absent' || c.type === 'Extra') && c.substitute === t && c.date === date);
+  if (busy.length && !window.confirm(`${t} covers or has ${busy.length} extra class(es) that day. ${why} removes them. Continue?`)) return false;
+  W.cover = W.cover.filter(c => !(busy.includes(c) && c.type === 'Extra'));
+  busy.filter(c => c.type === 'Absent').forEach(c => { c.substitute = ''; });
+  return true;
+}
+function myClasses(t, date) { return W.planned.filter(p => p.teacher === t && p.date === date && !p.factory); }
+function markAllAbsent(t, date) {
+  myClasses(t, date).forEach(p => { if (!coverAt(t, date, p.session)) W.cover.push({ type: 'Absent', teacher: t, date, session: p.session, cls: p.cls, subject: p.subject, substitute: '' }); });
+}
+function dayNormal(t, date) {
+  const covered = myClasses(t, date).filter(p => coverAt(t, date, p.session) && coverAt(t, date, p.session).substitute).length;
+  if (covered && !window.confirm(`${t} teaches normally that day. ${covered} substitution(s) for them are removed. Continue?`)) return false;
+  if (givenFactory(t, date)) shiftLimit(t, +1);
+  W.cover = W.cover.filter(c => !((c.type === 'Absent' || c.type === 'Factory') && c.teacher === t && c.date === date));
+  return true;
+}
+function dayAbsent(t, date) {
+  if (!freeUp(t, date, 'Marking the day absent')) return false;
+  if (givenFactory(t, date)) { shiftLimit(t, +1); W.cover = W.cover.filter(c => !(c.type === 'Factory' && c.teacher === t && c.date === date)); }
+  markAllAbsent(t, date);
+  return true;
+}
+function dayFactory(t, date) {
+  if (atFactory(t, date)) return true;
+  if (!freeUp(t, date, 'A factory day')) return false;
+  markAllAbsent(t, date);
+  W.cover.push({ type: 'Factory', teacher: t, date, session: 0, cls: '', subject: 'تدريب ميداني', substitute: '' });
+  shiftLimit(t, -1);
+  return true;
+}
+function dayCancelPdf(t, date) {   // the timetable's factory day: this teacher does not go, and is free that day
+  W.cover.push({ type: 'NoFactory', teacher: t, date, session: 0, cls: '', subject: 'تدريب ميداني', substitute: '' });
+  shiftLimit(t, +1);
+  return true;
+}
+function dayRestorePdf(t, date) {
+  if (!freeUp(t, date, 'Making it a factory day again')) return false;
+  W.cover = W.cover.filter(c => !(c.type === 'NoFactory' && c.teacher === t && c.date === date));
+  shiftLimit(t, -1);
+  return true;
+}
+// Someone else goes to the factory instead of t
+function dayMove(t, date, to) {
+  const ok = pdfFactory(t, date) && !cancelledFactory(t, date) ? dayCancelPdf(t, date) : dayNormal(t, date);
+  return ok && dayFactory(to, date);
+}
+function changeDay(fn) {
+  const before = { cover: W.cover.map(c => ({ ...c })), limits: JSON.parse(JSON.stringify(W.limits)) };
+  applyPlanned();
+  if (fn() === false) { W.cover = before.cover; W.limits = before.limits; applyPlanned(); renderWeek(); return; }
   markWeekDirty();
+}
+
+// The day menu for teacher t: what can be done with that day
+function dayOptions(t, date) {
+  const o = [];
+  const classes = myClasses(t, date);
+  const offAll = !givenFactory(t, date) && classes.length && classes.every(p => coverAt(t, date, p.session));
+  if (pdfFactory(t, date)) {
+    if (cancelledFactory(t, date)) o.push(['restore', 'Factory day again']);
+    else o.push(['move', 'Move factory day to…'], ['cancel', 'Not a factory day (free)']);
+  } else if (givenFactory(t, date)) {
+    o.push(['move', 'Move factory day to…'], ['normal', 'Normal day']);
+  } else {
+    if (classes.length && !offAll) o.push(['absent', 'Absent all day']);
+    o.push(['factory', 'Factory day']);
+    if (offAll) o.push(['normal', 'Normal day']);
+  }
+  return o;
+}
+
+// Who is at the factory on each day of the week, said plainly
+function renderFactoryList() {
+  const box = $('facList');
+  const lines = [];
+  TT_DAYS.forEach((dn, day) => {
+    const date = addDays(W.weekStart, day);
+    const names = [...new Set(W.plannedAll.filter(p => p.date === date && p.factory).map(p => p.teacher)
+      .concat(W.cover.filter(c => c.type === 'Factory' && c.date === date).map(c => c.teacher)))];
+    const off = names.filter(n => cancelledFactory(n, date));
+    const going = [];
+    names.forEach(n => {
+      if (off.includes(n)) return;
+      const why = givenFactory(n, date) ? (off.length ? 'instead of ' + off.join(', ') : 'added by you') : 'from the timetable';
+      going.push(`<b>${esc(n)}</b> <small>${why}</small>`);
+    });
+    off.filter(n => !W.cover.some(c => c.type === 'Factory' && c.date === date)).forEach(n => going.push(`<s>${esc(n)}</s> <small>not going, nobody instead</small>`));
+    if (going.length) lines.push(`<div class="facRow"><span>${dn.slice(0, 3)} ${shortDate(date)}</span><div>${going.join(' · ')}</div></div>`);
+  });
+  box.innerHTML = lines.length ? lines.join('') : '<div class="empty">No factory days this week.</div>';
 }
 
 // ---------- team timetable: everyone's day, view only ----------
@@ -1087,39 +1182,57 @@ function renderWeek() {
     const classes = mine.filter(p => !p.factory);
     const factoryDay = mine.length && !classes.length && mine.some(p => p.factory);   // from the timetable PDF
     const given = givenFactory(t, date);
+    const moved = t && cancelledFactory(t, date);
     const offAll = !given && classes.length && classes.every(p => coverAt(t, date, p.session));
     const n = (counts[t] && counts[t].perDay[date]) || 0;
     const th = document.createElement('th');
-    th.className = 'd' + (t && !factoryDay ? ' click' : '') + (offAll ? ' off' : '') + (given ? ' fday' : '') + (n >= W.dayWarning ? ' busy' : '');
-    if (t && !factoryDay && W.dayMenu === date) {
+    th.className = 'd' + (t ? ' click' : '') + (offAll ? ' off' : '') + (given || factoryDay ? ' fday' : '') + (n >= W.dayWarning ? ' busy' : '');
+    const menu = W.dayMenu && W.dayMenu.date === date ? W.dayMenu : null;
+    if (t && menu) {
       const sel = document.createElement('select');
-      sel.setAttribute('aria-label', `${t}, ${dn}`);
-      sel.add(new Option(dn + '…', ''));
-      if (classes.length && !offAll) sel.add(new Option('Absent all day', 'absent'));
-      if (!given) sel.add(new Option('Factory day', 'factory'));
-      if (given || offAll) sel.add(new Option('Normal day', 'normal'));
-      sel.add(new Option('Cancel', '-'));
       sel.onclick = e => e.stopPropagation();
-      sel.onchange = () => {
-        W.dayMenu = null;
-        if (!sel.value || sel.value === '-') { renderWeek(); return; }
-        setDay(t, day, sel.value);
-        renderWeek();
-      };
+      if (menu.move) {
+        // move the factory day: who goes instead
+        sel.setAttribute('aria-label', `Who goes to the factory on ${dn} instead of ${t}`);
+        sel.add(new Option('Instead of ' + t.split(' ')[0] + '…', ''));
+        W.teachers.filter(x => x !== t && !atFactory(x, date)).forEach(x => {
+          const k = myClasses(x, date).length;
+          sel.add(new Option(`${x} · ${k ? k + ' class' + (k > 1 ? 'es' : '') + ' to cover' : 'free that day'}`, x));
+        });
+        sel.add(new Option('Cancel', '-'));
+        sel.onchange = () => {
+          const x = sel.value;
+          W.dayMenu = null;
+          if (!x || x === '-') { renderWeek(); return; }
+          changeDay(() => dayMove(t, date, x));
+        };
+      } else {
+        sel.setAttribute('aria-label', `${t}, ${dn}`);
+        sel.add(new Option(dn + '…', ''));
+        dayOptions(t, date).forEach(([v, l]) => sel.add(new Option(l, v)));
+        sel.add(new Option('Cancel', '-'));
+        sel.onchange = () => {
+          const v = sel.value;
+          W.dayMenu = null;
+          if (!v || v === '-') { renderWeek(); return; }
+          if (v === 'move') { W.dayMenu = { date, move: true }; renderWeek(); return; }
+          changeDay(() => ({ absent: dayAbsent, factory: dayFactory, normal: dayNormal, cancel: dayCancelPdf, restore: dayRestorePdf }[v])(t, date));
+        };
+      }
       th.appendChild(sel);
       setTimeout(() => sel.focus(), 0);
     } else {
-      th.innerHTML = `${dn}<small>${shortDate(date)}${given ? ' · factory day' : offAll ? ' · absent' : factoryDay ? ' · factory' : n ? ' · ' + n + ' classes' : ''}</small>`;
-      if (t && !factoryDay) {
-        th.title = 'Absent all day, factory day, or normal day';
-        th.onclick = () => { W.adding = null; W.dayMenu = date; renderWeek(); };
+      th.innerHTML = `${dn}<small>${shortDate(date)}${given ? ' · factory day' : moved ? ' · no factory' : offAll ? ' · absent' : factoryDay ? ' · factory' : n ? ' · ' + n + ' classes' : ''}</small>`;
+      if (t) {
+        th.title = factoryDay || given ? 'Move or cancel this factory day' : 'Absent all day, factory day, or normal day';
+        th.onclick = () => { W.adding = null; W.dayMenu = { date }; renderWeek(); };
       }
     }
     tr.appendChild(th);
     for (let s = 1; s <= 8; s++) {
       const td = document.createElement('td');
       const p = mine.find(x => x.session === s);
-      const sub = W.cover.find(c => c.type !== 'Extra' && c.substitute === t && c.date === date && c.session === s);
+      const sub = W.cover.find(c => c.type === 'Absent' && c.substitute === t && c.date === date && c.session === s);
       const extra = W.cover.find(c => c.type === 'Extra' && c.substitute === t && c.date === date && c.session === s);
       if (p && p.factory) {
         td.className = 'fac';
@@ -1183,6 +1296,7 @@ function renderWeek() {
     grid.appendChild(tr);
   });
 
+  renderFactoryList();
   renderNeeds(counts);
   renderSum(counts);
 }
@@ -1211,7 +1325,7 @@ function renderNeeds(counts) {
     row.className = 'needRow' + (r.substitute ? ' done' : '');
     const day = TT_DAYS[dayIdx(r.date)] || r.date;
     const label = document.createElement('span');
-    label.innerHTML = `<b>${esc(day.slice(0, 3))} ${esc(shortDate(r.date))} · session ${r.session}</b><small>${esc(r.teacher)}${givenFactory(r.teacher, r.date) ? ' (factory day)' : ''} · ${esc(r.cls)}${r.subject ? ' · ' + esc(r.subject) : ''}</small>`;
+    label.innerHTML = `<b>${esc(day.slice(0, 3))} ${esc(shortDate(r.date))} · session ${r.session}</b><small>${esc(r.teacher)}${givenFactory(r.teacher, r.date) ? ' (factory day' + (W.cover.some(c => c.type === 'NoFactory' && c.date === r.date) ? ', instead of ' + W.cover.filter(c => c.type === 'NoFactory' && c.date === r.date).map(c => c.teacher).join(', ') : '') + ')' : ''} · ${esc(r.cls)}${r.subject ? ' · ' + esc(r.subject) : ''}</small>`;
     const sel = document.createElement('select');
     sel.setAttribute('aria-label', `Substitute for ${r.teacher}, ${day} session ${r.session}`);
     sel.add(new Option('No substitute', ''));
@@ -1288,9 +1402,9 @@ function renderSum(counts) {
 }
 
 $('wkSave').onclick = async () => {
-  const abs = W.cover.filter(r => r.type !== 'Extra');
+  const abs = W.cover.filter(r => r.type === 'Absent');
   const open = abs.filter(r => !r.substitute).length;
-  const extra = W.cover.length - abs.length;
+  const extra = W.cover.filter(r => r.type === 'Extra').length;
   if (!window.confirm(`Save the week of ${shortDate(W.weekStart)}?\n\n${abs.length} absent session(s), ${abs.length - open} covered, ${open} without a substitute, ${extra} extra class(es).`)) return;
   const btn = $('wkSave');
   btn.disabled = true;
@@ -1299,7 +1413,7 @@ $('wkSave').onclick = async () => {
     const counts = weekCounts();
     await post('ttSaveWeek', {
       weekStart: W.weekStart,
-      cover: W.cover.map(r => ({ type: ['Extra', 'Factory'].includes(r.type) ? r.type : 'Absent', teacher: r.teacher, date: r.date,
+      cover: W.cover.map(r => ({ type: ['Extra', 'Factory', 'NoFactory'].includes(r.type) ? r.type : 'Absent', teacher: r.teacher, date: r.date,
         session: r.session, substitute: r.substitute || '', cls: r.cls })),
       limits: W.teachers.map(t => ({ teacher: t, days: counts[t].days, max: counts[t].max }))
     });
