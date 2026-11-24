@@ -1824,7 +1824,7 @@ function tRender(w) {
   const added = (c.subs || 0) + (c.extra || 0);
   $('tStats').innerHTML =
     `<div><span>Classes</span><b>${c.planned}</b></div>` +
-    `<div><span>Absent</span><b>${c.absent ? '−' + c.absent : 0}</b></div>` +
+    `<div><span>Absent or factory</span><b>${c.absent ? '−' + c.absent : 0}</b></div>` +
     `<div><span>Substitutions + extra</span><b>${added ? '+' + added : 0}</b></div>` +
     `<div><span>Total this week${c.max !== undefined ? ' · max ' + c.max : ''}</span><b>${c.total}</b></div>`;
   const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
@@ -1839,6 +1839,10 @@ function tRender(w) {
       const sub = w.subs.find(x => x.day === day && x.session === s);
       if (mine && mine.factory) {
         html += `<td class="fac" title="Factory day: field training all day, not counted as classes"><b>${esc(mine.cls)}</b><small>factory day</small></td>`;
+      } else if (mine && mine.factoryDay) {
+        html += `<td class="fac" title="Factory day"><b>${esc(mine.cls)}</b><small>${mine.coveredBy ? 'factory · ' + esc(mine.coveredBy) + ' covers' : 'factory day'}</small></td>`;
+      } else if (!mine && !sub && (w.factoryDays || []).includes(day)) {
+        html += '<td class="fac" title="Factory day"><small>factory</small></td>';
       } else if (mine) {
         const note = mine.absent ? (mine.coveredBy ? 'absent · ' + esc(mine.coveredBy) + ' covers' : 'absent') : esc(mine.subject);
         html += `<td class="${mine.absent ? 'abs' : ''}"><b>${esc(mine.cls)}</b><small>${note}</small></td>`;
@@ -1891,12 +1895,12 @@ function teamHTML(o) {
   let anything = false;
   o.teachers.forEach(t => {
     const mine = dayPlanned.filter(p => p.teacher === t);
-    const absent = dayCover.filter(c => c.type !== 'Extra' && c.teacher === t);
+    const absent = dayCover.filter(c => c.type === 'Absent' && c.teacher === t);
     const covering = dayCover.filter(c => c.substitute === t);
     const name = `<td class="tmN" title="${esc(t)}">${esc(tmFirst(t))}</td>`;
     const rowCls = t === o.me ? ' class="me"' : '';
     if (mine.length || covering.length) anything = true;
-    if (mine.some(p => p.factory)) { html += `<tr${rowCls}>${name}<td class="tmF" colspan="8">Factory day</td></tr>`; return; }
+    if (mine.some(p => p.factory) || dayCover.some(c => c.type === 'Factory' && c.teacher === t)) { html += `<tr${rowCls}>${name}<td class="tmF" colspan="8">Factory day</td></tr>`; return; }
     if (mine.length && mine.every(p => absent.some(a => a.session === p.session)) && !covering.length) {
       html += `<tr${rowCls}>${name}<td class="tmX" colspan="8">Absent</td></tr>`; return;
     }
