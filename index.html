@@ -238,6 +238,9 @@
 .pill.P,.pill.ok{background:var(--ok-bg);color:var(--ok-ink)}.pill.L{background:#FDF1C8;color:#5c4500}.pill.A,.pill.bad{background:var(--err-bg);color:var(--err-ink)}
 .pill.q{background:#FDF1C8;color:#5c4500}
 .profNote{font-size:12px;color:var(--muted);margin:10px 0 0}
+.profTools{display:flex;gap:6px;justify-content:flex-end;margin-top:10px}
+.profBtn{background:transparent;border:1px solid var(--brand-dark);color:var(--ink);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer}
+
 </style>
 </head>
 <body>
@@ -2096,12 +2099,13 @@ async function ywPdf() {
   showIn($('sMsg'), 'Making the sheet…', true);
   try {
     const T = await ywTemplate();
-    if (!$('ywCss')) { const st = document.createElement('style'); st.id = 'ywCss'; st.textContent = YW_PRINT_CSS; document.head.appendChild(st); }
+    if (!$('ywCss')) { const st = document.createElement('style'); st.id = 'ywCss'; st.dataset.print = '1'; st.textContent = YW_PRINT_CSS; document.head.appendChild(st); }
     let box = $('ywPrint');
     if (!box) { box = document.createElement('div'); box.id = 'ywPrint'; document.body.appendChild(box); }
     box.innerHTML = out.pages.map(p => ywPageHtml(p, T.logo)).join('');
     const n = out.pages.length;
     showIn($('sMsg'), `${n} page${n > 1 ? 's' : ''}. In the print window choose "Save as PDF" (on iPhone: Share → Print, then Share → Save to Files).`, true);
+    document.querySelectorAll('style[data-print]').forEach(x => { x.disabled = x.id !== 'ywCss'; });
     const title = document.title;
     document.title = `قوائم أعمال السنة - ${out.pages[0].cls} - ${S2.from} to ${S2.to}`;
     setTimeout(() => { window.print(); document.title = title; }, 300);
@@ -2131,7 +2135,8 @@ function profHTML(p) {
   const day = ymd => { const [y, m, dd] = String(ymd).split('-').map(Number); return isNaN(dd) ? ymd : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date(y, m - 1, dd).getDay()] + ' ' + dd + '/' + m + (y !== new Date().getFullYear() ? '/' + y : ''); };
   let h = `<div class="profHead"><div class="profAv">${e((p.student || '?').trim()[0])}</div><div><h2>${e(p.student)}</h2>` +
     `<small>${e(group || '')}${p.own ? ' · your grades and evaluations only' : ' · all teachers'}</small></div>` +
-    `<button class="profX" type="button" data-prof-close aria-label="Close">×</button></div>`;
+    `<button class="profX" type="button" data-prof-close aria-label="Close">×</button></div>` +
+    `<div class="profTools"><button type="button" class="profBtn" data-prof-print>Print / PDF</button><button type="button" class="profBtn" data-prof-xlsx>Excel</button></div>`;
   h += `<div class="profKpi"><div><b>${pct(got, outOf)}</b><span>Class average</span></div>` +
     `<div><b>${pct(att.P + att.L, d.length)}</b><span>Attendance (${att.P} present · ${att.L} late)</span></div>` +
     `<div><b>${att.A}</b><span>Absent sessions</span></div><div><b>${f.length}</b><span>Factory evaluations</span></div>` +
@@ -2171,11 +2176,109 @@ async function profShow(student) {
   card.innerHTML = `<div class="profHead"><h2>${String(student).replace(/</g, '&lt;')}</h2><button class="profX" type="button" data-prof-close aria-label="Close">×</button></div><p class="profNote">Loading…</p>`;
   try {
     const p = await post(PROF_ACTION, { student, ...PROF_EXTRA() });
+    PROF_LAST = p;
     card.innerHTML = profHTML(p);
   } catch (err) {
     card.innerHTML = `<div class="profHead"><h2>${String(student).replace(/</g, '&lt;')}</h2><button class="profX" type="button" data-prof-close aria-label="Close">×</button></div><p class="profNote">Could not load the profile: ${String(err.message).replace(/</g, '&lt;')}</p>`;
   }
 }
+
+// ---------- printing: the school header on every page, then the browser's Print → Save as PDF ----------
+// prPrint({ pages: [{ title, sub, html }], landscape }) — one A4 page (or more, if long) per entry.
+function prLogo() {
+  if (window.YW_TEMPLATE) return Promise.resolve(window.YW_TEMPLATE.logo);
+  return new Promise(ok => {
+    const s = document.createElement('script');
+    s.src = 'yearwork-template.js?v=2';
+    s.onload = () => ok(window.YW_TEMPLATE ? window.YW_TEMPLATE.logo : '');
+    s.onerror = () => ok('');            // still prints, without the logos
+    document.head.appendChild(s);
+  });
+}
+const prEsc = t => String(t === undefined || t === null ? '' : t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+function prToday() { const d = new Date(); return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`; }
+async function prPrint(o) {
+  const logo = await prLogo();
+  let css = $('prCss');
+  if (!css) { css = document.createElement('style'); css.id = 'prCss'; css.dataset.print = '1'; document.head.appendChild(css); }
+  css.textContent = `
+#prDoc{display:none}
+@media print{body>*:not(#prDoc){display:none!important}#prDoc{display:block!important}html,body{background:#fff!important;color:#000!important}}
+@page{size:A4 ${o.landscape ? 'landscape' : 'portrait'};margin:9mm 9mm 13mm;
+  @bottom-right{content:"Page " counter(page) " of " counter(pages);font:9px Arial,sans-serif;color:#555}
+  @bottom-left{content:"OMHG EVA SCHOOL · printed ${prToday()}";font:9px Arial,sans-serif;color:#555}}
+#prDoc{color:#000;font-family:Arial,"Segoe UI",Tahoma,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+#prDoc *{text-transform:none!important;letter-spacing:normal!important}
+.prPage{break-after:page;page-break-after:always}.prPage:last-child{break-after:auto;page-break-after:auto}
+.prHead{display:flex;justify-content:space-between;align-items:center;gap:6mm;direction:rtl;border-bottom:1.2px solid #000;padding-bottom:2.5mm;margin-bottom:4mm}
+.prHead .t{font-weight:700;font-size:11.5px;line-height:1.5;white-space:nowrap}
+.prHead img{height:14mm;width:auto}
+.prTitle{font-size:16px;font-weight:700;margin:0 0 1mm}
+.prSub{font-size:11px;color:#333;margin:0 0 4mm}
+#prDoc table{width:100%;border-collapse:collapse;font-size:10px;min-width:0}
+#prDoc th{background:#f1f1f1;color:#000;text-align:left;border:.5px solid #999;padding:3px 4px;font-size:9.5px;white-space:nowrap}
+#prDoc td{border:.5px solid #bbb;padding:3px 4px;color:#000;background:#fff}
+#prDoc tr{break-inside:avoid;page-break-inside:avoid}
+#prDoc .pill{border:.5px solid #999}
+#prDoc .profX,#prDoc .profTools,#prDoc .noPrint{display:none!important}
+#prDoc .profHead{margin-bottom:3mm}#prDoc .profAv{width:11mm;height:11mm;font-size:15px;background:#f1f1f1}
+#prDoc .profKpi{display:grid;grid-template-columns:repeat(5,1fr);gap:2mm;margin:2mm 0 4mm}
+#prDoc .profKpi div{border:.5px solid #bbb;border-radius:2mm;background:#fff;padding:2mm}
+#prDoc .profKpi b{font-size:15px}#prDoc .profKpi span{font-size:9px;color:#333}
+#prDoc h3{font-size:12.5px;margin:4mm 0 1.5mm}
+#prDoc .profWrap{overflow:visible}
+#prDoc .prKpis{display:grid;grid-template-columns:repeat(4,1fr);gap:2mm;margin:0 0 4mm}
+#prDoc .prKpis div{border:.5px solid #bbb;border-radius:2mm;padding:2mm}#prDoc .prKpis b{display:block;font-size:15px}#prDoc .prKpis span{font-size:9px;color:#333}
+`;
+  let box = $('prDoc');
+  if (!box) { box = document.createElement('div'); box.id = 'prDoc'; document.body.appendChild(box); }
+  const head = `<div class="prHead"><div class="t"><div>وزارة التربية والتعليم والتعليم الفني</div>` +
+    `<div>وحدة تشغيل وإدارة مدارس التكنولوجيا التطبيقية</div><div>مدرسة إيفا الدولية للتكنولوجيا التطبيقية</div></div>` +
+    (logo ? `<img src="data:image/png;base64,${logo}" alt="">` : '') + '</div>';
+  box.innerHTML = o.pages.map(p => `<section class="prPage">${head}` +
+    (p.title ? `<div class="prTitle">${prEsc(p.title)}</div>` : '') + (p.sub ? `<div class="prSub">${prEsc(p.sub)}</div>` : '') +
+    p.html + '</section>').join('');
+  // only this page's print rules are active while printing
+  document.querySelectorAll('style[data-print]').forEach(x => { x.disabled = x.id !== 'prCss'; });
+  const title = document.title;
+  if (o.file) document.title = o.file;
+  setTimeout(() => { window.print(); document.title = title; }, 350);
+}
+function prDownload(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+// A profile as Excel: one sheet for class grades, one for factory evaluations
+function profSheets(p) {
+  const att = { P: 'Present', L: 'Late', A: 'Absent' };
+  const group = p.dept ? `${p.cls} ${p.dept}` : p.cls;
+  return [
+    { name: 'Class grades', bold: [0, 2], rows: [[`${p.student} · ${group}`], [],
+      ['Date', 'Session', 'Teacher', 'Class', 'Attendance', 'Behaviour', 'Participation', 'Assignment', 'Assignment title', 'Quiz', 'Quiz title', 'Total', 'Out of'],
+      ...p.daily.map(r => [r.date, r.session, r.teacher, r.dept ? `${r.cls} ${r.dept}` : r.cls, att[r.att] || r.att,
+        r.behaviour, r.participation, r.assignment, r.assignmentTitle || '', r.quiz, r.quizTitle || '', r.total, r.outOf])] },
+    { name: 'Factory evaluations', bold: [0, 2], rows: [[`${p.student} · ${group}`], [],
+      ['Date', 'Teacher', 'Class', 'Evaluation', 'Score /5', 'Incident', 'Comment'],
+      ...p.factory.map(x => [x.date, x.teacher, x.cls, x.evaluation, x.evaluation === 'Absent' ? '' : x.score, x.incidents ? 'Yes' : '', x.comment])] }
+  ];
+}
+
+let PROF_LAST = null;
+document.addEventListener('click', ev => {
+  if (!PROF_LAST) return;
+  const p = PROF_LAST, group = p.dept ? `${p.cls} ${p.dept}` : p.cls;
+  if (ev.target.closest('[data-prof-print]')) {
+    prPrint({ file: `Student profile - ${p.student}`, pages: [{ title: 'Student profile',
+      sub: `${p.own ? 'Your grades and evaluations only' : 'All teachers'} · printed ${prToday()}`, html: profHTML(p) }] });
+  } else if (ev.target.closest('[data-prof-xlsx]')) {
+    prDownload(xlsxBlob(profSheets(p)), `Student profile - ${p.student} - ${group}.xlsx`);
+  }
+});
 // any element with class "stLink" and data-st opens that student's profile
 document.addEventListener('click', ev => {
   const a = ev.target.closest('.stLink[data-st]');
