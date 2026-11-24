@@ -51,6 +51,8 @@ li small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
 .ptabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
 .ptabs button{flex:1;min-width:160px;height:44px;border-radius:10px;border:1px solid var(--brand-dark);background:var(--card);color:var(--ink);font-size:15px;font-weight:600;cursor:pointer}
 .ptabs button.on{background:var(--brand);color:#1d1d1d}
+.ptabs button small{display:block;font-size:11px;font-weight:400;color:var(--muted)}
+.ptabs.kind{padding:6px;border-radius:12px;background:var(--brand-soft);margin-top:-6px}
 .ttWrap{overflow-x:auto}
 .ttGrid{width:100%;border-collapse:collapse;table-layout:fixed;min-width:640px;font-size:13px}
 .ttGrid th{font-weight:600;color:var(--muted);padding:4px;text-align:center;font-size:12px}
@@ -175,9 +177,13 @@ main.wide{max-width:1200px}
   <nav class="ptabs">
     <button type="button" id="tabLists" class="on">Teachers, classes and students</button>
     <button type="button" id="tabTT">Timetable</button>
-    <button type="button" id="tabGrades">Grading</button>
-    <button type="button" id="tabEvals">Evaluations</button>
+    <button type="button" id="tabEvalAll">Evaluations<small>class or factory</small></button>
     <button type="button" id="tabAssess">Assessments</button>
+    <button type="button" id="tabTeam">Team hub</button>
+  </nav>
+  <nav class="ptabs kind" id="kindTabs" hidden>
+    <button type="button" id="tabGrades">Class<small>daily grading</small></button>
+    <button type="button" id="tabEvals">Factory<small>factory evaluations</small></button>
   </nav>
   <div id="paneLists">
   <div id="status"></div>
@@ -320,6 +326,13 @@ main.wide{max-width:1200px}
     <iframe id="boardFrame" title="Evaluations board" class="boardFrame"></iframe>
   </div>
 
+  <!-- ===================== TEAM HUB ===================== -->
+  <div id="paneTeam" hidden>
+    <div class="card soonCard">
+      <h2>Team hub</h2>
+      <p>Coming soon.</p>
+    </div>
+  </div>
   <!-- ===================== ASSESSMENTS ===================== -->
   <div id="paneAssess" hidden>
     <div class="card soonCard">
@@ -818,13 +831,18 @@ const PDFJS_BASES = [`https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/b
 
 // ---------- page tabs: lists | timetable ----------
 const PANES = { lists: ['paneLists', 'tabLists'], tt: ['paneTT', 'tabTT'], grades: ['paneGrades', 'tabGrades'],
-  evals: ['paneEvals', 'tabEvals'], assess: ['paneAssess', 'tabAssess'] };
+  evals: ['paneEvals', 'tabEvals'], assess: ['paneAssess', 'tabAssess'], team: ['paneTeam', 'tabTeam'] };
 function showPane(p) {
   if (!PANES[p]) p = 'lists';
   Object.keys(PANES).forEach(k => {
     $(PANES[k][0]).hidden = k !== p;
     $(PANES[k][1]).classList.toggle('on', k === p);
   });
+  // Evaluations = class (grading) or factory: one button on top, the choice under it
+  const isEval = p === 'grades' || p === 'evals';
+  $('tabEvalAll').classList.toggle('on', isEval);
+  $('kindTabs').hidden = !isEval;
+  if (isEval) localStorage.setItem('adminEvalKind', p);
   $('loadBtn').hidden = $('saveBtn').hidden = p !== 'lists';
   $('main').classList.toggle('wide', p === 'evals' || p === 'grades' || p === 'tt');
   localStorage.setItem('adminPane', p);
@@ -833,6 +851,7 @@ function showPane(p) {
   if (p === 'evals') evInit();
 }
 Object.keys(PANES).forEach(k => { $(PANES[k][1]).onclick = () => showPane(k); });
+$('tabEvalAll').onclick = () => showPane(localStorage.getItem('adminEvalKind') === 'evals' ? 'evals' : 'grades');
 
 function ttMsg(text, ok) {
   const el = $('ttStatus');
