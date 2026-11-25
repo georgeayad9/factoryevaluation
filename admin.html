@@ -264,6 +264,43 @@ main.wide{max-width:1200px}
 .pfNote .del{background:transparent;border:0;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px}
 .pfSum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:8px 0}
 .pfSum div{background:var(--bg);border-radius:10px;padding:9px 11px}.pfSum b{display:block;font-size:19px}.pfSum span{font-size:12px;color:var(--muted)}
+/* round 3: calmer header and tabs, search, saved views, trends, compare */
+.moreWrap{position:relative;flex:1;min-width:130px;display:flex}
+.moreWrap > button{flex:1}
+.moreList{position:absolute;right:0;top:calc(100% + 6px);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px;z-index:40;min-width:240px;box-shadow:0 8px 24px rgba(0,0,0,.14)}
+.ptabs .moreList button{display:block;width:100%;height:auto;min-width:0;text-align:left;border:0;padding:10px 12px;border-radius:8px;background:transparent;font-size:15px}
+.ptabs .moreList button:hover{background:var(--bg)}
+.ptabs .moreList button.on{background:var(--brand-soft);color:var(--ink)}
+.hdrMore{position:relative}
+.hdrList{position:absolute;right:0;top:calc(100% + 6px);background:var(--card);border:1px solid var(--line);border-radius:12px;padding:6px;z-index:40;min-width:170px;box-shadow:0 8px 24px rgba(0,0,0,.14)}
+header .hdrList .btn{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--ink);margin:0}
+header .hdrList .btn:hover{background:var(--bg)}
+#findBox{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:70;display:flex;justify-content:center;align-items:flex-start;padding:60px 12px 12px}
+#findBox[hidden]{display:none}
+.findCard{background:var(--card);color:var(--ink);border-radius:14px;width:100%;max-width:560px;box-shadow:0 10px 30px rgba(0,0,0,.25);overflow:hidden}
+.findCard input{border:0;border-bottom:1px solid var(--line);border-radius:0;font-size:17px;padding:14px 16px;width:100%;box-sizing:border-box;background:var(--card);color:var(--ink)}
+.findCard input:focus{outline:none}
+.findRes{max-height:60vh;overflow-y:auto;padding:6px}
+.findRes h4{font-size:11px;color:var(--muted);margin:8px 10px 4px;font-weight:600;letter-spacing:.3px}
+.findRes button{display:flex;justify-content:space-between;gap:10px;width:100%;text-align:left;border:0;background:transparent;color:var(--ink);padding:9px 10px;border-radius:8px;font-size:15px;cursor:pointer}
+.findRes button small{color:var(--muted);font-size:12px}
+.findRes button.on,.findRes button:hover{background:var(--brand-soft)}
+.findHint{font-size:12px;color:var(--muted);padding:8px 16px;border-top:1px solid var(--line)}
+.stViews{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.stView{display:inline-flex;align-items:center;border:1px solid var(--brand-dark);border-radius:999px;overflow:hidden}
+.stView button{background:transparent;border:0;color:var(--ink);padding:5px 10px;font-size:13px;cursor:pointer}
+.stView button.x{padding:5px 9px 5px 2px;color:var(--muted)}
+.stView.on{background:var(--brand-soft)}
+.spark{vertical-align:middle;margin-right:4px}
+.trUp{color:var(--ok-ink);font-weight:700}.trDown{color:var(--danger);font-weight:700}.trFlat{color:var(--muted)}
+.cmpGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+.cmpSide{border:1px solid var(--line);border-radius:10px;padding:10px}
+.cmpSide b{display:block;margin-bottom:6px}
+.cmpT{width:100%;border-collapse:collapse;font-size:14px}
+.cmpT th{font-size:11px;color:var(--muted);text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);font-weight:600}
+.cmpT td{padding:8px 6px;border-bottom:1px solid var(--line)}
+.cmpT td.n{font-weight:700;font-size:15px}
+.better{color:var(--ok-ink)}.worse{color:var(--danger)}
 </style>
 </head>
 <body>
@@ -271,11 +308,17 @@ main.wide{max-width:1200px}
 <header>
   <h1>OMHG EVA SCHOOL — Admin</h1>
   <div class="tools">
-    <button class="btn alt bellBtn" id="bellBtn" type="button" hidden aria-label="Notifications">🔔<span class="bellBadge" id="bellBadge" hidden>0</span></button>
-    <button class="btn alt" id="themeBtn" type="button">Dark</button>
     <button class="btn alt" id="loadBtn" type="button">Reload</button>
     <button class="btn save" id="saveBtn" type="button" disabled>Save</button>
-    <button class="btn alt" id="signOutBtn" type="button" hidden>Sign out</button>
+    <button class="btn alt" id="findBtn" type="button" hidden aria-label="Search (press /)" title="Search (press /)">🔍</button>
+    <button class="btn alt bellBtn" id="bellBtn" type="button" hidden aria-label="Notifications">🔔<span class="bellBadge" id="bellBadge" hidden>0</span></button>
+    <div class="hdrMore">
+      <button class="btn alt" id="hdrMoreBtn" type="button" aria-label="More" aria-expanded="false">⋯</button>
+      <div class="hdrList" id="hdrList" hidden>
+        <button class="btn alt" id="themeBtn" type="button">Dark</button>
+        <button class="btn alt" id="signOutBtn" type="button" hidden>Sign out</button>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -307,11 +350,16 @@ main.wide{max-width:1200px}
   <nav class="ptabs">
     <button type="button" id="tabStudents">Students</button>
     <button type="button" id="tabTeachers">Teachers</button>
-    <button type="button" id="tabLists" class="on">Teachers, classes and students</button>
     <button type="button" id="tabTT">Timetable</button>
     <button type="button" id="tabEvalAll">Evaluations<small>class or factory</small></button>
-    <button type="button" id="tabAssess">Assessments</button>
-    <button type="button" id="tabTeam">Team hub</button>
+    <div class="moreWrap">
+      <button type="button" id="tabMore" aria-expanded="false">⋯ More</button>
+      <div class="moreList" id="moreList" hidden>
+        <button type="button" id="tabLists">Setup<small>teachers, classes and students</small></button>
+        <button type="button" id="tabAssess">Assessments<small>coming soon</small></button>
+        <button type="button" id="tabTeam">Team hub<small>coming soon</small></button>
+      </div>
+    </div>
   </nav>
   <nav class="ptabs kind" id="kindTabs" hidden>
     <button type="button" id="tabGrades">Class<small>daily grading</small></button>
@@ -486,6 +534,7 @@ main.wide{max-width:1200px}
       <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
         <h2 style="margin:0">Students</h2>
         <div class="exMenu">
+          <button class="btn alt small" id="stCmpBtn" type="button">⇄ Compare</button>
           <button class="btn alt small" id="stExBtn" type="button" aria-expanded="false">⤓ Export</button>
           <div class="exList" id="stExList" hidden>
             <button type="button" data-ex="xlsx">Excel<small>Exactly what's on screen: filters, sorting and columns</small></button>
@@ -507,8 +556,11 @@ main.wide{max-width:1200px}
           <label for="stPeriod">Dates</label>
           <select id="stPeriod">
             <option value="week">This week</option>
+            <option value="lastweek">Last week</option>
             <option value="month" selected>This month</option>
+            <option value="lastmonth">Last month</option>
             <option value="term">This term</option>
+            <option value="lastterm">Last term</option>
             <option value="year">This school year</option>
             <option value="custom">Choose dates…</option>
           </select>
@@ -518,6 +570,7 @@ main.wide{max-width:1200px}
         <div><label for="stFrom">From</label><input type="date" id="stFrom"></div>
         <div><label for="stTo">To</label><input type="date" id="stTo"></div>
       </div>
+      <div class="stViews" id="stViews"></div>
       <div class="stChips" id="stChips">
         <button type="button" class="stChip on" data-f="all">All</button>
         <button type="button" class="stChip" data-f="abs">Absence alert</button>
@@ -528,6 +581,21 @@ main.wide{max-width:1200px}
       <div class="stSum" id="stSum"></div>
       <div class="ttWrap"><table class="stT" id="stT"></table></div>
       <p class="hint" id="stHint">Tap a column to sort. Tap a student to open the profile.</p>
+    </div>
+    <!-- COMPARE: two classes or two periods side by side -->
+    <div class="card" id="cmpCard" hidden>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <h2 style="margin:0">Compare</h2>
+        <span><button class="btn alt small" id="cmpPrint" type="button">Print / PDF</button>
+        <button class="btn alt small" id="cmpClose" type="button" aria-label="Close compare">×</button></span>
+      </div>
+      <div class="cmpGrid">
+        <div class="cmpSide"><b>A</b><label for="cmpClsA">Class</label><select id="cmpClsA"></select>
+          <label for="cmpPerA" style="margin-top:6px">Dates</label><select id="cmpPerA"></select></div>
+        <div class="cmpSide"><b>B</b><label for="cmpClsB">Class</label><select id="cmpClsB"></select>
+          <label for="cmpPerB" style="margin-top:6px">Dates</label><select id="cmpPerB"></select></div>
+      </div>
+      <div id="cmpOut"></div>
     </div>
   </div>
 
@@ -642,6 +710,14 @@ main.wide{max-width:1200px}
     </div>
   </div>
 </main>
+<div id="findBox" hidden>
+  <div class="findCard" role="dialog" aria-modal="true" aria-label="Search">
+    <input type="search" id="findQ" placeholder="Search a student, teacher, class or screen…" autocomplete="off">
+    <div class="findRes" id="findRes"></div>
+    <div class="findHint">↑ ↓ to move · Enter to open · Esc to close · press / anytime to search</div>
+  </div>
+</div>
+
 
 <script>
 // ===================== CONFIGURATION (edit these two lines) =====================
@@ -1073,6 +1149,11 @@ function showPane(p) {
   $('kindTabs').hidden = !isEval;
   if (isEval) localStorage.setItem('adminEvalKind', p);
   $('loadBtn').hidden = $('saveBtn').hidden = p !== 'lists';
+  // the ⋯ More tab shows which of its screens is open
+  const more = { lists: 'Setup', assess: 'Assessments', team: 'Team hub' }[p];
+  $('tabMore').classList.toggle('on', !!more);
+  $('tabMore').innerHTML = more ? `⋯ More<small>${more}</small>` : '⋯ More';
+  $('moreList').hidden = true;
   $('main').classList.toggle('wide', p === 'evals' || p === 'grades' || p === 'tt');
   localStorage.setItem('adminPane', p);
   if (p === 'tt' && !W.loaded) loadWeek();
@@ -2552,18 +2633,36 @@ $('dbTo').onchange = dbLoad;
 // ===================== STUDENTS: one screen for every student =====================
 // Search, class, dates and filter chips narrow the list; the 4 numbers on top follow the list.
 // Export gives exactly what is on screen.
-const ST = { rows: [], from: '', to: '', filter: 'all', sort: 'name', dir: 1, loading: false };
+const ST = { rows: [], from: '', to: '', filter: 'all', sort: 'name', dir: 1, loading: false, cache: {}, views: null, view: '' };
 const ST_EV = { Outstanding: 'O', Proficient: 'P', Developing: 'D', 'Needs Improvement': 'N', Unsatisfactory: 'U', Absent: 'A' };
 function stRange(kind) {
   const now = new Date(), y = now.getFullYear(), m = now.getMonth() + 1;
   const today = isoDay(now);
-  if (kind === 'week') { const s = new Date(now); s.setDate(now.getDate() - now.getDay()); return [isoDay(s), today]; }
+  const ws = new Date(now); ws.setDate(now.getDate() - now.getDay());
+  if (kind === 'week') return [isoDay(ws), today];
+  if (kind === 'lastweek') { const a = new Date(ws); a.setDate(ws.getDate() - 7); const b = new Date(ws); b.setDate(ws.getDate() - 1); return [isoDay(a), isoDay(b)]; }
   if (kind === 'month') return [`${y}-${String(m).padStart(2, '0')}-01`, today];
+  if (kind === 'lastmonth') { const a = new Date(y, m - 2, 1), b = new Date(y, m - 1, 0); return [isoDay(a), isoDay(b)]; }
   const start = m >= 9 ? y : y - 1;
   if (kind === 'year') return [`${start}-09-01`, today];
   // term 1 = September to January, term 2 = February to August
-  if (m >= 9 || m === 1) return [`${start}-09-01`, today];
+  const t1 = m >= 9 || m === 1;
+  if (kind === 'lastterm') return t1 ? [`${start}-02-01`, `${start}-08-31`] : [`${start}-09-01`, `${start + 1}-01-31`];
+  if (t1) return [`${start}-09-01`, today];
   return [`${start + 1}-02-01`, today];
+}
+const ST_PERIODS = { week: 'This week', lastweek: 'Last week', month: 'This month', lastmonth: 'Last month', term: 'This term', lastterm: 'Last term', year: 'This school year' };
+// trend: this student's class average over the last 8 weeks; the arrow compares the latest week with the weeks before
+function stTrend(r) {
+  const t = (r.trend || []).map((v, i) => [i, v]).filter(x => x[1] !== null);
+  if (t.length < 2) return { delta: null, html: '<span class="sub" style="display:inline">—</span>' };
+  const last = t[t.length - 1][1], before = t.slice(0, -1).reduce((s, x) => s + x[1], 0) / (t.length - 1);
+  const delta = Math.round(last - before);
+  const W = 64, H = 18, pts = t.map(([i, v]) => `${(i / 7 * (W - 4) + 2).toFixed(1)},${(H - 2 - v / 100 * (H - 4)).toFixed(1)}`).join(' ');
+  const cls = delta >= 5 ? 'trUp' : delta <= -5 ? 'trDown' : 'trFlat';
+  const col = delta >= 5 ? '#1D9E75' : delta <= -5 ? '#E24B4A' : '#999';
+  return { delta, html: `<svg class="spark" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-hidden="true"><polyline fill="none" stroke="${col}" stroke-width="1.6" points="${pts}"/></svg>` +
+    `<span class="${cls}">${delta >= 5 ? '↑' : delta <= -5 ? '↓' : '→'}${delta > 0 ? '+' : ''}${delta}</span>` };
 }
 const stGroup = r => r.dept ? `${r.cls} · ${r.dept}` : r.cls;
 const stPct = (a, b) => b ? Math.round(a / b * 100) : null;
@@ -2580,6 +2679,7 @@ const ST_FILTERS = {
 function stShown() {
   const q = $('stQ').value.trim().toLowerCase(), c = $('stCls').value;
   const val = { name: r => r.name, cls: r => stGroup(r), att: r => stAtt(r) ?? -1, avg: r => stAvg(r) ?? -1,
+    trend: r => stTrend(r).delta ?? -999,
     abs: r => r.absDays.length, fac: r => r.fAvg === '' ? -1 : r.fAvg };
   return ST.rows.filter(r => (!q || r.name.toLowerCase().includes(q)) && (!c || stGroup(r) === c) && ST_FILTERS[ST.filter](r))
     .sort((a, b) => { const x = val[ST.sort](a), y = val[ST.sort](b); return (x > y ? 1 : x < y ? -1 : a.name.localeCompare(b.name)) * ST.dir; });
@@ -2605,16 +2705,18 @@ function stRender() {
     `<div><b>${stPct(sumGot, sumOut) ?? '—'}${sumOut ? '%' : ''}</b><span>Class average</span></div>` +
     `<div><b style="color:${R.filter(stNeeds).length ? 'var(--danger)' : 'inherit'}">${R.filter(stNeeds).length}</b><span>Need attention</span></div>`;
   const th = (k, l) => `<th data-k="${k}">${l}${ST.sort === k ? (ST.dir > 0 ? ' ↑' : ' ↓') : ''}</th>`;
-  $('stT').innerHTML = `<tr>${th('name', 'Student')}${th('att', 'Attendance')}${th('avg', 'Class average')}${th('abs', 'Absent days')}${th('fac', 'Factory')}<th class="noSort">Flags</th></tr>` +
+  $('stT').innerHTML = `<tr>${th('name', 'Student')}${th('att', 'Attendance')}${th('avg', 'Class average')}${th('trend', 'Trend (8 weeks)')}${th('abs', 'Absent days')}${th('fac', 'Factory')}<th class="noSort">Flags</th></tr>` +
     (R.length ? R.map(r => {
       const a = stAtt(r), g = stAvg(r);
       return `<tr><td><span class="stLink" data-st="${esc(r.name)}"><b>${esc(r.name)}</b></span><span class="sub">${esc(stGroup(r))}</span></td>` +
         `<td>${a === null ? '<span class="sub">—</span>' : `<span class="mBar"><i style="width:${a}%;background:${stColor(a)}"></i></span>${a}%`}</td>` +
         `<td>${g === null ? '<span class="sub">—</span>' : `<b style="color:${g < 60 ? 'var(--danger)' : 'inherit'}">${g}%</b>`}</td>` +
+        `<td>${stTrend(r).html}</td>` +
         `<td>${r.absDays.length || '—'}</td>` +
         `<td>${r.fCount ? `${esc(ST_EV[r.fLast] || r.fLast)}${r.fAvg !== '' ? ` <span class="sub" style="display:inline">avg ${r.fAvg}/5</span>` : ''}` : '<span class="sub">—</span>'}</td>` +
         `<td>${stFlags(r) || '<span class="sub">—</span>'}</td></tr>`;
-    }).join('') : '<tr><td colspan="6" class="empty">No students match.</td></tr>');
+    }).join('') : '<tr><td colspan="7" class="empty">No students match.</td></tr>');
+  stViewsRender();
 }
 async function stLoad() {
   let from, to;
@@ -2631,14 +2733,20 @@ async function stLoad() {
     ST.from = out.from; ST.to = out.to;
     const groups = [...new Set(ST.rows.map(stGroup))].sort();
     const keep = $('stCls').value;
-    $('stCls').innerHTML = '<option value="">All classes</option>' + groups.map(g => `<option${g === keep ? ' selected' : ''}>${esc(g)}</option>`).join('');
+    const want = ST.wantClass !== undefined ? ST.wantClass : keep;
+    ST.wantClass = undefined;
+    $('stCls').innerHTML = '<option value="">All classes</option>' + groups.map(g => `<option${g === want ? ' selected' : ''}>${esc(g)}</option>`).join('');
+    ST.cache[out.from + '|' + out.to] = ST.rows;
     $('stHint').textContent = `${ST.from} to ${ST.to}. Tap a column to sort. Tap a student to open the profile.`;
     stRender();
   } catch (e) {
     $('stHint').textContent = 'Could not load the students: ' + e.message;
   }
 }
-function stInit() { if (!ST.rows.length) stLoad(); else stRender(); }
+function stInit() {
+  if (ST.views === null) post('adminViews', {}).then(o => { ST.views = o.views || []; stViewsRender(); }).catch(() => { ST.views = []; });
+  if (!ST.rows.length) stLoad(); else stRender();
+}
 $('stQ').oninput = stRender;
 $('stCls').onchange = stRender;
 $('stPeriod').onchange = () => { if ($('stPeriod').value === 'custom') { $('stCustom').hidden = false; return; } stLoad(); };
@@ -2660,11 +2768,11 @@ function stFilterText() {
   return parts.join(' · ');
 }
 function stRowsOut(R) {
-  return R.map(r => [r.name, stGroup(r), stAtt(r) ?? '', stAvg(r) ?? '', r.P, r.L, r.A, r.absDays.length, r.absDays.join(', '),
+  return R.map(r => [r.name, stGroup(r), stAtt(r) ?? '', stAvg(r) ?? '', stTrend(r).delta ?? '', r.P, r.L, r.A, r.absDays.length, r.absDays.join(', '),
     r.fCount, r.fLast, r.fAvg, r.fInc, r.fAbsent ? 'Yes' : '',
     [r.absAlert ? 'Absence alert' : '', r.fInc ? 'Factory incident' : '', r.fAbsent ? 'Factory absent' : ''].filter(Boolean).join(', ')]);
 }
-const ST_HEAD = ['Student', 'Class', 'Attendance %', 'Class average %', 'Present', 'Late', 'Absent sessions', 'Absent days', 'Absent dates',
+const ST_HEAD = ['Student', 'Class', 'Attendance %', 'Class average %', 'Trend (change, points)', 'Present', 'Late', 'Absent sessions', 'Absent days', 'Absent dates',
   'Factory evaluations', 'Last factory result', 'Factory average /5', 'Factory incidents', 'Factory absent 8+ days', 'Flags'];
 $('stExBtn').onclick = ev => { ev.stopPropagation(); const l = $('stExList'); l.hidden = !l.hidden; $('stExBtn').setAttribute('aria-expanded', !l.hidden); };
 document.addEventListener('click', ev => { if (!ev.target.closest('.exMenu')) { $('stExList').hidden = true; $('stExBtn').setAttribute('aria-expanded', 'false'); } });
@@ -2877,6 +2985,188 @@ function pfPrintTeacher() {
       '</tbody></table>' : '<p style="font-size:10px">No notes.</p>');
   prPrint({ file: `Portfolio - ${d.teacher} - week of ${w.weekStart}`, pages: [{ title: `${d.teacher} · portfolio`, sub: `Week of ${pfDayName(w.weekStart)} ${w.weekStart} · private`, html }] });
 }
+
+
+// ===================== MENUS: ⋯ More tab and ⋯ header menu =====================
+$('tabMore').onclick = ev => { ev.stopPropagation(); const l = $('moreList'); l.hidden = !l.hidden; $('tabMore').setAttribute('aria-expanded', !l.hidden); };
+$('hdrMoreBtn').onclick = ev => { ev.stopPropagation(); const l = $('hdrList'); l.hidden = !l.hidden; $('hdrMoreBtn').setAttribute('aria-expanded', !l.hidden); };
+document.addEventListener('click', ev => {
+  if (!ev.target.closest('.moreWrap')) { $('moreList').hidden = true; $('tabMore').setAttribute('aria-expanded', 'false'); }
+  if (!ev.target.closest('.hdrMore') || ev.target.closest('.hdrList .btn')) { $('hdrList').hidden = true; $('hdrMoreBtn').setAttribute('aria-expanded', 'false'); }
+});
+
+// ===================== SEARCH EVERYWHERE: students, teachers, classes, screens =====================
+const FIND_SCREENS = [['Students', 'students'], ['Teachers', 'teachers'], ['Timetable', 'tt'], ['Class grading', 'grades'],
+  ['Factory evaluations', 'evals'], ['Setup: teachers, classes and students', 'lists'], ['Assessments', 'assess'], ['Team hub', 'team']];
+let FIND = { items: [], on: 0 };
+function findItems(q) {
+  const n = t => String(t || '').toLowerCase().replace(/[إأآ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه');
+  const qq = n(q.trim());
+  const hit = t => !qq || n(t).includes(qq);
+  const out = [];
+  const studs = RAW.filter(x => x.Type === 'Student' && hit(x.Name)).slice(0, qq ? 12 : 0)
+    .map(x => ({ group: 'Students', label: x.Name, sub: x.Department ? `${x.Parent} · ${x.Department}` : x.Parent, go: () => profShow(x.Name) }));
+  const teach = RAW.filter(x => x.Type === 'Teacher' && hit(x.Name)).slice(0, 8)
+    .map(x => ({ group: 'Teachers', label: x.Name, sub: 'portfolio', go: () => { showPane('teachers'); PF.sel = x.Name; if (PF.week) { pfRender(); pfOpen(x.Name); } } }));
+  const classes = [];
+  RAW.filter(x => x.Type === 'Class').forEach(c => {
+    const depts = [...new Set(RAW.filter(s => s.Type === 'Student' && s.Parent === c.Name && s.Department).map(s => s.Department))];
+    (depts.length ? depts.map(dp => `${c.Name} · ${dp}`) : [c.Name]).forEach(g => { if (hit(g)) classes.push(g); });
+  });
+  const cls = classes.slice(0, 8).map(g => ({ group: 'Classes', label: g, sub: 'students', go: () => {
+    showPane('students');
+    ST.filter = 'all'; $('stQ').value = '';
+    if (ST.rows.length) { $('stCls').value = g; stRender(); } else ST.wantClass = g;
+  } }));
+  const scr = FIND_SCREENS.filter(x => hit(x[0])).map(x => ({ group: 'Screens', label: x[0], sub: '', go: () => showPane(x[1]) }));
+  return out.concat(studs, teach, cls, scr);
+}
+function findRender() {
+  const q = $('findQ').value;
+  FIND.items = findItems(q);
+  FIND.on = Math.min(FIND.on, Math.max(0, FIND.items.length - 1));
+  let last = '', h = '';
+  FIND.items.forEach((it, i) => {
+    if (it.group !== last) { h += `<h4>${it.group}</h4>`; last = it.group; }
+    h += `<button type="button" data-i="${i}" class="${i === FIND.on ? 'on' : ''}"><span>${esc(it.label)}</span><small>${esc(it.sub)}</small></button>`;
+  });
+  $('findRes').innerHTML = h || `<div class="empty">Nothing found for "${esc(q)}".</div>`;
+}
+function findOpen() {
+  $('findBox').hidden = false;
+  $('findQ').value = '';
+  FIND.on = 0;
+  findRender();
+  setTimeout(() => $('findQ').focus(), 0);
+}
+function findGo(i) { const it = FIND.items[i]; if (!it) return; $('findBox').hidden = true; it.go(); }
+$('findBtn').onclick = findOpen;
+$('findQ').oninput = () => { FIND.on = 0; findRender(); };
+$('findQ').onkeydown = ev => {
+  if (ev.key === 'ArrowDown') { FIND.on = Math.min(FIND.items.length - 1, FIND.on + 1); findRender(); ev.preventDefault(); }
+  else if (ev.key === 'ArrowUp') { FIND.on = Math.max(0, FIND.on - 1); findRender(); ev.preventDefault(); }
+  else if (ev.key === 'Enter') { findGo(FIND.on); ev.preventDefault(); }
+  else if (ev.key === 'Escape') $('findBox').hidden = true;
+};
+$('findRes').onclick = ev => { const b = ev.target.closest('button[data-i]'); if (b) findGo(Number(b.dataset.i)); };
+$('findBox').onclick = ev => { if (ev.target === $('findBox')) $('findBox').hidden = true; };
+document.addEventListener('keydown', ev => {
+  if ($('main').hidden) return;
+  const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
+  if ((ev.key === '/' && !typing) || ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'k')) { ev.preventDefault(); findOpen(); }
+});
+
+// ===================== SAVED VIEWS (Students screen) =====================
+// A view = the search, class, dates, chip and sorting, saved with a name on the server (shared by your devices)
+function stViewNow() {
+  return { q: $('stQ').value.trim(), cls: $('stCls').value, period: $('stPeriod').value,
+    from: $('stPeriod').value === 'custom' ? $('stFrom').value : '', to: $('stPeriod').value === 'custom' ? $('stTo').value : '',
+    filter: ST.filter, sort: ST.sort, dir: ST.dir };
+}
+const stSame = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+function stViewsRender() {
+  if (!ST.views) { $('stViews').innerHTML = ''; return; }
+  const now = stViewNow();
+  $('stViews').innerHTML = ST.views.map((v, i) => `<span class="stView${stSame(v.f, now) ? ' on' : ''}"><button type="button" data-v="${i}">★ ${esc(v.name)}</button>` +
+    `<button type="button" class="x" data-del="${i}" aria-label="Delete view ${esc(v.name)}">×</button></span>`).join('') +
+    `<button type="button" class="btn alt small" id="stViewSave">＋ Save this view</button>`;
+}
+async function stViewsSave() {
+  try { const o = await post('adminViews', { views: ST.views }); ST.views = o.views; } catch (e) { $('stHint').textContent = 'Could not save the views: ' + e.message; }
+  stViewsRender();
+}
+$('stViews').onclick = async ev => {
+  const b = ev.target.closest('button');
+  if (!b) return;
+  if (b.id === 'stViewSave') {
+    const name = (window.prompt('Name this view (for example "Monday check: absence alerts")') || '').trim();
+    if (!name) return;
+    ST.views = ST.views.filter(v => v.name !== name).concat([{ name, screen: 'students', f: stViewNow() }]);
+    stViewsSave();
+  } else if (b.dataset.del !== undefined) {
+    const v = ST.views[Number(b.dataset.del)];
+    if (!window.confirm(`Delete the view "${v.name}"?`)) return;
+    ST.views.splice(Number(b.dataset.del), 1);
+    stViewsSave();
+  } else if (b.dataset.v !== undefined) {
+    const f = ST.views[Number(b.dataset.v)].f;
+    $('stQ').value = f.q || '';
+    ST.filter = f.filter || 'all'; ST.sort = f.sort || 'name'; ST.dir = f.dir || 1;
+    const periodChanged = f.period !== $('stPeriod').value || (f.period === 'custom' && (f.from !== $('stFrom').value || f.to !== $('stTo').value));
+    $('stPeriod').value = f.period || 'month';
+    if (f.period === 'custom') { $('stFrom').value = f.from; $('stTo').value = f.to; }
+    if (periodChanged) { ST.wantClass = f.cls || ''; stLoad(); }
+    else { $('stCls').value = f.cls || ''; stRender(); }
+  }
+};
+
+// ===================== COMPARE: two classes or two periods =====================
+async function cmpRows(period) {
+  const [from, to] = stRange(period);
+  const k = from + '|' + to;
+  if (!ST.cache[k]) ST.cache[k] = (await post('adminStudents', { from, to })).students;
+  return { rows: ST.cache[k], from, to };
+}
+function cmpSum(rows) {
+  const ses = rows.reduce((s, r) => s + r.sessions, 0), att = rows.reduce((s, r) => s + r.P + r.L, 0);
+  const got = rows.reduce((s, r) => s + r.got, 0), out = rows.reduce((s, r) => s + r.out, 0);
+  const f = rows.filter(r => r.fAvg !== '');
+  return {
+    students: rows.length, att: stPct(att, ses), avg: stPct(got, out),
+    absDays: rows.length ? Math.round(rows.reduce((s, r) => s + r.absDays.length, 0) / rows.length * 10) / 10 : null,
+    alerts: rows.filter(r => r.absAlert).length, low: rows.filter(r => stAvg(r) !== null && stAvg(r) < 60).length,
+    inc: rows.reduce((s, r) => s + r.fInc, 0), fab: rows.filter(r => r.fAbsent).length,
+    fAvg: f.length ? Math.round(f.reduce((s, r) => s + r.fAvg, 0) / f.length * 10) / 10 : null
+  };
+}
+const CMP_ROWS = [['students', 'Students', 0], ['att', 'Attendance %', 1], ['avg', 'Class average %', 1], ['absDays', 'Absent days per student', -1],
+  ['alerts', 'Absence alerts', -1], ['low', 'Below 60%', -1], ['fAvg', 'Factory average /5', 1], ['inc', 'Factory incidents', -1], ['fab', 'Factory absent 8+ days', -1]];
+let CMP_LAST = null;
+async function cmpRender() {
+  $('cmpOut').innerHTML = '<div class="empty">Loading…</div>';
+  try {
+    const A = await cmpRows($('cmpPerA').value), B = await cmpRows($('cmpPerB').value);
+    const ca = $('cmpClsA').value, cb = $('cmpClsB').value;
+    const a = cmpSum(A.rows.filter(r => !ca || stGroup(r) === ca)), b = cmpSum(B.rows.filter(r => !cb || stGroup(r) === cb));
+    const la = `${ca || 'All classes'} · ${ST_PERIODS[$('cmpPerA').value]}`, lb = `${cb || 'All classes'} · ${ST_PERIODS[$('cmpPerB').value]}`;
+    CMP_LAST = { a, b, la, lb, ra: `${A.from} to ${A.to}`, rb: `${B.from} to ${B.to}` };
+    const show = (v, k) => v === null ? '—' : v + (k === 'att' || k === 'avg' ? '%' : '');
+    $('cmpOut').innerHTML = `<div class="ttWrap"><table class="cmpT"><tr><th></th><th>A · ${esc(la)}<br><small>${A.from} to ${A.to}</small></th>` +
+      `<th>B · ${esc(lb)}<br><small>${B.from} to ${B.to}</small></th><th>A − B</th></tr>` +
+      CMP_ROWS.map(([k, l, good]) => {
+        const x = a[k], y = b[k];
+        const dlt = x === null || y === null ? null : Math.round((x - y) * 10) / 10;
+        const cls = !good || !dlt ? '' : (dlt * good > 0 ? 'better' : 'worse');
+        return `<tr><td>${l}</td><td class="n">${show(x, k)}</td><td class="n">${show(y, k)}</td><td class="${cls}">${dlt === null ? '—' : (dlt > 0 ? '+' : '') + dlt}</td></tr>`;
+      }).join('') + '</table></div><p class="hint">Green means A is better, red means A is worse.</p>';
+  } catch (e) {
+    $('cmpOut').innerHTML = `<div class="msg err">Could not compare: ${esc(e.message)}</div>`;
+  }
+}
+function cmpFill() {
+  const groups = [...new Set(RAW.filter(x => x.Type === 'Student').map(x => x.Department ? `${x.Parent} · ${x.Department}` : x.Parent))].sort();
+  const opts = '<option value="">All classes</option>' + groups.map(g => `<option>${esc(g)}</option>`).join('');
+  const per = Object.keys(ST_PERIODS).map(k => `<option value="${k}">${ST_PERIODS[k]}</option>`).join('');
+  ['A', 'B'].forEach(s => { $('cmpCls' + s).innerHTML = opts; $('cmpPer' + s).innerHTML = per; });
+  $('cmpPerA').value = 'month'; $('cmpPerB').value = 'lastmonth';
+  $('cmpClsA').value = $('cmpClsB').value = $('stCls').value;
+}
+$('stCmpBtn').onclick = () => {
+  const c = $('cmpCard');
+  c.hidden = !c.hidden;
+  if (!c.hidden) { cmpFill(); cmpRender(); c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+};
+$('cmpClose').onclick = () => { $('cmpCard').hidden = true; };
+['cmpClsA', 'cmpClsB', 'cmpPerA', 'cmpPerB'].forEach(id => { $(id).onchange = cmpRender; });
+$('cmpPrint').onclick = () => {
+  if (!CMP_LAST) return;
+  const { a, b, la, lb, ra, rb } = CMP_LAST;
+  const show = (v, k) => v === null ? '—' : v + (k === 'att' || k === 'avg' ? '%' : '');
+  const html = `<table><thead><tr><th></th><th>A · ${esc(la)}<br>${ra}</th><th>B · ${esc(lb)}<br>${rb}</th><th>A − B</th></tr></thead><tbody>` +
+    CMP_ROWS.map(([k, l]) => { const x = a[k], y = b[k]; const d = x === null || y === null ? '—' : Math.round((x - y) * 10) / 10;
+      return `<tr><td>${l}</td><td><b>${show(x, k)}</b></td><td><b>${show(y, k)}</b></td><td>${typeof d === 'number' && d > 0 ? '+' : ''}${d}</td></tr>`; }).join('') + '</tbody></table>';
+  prPrint({ file: `Compare - ${la} vs ${lb}`, pages: [{ title: 'Compare', sub: `A: ${la} · B: ${lb}`, html }] });
+};
 
 // ===================== EVALUATIONS: the board inside the admin page =====================
 // A copy of the board page (board/index.html) is kept inside this file, so it always opens, wherever this
@@ -3191,10 +3481,11 @@ function adminStart() {
   $('main').hidden = false;
   $('signOutBtn').hidden = false;
   $('bellBtn').hidden = false;
+  $('findBtn').hidden = false;
   noteLoad();
   renderAll();
   loadLists();
-  showPane(localStorage.getItem('adminPane') || 'lists');
+  showPane(localStorage.getItem('adminPane') || 'students');
 }
 
 // Forget the key on this device; the page reloads so nothing signed-in stays open (e.g. the board)
