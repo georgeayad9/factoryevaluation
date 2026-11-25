@@ -2490,7 +2490,7 @@ async function prPrint(o) {
   document.querySelectorAll('style[data-print]').forEach(x => { x.disabled = x.id !== 'prCss'; });
   const title = document.title;
   if (o.file) document.title = o.file;
-  setTimeout(() => { window.print(); document.title = title; }, 350);
+  setTimeout(() => { prOut(box, !!o.landscape, o.file); document.title = title; }, 350);
 }
 function prDownload(blob, name) {
   const a = document.createElement('a');
@@ -2500,6 +2500,118 @@ function prDownload(blob, name) {
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+// ---------- iPhone home-screen app: printing is switched off there, so make a real PDF file instead ----------
+// Everywhere else the normal print window opens (Save as PDF from there).
+const PR_IOS_APP = window.navigator.standalone === true;
+function prScript(urls) {
+  return new Promise((ok, fail) => {
+    const tryAt = i => {
+      if (i >= urls.length) return fail(new Error('could not load the PDF maker (check the internet connection)'));
+      const s = document.createElement('script');
+      s.src = urls[i];
+      s.onload = ok;
+      s.onerror = () => tryAt(i + 1);
+      document.head.appendChild(s);
+    };
+    tryAt(0);
+  });
+}
+async function prLibs() {
+  if (!window.htmlToImage) await prScript(['https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.js', 'https://unpkg.com/html-to-image@1.11.13/dist/html-to-image.js']);
+  if (!window.PDFLib) await prScript(['https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js', 'https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js']);
+}
+function prBar(text, action) {
+  let bar = document.getElementById('prBar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'prBar';
+    bar.style.cssText = 'position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:90;background:#1d1d1d;color:#fff;' +
+      'border-radius:14px;padding:12px 14px;display:flex;gap:10px;align-items:center;box-shadow:0 8px 24px rgba(0,0,0,.3);font:15px system-ui,sans-serif';
+    document.body.appendChild(bar);
+  }
+  bar.innerHTML = `<span style="flex:1">${prEsc(text)}</span>`;
+  if (action) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = action.label;
+    b.style.cssText = 'background:#F7C948;color:#1d1d1d;border:0;border-radius:10px;padding:10px 14px;font-weight:700;font-size:15px';
+    b.onclick = action.go;
+    bar.appendChild(b);
+  }
+  const x = document.createElement('button');
+  x.type = 'button';
+  x.textContent = '×';
+  x.setAttribute('aria-label', 'Close');
+  x.style.cssText = 'background:transparent;color:#fff;border:0;font-size:22px;padding:0 4px';
+  x.onclick = () => bar.remove();
+  bar.appendChild(x);
+  return bar;
+}
+// el: the box holding the pages (.prPage or .ywPage sections); each section starts a new page, long ones continue
+async function prPdfFile(el, landscape, file) {
+  prBar('Making the PDF…');
+  try {
+    await prLibs();
+    const { PDFDocument, StandardFonts, rgb } = window.PDFLib;
+    const K = 72 / 25.4;                          // mm → PDF points
+    const W = landscape ? 297 : 210, H = landscape ? 210 : 297, M = 9, FOOT = 7;
+    const pxW = landscape ? 1123 : 794;
+    const keep = el.getAttribute('style') || '';
+    el.setAttribute('style', `display:block;position:absolute;left:-30000px;top:0;width:${pxW - 68}px;background:#fff`);
+    const pdf = await PDFDocument.create();
+    const font = await pdf.embedFont(StandardFonts.Helvetica);
+    const secs = [...el.querySelectorAll(':scope > .prPage, :scope > .ywPage, :scope > section')];
+    for (const sec of secs) {
+      const canvas = await window.htmlToImage.toCanvas(sec, { pixelRatio: 2, backgroundColor: '#ffffff', cacheBust: false });
+      const cw = W - 2 * M, room = H - 2 * M - FOOT;
+      const full = canvas.height * cw / canvas.width;
+      if (full <= room * 1.25) {                  // fits on one page (shrunk a little if needed)
+        const k = Math.min(1, room / full);
+        const img = await pdf.embedJpg(canvas.toDataURL('image/jpeg', 0.92));
+        const page = pdf.addPage([W * K, H * K]);
+        page.drawImage(img, { x: (M + (cw - cw * k) / 2) * K, y: (H - M - full * k) * K, width: cw * k * K, height: full * k * K });
+        continue;
+      }
+      const sliceH = Math.floor(room * canvas.width / cw);
+      for (let y = 0; y < canvas.height; y += sliceH) {
+        const h = Math.min(sliceH, canvas.height - y);
+        if (h < 8 && y > 0) break;
+        const part = document.createElement('canvas');
+        part.width = canvas.width; part.height = h;
+        part.getContext('2d').drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
+        const img = await pdf.embedJpg(part.toDataURL('image/jpeg', 0.92));
+        const page = pdf.addPage([W * K, H * K]);
+        const hmm = h * cw / canvas.width;
+        page.drawImage(img, { x: M * K, y: (H - M - hmm) * K, width: cw * K, height: hmm * K });
+      }
+    }
+    const n = pdf.getPageCount();
+    pdf.getPages().forEach((page, i) => {
+      const grey = rgb(0.35, 0.35, 0.35), right = `Page ${i + 1} of ${n}`;
+      page.drawText('OMHG EVA SCHOOL - printed ' + prToday(), { x: M * K, y: 5 * K, size: 8, font, color: grey });
+      page.drawText(right, { x: (W - M) * K - font.widthOfTextAtSize(right, 8), y: 5 * K, size: 8, font, color: grey });
+    });
+    el.setAttribute('style', keep);
+    const name = String(file || 'OMHG EVA SCHOOL').replace(/[\\/:*?"<>|]/g, '-') + '.pdf';
+    const blob = new Blob([await pdf.save()], { type: 'application/pdf' });
+    const f = new File([blob], name, { type: 'application/pdf' });
+    const canShare = navigator.canShare && navigator.canShare({ files: [f] });
+    prBar(`PDF ready: ${n} page${n > 1 ? 's' : ''}`, {
+      label: canShare ? 'Share / Save' : 'Open PDF',
+      go: async () => {
+        if (canShare) { try { await navigator.share({ files: [f], title: name }); } catch (e) { /* closed the share sheet */ } }
+        else prDownload(blob, name);
+      }
+    });
+  } catch (e) {
+    prBar('Could not make the PDF: ' + e.message);
+  }
+}
+// print: the print window, or on an iPhone home-screen app a PDF file
+function prOut(el, landscape, file) {
+  if (PR_IOS_APP) prPdfFile(el, landscape, file);
+  else window.print();
 }
 // A profile as Excel: one sheet for class grades, one for factory evaluations
 function profSheets(p) {
@@ -3312,7 +3424,7 @@ function ywPageHtml(p, logo) {
     `<div>مدرسة إيفا الدولية للتكنولوجيا التطبيقية</div><div>قوائم أعمال السنه للعام الدراسى ${e(p.year)} — ${e(p.term)}</div>` +
     `</div><img src="data:image/png;base64,${logo}" alt=""></div>` +
     `<div class="ywLine"><span>الفصل : <b>${e(p.cls)}</b></span><span>المادة :</span><span>اسم المعلم : <b>${e(p.teacher)}</b></span></div>` +
-    '<table class="ywT"><colgroup><col class="n"><col class="nm">' + YW_BLOCKS.map(() => '<col span="5" class="m">').join('') + '<col class="t"></colgroup>';
+    '<table class="ywT"><colgroup><col class="n"><col class="nm">' + YW_BLOCKS.map(() => '<col class="m"><col class="m"><col class="m"><col class="m"><col class="m">').join('') + '<col class="t"></colgroup>';
   const blockRow = f => YW_BLOCKS.map((_, k) => `<td colspan="5" class="bh">${f(p.sessions[k])}</td>`).join('');
   h += `<tr><td rowspan="3"></td><td rowspan="3"></td>${blockRow(s => 'اليوم : ' + (s ? ywDay(s.date) : ''))}<td rowspan="4" class="vt"><span>مجموع</span></td></tr>`;
   h += `<tr>${blockRow(s => 'التاريخ : ' + (s ? ywDate(s.date) : ''))}</tr>`;
@@ -3352,7 +3464,7 @@ const YW_PRINT_CSS = `
 .ywTop img{height:17mm;width:auto}
 .ywLine{display:flex;justify-content:space-between;font-weight:700;font-size:13px;margin:2mm 0 1.5mm;padding:1.5mm 2mm 0;border-top:1.2px solid #000}
 .ywT{width:100%;border-collapse:collapse;table-layout:fixed;font-size:9px}
-.ywT col.n{width:5mm}.ywT col.nm{width:34mm}.ywT col.t{width:9mm}
+.ywT col.n{width:5mm}.ywT col.nm{width:34mm}.ywT col.t{width:9mm}.ywT col.m{width:5.87mm}
 .ywT td,.ywT th{border:.6px solid #000;height:4.25mm;padding:0 1px;text-align:center;white-space:nowrap;overflow:hidden}
 .ywT td.nm{text-align:right;font-size:9.5px;padding-right:2px}
 .ywT td.bh{text-align:right;font-weight:700;font-size:8.5px;height:5.2mm;padding-right:3px}
@@ -3487,7 +3599,7 @@ $('ywaPdf').onclick = async () => {
     $('ywaMsg').innerHTML = `<div class="msg ok">${pages.length} page${pages.length > 1 ? 's' : ''}. In the print window choose "Save as PDF".</div>`;
     const title = document.title;
     document.title = `قوائم أعمال السنة - ${$('ywaCls').value || 'All classes'}`;
-    setTimeout(() => { window.print(); document.title = title; }, 300);
+    setTimeout(() => { prOut(box, true, document.title); document.title = title; }, 300);
   } catch (e) { $('ywaMsg').innerHTML = `<div class="msg err">${esc(e.message)}</div>`; }
 };
 
