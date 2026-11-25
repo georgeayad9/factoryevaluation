@@ -316,6 +316,7 @@ header .hdrList .btn:hover{background:var(--bg)}
       <button class="btn alt" id="hdrMoreBtn" type="button" aria-label="More" aria-expanded="false">⋯</button>
       <div class="hdrList" id="hdrList" hidden>
         <button class="btn alt" id="themeBtn" type="button">Dark</button>
+        <button class="btn alt" id="backupBtn" type="button">⤓ Download full backup</button>
         <button class="btn alt" id="signOutBtn" type="button" hidden>Sign out</button>
       </div>
     </div>
@@ -464,6 +465,25 @@ header .hdrList .btn:hover{background:var(--bg)}
       <div id="dbOut"></div>
     </div>
 
+    <!-- قوائم أعمال السنة for any teacher and class -->
+    <div class="card">
+      <h2>قوائم أعمال السنة</h2>
+      <p class="hint" style="margin-top:-6px">The school sheet teachers export, for any teacher and class, or everyone at once (one tab or page per teacher and class).</p>
+      <div class="row">
+        <div><label for="ywaCls">Class</label><select id="ywaCls"></select></div>
+        <div><label for="ywaTeacher">Teacher</label><select id="ywaTeacher"></select></div>
+      </div>
+      <div class="row">
+        <div><label for="ywaFrom">From</label><input type="date" id="ywaFrom"></div>
+        <div><label for="ywaTo">To</label><input type="date" id="ywaTo"></div>
+      </div>
+      <div class="row">
+        <div class="auto"><button class="btn alt small" id="ywaXlsx" type="button">Excel</button></div>
+        <div class="auto"><button class="btn alt small" id="ywaPdf" type="button">PDF / print</button></div>
+      </div>
+      <div id="ywaMsg"></div>
+    </div>
+
     <div class="card">
       <h2>Grading: all teachers</h2>
       <div class="row">
@@ -498,6 +518,21 @@ header .hdrList .btn:hover{background:var(--bg)}
   <!-- ===================== EVALUATIONS: the board ===================== -->
   <div id="paneEvals" hidden>
     <div id="evStatus"></div>
+    <!-- FACTORY REPORT -->
+    <div class="card">
+      <h2>Factory report</h2>
+      <p class="hint" style="margin-top:-6px">Results by class, incidents and comments for the dates you choose.</p>
+      <div class="row">
+        <div><label for="frCls">Class</label><select id="frCls"></select></div>
+        <div><label for="frFrom">From</label><input type="date" id="frFrom"></div>
+        <div><label for="frTo">To</label><input type="date" id="frTo"></div>
+      </div>
+      <div class="row">
+        <div class="auto"><button class="btn alt small" id="frXlsx" type="button">Excel</button></div>
+        <div class="auto"><button class="btn alt small" id="frPdf" type="button">PDF / print</button></div>
+      </div>
+      <div id="frMsg"></div>
+    </div>
     <details class="card evUp" id="evUpBox">
       <summary><h2 style="display:inline">Upload past evaluations</h2> <span class="hint">· for one class and one teacher, from Excel</span></summary>
       <p class="hint">1. Choose the class and the teacher, then download the template: one row per student, one column per date.
@@ -540,6 +575,7 @@ header .hdrList .btn:hover{background:var(--bg)}
             <button type="button" data-ex="xlsx">Excel<small>Exactly what's on screen: filters, sorting and columns</small></button>
             <button type="button" data-ex="print">Print / PDF<small>This list as a report with the school header</small></button>
             <button type="button" data-ex="profiles">Student profiles (PDF)<small>One page per student in this list</small></button>
+            <button type="button" data-ex="class">Class report (PDF)<small>One page per class: summary, teachers, students needing attention</small></button>
           </div>
         </div>
       </div>
@@ -655,6 +691,15 @@ header .hdrList .btn:hover{background:var(--bg)}
           <select id="wkTeacher"></select>
         </div>
         <div class="auto"><button class="btn save" id="wkSave" type="button" disabled>Save week</button></div>
+        <div class="auto exMenu" id="ttpWrap">
+          <button class="btn alt small" id="ttpBtn" type="button" aria-expanded="false">🖨 Print</button>
+          <div class="exList" id="ttpList" hidden>
+            <button type="button" data-p="teacher">This teacher's week<small>The teacher chosen above, with absences and cover</small></button>
+            <button type="button" data-p="all">Every teacher's week<small>One page per teacher</small></button>
+            <button type="button" data-p="team">Team timetable<small>One page per day, for the staff room</small></button>
+            <button type="button" data-p="cover">Cover list<small>Absences, substitutions, extra classes and factory changes</small></button>
+          </div>
+        </div>
       </div>
       <div class="ttStats" id="wkStats"></div>
       <div class="ttWrap"><table class="ttGrid" id="wkGrid"></table></div>
@@ -1158,6 +1203,7 @@ function showPane(p) {
   localStorage.setItem('adminPane', p);
   if (p === 'tt' && !W.loaded) loadWeek();
   if (p === 'grades') grInit();
+  if (p === 'evals') frFill();
   if (p === 'students') stInit();
   if (p === 'teachers') pfInit();
   if (p === 'evals') evInit();
@@ -2161,6 +2207,7 @@ function grRange(kind) {
 
 function grInit() {
   dbInit();
+  ywaFill();
   const groups = gradingGroups();
   const sel = $('grGrp'), prev = sel.value || localStorage.getItem('grGrp') || '';
   sel.innerHTML = '';
@@ -2417,7 +2464,11 @@ async function prPrint(o) {
 #prDoc td{border:.5px solid #bbb;padding:3px 4px;color:#000;background:#fff}
 #prDoc tr{break-inside:avoid;page-break-inside:avoid}
 #prDoc .pill{border:.5px solid #999}
-#prDoc .profX,#prDoc .profTools,#prDoc .noPrint{display:none!important}
+#prDoc .profX,#prDoc .profTools,#prDoc .noPrint,#prDoc .tmDays,#prDoc .tmNone{display:none!important}
+#prDoc .tmGrid{min-width:0}#prDoc .tmGrid td{height:8mm;font-size:11px}#prDoc .tmGrid .tmN{width:30mm;font-size:11px}
+#prDoc .tmGrid td.tmC{background:#FDF1C8;color:#5c4500}#prDoc .tmGrid td.tmS{background:#DDEBF8;color:#0C447C}
+#prDoc .tmGrid td.tmF{background:#E7E4DA;color:#55524a}#prDoc .tmGrid td.tmX,#prDoc .tmGrid td.tmA{background:#FBE4E4;color:#791F1F}
+#prDoc .tmGrid td.tmE{background:#F6F3EA}#prDoc .tmGrid .tmFree td{background:#fff}
 #prDoc .profHead{margin-bottom:3mm}#prDoc .profAv{width:11mm;height:11mm;font-size:15px;background:#f1f1f1}
 #prDoc .profKpi{display:grid;grid-template-columns:repeat(5,1fr);gap:2mm;margin:2mm 0 4mm}
 #prDoc .profKpi div{border:.5px solid #bbb;border-radius:2mm;background:#fff;padding:2mm}
@@ -2795,6 +2846,8 @@ $('stExList').onclick = async ev => {
         `<td>${stAvg(r) ?? '—'}${stAvg(r) === null ? '' : '%'}</td><td>${r.absDays.length || '—'}</td>` +
         `<td>${r.fCount ? esc(ST_EV[r.fLast] || r.fLast) + (r.fAvg !== '' ? ` (avg ${r.fAvg}/5)` : '') : '—'}</td><td>${stFlags(r) || '—'}</td></tr>`).join('') + '</tbody></table>';
     prPrint({ file: name, landscape: true, pages: [{ title: 'Students report', sub: stFilterText(), html }] });
+  } else if (b.dataset.ex === 'class') {
+    stClassReport();
   } else if (b.dataset.ex === 'profiles') {
     if (R.length > 60 && !window.confirm(`Print ${R.length} profiles? That is about ${R.length} pages.`)) return;
     $('stHint').textContent = `Getting ${R.length} profiles…`;
@@ -3166,6 +3219,455 @@ $('cmpPrint').onclick = () => {
     CMP_ROWS.map(([k, l]) => { const x = a[k], y = b[k]; const d = x === null || y === null ? '—' : Math.round((x - y) * 10) / 10;
       return `<tr><td>${l}</td><td><b>${show(x, k)}</b></td><td><b>${show(y, k)}</b></td><td>${typeof d === 'number' && d > 0 ? '+' : ''}${d}</td></tr>`; }).join('') + '</tbody></table>';
   prPrint({ file: `Compare - ${la} vs ${lb}`, pages: [{ title: 'Compare', sub: `A: ${la} · B: ${lb}`, html }] });
+};
+
+const TEACHER_AR = {
+  'george ayad': 'جورج عياد', 'ramy nabih': 'رامي نبيه', 'maria morcos': 'ماريا مرقس',
+  'dalia mahmoud': 'داليا محمود', 'sufian abdalla': 'سفيان عبدالله', 'jan ossama': 'جان اسامة'
+};
+const DEPT_AR = { operation: 'تشغيل', utilities: 'مرافق' };
+const AR_DAYS = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+const AR_ORD = ['الأولى', 'الثانية', 'الثالثة', 'الرابعة', 'الخامسة', 'السادسة', 'السابعة', 'الثامنة'];
+const YW_BLOCKS = ['C', 'I', 'O', 'U', 'AA', 'AG', 'AM', 'AS'];
+
+// "Wheeler 1" → "W1", "Junior 2" → "J2"; Senior 1 adds the department in Arabic: "S1 تشغيل"
+function ywClassName(cls, dept) {
+  const words = String(cls).trim().split(/\s+/);
+  const code = words.map(w => /^\d+$/.test(w) ? w : w[0].toUpperCase()).join('');
+  const d = dept ? (DEPT_AR[String(dept).trim().toLowerCase()] || dept) : '';
+  return d ? `${code} ${d}` : code;
+}
+// School year from September; term 1 = September to January, term 2 = February to August
+function ywYearTerm(ymd) {
+  const [y, m] = ymd.split('-').map(Number);
+  const start = m >= 9 ? y : y - 1;
+  return { year: `${start}/${start + 1}`, term: (m >= 9 || m === 1) ? 'الفصل الدراسى الاول' : 'الفصل الدراسى الثانى' };
+}
+
+const ywDate = ymd => { const [y, m, d] = ymd.split('-').map(Number); return `${d}/${m}/${y}`; };
+const ywDay = ymd => { const [y, m, d] = ymd.split('-').map(Number); return AR_DAYS[new Date(y, m - 1, d).getDay()]; };
+
+// loads yearwork-template.js (the school's sheet) the first time it is needed
+function ywTemplate() {
+  if (window.YW_TEMPLATE) return Promise.resolve(window.YW_TEMPLATE);
+  return new Promise((ok, fail) => {
+    const s = document.createElement('script');
+    s.src = 'yearwork-template.js?v=2';
+    s.onload = () => window.YW_TEMPLATE ? ok(window.YW_TEMPLATE) : fail(new Error('the sheet template did not load'));
+    s.onerror = () => fail(new Error('could not load yearwork-template.js — is it uploaded next to index.html?'));
+    document.head.appendChild(s);
+  });
+}
+
+const ywEsc = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+function ywSet(xml, ref, value, style) {
+  const re = new RegExp(`<c r="${ref}"(?: s="(\\d+)")?[^>]*?(?:/>|>[\\s\\S]*?</c>)`);
+  return xml.replace(re, (m, s) => {
+    const st = style !== undefined ? style : s;
+    const sa = st !== undefined ? ` s="${st}"` : '';
+    if (value === '' || value === null || value === undefined) return `<c r="${ref}"${sa}/>`;
+    if (typeof value === 'number') return `<c r="${ref}"${sa}><v>${value}</v></c>`;
+    return `<c r="${ref}"${sa} t="inlineStr"><is><t xml:space="preserve">${ywEsc(value)}</t></is></c>`;
+  });
+}
+const ywCol = n => { let s = ''; n++; while (n) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; };
+const ywIdx = c => [...c].reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0) - 1;
+
+function ywSheetXml(T, p) {
+  let x = T.sheet;
+  x = ywSet(x, 'B4', 'قوائم أعمال السنه للعام الدراسى ' + p.year + ' — ' + p.term);
+  x = ywSet(x, 'B6', '');
+  x = ywSet(x, 'B8', 'الفصل : ' + p.cls);
+  x = ywSet(x, 'AM8', 'اسم المعلم : ' + p.teacher);
+  YW_BLOCKS.forEach((col, k) => {
+    const s = p.sessions[k];
+    x = ywSet(x, col + '9', 'اليوم : ' + (s ? ywDay(s.date) : ''));
+    x = ywSet(x, col + '10', 'التاريخ : ' + (s ? ywDate(s.date) : ''));
+    x = ywSet(x, col + '11', 'الحصة : ' + (s ? (AR_ORD[s.session - 1] || s.session) : ''));
+    const c0 = ywIdx(col);
+    const wCol = ywCol(c0 + 3);
+    if (s && s.quiz) {
+      for (let r = 12; r <= 38; r++) x = ywSet(x, wCol + r, r === 12 ? 'quiz' : r === 13 ? 10 : '', T.shade[wCol + r]);
+    }
+    p.students.forEach((st, i) => {
+      const v = st.cells[k];
+      if (!v) return;
+      v.forEach((val, j) => {
+        const ref = ywCol(c0 + j) + (14 + i);
+        x = ywSet(x, ref, val, s && s.quiz && j === 3 ? T.shade[ref] : undefined);
+      });
+    });
+  });
+  p.students.forEach((st, i) => {
+    x = ywSet(x, 'B' + (14 + i), st.name);
+    x = ywSet(x, 'AZ' + (14 + i), st.total);
+  });
+  return x;
+}
+
+function ywPageHtml(p, logo) {
+  const e = t => ywEsc(t === undefined || t === null ? '' : t);
+  let h = `<section class="ywPage"><div class="ywTop"><div class="ywTitles">` +
+    `<div>وزارة التربية والتعليم والتعليم الفني</div><div>وحدة تشغيل وإدارة مدارس التكنولوجيا التطبيقية</div>` +
+    `<div>مدرسة إيفا الدولية للتكنولوجيا التطبيقية</div><div>قوائم أعمال السنه للعام الدراسى ${e(p.year)} — ${e(p.term)}</div>` +
+    `</div><img src="data:image/png;base64,${logo}" alt=""></div>` +
+    `<div class="ywLine"><span>الفصل : <b>${e(p.cls)}</b></span><span>المادة :</span><span>اسم المعلم : <b>${e(p.teacher)}</b></span></div>` +
+    '<table class="ywT"><colgroup><col class="n"><col class="nm">' + YW_BLOCKS.map(() => '<col span="5" class="m">').join('') + '<col class="t"></colgroup>';
+  const blockRow = f => YW_BLOCKS.map((_, k) => `<td colspan="5" class="bh">${f(p.sessions[k])}</td>`).join('');
+  h += `<tr><td rowspan="3"></td><td rowspan="3"></td>${blockRow(s => 'اليوم : ' + (s ? ywDay(s.date) : ''))}<td rowspan="4" class="vt"><span>مجموع</span></td></tr>`;
+  h += `<tr>${blockRow(s => 'التاريخ : ' + (s ? ywDate(s.date) : ''))}</tr>`;
+  h += `<tr>${blockRow(s => 'الحصة : ' + (s ? (AR_ORD[s.session - 1] || s.session) : ''))}</tr>`;
+  h += '<tr><th rowspan="2">م</th><th rowspan="2">الاسم</th>' + YW_BLOCKS.map((_, k) => {
+    const q = p.sessions[k] && p.sessions[k].quiz;
+    return `<th class="sm">الغياب</th><th class="sm">السلوك</th><th class="sm">تفاعل</th><th class="sm${q ? ' q' : ''}">${q ? 'quiz' : 'واجب'}</th><th class="sm tt">مجموع</th>`;
+  }).join('') + '</tr>';
+  h += '<tr>' + YW_BLOCKS.map((_, k) => { const q = p.sessions[k] && p.sessions[k].quiz; return `<th>10</th><th>10</th><th>10</th><th${q ? ' class="q"' : ''}>10</th><th class="tt">40</th>`; }).join('') + '<th></th></tr>';
+  for (let i = 0; i < 25; i++) {
+    const st = p.students[i];
+    h += `<tr><td class="n">${i + 1}</td><td class="nm">${st ? e(st.name) : ''}</td>`;
+    YW_BLOCKS.forEach((_, k) => {
+      const q = p.sessions[k] && p.sessions[k].quiz;
+      const v = st && st.cells[k];
+      for (let j = 0; j < 5; j++) h += `<td class="${j === 3 && q ? 'q' : ''}${j === 4 ? ' tt' : ''}">${v ? e(v[j]) : ''}</td>`;
+    });
+    h += `<td class="tot">${st ? e(st.total) : ''}</td></tr>`;
+  }
+  h += '</table><div class="ywSign"><span>معلم المادة :</span><span>المدير الأكاديمي :</span></div></section>';
+  return h;
+}
+const YW_PRINT_CSS = `
+@page{size:A4 landscape;margin:7mm}
+#ywPrint{display:none}
+@media print{
+  body>*:not(#ywPrint){display:none!important}
+  #ywPrint{display:block!important}
+  html,body{background:#fff!important}
+}
+#ywPrint *{text-transform:none!important;letter-spacing:normal!important}
+#ywPrint{direction:rtl;font-family:Arial,"Segoe UI",Tahoma,sans-serif;color:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ywPage{page-break-after:always;break-after:page;width:283mm;height:195mm;overflow:hidden;box-sizing:border-box}
+.ywPage:last-child{page-break-after:auto;break-after:auto}
+.ywTop{display:flex;justify-content:space-between;align-items:center;gap:8mm}
+.ywTitles{font-weight:700;font-size:13px;line-height:1.5;white-space:nowrap}
+.ywTop img{height:17mm;width:auto}
+.ywLine{display:flex;justify-content:space-between;font-weight:700;font-size:13px;margin:2mm 0 1.5mm;padding:1.5mm 2mm 0;border-top:1.2px solid #000}
+.ywT{width:100%;border-collapse:collapse;table-layout:fixed;font-size:9px}
+.ywT col.n{width:5mm}.ywT col.nm{width:34mm}.ywT col.t{width:9mm}
+.ywT td,.ywT th{border:.6px solid #000;height:4.25mm;padding:0 1px;text-align:center;white-space:nowrap;overflow:hidden}
+.ywT td.nm{text-align:right;font-size:9.5px;padding-right:2px}
+.ywT td.bh{text-align:right;font-weight:700;font-size:8.5px;height:5.2mm;padding-right:3px}
+.ywT th{font-size:7px;font-weight:700}
+.ywT th.sm{font-size:6.3px}
+.ywT td.tt,.ywT th.tt{border-left:1.6px solid #000}
+.ywT .q{background:#FFE699}
+.ywT td.vt{font-weight:700;font-size:12px}
+.ywT td.vt span{display:inline-block;transform:rotate(-90deg)}
+.ywT td.tot{font-weight:700;font-size:10px}
+.ywSign{display:flex;gap:60mm;font-weight:700;font-size:13px;margin-top:4mm;padding-right:4mm}
+`;
+
+// ===================== REPORTS =====================
+// ----- قوائم أعمال السنة for any teacher and class (the same sheet teachers export) -----
+// rows = one class's daily grading (all teachers); one sheet set per teacher who graded it
+function ywBuild(rows, roster, g, teacher, from) {
+  const sesKey = r => r.date + '|' + r.session;
+  const mine = rows.filter(r => r.teacher === teacher);
+  const sessions = [...new Set(mine.map(sesKey))].sort((a, b) => {
+    const [da, sa] = a.split('|'), [db, sb] = b.split('|');
+    return da.localeCompare(db) || Number(sa) - Number(sb);
+  }).map(k => {
+    const [date, session] = k.split('|');
+    const rs = mine.filter(r => sesKey(r) === k);
+    return { key: k, date, session: Number(session), rows: rs, quiz: rs.some(r => r.quiz !== ''), assignment: rs.some(r => r.assignment !== '') };
+  });
+  const names = roster.slice();
+  mine.forEach(r => { if (!names.includes(r.student)) names.push(r.student); });
+  const num = v => (v === '' || v === 'A' || v === null || v === undefined) ? '' : Number(v);
+  const cells = (ses, student) => {
+    const r = ses.rows.find(x => x.student === student);
+    if (!r) return null;
+    if (r.att === 'A') return ['غ', 'غ', 'غ', 'غ', 0];
+    const v = [r.att === 'L' ? 5 : 10, num(r.behaviour), num(r.participation), ses.quiz ? num(r.quiz) : ses.assignment ? num(r.assignment) : 10];
+    return v.concat(v.reduce((s, x) => s + (x === '' ? 0 : x), 0));
+  };
+  const { year, term } = ywYearTerm(from);
+  const head = { year, term, cls: ywClassName(g.cls, g.dept), teacher: TEACHER_AR[String(teacher).trim().toLowerCase()] || teacher, who: teacher };
+  const pages = [];
+  for (let i = 0; i < sessions.length; i += 8) {
+    const ss = sessions.slice(i, i + 8);
+    for (let j = 0; j < Math.max(1, names.length); j += 25) {
+      pages.push({ ...head, sessions: ss, students: names.slice(j, j + 25).map(n => {
+        const c = ss.map(s => cells(s, n));
+        return { name: n, cells: c, total: c.some(Boolean) ? c.reduce((s, x) => s + (x ? x[4] : 0), 0) : '' };
+      }) });
+    }
+  }
+  return pages;
+}
+// one workbook, one tab per page; tab names like "W1 جورج 1"
+function ywWorkbook(T, pages) {
+  const enc = new TextEncoder();
+  const R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  const head = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+  const n = pages.length, files = [];
+  const add = (name, text) => files.push({ name, data: enc.encode(text) });
+  const used = {};
+  const tab = p => {
+    const base = `${p.cls} ${String(p.who).split(' ')[0]}`.replace(/[\[\]:*?\/\\']/g, '-').slice(0, 26);
+    used[base] = (used[base] || 0) + 1;
+    return `${base} ${used[base]}`;
+  };
+  const names = pages.map(tab);
+  add('[Content_Types].xml', head + '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+    '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+    '<Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/>' +
+    '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>' +
+    '<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' +
+    '<Override PartName="/xl/theme/theme1.xml" ContentType="application/vnd.openxmlformats-officedocument.theme+xml"/>' +
+    pages.map((_, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>` +
+      `<Override PartName="/xl/drawings/drawing${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/>`).join('') + '</Types>');
+  add('_rels/.rels', head + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${R}/officeDocument" Target="xl/workbook.xml"/></Relationships>`);
+  add('xl/workbook.xml', head + `<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="${R}"><bookViews><workbookView activeTab="0"/></bookViews><sheets>` +
+    pages.map((_, i) => `<sheet name="${ywEsc(names[i])}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('') + '</sheets><definedNames>' +
+    pages.map((_, i) => `<definedName name="_xlnm.Print_Area" localSheetId="${i}">'${ywEsc(names[i])}'!$A$1:$AZ$41</definedName>`).join('') + '</definedNames></workbook>');
+  add('xl/_rels/workbook.xml.rels', head + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+    pages.map((_, i) => `<Relationship Id="rId${i + 1}" Type="${R}/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('') +
+    `<Relationship Id="rId${n + 1}" Type="${R}/styles" Target="styles.xml"/><Relationship Id="rId${n + 2}" Type="${R}/theme" Target="theme/theme1.xml"/></Relationships>`);
+  add('xl/styles.xml', T.styles);
+  add('xl/theme/theme1.xml', T.theme);
+  pages.forEach((p, i) => {
+    add(`xl/worksheets/sheet${i + 1}.xml`, ywSheetXml(T, p));
+    add(`xl/worksheets/_rels/sheet${i + 1}.xml.rels`, `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${R}/drawing" Target="/xl/drawings/drawing${i + 1}.xml"/></Relationships>`);
+    add(`xl/drawings/drawing${i + 1}.xml`, T.drawing);
+    add(`xl/drawings/_rels/drawing${i + 1}.xml.rels`, `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${R}/image" Target="/xl/media/image1.png"/></Relationships>`);
+  });
+  files.push({ name: 'xl/media/image1.png', data: Uint8Array.from(atob(T.logo), c => c.charCodeAt(0)) });
+  return new Blob([zipFiles(files)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+}
+function ywaFill() {
+  const groups = gradingGroups();
+  if (!$('ywaCls').options.length) {
+    $('ywaCls').innerHTML = '<option value="">All classes</option>' + Object.keys(groups).map(k => `<option>${esc(k)}</option>`).join('');
+    $('ywaTeacher').innerHTML = '<option value="">All teachers</option>' + RAW.filter(x => x.Type === 'Teacher').map(x => `<option>${esc(x.Name)}</option>`).join('');
+    const [f, t] = stRange('term');
+    $('ywaFrom').value = f; $('ywaTo').value = t;
+  }
+}
+async function ywaPages() {
+  const from = $('ywaFrom').value, to = $('ywaTo').value;
+  if (!from || !to || from > to) throw new Error('Choose the dates.');
+  const groups = gradingGroups();
+  const keys = $('ywaCls').value ? [$('ywaCls').value] : Object.keys(groups);
+  const pages = [];
+  for (const k of keys) {
+    const g = groups[k];
+    $('ywaMsg').innerHTML = `<div class="msg ok">Reading ${esc(k)}…</div>`;
+    const out = await post('adminGrading', { cls: g.cls, dept: g.dept, from, to });
+    const teachers = $('ywaTeacher').value ? [$('ywaTeacher').value] : [...new Set(out.rows.map(r => r.teacher))].sort();
+    teachers.forEach(t => pages.push(...ywBuild(out.rows, g.students || [], g, t, from)));
+  }
+  if (!pages.length) throw new Error('No graded sessions for that choice and those dates.');
+  return pages;
+}
+$('ywaXlsx').onclick = async () => {
+  try {
+    const [pages, T] = await Promise.all([ywaPages(), ywTemplate()]);
+    prDownload(ywWorkbook(T, pages), `قوائم أعمال السنة - ${$('ywaCls').value || 'All classes'} - ${$('ywaTeacher').value || 'All teachers'} - ${$('ywaFrom').value} to ${$('ywaTo').value}.xlsx`);
+    $('ywaMsg').innerHTML = `<div class="msg ok">Excel ready: ${pages.length} page${pages.length > 1 ? 's' : ''}, one tab each.</div>`;
+  } catch (e) { $('ywaMsg').innerHTML = `<div class="msg err">${esc(e.message)}</div>`; }
+};
+$('ywaPdf').onclick = async () => {
+  try {
+    const [pages, T] = await Promise.all([ywaPages(), ywTemplate()]);
+    if (!$('ywCss')) { const st = document.createElement('style'); st.id = 'ywCss'; st.dataset.print = '1'; st.textContent = YW_PRINT_CSS; document.head.appendChild(st); }
+    let box = $('ywPrint');
+    if (!box) { box = document.createElement('div'); box.id = 'ywPrint'; document.body.appendChild(box); }
+    box.innerHTML = pages.map(p => ywPageHtml(p, T.logo)).join('');
+    document.querySelectorAll('style[data-print]').forEach(x => { x.disabled = x.id !== 'ywCss'; });
+    $('ywaMsg').innerHTML = `<div class="msg ok">${pages.length} page${pages.length > 1 ? 's' : ''}. In the print window choose "Save as PDF".</div>`;
+    const title = document.title;
+    document.title = `قوائم أعمال السنة - ${$('ywaCls').value || 'All classes'}`;
+    setTimeout(() => { window.print(); document.title = title; }, 300);
+  } catch (e) { $('ywaMsg').innerHTML = `<div class="msg err">${esc(e.message)}</div>`; }
+};
+
+// ----- class report: one page per class for the Students screen's dates -----
+async function stClassReport() {
+  const R = stShown();
+  const groups = $('stCls').value ? [$('stCls').value] : [...new Set(R.map(stGroup))].sort();
+  if (!groups.length) { $('stHint').textContent = 'Nothing to report: no students match.'; return; }
+  $('stHint').textContent = 'Making the class report…';
+  let dash;
+  try { dash = (await post('adminDashboard', { from: ST.from, to: ST.to })).rows; }
+  catch (e) { $('stHint').textContent = 'Could not make the report: ' + e.message; return; }
+  const pages = groups.map(g => {
+    const rows = R.filter(r => stGroup(r) === g);
+    const s = cmpSum(rows);
+    const dr = dash.filter(r => (r.dept ? `${r.cls} · ${r.dept}` : r.cls) === g);
+    const byT = {};
+    dr.forEach(r => { const t = byT[r.teacher] = byT[r.teacher] || { ses: new Set(), days: new Set(), abs: 0, n: 0 }; t.ses.add(r.date + '|' + r.session); t.days.add(r.date); t.n++; if (r.att === 'A') t.abs++; });
+    const flagged = rows.filter(stNeeds);
+    let html = `<div class="prKpis"><div><b>${s.students}</b><span>Students</span></div><div><b>${s.att ?? '—'}${s.att === null ? '' : '%'}</b><span>Attendance</span></div>` +
+      `<div><b>${s.avg ?? '—'}${s.avg === null ? '' : '%'}</b><span>Class average</span></div><div><b>${flagged.length}</b><span>Need attention</span></div></div>`;
+    html += '<h3>Teachers</h3><table><thead><tr><th>Teacher</th><th>Sessions graded</th><th>Days</th><th>Absences recorded</th></tr></thead><tbody>' +
+      (Object.keys(byT).length ? Object.keys(byT).sort().map(t => `<tr><td>${esc(t)}</td><td>${byT[t].ses.size}</td><td>${byT[t].days.size}</td><td>${byT[t].abs}</td></tr>`).join('')
+        : '<tr><td colspan="4">No grading in these dates.</td></tr>') + '</tbody></table>';
+    html += '<h3>Need attention</h3>' + (flagged.length ? '<table><thead><tr><th>Student</th><th>Why</th><th>Absent dates</th></tr></thead><tbody>' +
+      flagged.map(r => `<tr><td><b>${esc(r.name)}</b></td><td>${stFlags(r)}</td><td style="white-space:normal">${esc(r.absDays.join(', ')) || '—'}</td></tr>`).join('') + '</tbody></table>'
+      : '<p style="font-size:10px">Nobody: no absence alerts, factory incidents or factory absences.</p>');
+    html += '<h3>All students</h3><table><thead><tr><th>#</th><th>Student</th><th>Attendance</th><th>Class average</th><th>Trend</th><th>Absent days</th><th>Factory</th></tr></thead><tbody>' +
+      rows.slice().sort((a, b) => a.name.localeCompare(b.name)).map((r, i) => `<tr><td>${i + 1}</td><td>${esc(r.name)}</td><td>${stAtt(r) ?? '—'}${stAtt(r) === null ? '' : '%'}</td>` +
+        `<td>${stAvg(r) ?? '—'}${stAvg(r) === null ? '' : '%'}</td><td>${stTrend(r).delta === null ? '—' : (stTrend(r).delta > 0 ? '+' : '') + stTrend(r).delta}</td>` +
+        `<td>${r.absDays.length || '—'}</td><td>${r.fCount ? esc(ST_EV[r.fLast] || r.fLast) + (r.fAvg !== '' ? ` (avg ${r.fAvg}/5)` : '') : '—'}</td></tr>`).join('') + '</tbody></table>';
+    return { title: `Class report · ${g}`, sub: `${ST.from} to ${ST.to} · printed ${prToday()}`, html };
+  });
+  $('stHint').textContent = `${pages.length} class report page${pages.length > 1 ? 's' : ''}. In the print window choose "Save as PDF".`;
+  prPrint({ file: `Class report - ${$('stCls').value || 'All classes'} - ${ST.from} to ${ST.to}`, pages });
+}
+
+// ----- factory report: results by class, incidents and comments -----
+const FR_ORDER = ['Outstanding', 'Proficient', 'Developing', 'Needs Improvement', 'Unsatisfactory', 'Absent'];
+let FR = null;
+async function frLoad() {
+  const from = $('frFrom').value, to = $('frTo').value;
+  if (!from || !to || from > to) throw new Error('Choose the dates.');
+  FR = await post('adminFactory', { from, to });
+  const c = $('frCls').value;
+  return FR.rows.filter(r => !c || r.cls === c);
+}
+function frFill() {
+  if ($('frCls').options.length) return;
+  $('frCls').innerHTML = '<option value="">All classes</option>' + RAW.filter(x => x.Type === 'Class').map(x => `<option>${esc(x.Name)}</option>`).join('');
+  const [f, t] = stRange('month');
+  $('frFrom').value = f; $('frTo').value = t;
+}
+function frByClass(rows) {
+  const out = {};
+  rows.forEach(r => { (out[r.cls] = out[r.cls] || []).push(r); });
+  return Object.keys(out).sort().map(cls => {
+    const rs = out[cls];
+    const dist = {}; FR_ORDER.forEach(k => { dist[k] = rs.filter(r => r.evaluation === k).length; });
+    const scored = rs.filter(r => r.evaluation !== 'Absent');
+    const studs = {};
+    rs.forEach(r => { const s = studs[r.student] = studs[r.student] || { n: 0, sum: 0, scored: 0, abs: 0, inc: 0, last: '', lastDate: '' };
+      s.n++; if (r.evaluation === 'Absent') s.abs++; else { s.sum += r.score; s.scored++; } if (r.incidents) s.inc++;
+      if (r.date >= s.lastDate) { s.lastDate = r.date; s.last = r.evaluation; } });
+    return { cls, rows: rs, dist, avg: scored.length ? Math.round(scored.reduce((s, r) => s + r.score, 0) / scored.length * 10) / 10 : null,
+      dates: [...new Set(rs.map(r => r.date))].length, studs, incidents: rs.filter(r => r.incidents).sort((a, b) => a.date.localeCompare(b.date)) };
+  });
+}
+$('frPdf').onclick = async () => {
+  try {
+    const rows = await frLoad();
+    if (!rows.length) throw new Error('No factory evaluations in these dates.');
+    const pages = frByClass(rows).map(c => {
+      let html = `<div class="prKpis"><div><b>${c.rows.length}</b><span>Evaluations</span></div><div><b>${c.dates}</b><span>Factory days</span></div>` +
+        `<div><b>${c.avg ?? '—'}${c.avg === null ? '' : '/5'}</b><span>Average score</span></div><div><b>${c.incidents.length}</b><span>Incidents</span></div></div>`;
+      html += '<h3>Results</h3><table><thead><tr>' + FR_ORDER.map(k => `<th>${k}</th>`).join('') + '</tr></thead><tbody><tr>' +
+        FR_ORDER.map(k => `<td><b>${c.dist[k]}</b> (${Math.round(c.dist[k] / c.rows.length * 100)}%)</td>`).join('') + '</tr></tbody></table>';
+      html += '<h3>Incidents</h3>' + (c.incidents.length ? '<table><thead><tr><th>Date</th><th>Student</th><th>Teacher</th><th>Comment</th></tr></thead><tbody>' +
+        c.incidents.map(r => `<tr><td>${r.date}</td><td>${esc(r.student)}</td><td>${esc(r.teacher)}</td><td style="white-space:normal">${esc(r.comment)}</td></tr>`).join('') + '</tbody></table>'
+        : '<p style="font-size:10px">No incidents.</p>');
+      html += '<h3>Students</h3><table><thead><tr><th>#</th><th>Student</th><th>Evaluations</th><th>Average /5</th><th>Absent</th><th>Incidents</th><th>Last result</th></tr></thead><tbody>' +
+        Object.keys(c.studs).sort().map((n, i) => { const s = c.studs[n]; return `<tr><td>${i + 1}</td><td>${esc(n)}</td><td>${s.n}</td><td>${s.scored ? Math.round(s.sum / s.scored * 10) / 10 : '—'}</td><td>${s.abs || '—'}</td><td>${s.inc || '—'}</td><td>${esc(s.last)}</td></tr>`; }).join('') + '</tbody></table>';
+      const comments = c.rows.filter(r => r.comment && !r.incidents).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 40);
+      if (comments.length) html += '<h3>Comments</h3><table><thead><tr><th>Date</th><th>Student</th><th>Teacher</th><th>Comment</th></tr></thead><tbody>' +
+        comments.map(r => `<tr><td>${r.date}</td><td>${esc(r.student)}</td><td>${esc(r.teacher)}</td><td style="white-space:normal">${esc(r.comment)}</td></tr>`).join('') + '</tbody></table>';
+      return { title: `Factory report · ${c.cls}`, sub: `${FR.from} to ${FR.to} · printed ${prToday()}`, html };
+    });
+    $('frMsg').innerHTML = `<div class="msg ok">${pages.length} class page${pages.length > 1 ? 's' : ''}. In the print window choose "Save as PDF".</div>`;
+    prPrint({ file: `Factory report - ${$('frCls').value || 'All classes'} - ${FR.from} to ${FR.to}`, pages });
+  } catch (e) { $('frMsg').innerHTML = `<div class="msg err">${esc(e.message)}</div>`; }
+};
+$('frXlsx').onclick = async () => {
+  try {
+    const rows = await frLoad();
+    if (!rows.length) throw new Error('No factory evaluations in these dates.');
+    const cs = frByClass(rows);
+    prDownload(xlsxBlob([
+      { name: 'Summary', bold: [0, 2], rows: [[`Factory report · ${FR.from} to ${FR.to}`], [], ['Class', 'Evaluations', 'Factory days', 'Average /5', ...FR_ORDER, 'Incidents'],
+        ...cs.map(c => [c.cls, c.rows.length, c.dates, c.avg ?? '', ...FR_ORDER.map(k => c.dist[k]), c.incidents.length])] },
+      { name: 'Incidents', bold: [0], rows: [['Date', 'Class', 'Student', 'Teacher', 'Comment'], ...cs.flatMap(c => c.incidents.map(r => [r.date, r.cls, r.student, r.teacher, r.comment]))] },
+      { name: 'All evaluations', bold: [0], rows: [['Date', 'Class', 'Student', 'Teacher', 'Evaluation', 'Score /5', 'Incident', 'Comment'],
+        ...rows.slice().sort((a, b) => a.date.localeCompare(b.date) || a.cls.localeCompare(b.cls)).map(r => [r.date, r.cls, r.student, r.teacher, r.evaluation, r.evaluation === 'Absent' ? '' : r.score, r.incidents ? 'Yes' : '', r.comment])] }
+    ]), `Factory report - ${$('frCls').value || 'All classes'} - ${FR.from} to ${FR.to}.xlsx`);
+    $('frMsg').innerHTML = '<div class="msg ok">Excel ready: Summary, Incidents and All evaluations tabs.</div>';
+  } catch (e) { $('frMsg').innerHTML = `<div class="msg err">${esc(e.message)}</div>`; }
+};
+
+// ----- timetable printouts: one teacher's week, the team day by day, the cover list -----
+function ttpTeacherWeek(t) {
+  const days = TT_DAYS.map((dn, d) => ({ dn, date: addDays(W.weekStart, d) }));
+  let html = '<table><thead><tr><th>Day</th>' + [1, 2, 3, 4, 5, 6, 7, 8].map(s => `<th>${s}</th>`).join('') + '</tr></thead><tbody>';
+  days.forEach(({ dn, date }) => {
+    html += `<tr><td><b>${dn}</b><br>${shortDate(date)}</td>`;
+    if (atFactory(t, date)) { html += `<td colspan="8" style="text-align:center"><b>Factory day</b>${factoryClass(t, date) ? ' · ' + esc(factoryClass(t, date)) : ''}</td></tr>`; return; }
+    for (let s = 1; s <= 8; s++) {
+      const p = W.planned.find(x => x.teacher === t && x.date === date && x.session === s && !x.factory);
+      const c = coverAt(t, date, s);
+      const sub = W.cover.find(x => (x.type === 'Absent' || x.type === 'Extra') && x.substitute === t && x.date === date && x.session === s);
+      html += '<td>' + (sub ? `<b>${esc(sub.cls)}</b><br>${sub.type === 'Extra' ? 'extra' : 'covers ' + esc(String(sub.teacher).split(' ')[0])}`
+        : p ? `<b>${esc(p.cls)}</b>${c ? '<br>absent' + (c.substitute ? ' · ' + esc(String(c.substitute).split(' ')[0]) : '') : ''}` : '') + '</td>';
+    }
+    html += '</tr>';
+  });
+  return html + '</tbody></table>';
+}
+function ttpCoverList() {
+  const rows = W.cover.filter(c => c.type === 'Absent' || c.type === 'Extra').slice().sort((a, b) => a.date.localeCompare(b.date) || a.session - b.session);
+  const fac = W.cover.filter(c => c.type === 'Factory' || c.type === 'NoFactory');
+  let html = rows.length ? '<table><thead><tr><th>Day</th><th>Session</th><th>Class</th><th>Teacher</th><th>Covered by</th></tr></thead><tbody>' +
+    rows.map(r => `<tr><td>${TT_DAYS[TT_DAYS.findIndex((_, d) => addDays(W.weekStart, d) === r.date)] || ''} ${shortDate(r.date)}</td><td>${r.session}</td><td><b>${esc(r.cls)}</b></td>` +
+      `<td>${r.type === 'Extra' ? 'extra class' : esc(r.teacher) + (givenFactory(r.teacher, r.date) ? ' (factory day)' : ' (absent)')}</td><td>${r.substitute ? esc(r.substitute) : '<b>needs cover</b>'}</td></tr>`).join('') + '</tbody></table>'
+    : '<p style="font-size:10px">No absences, substitutions or extra classes this week.</p>';
+  if (fac.length) html += '<h3>Factory day changes</h3><table><thead><tr><th>Date</th><th>Teacher</th><th>Change</th></tr></thead><tbody>' +
+    fac.map(f => `<tr><td>${shortDate(f.date)}</td><td>${esc(f.teacher)}</td><td>${f.type === 'Factory' ? 'Factory day' + (f.cls ? ' · ' + esc(f.cls) : '') : 'No factory (cancelled)'}</td></tr>`).join('') + '</tbody></table>';
+  return html;
+}
+$('ttpBtn').onclick = ev => { ev.stopPropagation(); const l = $('ttpList'); l.hidden = !l.hidden; $('ttpBtn').setAttribute('aria-expanded', !l.hidden); };
+document.addEventListener('click', ev => { if (!ev.target.closest('#ttpWrap')) { $('ttpList').hidden = true; $('ttpBtn').setAttribute('aria-expanded', 'false'); } });
+$('ttpList').onclick = ev => {
+  const b = ev.target.closest('[data-p]');
+  if (!b || !W.loaded) return;
+  $('ttpList').hidden = true;
+  const wk = `Week of ${TT_DAYS[0]} ${W.weekStart}${W.dirty ? ' · includes changes not saved yet' : ''}`;
+  if (b.dataset.p === 'teacher') {
+    const t = $('wkTeacher').value;
+    if (!t) { window.alert('Choose a teacher first.'); return; }
+    prPrint({ file: `Timetable - ${t} - ${W.weekStart}`, landscape: true, pages: [{ title: `${t} · timetable`, sub: wk, html: ttpTeacherWeek(t) }] });
+  } else if (b.dataset.p === 'all') {
+    const ts = W.teachers.filter(t => W.planned.some(p => p.teacher === t) || W.cover.some(c => c.substitute === t || c.teacher === t));
+    prPrint({ file: `Timetables - ${W.weekStart}`, landscape: true, pages: ts.map(t => ({ title: `${t} · timetable`, sub: wk, html: ttpTeacherWeek(t) })) });
+  } else if (b.dataset.p === 'team') {
+    const names = W.teachers.slice();
+    W.planned.forEach(p => { if (!names.includes(p.teacher)) names.push(p.teacher); });
+    prPrint({ file: `Team timetable - ${W.weekStart}`, landscape: true, pages: TT_DAYS.map((dn, d) => ({ title: `Team timetable · ${dn} ${shortDate(addDays(W.weekStart, d))}`, sub: wk,
+      html: teamHTML({ weekStart: W.weekStart, teachers: names, planned: W.planned, cover: W.cover, me: '', day: d }) })) });
+  } else if (b.dataset.p === 'cover') {
+    prPrint({ file: `Cover list - ${W.weekStart}`, pages: [{ title: 'Absences, substitutions and extra classes', sub: wk, html: ttpCoverList() }] });
+  }
+};
+
+// ----- full backup: every tab of the spreadsheet in one Excel file -----
+$('backupBtn').onclick = async () => {
+  const b = $('backupBtn');
+  b.disabled = true; b.textContent = 'Preparing backup…';
+  try {
+    const out = await post('adminBackup', {});
+    const used = {};
+    const sheets = out.tabs.map(t => {
+      let n = String(t.name).replace(/[\[\]:*?\/\\]/g, '-').slice(0, 28) || 'Sheet';
+      used[n] = (used[n] || 0) + 1;
+      if (used[n] > 1) n = `${n.slice(0, 25)} ${used[n]}`;
+      return { name: n, bold: [0], rows: t.rows.length ? t.rows : [['(empty)']] };
+    });
+    const d = new Date();
+    prDownload(xlsxBlob(sheets), `OMHG EVA SCHOOL backup - ${isoDay(d)} ${String(d.getHours()).padStart(2, '0')}-${String(d.getMinutes()).padStart(2, '0')}.xlsx`);
+    b.textContent = `Backup downloaded (${sheets.length} tabs)`;
+  } catch (e) {
+    b.textContent = 'Backup failed: ' + e.message;
+  }
+  setTimeout(() => { b.disabled = false; b.textContent = '⤓ Download full backup'; }, 4000);
 };
 
 // ===================== EVALUATIONS: the board inside the admin page =====================
