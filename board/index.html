@@ -57,6 +57,12 @@ select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-s
   @page{size:A4 landscape;margin:12mm}
 }
 .embedded #signOut{display:none !important}
+.range{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 6px}
+.range .chip{padding:7px 12px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--ink);cursor:pointer;font-size:13px}
+.range .chip.on{background:#1d1d1d;color:var(--brand);border-color:#1d1d1d;font-weight:600}
+.range input[type=date]{min-width:0;padding:6px 8px;font-size:13px}
+.range .lbl{font-size:13px;color:var(--muted)}
+.rangeNote{font-size:13px;color:var(--muted);margin:0 0 10px}
 </style>
 </head>
 <body>
@@ -89,8 +95,22 @@ select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-s
       <button class="tab" data-view="vAll" type="button" data-i18n="tabAll"></button>
       <button class="tab" data-view="vComments" type="button" data-i18n="tabComments"></button>
       <button class="tab" data-view="vIncidents" type="button" data-i18n="tabIncidents"></button>
+      <button class="tab" data-view="vAbsent" type="button" data-i18n="tabAbsent"></button>
       <button class="btn" id="refresh" type="button" style="margin-inline-start:auto" data-i18n="refresh"></button>
     </div>
+    <!-- DATE FILTER: applies to every tab and every download -->
+    <div class="range noprint" id="range">
+      <span class="lbl" data-i18n="rangeLbl"></span>
+      <button class="chip" type="button" data-range="all" data-i18n="rAll"></button>
+      <button class="chip" type="button" data-range="week" data-i18n="rWeek"></button>
+      <button class="chip" type="button" data-range="month" data-i18n="rMonth"></button>
+      <button class="chip" type="button" data-range="term" data-i18n="rTerm"></button>
+      <button class="chip" type="button" data-range="custom" data-i18n="rCustom"></button>
+      <span id="customBox" hidden>
+        <input type="date" id="rFrom" aria-label="From"> <span class="lbl" data-i18n="rTo"></span> <input type="date" id="rTo">
+      </span>
+    </div>
+    <div class="rangeNote" id="rangeNote"></div>
     <div class="muted" id="stamp"></div>
     <div id="appMsg"></div>
 
@@ -144,6 +164,7 @@ select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-s
       <div class="row noprint">
         <label><span data-i18n="classLbl"></span> <select id="fCls"></select></label>
         <label><span data-i18n="teacherLbl"></span> <select id="fTeacher"></select></label>
+        <label><span data-i18n="evalLbl"></span> <select id="fEval"></select></label>
         <label><span data-i18n="searchLbl"></span> <input id="fQ" data-i18n-ph="searchPh" style="min-width:200px"></label>
         <button class="btn dark" id="xlsFilter" type="button" data-i18n="dlShown"></button>
       </div>
@@ -164,6 +185,19 @@ select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-s
       <div class="card">
         <div id="cmCount" class="muted"></div>
         <div id="cmTable"></div>
+      </div>
+    </div>
+
+    <!-- ABSENCES: one row per student absent at least once in the chosen dates -->
+    <div id="vAbsent" hidden>
+      <div class="row noprint">
+        <label><span data-i18n="classLbl"></span> <select id="abCls"></select></label>
+        <label><span data-i18n="searchLbl"></span> <input id="abQ" data-i18n-ph="namePh" style="min-width:200px"></label>
+        <button class="btn dark" id="xlsAbsent" type="button" data-i18n="dl"></button>
+      </div>
+      <div class="card">
+        <div id="abCount" class="muted"></div>
+        <div id="abTable"></div>
       </div>
     </div>
 
@@ -236,7 +270,13 @@ const T = {
     xName: "Name", xIncident: "Incident",
     printTitle: "{cls} · evaluations ({n})",
     fileAll: "OMHG EVA SCHOOL - all classes", fileComments: "OMHG EVA SCHOOL - comments", fileIncidents: "OMHG EVA SCHOOL - incidents",
-    fileShown: "OMHG EVA SCHOOL - evaluations"
+    fileShown: "OMHG EVA SCHOOL - evaluations",
+    tabAbsent: "Absences", evalLbl: "Evaluation", allEvals: "All ratings", namePh: "Student name",
+    abCount: "{s} student(s) absent at least once · {n} absence(s) in total", abNone: "No absences in these dates.",
+    colTimesAbsent: "Times absent", colOutOf: "Out of", colAbsentDates: "Absent on",
+    rangeLbl: "Dates:", rAll: "All dates", rWeek: "This week", rMonth: "This month", rTerm: "This term", rCustom: "Custom", rTo: "to",
+    rShowing: "Showing {from} – {to}", rShowingAll: "Showing all dates", rPick: "Choose both dates.",
+    term1: "Term 1", term2: "Term 2"
   },
   ar: {
     title: "OMHG EVA SCHOOL · لوحة المجلس", signin: "تسجيل دخول المجلس", pw: "كلمة مرور المجلس", open: "فتح",
@@ -269,7 +309,13 @@ const T = {
     xName: "الاسم", xIncident: "الحادثة",
     printTitle: "{cls} · التقييمات ({n})",
     fileAll: "OMHG EVA SCHOOL - كل الفصول", fileComments: "OMHG EVA SCHOOL - التعليقات", fileIncidents: "OMHG EVA SCHOOL - الحوادث",
-    fileShown: "OMHG EVA SCHOOL - التقييمات"
+    fileShown: "OMHG EVA SCHOOL - التقييمات",
+    tabAbsent: "الغياب", evalLbl: "التقييم", allEvals: "كل التقييمات", namePh: "اسم الطالب",
+    abCount: "{s} طالب غاب مرة على الأقل · {n} غياب في المجموع", abNone: "لا يوجد غياب في هذه الفترة.",
+    colTimesAbsent: "مرات الغياب", colOutOf: "من أصل", colAbsentDates: "أيام الغياب",
+    rangeLbl: "التاريخ:", rAll: "كل التواريخ", rWeek: "هذا الأسبوع", rMonth: "هذا الشهر", rTerm: "هذا الترم", rCustom: "مخصص", rTo: "إلى",
+    rShowing: "المعروض من {from} إلى {to}", rShowingAll: "المعروض: كل التواريخ", rPick: "اختر التاريخين.",
+    term1: "الترم الأول", term2: "الترم الثاني"
   }
 };
 
@@ -296,7 +342,7 @@ function applyLang() {
   document.querySelectorAll("[data-i18n-ph]").forEach(e => { e.placeholder = t(e.dataset.i18nPh); });
   $("langBtn").textContent = t("langBtn");
   applyThemeText();
-  if (DATA) renderAll();
+  if (DATA) { $("stamp").textContent = t("asOf") + " " + DATA.generated; renderAll(); }
 }
 
 $("langBtn").onclick = () => {
@@ -349,7 +395,7 @@ function table(headers, rows) {
 }
 
 function setView(id) {
-  ["vOverview", "vTeachers", "vClasses", "vAll", "vComments", "vIncidents"].forEach(v => $(v).hidden = v !== id);
+  ["vOverview", "vTeachers", "vClasses", "vAll", "vComments", "vIncidents", "vAbsent"].forEach(v => $(v).hidden = v !== id);
   document.querySelectorAll(".tab").forEach(b => b.classList.toggle("on", b.dataset.view === id));
 }
 
@@ -454,8 +500,62 @@ $("signOut").onclick = () => signOut("");
 $("refresh").onclick = refresh;
 document.querySelectorAll(".tab").forEach(b => b.onclick = () => setView(b.dataset.view));
 
+// ---------- date filter ----------
+// Week: Sunday to Saturday. Term 1: 1 Sep - 31 Jan. Term 2: 1 Feb - 30 Jun (July and August count with term 2).
+let RANGE = localStorage.getItem("boardRange") || "all";
+let CUSTOM = JSON.parse(localStorage.getItem("boardCustom") || '{"from":"","to":""}');
+const ymd = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const showDay = s => { const [y, m, d] = s.split("-"); return d + "/" + m + "/" + y; };
+
+function rangeDates() {
+  const now = new Date(), y = now.getFullYear(), m = now.getMonth();
+  if (RANGE === "week") {
+    const a = new Date(y, m, now.getDate() - now.getDay());
+    return { from: ymd(a), to: ymd(new Date(a.getFullYear(), a.getMonth(), a.getDate() + 6)) };
+  }
+  if (RANGE === "month") return { from: ymd(new Date(y, m, 1)), to: ymd(new Date(y, m + 1, 0)) };
+  if (RANGE === "term") {
+    if (m >= 8) return { from: y + "-09-01", to: (y + 1) + "-01-31", term: 1 };
+    if (m === 0) return { from: (y - 1) + "-09-01", to: y + "-01-31", term: 1 };
+    return { from: y + "-02-01", to: m >= 6 ? y + "-08-31" : y + "-06-30", term: 2 };
+  }
+  if (RANGE === "custom") {
+    if (!CUSTOM.from || !CUSTOM.to) return { from: "", to: "", missing: true };
+    return CUSTOM.from <= CUSTOM.to ? { ...CUSTOM } : { from: CUSTOM.to, to: CUSTOM.from };
+  }
+  return null;
+}
+
+function drawRange(r) {
+  document.querySelectorAll("#range .chip").forEach(b => b.classList.toggle("on", b.dataset.range === RANGE));
+  $("customBox").hidden = RANGE !== "custom";
+  $("rFrom").value = CUSTOM.from; $("rTo").value = CUSTOM.to;
+  $("rangeNote").textContent = !r ? t("rShowingAll") : r.missing ? t("rPick")
+    : (r.term ? t(r.term === 1 ? "term1" : "term2") + " · " : "") + t("rShowing", { from: showDay(r.from), to: showDay(r.to) });
+}
+
+document.querySelectorAll("#range .chip").forEach(b => b.onclick = () => {
+  RANGE = b.dataset.range; localStorage.setItem("boardRange", RANGE);
+  if (DATA) renderAll(); else drawRange(rangeDates());
+});
+["rFrom", "rTo"].forEach(id => $(id).onchange = () => {
+  CUSTOM = { from: $("rFrom").value, to: $("rTo").value };
+  localStorage.setItem("boardCustom", JSON.stringify(CUSTOM));
+  if (DATA) renderAll();
+});
+
 // ---------- rendering ----------
+// Every tab and every download uses DATA.records, so filtering it here filters everything.
 function renderAll() {
+  if (!DATA.allRecords) DATA.allRecords = DATA.records;
+  const r = rangeDates();
+  DATA.records = !r ? DATA.allRecords : r.missing ? DATA.allRecords
+    : DATA.allRecords.filter(x => x.date >= r.from && x.date <= r.to);
+  drawRange(r);
+  renderViews();
+}
+
+function renderViews() {
   const recs = DATA.records;
   const classNames = [...new Set([...DATA.classes, ...recs.map(r => r.class)])].sort();
   const teacherNames = [...new Set(recs.map(r => r.teacher))].sort();
@@ -516,7 +616,14 @@ function renderAll() {
   // All evaluations tab
   fillSelect($("fCls"), classNames, $("fCls").value, "allClasses");
   fillSelect($("fTeacher"), teacherNames, $("fTeacher").value, "allTeachers");
+  const fe = $("fEval"), keepE = fe.value;
+  fe.innerHTML = "";
+  fe.appendChild(new Option(t("allEvals"), ""));
+  EVALS.forEach(e => fe.appendChild(new Option(evalLabel(e), e)));
+  fe.value = keepE;
   renderAllTable();
+  fillSelect($("abCls"), classNames, $("abCls").value, "allClasses");
+  renderAbsent();
 
   // Comments and incidents tabs
   fillSelect($("cmCls"), classNames, $("cmCls").value, "allClasses");
@@ -614,9 +721,9 @@ function renderClassDates(list) {
 }
 
 function filteredRecs() {
-  const c = $("fCls").value, tch = $("fTeacher").value, q = $("fQ").value.trim().toLowerCase();
+  const c = $("fCls").value, tch = $("fTeacher").value, ev = $("fEval").value, q = $("fQ").value.trim().toLowerCase();
   return sortRecs(DATA.records.filter(r =>
-    (!c || r.class === c) && (!tch || r.teacher === tch) && (!q || r.student.toLowerCase().includes(q))));
+    (!c || r.class === c) && (!tch || r.teacher === tch) && (!ev || r.evaluation === ev) && (!q || r.student.toLowerCase().includes(q))));
 }
 
 function renderAllTable() {
@@ -633,7 +740,31 @@ function renderAllTable() {
 }
 
 ["clsPick"].forEach(id => $(id).onchange = renderClass);
-["fCls", "fTeacher"].forEach(id => $(id).onchange = renderAllTable);
+["fCls", "fTeacher", "fEval"].forEach(id => $(id).onchange = renderAllTable);
+$("abCls").onchange = renderAbsent;
+$("abQ").oninput = renderAbsent;
+
+// ---------- absences tab ----------
+// One row per student (class + name): how many times absent in the chosen dates, out of how many evaluations, and the dates.
+function absentRows() {
+  const c = $("abCls").value, q = $("abQ").value.trim().toLowerCase();
+  const byStudent = group(DATA.records.filter(r => (!c || r.class === c) && (!q || r.student.toLowerCase().includes(q))),
+    r => r.class + "||" + r.student);
+  return Object.values(byStudent).map(list => {
+    const abs = list.filter(r => r.evaluation === "Absent").map(r => r.date).sort().reverse();
+    return { student: list[0].student, cls: list[0].class, n: abs.length, of: list.length, dates: [...new Set(abs)] };
+  }).filter(x => x.n > 0).sort((a, b) => b.n - a.n || a.cls.localeCompare(b.cls) || a.student.localeCompare(b.student));
+}
+
+function renderAbsent() {
+  const rows = absentRows();
+  $("abCount").textContent = rows.length ? t("abCount", { s: rows.length, n: rows.reduce((m, x) => m + x.n, 0) }) : t("abNone");
+  $("abTable").innerHTML = "";
+  if (!rows.length) return;
+  $("abTable").appendChild(table(
+    [t("colStudent"), t("colClass"), t("colTimesAbsent"), t("colOutOf"), t("colAbsentDates")],
+    rows.map(x => ({ cls: x.n >= 3 ? "inc" : "", cells: [x.student, x.cls, x.n, x.of, x.dates.join(" · ")] }))));
+}
 $("fQ").oninput = renderAllTable;
 ["cmCls", "cmTeacher"].forEach(id => $(id).onchange = renderComments);
 $("cmQ").oninput = renderComments;
@@ -723,6 +854,12 @@ $("xlsAll").onclick = () => {
 $("xlsFilter").onclick = () => {
   const list = filteredRecs().slice().reverse();
   downloadWorkbook([[t("tabAll"), list]], t("fileShown"));
+};
+
+$("xlsAbsent").onclick = () => {
+  downloadTable(t("tabAbsent") + " - OMHG EVA SCHOOL",
+    [t("colStudent"), t("colClass"), t("colTimesAbsent"), t("colOutOf"), t("colAbsentDates")],
+    absentRows().map(x => [x.student, x.cls, x.n, x.of, x.dates.join(", ")]));
 };
 
 $("xlsComments").onclick = () => {
