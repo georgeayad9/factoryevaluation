@@ -514,6 +514,22 @@ button.feCell{cursor:pointer}button.feCell:hover{filter:brightness(.97)}
 .feR .feInc{display:inline-flex !important;align-items:center;gap:4px;font-size:13px;color:#B91C1C;font-weight:700;margin:0 0 0 6px !important}.feR .feInc input{width:56px !important;min-height:36px;padding:0 6px;margin:0}
 .feDF{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:16px 24px;border-top:1px solid var(--line)}.feDF .hint{flex:1;margin:0}.feDF .btn{min-height:44px}
 @media (max-width:640px){.feStu{grid-template-columns:1fr}.feR{justify-content:flex-start}}
+
+.feClsRow{display:flex;gap:16px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--line)}.feClsRow:last-of-type{border-bottom:0}
+.feClsName{flex:0 0 180px;font-size:14px;line-height:1.35}.feClsName span{color:var(--muted)}.feClsName small{display:block;color:var(--muted);font-size:12.5px;margin-top:3px}.feClsName em{font-style:normal;color:#B91C1C;font-weight:600}
+.feDots{flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:6px}
+.feDot{display:inline-flex;flex-direction:column;align-items:flex-start;gap:1px;min-width:86px;padding:6px 9px;border-radius:9px;border:1px solid transparent;font:inherit;font-size:12px;line-height:1.25;text-align:left;color:var(--ink)}
+.feDot b{font-size:12.5px}.feDot span{font-size:11.5px;color:var(--muted)}
+button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
+.feDot.ok{background:#E6F4EA}.feDot.ok b{color:#17652A}
+.feDot.miss{background:#FEF2F2;border-color:#FECACA}.feDot.miss b{color:#991B1B}
+.feDot.wait{background:var(--bg);border-color:var(--line)}
+[data-theme="dark"] .feDot.ok{background:#16351F}[data-theme="dark"] .feDot.ok b{color:#9FE0B0}[data-theme="dark"] .feDot.miss{background:#3B1A1A;border-color:#5B2727}[data-theme="dark"] .feDot.miss b{color:#FCA5A5}
+.feMiss{margin-top:14px;padding-top:6px;border-top:1px solid var(--line)}.feMiss h3{font-size:14px;margin:8px 0 2px;color:#991B1B}
+@media (max-width:700px){.feClsRow{flex-direction:column;gap:8px}.feClsName{flex:none}.feDot{min-width:0}}
+
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+#paneEvals .card{min-width:0;overflow:hidden}
 </style>
 </head>
 <body>
@@ -767,8 +783,8 @@ button.feCell{cursor:pointer}button.feCell:hover{filter:brightness(.97)}
     <div id="frMsg"></div>
     <div class="feStats" id="feStats"></div>
     <section class="card">
-      <div class="feT"><h2>Did every factory day get its evaluation?</h2><span class="hint">Factory days come from the timetable (and the ones you added in Timetable). Click a day to open it.</span></div>
-      <div class="tw" id="feGrid"></div>
+      <div class="feT"><h2>Did every factory day get its evaluation?</h2><span class="hint">Factory days come from the timetable and the ones you added in Timetable. Green = done (click to open), red = missing, grey = coming.</span></div>
+      <div id="feGrid"></div>
     </section>
     <div class="feTwo">
       <section class="card"><h2>Incidents to follow up</h2><div id="feInc"></div></section>
@@ -4110,20 +4126,28 @@ function feDraw() {
   const codes = [...new Set(exp.map(x => feCode(x.cls)).concat(recs.map(r => feCode(r.class))))].filter(Boolean).sort();
   const dates = [...new Set(exp.map(x => x.date).concat(recs.map(r => r.date)))].sort();
   let due = 0, done = 0, missing = 0;
-  const cell = (code, date) => {
-    const rs = byDay[date + '|' + code] || [], ex = exp.filter(x => x.date === date && feCode(x.cls) === code);
-    if (ex.length && date <= today) { due++; if (rs.length) done++; }
-    if (rs.length) {
-      const late = rs.some(r => r.uploaded.slice(0, 10) > date), who = [...new Set(rs.map(r => feFirst(r.teacher)))].join(', ');
-      return `<td><button type="button" class="feCell ${late ? 'late' : 'ok'}" data-day="${esc(date + '|' + code)}"><b>${late ? 'Done late' : 'Done'}</b><span>${esc(who)} · ${rs.length} students</span></button></td>`;
-    }
-    if (!ex.length) return '<td class="feNone">—</td>';
-    const t = ex[0];
-    if (date < today) { missing++; return `<td><div class="feCell miss"><b>Missing</b><span>${esc(t.teacher)}</span><button type="button" class="btn alt small" data-remind="${esc(t.teacher)}" data-date="${date}" data-cls="${esc(code)}">Remind ${esc(feFirst(t.teacher))}</button></div></td>`; }
-    return `<td><div class="feCell wait"><b>${date === today ? 'Due today' : 'Coming'}</b><span>${esc(t.teacher)}</span></div></td>`;
-  };
-  $('feGrid').innerHTML = codes.length && dates.length ? `<table class="feGridT"><thead><tr><th>Class</th>${dates.map(d => `<th>${feDay(d)}</th>`).join('')}</tr></thead><tbody>${
-    codes.map(c => `<tr><th class="feCls">${esc(c)}${names[c] && names[c] !== c ? ' · <span>' + esc(names[c]) + '</span>' : ''}</th>${dates.map(d => cell(c, d)).join('')}</tr>`).join('')}</tbody></table>`
+  const miss = [];
+  const rowsHtml = codes.map(code => {
+    let cDone = 0, cDue = 0, cMiss = 0;
+    const chips = dates.map(date => {
+      const rs = byDay[date + '|' + code] || [], ex = exp.filter(x => x.date === date && feCode(x.cls) === code);
+      if (ex.length && date <= today) { due++; cDue++; if (rs.length) { done++; cDone++; } }
+      const lbl = feDay(date).replace(/ (Sept|Sep)$/, ' Sep');
+      if (rs.length) {
+        const late = rs.some(r => r.uploaded.slice(0, 10) > date), who = [...new Set(rs.map(r => feFirst(r.teacher)))].join(', ');
+        if (!ex.length && date <= today) { /* evaluated on a day that is not a factory day in the timetable */ }
+        return `<button type="button" class="feDot ok" data-day="${esc(date + '|' + code)}" title="${esc(who)} · ${rs.length} students${late ? ' · uploaded later' : ''}"><b>${lbl}</b><span>${esc(who)}${late ? ' · later' : ''}</span></button>`;
+      }
+      if (!ex.length) return '';
+      const t = ex[0];
+      if (date < today) { missing++; cMiss++; miss.push({ date, code, teacher: t.teacher }); return `<span class="feDot miss" title="Missing · ${esc(t.teacher)}"><b>${lbl}</b><span>${esc(feFirst(t.teacher))} · missing</span></span>`; }
+      return `<span class="feDot wait" title="${date === today ? 'Due today' : 'Coming'} · ${esc(t.teacher)}"><b>${lbl}</b><span>${date === today ? 'today' : 'coming'} · ${esc(feFirst(t.teacher))}</span></span>`;
+    }).join('');
+    return `<div class="feClsRow"><div class="feClsName"><b>${esc(code)}</b>${names[code] && names[code] !== code ? ' <span>' + esc(names[code]) + '</span>' : ''}
+        <small>${cDue ? cDone + ' of ' + cDue + ' done' : 'no factory days due'}${cMiss ? ` · <em>${cMiss} missing</em>` : ''}</small></div><div class="feDots">${chips || '<span class="hint" style="margin:0">—</span>'}</div></div>`;
+  }).join('');
+  $('feGrid').innerHTML = codes.length && dates.length ? rowsHtml + (miss.length ? `<div class="feMiss"><h3>Missing (${miss.length})</h3>${miss.sort((x, y) => x.date < y.date ? 1 : -1).map(m =>
+      `<div class="feRow"><span class="aTag red">MISSING</span><div class="t"><b>${esc(m.code)}</b> · ${feDay(m.date)} · ${esc(m.teacher)}</div><button type="button" class="btn alt small" data-remind="${esc(m.teacher)}" data-date="${m.date}" data-cls="${esc(m.code)}">Remind ${esc(feFirst(m.teacher))}</button></div>`).join('')}</div>` : '')
     : '<div class="aEmpty">No factory days and no factory evaluations in these dates.</div>';
   // incidents
   const incs = recs.filter(r => r.incidents > 0).map(r => Object.assign({ key: r.date + '|' + r.class + '|' + r.student }, r)).sort((a, b) => a.date < b.date ? 1 : -1);
