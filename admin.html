@@ -544,6 +544,52 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
 .reqDone{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px;margin-top:6px}
 
 .ttStats{grid-template-columns:repeat(auto-fit,minmax(150px,1fr)) !important}
+
+#paneTT .ttBar{position:sticky;top:0;z-index:30;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px 0;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.04)}
+.ttBarIn{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.ttBarIn h1{margin:0 8px 0 0;font-size:20px}
+.ttNav{display:flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.ttNav .btn{border:0;border-radius:0;min-height:40px;padding:0 12px;font-size:16px}
+.ttNav input{border:0;border-radius:0;min-height:40px;width:auto;font-weight:600}
+.ttBarIn > select{width:auto;min-height:42px;min-width:180px}
+.ttBarR{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ttBarR .btn{min-height:40px}
+.ttBarR .exMenu{position:relative}
+.ttTabs{display:flex;gap:2px;margin-top:10px;overflow-x:auto}
+.ttTabs button{border:0;border-bottom:2px solid transparent;background:none;padding:11px 14px;font:500 14px Inter,system-ui,sans-serif;color:var(--muted);cursor:pointer;white-space:nowrap}
+.ttTabs button.on{color:var(--ink);font-weight:600;border-bottom-color:#18181B}
+[data-theme="dark"] .ttTabs button.on{border-bottom-color:#F7C948}
+.ttBadge,.sideBadge{display:inline-block;min-width:18px;padding:0 6px;border-radius:99px;background:#DC2626;color:#fff;font-size:11px;font-weight:600;line-height:18px;text-align:center;margin-left:6px}
+.side .lbl{display:flex;align-items:center;justify-content:space-between;flex:1}
+.ttToday{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:12px;font-size:13.5px}
+.ttToday span{color:var(--muted)}.ttToday .btn{margin-left:auto}
+#paneTT .ttStats{gap:10px;margin-bottom:12px}
+.ttGridCard{position:relative}
+.ttKey{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;font-size:12px;color:var(--muted);margin-bottom:10px}
+.ttKey i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;border:1px solid var(--line)}
+.ttKey .k1{background:var(--card)}.ttKey .k2{background:#FEE2E2}.ttKey .k3{background:#EEF4FF}.ttKey .k4{background:#E6F4EA}.ttKey .k5{background:#F4F4F5}
+.ttHelp{margin-left:auto}.ttHelp summary{list-style:none;width:30px;height:30px;border-radius:99px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;font-weight:600;color:var(--ink)}
+.ttHelp summary::-webkit-details-marker{display:none}
+.ttHelp[open]{flex-basis:100%;margin-left:0}.ttHelp[open] summary{margin-left:auto}.ttHelp .hint{margin:8px 0 0}
+.ttPop{position:fixed;z-index:90;width:240px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.16);padding:6px}
+.ttPopH{padding:8px 10px 6px;font-size:12px;color:var(--muted)}
+.ttPop button{display:block;width:100%;text-align:left;padding:10px;border:0;border-radius:8px;background:transparent;color:var(--ink);font:500 14px Inter,system-ui,sans-serif;cursor:pointer}
+.ttPop button:hover,.ttPop button:focus-visible{background:var(--bg)}.ttPop button small{display:block;font-size:12px;color:var(--muted);font-weight:400}.ttPop button.mute{color:var(--muted)}
+.ttCoverBar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}.ttCoverBar #cvFill{margin-left:auto;min-height:42px}
+.needRow .btn.small{min-height:36px}
+.ldRow{display:grid;grid-template-columns:200px minmax(0,1fr) 110px;gap:14px;align-items:center;width:100%;padding:12px 6px;border:0;border-bottom:1px solid var(--line);background:none;text-align:left;font:inherit;color:var(--ink);cursor:pointer}
+.ldRow:hover{background:var(--bg)}.ldRow:last-child{border-bottom:0}
+.ldRow .n small,.ldRow .v small{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+.ldRow .b{display:flex;align-items:center;gap:10px}.ldRow .tr{flex:1;height:12px;border-radius:99px;background:var(--bg);overflow:hidden;border:1px solid var(--line)}
+.ldRow .tr i{display:block;height:100%;background:#F7C948;border-radius:99px}.ldRow .tr i.near{background:#F59E0B}.ldRow .tr i.over{background:#DC2626}
+.ldRow em{font-style:normal;font-size:12px;font-weight:600;color:#B45309;white-space:nowrap}
+.ldRow .v{text-align:right;font-size:14px;color:var(--muted)}.ldRow .v b{color:var(--ink)}
+@media (max-width:700px){.ldRow{grid-template-columns:1fr 90px}.ldRow .b{grid-column:1 / -1;order:3}.ttBarR{margin-left:0}}
+
+#paneTT .ttStat{background:var(--card);border:1px solid var(--line);border-radius:12px}
+#paneTT .ttStat.warn{background:#FEF2F2;border-color:#FECACA}
+.tmDay{border-color:var(--line) !important;border-radius:10px}
+.tmDay.on{background:#18181B !important;color:#fff !important;border-color:#18181B !important}.tmDay.on small{color:#D4D4D8 !important}
+@media (max-width:700px){#paneTT .ttBar{position:static}.ttBarIn > select{flex:1 1 100%}}
 </style>
 </head>
 <body>
@@ -1035,30 +1081,13 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
   </div>
   <!-- ===================== TIMETABLE ===================== -->
   <div id="paneTT" hidden>
-    <div id="ttStatus"></div>
-
-    <!-- SUBSTITUTION REQUESTS from teachers (Requests.gs) -->
-    <div class="card" id="reqCard" hidden>
-      <h2 id="reqHead">Substitution requests</h2>
-      <p class="hint" style="margin:-4px 0 10px">Early leave, late arrival or other duty. The teacher is not absent: choose who takes each class, then approve.</p>
-      <div id="reqList"></div>
-    </div>
-
-    <!-- WEEK: absences and substitutions -->
-    <div class="card">
-      <h2>Week: absences and substitutions</h2>
-      <div class="row">
-        <div class="auto"><button class="btn alt small" id="wkPrev" type="button" aria-label="Previous week">◀</button></div>
-        <div>
-          <label for="wkDate">Week of</label>
-          <input type="date" id="wkDate">
-        </div>
-        <div class="auto"><button class="btn alt small" id="wkNext" type="button" aria-label="Next week">▶</button></div>
-        <div>
-          <label for="wkTeacher">Teacher</label>
-          <select id="wkTeacher"></select>
-        </div>
-        <div class="auto"><button class="btn save" id="wkSave" type="button" disabled>Save week</button></div>
+    <div class="ttBar">
+      <div class="ttBarIn">
+        <h1>Timetable</h1>
+        <div class="ttNav"><button class="btn alt" id="wkPrev" type="button" aria-label="Previous week">‹</button><input type="date" id="wkDate" aria-label="Week of"><button class="btn alt" id="wkNext" type="button" aria-label="Next week">›</button></div>
+        <select id="wkTeacher" aria-label="Teacher"></select>
+        <div class="ttBarR">
+          <button class="btn alt" id="wkUndo" type="button" disabled>Undo</button>
         <div class="auto exMenu" id="ttpWrap">
           <button class="btn alt small" id="ttpBtn" type="button" aria-expanded="false">🖨 Print</button>
           <div class="exList" id="ttpList" hidden>
@@ -1068,39 +1097,84 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
             <button type="button" data-p="cover">Cover list<small>Absences, substitutions, extra classes and factory changes</small></button>
           </div>
         </div>
+      
+          <button class="btn save" id="wkSave" type="button" disabled>Save week</button>
+        </div>
       </div>
+      <div class="ttTabs" role="tablist" aria-label="Timetable">
+        <button type="button" role="tab" data-tt="week">Week</button>
+        <button type="button" role="tab" data-tt="cover">Cover <span class="ttBadge" id="ttCoverN" hidden></span></button>
+        <button type="button" role="tab" data-tt="team">Team</button>
+        <button type="button" role="tab" data-tt="setup">Setup</button>
+      </div>
+    </div>
+    <div id="ttStatus"></div>
+
+    <!-- WEEK: one teacher's week -->
+    <section data-ttp="week">
+      <div class="ttToday" id="ttToday"></div>
       <div class="ttStats" id="wkStats"></div>
-      <div class="ttWrap"><table class="ttGrid" id="wkGrid"></table></div>
-      <p class="hint">Click a class to mark it absent, or to give it to another teacher without marking the teacher absent (substitution).
+      <div class="card ttGridCard">
+        <div class="ttKey"><span><i class="k1"></i>Class</span><span><i class="k2"></i>Absent</span><span><i class="k3"></i>Substituted (not absent)</span><span><i class="k4"></i>Covers / extra</span><span><i class="k5"></i>Factory</span>
+          <details class="ttHelp"><summary aria-label="How it works">?</summary>      <p class="hint">Click a class to mark it absent, or to give it to another teacher without marking the teacher absent (substitution).
         Click a day name to make it an absent day, a factory day, or a normal day again. On a factory day
         (from the timetable or added), click the day name to move it to another teacher or cancel it. A factory day puts the
         teacher's classes that day under Needs cover and lowers their max by 5; a cancelled one gives the 5 back. Click a class to mark that session only absent; click again to undo.
         Click a free session (+ extra) to give the teacher an extra class.</p>
 
-      <h2 style="margin-top:18px">Factory days this week</h2>
-      <div id="facList"></div>
+</details></div>
+        <div class="ttWrap"><table class="ttGrid" id="wkGrid"></table></div>
+      </div>
+    </section>
 
-      <h2 style="margin-top:18px" id="needHead">Needs cover</h2>
-      <div id="needList"></div>
+    <!-- COVER: everything that needs a decision -->
+    <section data-ttp="cover" hidden>
+      <div class="ttCoverBar">
+        <div class="feSeg" id="cvSeg"><button type="button" data-cv="todo" class="on">To do</button><button type="button" data-cv="all">Everything</button></div>
+        <span class="hint" style="margin:0">Requests, absences and substitutions of the week above, in one list.</span>
+        <button class="btn" id="cvFill" type="button">Fill all with suggestions</button>
+      </div>
+      <div class="card" id="reqCard" hidden>
+        <h2 id="reqHead">Substitution requests</h2>
+        <div id="reqList"></div>
+      </div>
+      <div class="card">
+        <h2 id="needHead">Needs cover</h2>
+        <div id="needList"></div>
+        <p class="hint" style="margin-bottom:0">Suggest picks the free teacher with the most room left and the fewest classes that day.</p>
+      </div>
+    </section>
 
-      <h2 style="margin-top:18px">This week, every teacher</h2>
-      <div class="ttWrap"><table class="ttSum" id="wkSum"></table></div>
+    <!-- TEAM: everyone's load and day -->
+    <section data-ttp="team" hidden>
+      <div class="card">
+        <div class="feT"><h2>Classes taken this week</h2><button class="btn alt small" id="ttLimBtn" type="button">Edit days &amp; max</button></div>
+        <p class="hint" style="margin-top:0">Click a teacher to open their week. Yellow = room left · orange = nearly full · red = over the max.</p>
+        <div id="ttLoad"></div>
+        <div id="ttLimBox" hidden>
+          <h3 style="margin:18px 0 6px;font-size:15px">Days and max this week</h3>
+          <div class="ttWrap"><table class="ttSum" id="wkSum"></table></div>
       <p class="hint">A factory day = more than 7 sessions of field training (تدريب ميداني) in a day. Its sessions are
         not counted as classes, and it lowers the teacher's days available by 1. Fewer field-training sessions in a day
         count as normal classes. Max = 5 classes for each available day (5 days = 25,
         4 = 20, 3 = 15); you can change the days or type any max for this week. Taken = planned − absent − given to others
         (substitutions, not absent) + classes covered + extra classes; Left = max − taken. ⚠ marks a teacher with 6 or more classes on a day.
         Press Save week to keep changes.</p>
-    </div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Team timetable</h2>
+        <p class="hint" style="margin-top:-6px">The same view teachers see under their timetable, including changes you have not saved yet.</p>
+        <div id="tmBox"></div>
+      </div>
+    </section>
 
-    <!-- TEAM: everyone's day, the same view the teachers see -->
-    <div class="card">
-      <h2>Team timetable</h2>
-      <p class="hint" style="margin-top:-6px">The same view teachers see under their timetable. It follows the week above,
-        including changes you have not saved yet.</p>
-      <div id="tmBox"></div>
-    </div>
-
+    <!-- SETUP: factory days, upload, saved timetables -->
+    <section data-ttp="setup" hidden>
+      <div class="card">
+        <h2>Factory days this week</h2>
+        <div id="facList"></div>
+      </div>
     <!-- UPLOAD a timetable PDF -->
     <div class="card">
       <h2>Upload a timetable (PDF from aSc Timetables)</h2>
@@ -1122,8 +1196,10 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
       <h2 style="margin-top:18px">Saved timetables</h2>
       <ul id="verList"></ul>
     </div>
+    </section>
   </div>
 </main>
+<div class="ttPop" id="ttPop" role="menu" hidden></div>
 <div id="findBox" hidden>
   <div class="findCard" role="dialog" aria-modal="true" aria-label="Search">
     <input type="search" id="findQ" placeholder="Search a student, teacher, class or screen…" autocomplete="off">
@@ -1641,7 +1717,7 @@ document.addEventListener('click', e => {
   if (!a) return;
   const act = a.dataset.act || a.dataset.q;
   if (act === 'tt') return showPane('tt');
-  if (act.indexOf('req:') === 0) { showPane('tt'); return loadWeek(act.slice(4)).then(() => $('reqCard').scrollIntoView({ behavior: 'smooth', block: 'start' })); }
+  if (act.indexOf('req:') === 0) { showPane('tt'); ttTab('cover'); return loadWeek(act.slice(4)); }
   if (act === 'kpi') return showPane('kpi');
   if (act === 'visit') return homeGoHub('visits', () => $('hubUnplanned').click());
   if (act === 'meet') return homeGoHub('', () => window.hubPlanMeeting && window.hubPlanMeeting());
@@ -1715,7 +1791,8 @@ async function loadWeek(date) {
       cover: out.cover, limits: out.limits || {}, versions: out.versions, dirty: false, adding: null, cellMenu: null, requests: out.requests || [],
       extraClasses: out.extraClasses || W.extraClasses, perDay: out.perDay || 5, dayWarning: out.dayWarning || 6 });
     applyPlanned();
-    $('wkSave').disabled = true;
+    W.hist = [ttSnap()];
+    ttSaveLabel();
     $('wkDate').value = out.weekStart;
     const sel = $('wkTeacher'), prev = sel.value || localStorage.getItem('ttTeacher');
     sel.innerHTML = '';
@@ -1791,9 +1868,105 @@ function weekCounts() {
 function markWeekDirty() {
   applyPlanned();
   W.dirty = true;
-  $('wkSave').disabled = false;
+  W.cellMenu = null; ttPopClose();
+  (W.hist = W.hist || []).push(ttSnap());
+  ttSaveLabel();
   renderWeek();
 }
+// ----- undo: a copy of the week after every change -----
+function ttSnap() { return JSON.stringify({ cover: W.cover, limits: W.limits }); }
+function ttSaveLabel() {
+  const n = Math.max(0, (W.hist || []).length - 1);
+  $('wkSave').disabled = !W.dirty;
+  $('wkSave').textContent = W.dirty ? `Save week${n ? ' · ' + n + ' change' + (n > 1 ? 's' : '') : ''}` : 'Save week';
+  $('wkUndo').disabled = !(W.hist && W.hist.length > 1);
+}
+$('wkUndo').onclick = () => {
+  if (!W.hist || W.hist.length < 2) return;
+  W.hist.pop();
+  const o = JSON.parse(W.hist[W.hist.length - 1]);
+  W.cover = o.cover; W.limits = o.limits;
+  applyPlanned();
+  W.dirty = W.hist.length > 1;
+  ttSaveLabel();
+  renderWeek();
+};
+// ----- tabs -----
+let TT_TAB = localStorage.getItem('ttTab') || 'week';
+function ttTab(t) {
+  TT_TAB = t; localStorage.setItem('ttTab', t);
+  document.querySelectorAll('#paneTT [data-ttp]').forEach(x => { x.hidden = x.dataset.ttp !== t; });
+  document.querySelectorAll('#paneTT [data-tt]').forEach(b => { b.classList.toggle('on', b.dataset.tt === t); b.setAttribute('aria-selected', b.dataset.tt === t); });
+  ttPopClose();
+}
+document.querySelectorAll('#paneTT [data-tt]').forEach(b => { b.onclick = () => ttTab(b.dataset.tt); });
+ttTab(TT_TAB);
+// ----- the small menu on a class (substitute / absent) -----
+function ttPopClose() { const p = $('ttPop'); if (p) p.hidden = true; }
+function ttPopOpen(cell, p, dn) {
+  const pop = $('ttPop');
+  pop.innerHTML = `<div class="ttPopH">${esc(dn)} ${esc(shortDate(p.date))} · session ${p.session} · ${esc(p.cls)}</div>
+    <button type="button" role="menuitem" data-pop="sub">Give to another teacher<small>Substitution · not absent</small></button>
+    <button type="button" role="menuitem" data-pop="absent">Mark absent</button>
+    <button type="button" role="menuitem" data-pop="x" class="mute">Cancel</button>`;
+  pop.hidden = false;
+  const r = cell.getBoundingClientRect(), w = 240;
+  pop.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, r.left)) + 'px';
+  pop.style.top = (r.bottom + 6 + 170 > window.innerHeight ? Math.max(8, r.top - 170) : r.bottom + 6) + 'px';
+  pop.onclick = e => {
+    const b = e.target.closest('[data-pop]'); if (!b) return;
+    ttPopClose();
+    if (b.dataset.pop === 'absent') toggleAbsent(p);
+    if (b.dataset.pop === 'sub') {
+      W.cover.push({ type: 'Sub', teacher: p.teacher, date: p.date, session: p.session, cls: p.cls, subject: p.subject, substitute: ttSuggest({ teacher: p.teacher, date: p.date, session: p.session }, weekCounts()) || '', reason: 'Other duty' });
+      markWeekDirty();
+      ttMsg(`${p.cls} on ${dn} session ${p.session} is now a substitution${W.cover[W.cover.length - 1].substitute ? ' (suggested: ' + W.cover[W.cover.length - 1].substitute + ')' : ''}. Change who or the reason under Cover.`, true);
+    }
+  };
+  setTimeout(() => pop.querySelector('button').focus({ preventScroll: true }), 0);
+  TT_POP_Y = window.scrollY;
+}
+document.addEventListener('click', e => { if (!e.target.closest('#ttPop') && !e.target.closest('#wkGrid td')) ttPopClose(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') ttPopClose(); });
+let TT_POP_Y = 0;
+window.addEventListener('scroll', () => { if (Math.abs(window.scrollY - TT_POP_Y) > 40) ttPopClose(); }, { passive: true });
+// ----- suggestions: the free teacher with the most room, then the fewest classes that day -----
+function ttSuggest(r, counts) {
+  const free = freeTeachers(r).filter(x => x !== r.teacher);
+  if (!free.length) return '';
+  const k = x => counts[x] || { room: 0, perDay: {} };
+  free.sort((a, b) => ((k(a).perDay[r.date] || 0) + 1 >= W.dayWarning) - ((k(b).perDay[r.date] || 0) + 1 >= W.dayWarning) ||
+    k(b).room - k(a).room || (k(a).perDay[r.date] || 0) - (k(b).perDay[r.date] || 0) || a.localeCompare(b));
+  return free[0];
+}
+let CV_MODE = 'todo';
+document.addEventListener('click', e => {
+  const sg = e.target.closest('#cvSeg [data-cv]');
+  if (sg) { CV_MODE = sg.dataset.cv; document.querySelectorAll('#cvSeg [data-cv]').forEach(b => b.classList.toggle('on', b === sg)); renderWeek(); return; }
+  const one = e.target.closest('[data-suggest]');
+  if (one) {
+    const r = W.cover[Number(one.dataset.suggest)], x = r && ttSuggest(r, weekCounts());
+    if (!x) return ttMsg('Nobody is free at that time.', false);
+    r.substitute = x; markWeekDirty(); return;
+  }
+  const rq = e.target.closest('[data-rqsuggest]');
+  if (rq) {
+    const [id, ses] = rq.dataset.rqsuggest.split('|'), q = W.requests.find(z => z.id === id);
+    const x = ttSuggest({ teacher: q.teacher, date: q.date, session: Number(ses) }, weekCounts());
+    if (!x) return ttMsg('Nobody is free at that time.', false);
+    (REQ_PICK[id] = REQ_PICK[id] || {})[ses] = x; renderWeek(); return;
+  }
+  if (e.target.id === 'cvFill') {
+    let n = 0;
+    W.cover.filter(r => (r.type === 'Absent' || r.type === 'Sub') && !r.substitute).forEach(r => { const x = ttSuggest(r, weekCounts()); if (x) { r.substitute = x; n++; } });
+    (W.requests || []).filter(q => q.status === 'pending' && q.weekStart === W.weekStart).forEach(q => q.sessions.forEach(ses => {
+      const pk = REQ_PICK[q.id] = REQ_PICK[q.id] || {};
+      if (!pk[ses]) { const x = ttSuggest({ teacher: q.teacher, date: q.date, session: ses }, weekCounts()); if (x) { pk[ses] = x; n++; } }
+    }));
+    if (n) { markWeekDirty(); ttMsg(`${n} suggestion${n > 1 ? 's' : ''} filled in. Check them, approve the requests, then Save week.`, true); }
+    else ttMsg('Nothing left to fill, or nobody is free.', false);
+  }
+});
 
 // Confirms when a teacher would reach 6+ classes that day or go past their max
 function okToAdd(x, date, counts) {
@@ -2125,7 +2298,7 @@ function renderWeek() {
             if (!window.confirm(`Undo the substitution of ${p.cls} on ${dn}, session ${s}? The class goes back to ${t}.`)) return;
             W.cover.splice(W.cover.indexOf(g), 1); markWeekDirty();
           };
-        } else if (menu) {
+        } else if (false && menu) {
           td.className = 'click';
           const sel = document.createElement('select');
           sel.setAttribute('aria-label', `${t}, ${dn} session ${s}`);
@@ -2143,7 +2316,7 @@ function renderWeek() {
           td.className = 'click' + (c ? (c.substitute ? ' cov' : ' abs') : '');
           td.innerHTML = `<b>${esc(p.cls)}</b><small>${c ? (c.substitute ? 'covered by ' + esc(c.substitute) : 'absent') : esc(p.subject)}</small>`;
           td.title = c ? 'Click to undo the absence' : 'Click: mark absent, or give this class to another teacher';
-          td.onclick = () => { if (c) return toggleAbsent(p); W.adding = null; W.cellMenu = { date, session: s }; renderWeek(); };
+          td.onclick = e => { if (c) return toggleAbsent(p); W.adding = null; e.stopPropagation(); ttPopOpen(td, p, dn); };
         }
       } else if (sub) {
         td.className = 'subcell';
@@ -2193,14 +2366,49 @@ function renderWeek() {
   renderNeeds(counts);
   renderSum(counts);
   renderRequests(counts);
+  ttTodayLine();
+  ttLoadBars(counts);
+  const nOpen = W.cover.filter(r => (r.type === 'Absent' || r.type === 'Sub') && !r.substitute).length + (W.requests || []).filter(q => q.status === 'pending').length;
+  $('ttCoverN').hidden = !nOpen; $('ttCoverN').textContent = nOpen;
+  const lbl = document.querySelector('#tabTT .lbl'); if (lbl) lbl.innerHTML = 'Timetable' + (nOpen ? `<span class="sideBadge">${nOpen}</span>` : '');
 }
+function ttTodayLine() {
+  const today = isoDay(new Date()), inWeek = today >= W.weekStart && today <= addDays(W.weekStart, 6);
+  const day = inWeek ? today : null;
+  const rows = W.cover.filter(r => (r.type === 'Absent' || r.type === 'Sub') && (!day || r.date === day));
+  const abs = rows.filter(r => r.type === 'Absent'), subs = rows.filter(r => r.type === 'Sub'), open = rows.filter(r => !r.substitute);
+  const req = (W.requests || []).filter(q => q.status === 'pending' && (!day || q.date === day));
+  const parts = [];
+  parts.push(abs.length ? `${abs.length} absence${abs.length > 1 ? 's' : ''}${abs.length - abs.filter(r => !r.substitute).length === abs.length ? (abs.length > 1 ? ', all covered' : ', covered') : ''}` : 'no absences');
+  if (subs.length) parts.push(`${subs.length} substitution${subs.length > 1 ? 's' : ''}`);
+  if (req.length) parts.push(`${req.length} request${req.length > 1 ? 's' : ''} waiting`);
+  if (open.length) parts.push(`<b class="warnTxt">${open.length} class${open.length > 1 ? 'es' : ''} still need${open.length > 1 ? '' : 's'} someone</b>`);
+  $('ttToday').innerHTML = `<b>${day ? 'Today' : 'This week'}</b><span>${parts.join(' · ')}</span>${open.length || req.length ? '<button type="button" class="btn alt small" data-tt-go="cover">Open Cover</button>' : ''}`;
+}
+document.addEventListener('click', e => { const g = e.target.closest('[data-tt-go]'); if (g) ttTab(g.dataset.ttGo); });
+function ttLoadBars(counts) {
+  $('ttLoad').innerHTML = W.teachers.map(t => {
+    const c = counts[t]; if (!c) return '';
+    const pct = c.max ? Math.min(100, Math.round(c.total / c.max * 100)) : 0, over = c.room < 0, near = !over && c.max && c.total / c.max >= 0.9;
+    const note = [c.factory ? c.factory + ' factory day' + (c.factory > 1 ? 's' : '') : '', c.absent ? '−' + c.absent + ' absent' : '', c.given ? '−' + c.given + ' substituted' : '', c.subs ? '+' + c.subs + ' covered' : '', c.extra ? '+' + c.extra + ' extra' : ''].filter(Boolean).join(' · ');
+    return `<button type="button" class="ldRow" data-ld="${esc(t)}"><span class="n"><b>${esc(t)}</b>${note ? `<small>${note}</small>` : ''}</span>
+      <span class="b"><span class="tr"><i style="width:${pct}%" class="${over ? 'over' : near ? 'near' : ''}"></i></span>${c.busyDays.length ? `<em>⚠ ${c.busyDays.map(d => c.perDay[d] + ' on ' + TT_DAYS[dayIdx(d)].slice(0, 3)).join(', ')}</em>` : ''}</span>
+      <span class="v"><b class="${over ? 'warnTxt' : ''}">${c.total}</b> of ${c.max}<small class="${over ? 'warnTxt' : ''}">${over ? 'over by ' + (-c.room) : c.room + ' left'}</small></span></button>`;
+  }).join('');
+}
+document.addEventListener('click', e => {
+  const r = e.target.closest('#ttLoad [data-ld]');
+  if (r) { $('wkTeacher').value = r.dataset.ld; localStorage.setItem('ttTeacher', r.dataset.ld); ttTab('week'); renderWeek(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  if (e.target.id === 'ttLimBtn') { const b = $('ttLimBox'); b.hidden = !b.hidden; e.target.textContent = b.hidden ? 'Edit days & max' : 'Hide days & max'; }
+});
 
 // ----- substitution requests from teachers -----
 const REQ_PICK = {};   // request id → { session: substitute } chosen so far
 function renderRequests(counts) {
   const R = W.requests || [], pend = R.filter(r => r.status === 'pending'), done = R.filter(r => r.status !== 'pending').slice(0, 5);
   $('reqCard').hidden = !R.length;
-  $('reqHead').textContent = pend.length ? `Substitution requests · ${pend.length} waiting` : 'Substitution requests';
+  $('reqHead').textContent = pend.length ? `Requests from teachers · ${pend.length} waiting` : 'Requests from teachers';
+  $('reqCard').hidden = !pend.length && CV_MODE === 'todo';
   const sessTxt = l => l.length > 2 && l[l.length - 1] - l[0] === l.length - 1 ? `sessions ${l[0]}–${l[l.length - 1]}` : 'session' + (l.length > 1 ? 's ' : ' ') + l.join(', ');
   $('reqList').innerHTML = pend.map(r => {
     const here = r.weekStart === W.weekStart, pick = REQ_PICK[r.id] = REQ_PICK[r.id] || {};
@@ -2211,7 +2419,7 @@ function renderRequests(counts) {
         <select data-reqpick="${r.id}" data-s="${c.session}" aria-label="Who takes session ${c.session}"><option value="">Choose who takes it</option>${free.map(x => {
           const k = counts[x] || { total: 0, max: 0, room: 0 };
           return `<option value="${esc(x)}" ${pick[c.session] === x ? 'selected' : ''}>${esc(x)} · ${k.total} of ${k.max} · ${k.room <= 0 ? 'full' : k.room + ' left'}</option>`;
-        }).join('')}</select>${free.length ? '' : '<span class="warnTxt">nobody is free</span>'}</div>`;
+        }).join('')}</select><button type="button" class="btn alt small" data-rqsuggest="${r.id}|${c.session}">Suggest</button>${free.length ? '' : '<span class="warnTxt">nobody is free</span>'}</div>`;
     }).join('') : `<button type="button" class="btn alt small" data-reqweek="${r.date}">Open the week of ${shortDate(r.weekStart)} to choose</button>`;
     return `<div class="reqItem"><div class="reqTop"><span class="aTag amb">${esc(r.typeName.toUpperCase())}</span>
         <b>${esc(r.teacher)}</b> · ${esc(TT_DAYS[Math.round((new Date(r.date) - new Date(r.weekStart)) / 86400000)] || '')} ${shortDate(r.date)} · ${sessTxt(r.sessions)}</div>
@@ -2265,11 +2473,11 @@ function freeTeachers(r) {
 function renderNeeds(counts) {
   const box = $('needList');
   box.innerHTML = '';
-  const list = W.cover.filter(r => r.type === 'Absent' || r.type === 'Sub')
+  const list = W.cover.filter(r => (r.type === 'Absent' || r.type === 'Sub') && (CV_MODE === 'all' || !r.substitute))
     .sort((a, b) => a.date.localeCompare(b.date) || a.session - b.session || a.teacher.localeCompare(b.teacher));
-  const open = list.filter(r => !r.substitute).length;
-  $('needHead').textContent = list.length ? `Needs cover · ${open} of ${list.length} still open` : 'Needs cover';
-  if (!list.length) { box.innerHTML = '<div class="empty">No classes need cover this week.</div>'; return; }
+  const all = W.cover.filter(r => r.type === 'Absent' || r.type === 'Sub'), open = all.filter(r => !r.substitute).length;
+  $('needHead').textContent = all.length ? `Absences and substitutions · ${open} of ${all.length} still need someone` : 'Absences and substitutions';
+  if (!list.length) { box.innerHTML = `<div class="empty">${all.length ? 'Everything is covered. Choose “Everything” to see and change them.' : 'No absences or substitutions this week.'}</div>`; return; }
   list.forEach(r => {
     const row = document.createElement('div');
     row.className = 'needRow' + (r.substitute ? ' done' : '');
@@ -2299,6 +2507,8 @@ function renderNeeds(counts) {
     };
     if (r.substitute && counts[r.substitute] && counts[r.substitute].room < 0) warn.textContent = `${r.substitute} is over their max of ${counts[r.substitute].max}`;
     if (!free.length) warn.textContent = 'nobody is free at this time';
+    const sg = document.createElement('button');
+    sg.type = 'button'; sg.className = 'btn alt small'; sg.textContent = 'Suggest'; sg.dataset.suggest = String(W.cover.indexOf(r));
     if (r.type === 'Sub') {
       sel.options[0].text = 'Choose who takes it';
       const rs = document.createElement('select');
@@ -2308,8 +2518,8 @@ function renderNeeds(counts) {
       SUB_REASONS.forEach(x => rs.add(new Option(x, x)));
       rs.value = base;
       rs.onchange = () => { r.reason = rs.value + (cur.indexOf(':') !== -1 && cur.indexOf(base) === 0 ? cur.slice(cur.indexOf(':')) : ''); markWeekDirty(); };
-      row.append(label, sel, rs, warn);
-    } else row.append(label, sel, warn);
+      row.append(label, sel, sg, rs, warn);
+    } else row.append(label, sel, sg, warn);
     box.appendChild(row);
   });
 }
@@ -2382,6 +2592,8 @@ $('wkSave').onclick = async () => {
       limits: W.teachers.map(t => ({ teacher: t, days: counts[t].days, max: counts[t].max }))
     });
     W.dirty = false;
+    W.hist = [ttSnap()];
+    ttSaveLabel();
     ttMsg('Week saved. Teachers see it on their Timetable tab.', true);
   } catch (e) {
     btn.disabled = false;
