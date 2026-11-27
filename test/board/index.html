@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OMHG EVA SCHOOL · Board overview</title>
+<script src="../config.js"></script>
+<script src="../kpi.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#F7C948;--brand-dark:#D9A900;--brand-tint:#FFF8E1;--bg:#FBF8EE;--card:#ffffff;--ink:#1d1d1d;--muted:#666666;--line:#e6e9ee;--border:#ccd3db;--red:#d32f2f;--red-bg:#fdecea;--bar:#F7C948}
+[data-theme="dark"]{--bg:#16161a;--card:#22222a;--ink:#f2f2f2;--muted:#a8a8b3;--line:#33333d;--border:#4a4a56;--brand-tint:#2e2a18;--red-bg:#3a1e1e;--bar:#E0B232}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,"Segoe UI",Tahoma,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--brand);color:#1d1d1d;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+header img{height:44px;width:auto}
+header .title{flex:1;font-weight:700;font-size:17px;min-width:160px}
+main{max-width:1100px;margin:16px auto;padding:0 12px 40px}
+.btn{border-radius:8px;padding:9px 14px;font-size:14px;cursor:pointer;border:1px solid var(--brand-dark);background:var(--card);color:var(--ink)}
+.btn.dark{background:#1d1d1d;color:var(--brand);border-color:#1d1d1d;font-weight:600}
+.btn.head{background:transparent;color:#1d1d1d;border-color:#1d1d1d}
+.btn:disabled{opacity:.5;cursor:default}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tab{padding:9px 14px;border-radius:8px;border:1px solid var(--brand-dark);background:var(--card);cursor:pointer;font-size:14px;color:var(--ink)}
+.tab.on{background:var(--brand);font-weight:600;color:#1d1d1d}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+h2{font-size:16px;margin:0 0 10px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.kpi .l{font-size:13px;color:var(--muted)}
+.kpi .v{font-size:24px;font-weight:600;margin-top:2px}
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+th,td{padding:8px;border-bottom:1px solid var(--line);text-align:start;vertical-align:middle}
+th{font-size:12px;color:var(--muted);text-transform:uppercase;white-space:nowrap}
+tr.inc td:first-child{border-inline-start:4px solid var(--red)}
+tr.inc{background:var(--red-bg)}
+.barrow{display:grid;grid-template-columns:minmax(90px,150px) 1fr minmax(90px,130px);gap:8px;align-items:center;font-size:14px;margin-bottom:8px}
+.track{background:var(--line);border-radius:4px;height:12px}
+.fill{height:12px;border-radius:4px;background:var(--bar)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:12px}
+.row label{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:var(--card);color:var(--ink);min-width:160px}
+.msg{padding:10px;border-radius:8px;font-size:14px;margin:10px 0;background:var(--red-bg);color:var(--red)}
+.muted{color:var(--muted);font-size:13px;margin:8px 0}
+.daycard{border:1px solid var(--line);border-radius:10px;margin-bottom:10px;background:var(--card);overflow:hidden}
+.daycard summary{padding:12px 14px;cursor:pointer;list-style:none;display:flex;flex-direction:column;gap:2px;font-weight:600}
+.daycard summary::-webkit-details-marker{display:none}
+.daycard summary:hover{background:var(--brand-tint)}
+.daycard .tw{padding:0 8px 8px}
+.daymeta{font-size:13px;color:var(--muted);font-weight:400}
+#gate{max-width:380px;margin:40px auto}
+#printArea{display:none}
+@media print{
+  body{background:#fff;color:#000}
+  header,main,.noprint{display:none !important}
+  #printArea{display:block}
+  #printArea table{font-size:11px;min-width:0}
+  #printArea th,#printArea td{border-bottom:1px solid #ccc}
+  @page{size:A4 landscape;margin:12mm}
+}
+.embedded #signOut{display:none !important}
+.copyFoot{text-align:center;font-size:12px;color:var(--muted,#888);padding:24px 12px 30px}@media print{.copyFoot{display:none !important}}
+.embedded .copyFoot{display:none !important}
+.embedded .kpiTab{display:none !important}
+.range{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 6px}
+.range .chip{padding:7px 12px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--ink);cursor:pointer;font-size:13px}
+.range .chip.on{background:#1d1d1d;color:var(--brand);border-color:#1d1d1d;font-weight:600}
+.range input[type=date]{min-width:0;padding:6px 8px;font-size:13px}
+.range .lbl{font-size:13px;color:var(--muted)}
+.rangeNote{font-size:13px;color:var(--muted);margin:0 0 10px}
+
+/* ===== Design D (Nov 2026) ===== */
+:root{--bg:#F6F6F4;--line:#E4E4E7;--border:#D4D4D8;--muted:#52525B;--ink:#18181B;--brand-tint:#FEF6DA}
+[data-theme="dark"]{--bg:#0E0E11;--card:#17171C;--line:#26262D;--border:#2E2E36;--muted:#A1A1AA;--ink:#F4F4F5;--brand-tint:#2A2414}
+body{font-family:Inter,system-ui,"Segoe UI",Tahoma,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+[dir="rtl"] body{font-family:"IBM Plex Sans Arabic",Inter,Tahoma,Arial,sans-serif}
+header{background:var(--card);color:var(--ink);border-bottom:1px solid var(--line);padding:10px 20px}
+header img{height:38px}
+header .title{font-size:16px}
+.btn{border-radius:10px;border-color:var(--line);min-height:40px}
+.btn:hover{background:var(--bg)}
+.btn.head{color:var(--ink);border-color:var(--line)}
+.btn.dark{background:#18181B;color:#fff;border-color:#18181B}
+[data-theme="dark"] .btn.dark{background:#F7C948;color:#141414;border-color:#F7C948}
+main{max-width:1200px;margin:0 auto;padding:0 20px 40px}
+.tabs{gap:2px;border-bottom:1px solid var(--line);margin:0 -20px 18px;padding:8px 20px 0;background:var(--card);flex-wrap:nowrap;overflow-x:auto}
+.tab{border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--muted);padding:12px 14px;white-space:nowrap}
+.tab:hover{color:var(--ink)}
+.tab.on{background:transparent;color:var(--ink);border-bottom-color:#18181B}
+[data-theme="dark"] .tab.on{border-bottom-color:#F7C948}
+.tabs #refresh{margin-bottom:6px;align-self:center}
+#gate{margin-top:60px}
+.card{border-radius:14px;padding:20px}
+.kpis{gap:14px}
+.kpi{border-radius:14px;padding:16px}
+.kpi .v{font-size:28px;font-weight:700;letter-spacing:-.02em}
+th{font-weight:600;font-size:12px;letter-spacing:.02em}
+.track{height:10px;border-radius:99px;background:var(--bg)}.fill{height:10px;border-radius:99px}
+select,input{border-radius:10px;min-height:40px}
+.range{gap:4px;background:#EDEDEA;border-radius:12px;padding:4px;display:inline-flex;margin:0 0 8px}
+[data-theme="dark"] .range{background:#1C1C22}
+.range .lbl{padding:0 8px}
+.range .chip{border:0;background:transparent;color:var(--muted);border-radius:9px;padding:9px 14px;font-size:14px}
+.range .chip.on{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08);font-weight:600}
+.range #customBox{padding:0 6px}
+.sumCard{padding:22px 24px}
+.sumK{font-size:13px;color:var(--muted)}
+.sumV{font-size:24px;font-weight:700;line-height:1.35;letter-spacing:-.02em;margin-top:4px}
+[dir="rtl"] .sumV{letter-spacing:0}
+table.matrix{border-collapse:separate;border-spacing:4px;min-width:0}
+table.matrix th,table.matrix td{border:0;text-align:center}
+table.matrix td:first-child,table.matrix th:first-child{text-align:start;white-space:nowrap}
+table.matrix td.m{border-radius:6px;font-weight:600;min-width:56px}
+td.m.h1{background:#FEF3CC}td.m.h2{background:#FDEBB0}td.m.h3{background:#F9D96B}td.m.h4{background:#F7C948}td.m.lo{background:#FFE4D1;color:#9A3412}
+[data-theme="dark"] td.m.h1{background:#2E2915}[data-theme="dark"] td.m.h2{background:#3A3214}[data-theme="dark"] td.m.h3{background:#4A3E12}[data-theme="dark"] td.m.h4{background:#5C4A0E}[data-theme="dark"] td.m.lo{background:#3B2416;color:#FDBA74}
+</style>
+</head>
+<body>
+
+<header>
+  <img src="../logo.png" alt="EVA Pharma logo" onerror="this.remove()">
+  <span class="title" data-i18n="title"></span>
+  <button class="btn head" id="langBtn" type="button"></button>
+  <button class="btn head" id="themeBtn" type="button"></button>
+  <button class="btn head" id="signOut" type="button" hidden data-i18n="signOut"></button>
+</header>
+
+<main>
+
+  <!-- SIGN IN -->
+  <div class="card" id="gate" hidden>
+    <h2 data-i18n="signin"></h2>
+    <label class="muted" for="pw" data-i18n="pw"></label>
+    <input type="password" id="pw" autocomplete="off" style="width:100%">
+    <button class="btn dark" id="openBtn" type="button" style="width:100%;margin-top:12px" data-i18n="open"></button>
+    <div id="gMsg"></div>
+  </div>
+
+  <!-- APP -->
+  <div id="app" hidden>
+    <div class="tabs noprint">
+      <button class="tab on" data-view="vOverview" type="button" data-i18n="tabOverview"></button>
+      <button class="tab" data-view="vTeachers" type="button" data-i18n="tabTeachers"></button>
+      <button class="tab" data-view="vClasses" type="button" data-i18n="tabClasses"></button>
+      <button class="tab" data-view="vAll" type="button" data-i18n="tabAll"></button>
+      <button class="tab" data-view="vComments" type="button" data-i18n="tabComments"></button>
+      <button class="tab" data-view="vIncidents" type="button" data-i18n="tabIncidents"></button>
+      <button class="tab" data-view="vAbsent" type="button" data-i18n="tabAbsent"></button>
+      <button class="tab kpiTab" data-view="vKpi" type="button" data-i18n="tabKpi"></button>
+      <button class="btn" id="refresh" type="button" style="margin-inline-start:auto" data-i18n="refresh"></button>
+    </div>
+    <!-- DATE FILTER: applies to every tab and every download -->
+    <div class="range noprint" id="range">
+      <span class="lbl" data-i18n="rangeLbl"></span>
+      <button class="chip" type="button" data-range="all" data-i18n="rAll"></button>
+      <button class="chip" type="button" data-range="week" data-i18n="rWeek"></button>
+      <button class="chip" type="button" data-range="month" data-i18n="rMonth"></button>
+      <button class="chip" type="button" data-range="term" data-i18n="rTerm"></button>
+      <button class="chip" type="button" data-range="custom" data-i18n="rCustom"></button>
+      <span id="customBox" hidden>
+        <input type="date" id="rFrom" aria-label="From"> <span class="lbl" data-i18n="rTo"></span> <input type="date" id="rTo">
+      </span>
+    </div>
+    <div class="rangeNote" id="rangeNote"></div>
+    <div class="muted" id="stamp"></div>
+    <div id="appMsg"></div>
+
+    <!-- OVERVIEW -->
+    <div id="vOverview">
+      <div class="card sumCard" id="summary"></div>
+      <div class="kpis" id="kpis"></div>
+      <div class="card">
+        <h2 data-i18n="levelsTitle"></h2>
+        <div id="dist"></div>
+      </div>
+      <div class="card">
+        <h2 data-i18n="classTitle"></h2>
+        <div id="classTable"></div>
+        <div class="muted" data-i18n="classNote"></div>
+      </div>
+    </div>
+
+    <!-- TEACHERS -->
+    <div id="vTeachers" hidden>
+      <div class="card">
+        <h2 data-i18n="teachersTitle"></h2>
+        <div id="teacherBars"></div>
+      </div>
+      <div class="card">
+        <h2 data-i18n="teacherDetails"></h2>
+        <div id="teacherTable"></div>
+      </div>
+      <div class="card">
+        <h2 data-i18n="matrixTitle"></h2>
+        <div class="tw" id="teacherMatrix"></div>
+        <div class="muted" data-i18n="matrixNote"></div>
+      </div>
+    </div>
+
+    <!-- CLASSES -->
+    <div id="vClasses" hidden>
+      <div class="row noprint">
+        <label><span data-i18n="clsLabel"></span> <select id="clsPick"></select></label>
+        <button class="btn" id="printCls" type="button" data-i18n="printCls"></button>
+        <button class="btn dark" id="xlsCls" type="button" data-i18n="xlsCls"></button>
+        <button class="btn" id="xlsAll" type="button" data-i18n="xlsAll"></button>
+      </div>
+      <div class="kpis" id="clsKpis"></div>
+      <div class="card">
+        <h2 data-i18n="studentsTitle"></h2>
+        <div id="clsStudents"></div>
+      </div>
+      <div class="card">
+        <h2 data-i18n="byDateTitle"></h2>
+        <div id="clsRecent"></div>
+      </div>
+    </div>
+
+    <!-- ALL EVALUATIONS -->
+    <div id="vAll" hidden>
+      <div class="row noprint">
+        <label><span data-i18n="classLbl"></span> <select id="fCls"></select></label>
+        <label><span data-i18n="teacherLbl"></span> <select id="fTeacher"></select></label>
+        <label><span data-i18n="evalLbl"></span> <select id="fEval"></select></label>
+        <label><span data-i18n="searchLbl"></span> <input id="fQ" data-i18n-ph="searchPh" style="min-width:200px"></label>
+        <button class="btn dark" id="xlsFilter" type="button" data-i18n="dlShown"></button>
+      </div>
+      <div class="card">
+        <div id="allCount" class="muted"></div>
+        <div id="allTable"></div>
+      </div>
+    </div>
+
+    <!-- COMMENTS -->
+    <div id="vComments" hidden>
+      <div class="row noprint">
+        <label><span data-i18n="classLbl"></span> <select id="cmCls"></select></label>
+        <label><span data-i18n="teacherLbl"></span> <select id="cmTeacher"></select></label>
+        <label><span data-i18n="searchLbl"></span> <input id="cmQ" data-i18n-ph="searchPh" style="min-width:200px"></label>
+        <button class="btn dark" id="xlsComments" type="button" data-i18n="dl"></button>
+      </div>
+      <div class="card">
+        <div id="cmCount" class="muted"></div>
+        <div id="cmTable"></div>
+      </div>
+    </div>
+
+    <!-- ABSENCES: one row per student absent at least once in the chosen dates -->
+    <!-- TEACHER KPIs (shared with the seniors' admin page; see ../kpi.js) -->
+    <div id="vKpi" hidden><div class="card" id="kpiBox"></div></div>
+
+    <div id="vAbsent" hidden>
+      <div class="row noprint">
+        <label><span data-i18n="classLbl"></span> <select id="abCls"></select></label>
+        <label><span data-i18n="searchLbl"></span> <input id="abQ" data-i18n-ph="namePh" style="min-width:200px"></label>
+        <button class="btn dark" id="xlsAbsent" type="button" data-i18n="dl"></button>
+      </div>
+      <div class="card">
+        <div id="abCount" class="muted"></div>
+        <div id="abTable"></div>
+      </div>
+    </div>
+
+    <!-- INCIDENTS -->
+    <div id="vIncidents" hidden>
+      <div class="row noprint">
+        <label><span data-i18n="classLbl"></span> <select id="inCls"></select></label>
+        <label><span data-i18n="teacherLbl"></span> <select id="inTeacher"></select></label>
+        <label><span data-i18n="searchLbl"></span> <input id="inQ" data-i18n-ph="searchPh" style="min-width:200px"></label>
+        <button class="btn dark" id="xlsIncidents" type="button" data-i18n="dl"></button>
+      </div>
+      <div class="card">
+        <div id="inCount" class="muted"></div>
+        <div id="inTable"></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div id="printArea"></div>
+
+<!-- Excel export in the browser -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+// ===================== SETTINGS =====================
+// The web app URL of the tracker (ends with /exec). Not secret: data needs the board password.
+// The server address comes from ../config.js (shared with the other pages); the address below is only a fallback.
+const BOARD_URL = (window.FEEDBACK_CONFIG && window.FEEDBACK_CONFIG.url) || "https://script.google.com/macros/s/AKfycbzXI1B0s_Hr2np_BiJlc0ibmYsMIoL2yaxOaIzYqogtfAdUXbe7wBUfGdaF_qf0wmchRg/exec";
+// =====================================================
+
+const EVALS = ["Outstanding", "Proficient", "Developing", "Needs Improvement", "Unsatisfactory", "Absent"];
+const EVAL_AR = {
+  "Outstanding": "متميز ومبادر",
+  "Proficient": "ملتزم ومتقن",
+  "Developing": "مقبول/تحت التدريب",
+  "Needs Improvement": "يحتاج تطوير/سلوك ضعيف",
+  "Unsatisfactory": "غير ملتزم/خطر",
+  "Absent": "غائب"
+};
+
+// All text on the page. Keys are used by data-i18n attributes and by t().
+const T = {
+  en: {
+    title: "OMHG EVA SCHOOL · Board overview", signin: "Board sign in", pw: "Board password", open: "Open",
+    signOut: "Sign out", refresh: "Refresh data", dark: "Dark", light: "Light", langBtn: "العربية",
+    tabOverview: "Overview", tabTeachers: "Teachers", tabClasses: "Classes", tabAll: "All evaluations",
+    tabComments: "Comments", tabIncidents: "Incidents",
+    asOf: "Data as of", badPw: "The board password is not correct.", loadErr: "Could not load the data: ",
+    sumHead: "In one line", sumLine: "{evals} evaluations, average {avg} / 5. Students absent at least once: {abs}.", sumWatch: " {cls} is the class to watch ({cavg}).", sumNone: "No evaluations in these dates yet.",
+    matrixTitle: "Teachers × classes (average out of 5)", matrixNote: "Darker = higher average. Orange = below 3.", 
+    kEvals: "Evaluations (by date)", kStudents: "Students", kAvg: "Average score (0-5)", kInc: "Incidents",
+    kAbsent: "Absent rate", kTeachers: "Teachers who uploaded",
+    levelsTitle: "Student ratings by level", levelsCount: "{n} ({p}%)",
+    classTitle: "Behaviour by class",
+    classNote: "An evaluation is one class on one date. Average excludes Absent. Absent rate is Absent ratings out of all ratings.",
+    teachersTitle: "Evaluations per teacher", teacherDetails: "Teacher details",
+    evalCount: "{n} evaluation(s)",
+    clsLabel: "Class", printCls: "Print this class", xlsCls: "Download this class (Excel)", xlsAll: "Download all classes (Excel)",
+    studentsTitle: "Students in this class", byDateTitle: "Evaluations by date", noClassEvals: "No evaluations for this class yet.",
+    dayMeta: "{n} student(s) evaluated · {t} teacher(s)",
+    classLbl: "Class", teacherLbl: "Teacher", searchLbl: "Search", searchPh: "Name or comment",
+    allClasses: "All classes", allTeachers: "All teachers",
+    dl: "Download (Excel)", dlShown: "Download shown rows (Excel)", matchRows: "{n} evaluation(s) match",
+    showingNewest: "Showing the newest {shown} of {total}. Download to get all of them.",
+    commentsCount: "{n} comment(s)", incCount: "{n} student rating(s) with incidents · {t} incident(s) in total",
+    colDate: "Date", colEvalDate: "Evaluation date", colUploaded: "Uploaded", colClass: "Class", colName: "Name",
+    colStudent: "Student", colTeacher: "Teacher", colEvaluation: "Evaluation", colScore: "Score (0-5)",
+    colIncidents: "Incidents", colIncident: "Incident", colComment: "Comments", colComments: "Comments",
+    colStudents: "Students", colEvals: "Evaluations", colAvg: "Average", colAbsentRate: "Absent rate",
+    colLast: "Last upload", colClasses: "Classes", colAbsent: "Absent",
+    xUpload: "Upload Timing", xDate: "Date", xStudent: "Student Name", xClass: "Class", xTeacher: "Teacher",
+    xScore: "Score (0-5)", xEvaluation: "Evaluation", xWarning: "Incident (Warning)", xComments: "Comments",
+    xName: "Name", xIncident: "Incident",
+    printTitle: "{cls} · evaluations ({n})",
+    fileAll: "OMHG EVA SCHOOL - all classes", fileComments: "OMHG EVA SCHOOL - comments", fileIncidents: "OMHG EVA SCHOOL - incidents",
+    fileShown: "OMHG EVA SCHOOL - evaluations",
+    tabKpi: "Teacher KPIs", tabAbsent: "Absences", evalLbl: "Evaluation", allEvals: "All ratings", namePh: "Student name",
+    abCount: "{s} student(s) absent at least once · {n} absence(s) in total", abNone: "No absences in these dates.",
+    colTimesAbsent: "Times absent", colOutOf: "Out of", colAbsentDates: "Absent on",
+    rangeLbl: "Dates:", rAll: "All dates", rWeek: "This week", rMonth: "This month", rTerm: "This term", rCustom: "Custom", rTo: "to",
+    rShowing: "Showing {from} – {to}", rShowingAll: "Showing all dates", rPick: "Choose both dates.",
+    term1: "Term 1", term2: "Term 2"
+  },
+  ar: {
+    title: "OMHG EVA SCHOOL · لوحة المجلس", signin: "تسجيل دخول المجلس", pw: "كلمة مرور المجلس", open: "فتح",
+    signOut: "تسجيل الخروج", refresh: "تحديث البيانات", dark: "داكن", light: "فاتح", langBtn: "English",
+    tabOverview: "نظرة عامة", tabTeachers: "المعلمون", tabClasses: "الفصول", tabAll: "كل التقييمات",
+    tabComments: "التعليقات", tabIncidents: "الحوادث",
+    asOf: "البيانات حتى", badPw: "كلمة مرور المجلس غير صحيحة.", loadErr: "تعذر تحميل البيانات: ",
+    sumHead: "باختصار", sumLine: "{evals} تقييم، بمتوسط {avg} من 5. عدد الطلاب الذين غابوا مرة على الأقل: {abs}.", sumWatch: " الفصل الذي يحتاج متابعة: {cls} ({cavg}).", sumNone: "لا توجد تقييمات في هذه الفترة بعد.",
+    matrixTitle: "المعلمون × الفصول (المتوسط من 5)", matrixNote: "اللون الأغمق = متوسط أعلى. البرتقالي = أقل من 3.",
+    kEvals: "التقييمات (حسب التاريخ)", kStudents: "الطلاب", kAvg: "متوسط الدرجة (من 5)", kInc: "الحوادث",
+    kAbsent: "نسبة الغياب", kTeachers: "المعلمون الذين رفعوا تقييمات",
+    levelsTitle: "تقييمات الطلاب حسب المستوى", levelsCount: "{n} ({p}%)",
+    classTitle: "السلوك حسب الفصل",
+    classNote: "التقييم الواحد هو فصل في يوم واحد. المتوسط لا يشمل الغياب. نسبة الغياب هي تقييمات الغياب من إجمالي التقييمات.",
+    teachersTitle: "التقييمات لكل معلم", teacherDetails: "تفاصيل المعلمين",
+    evalCount: "{n} تقييم",
+    clsLabel: "الفصل", printCls: "طباعة هذا الفصل", xlsCls: "تحميل هذا الفصل (Excel)", xlsAll: "تحميل كل الفصول (Excel)",
+    studentsTitle: "طلاب هذا الفصل", byDateTitle: "التقييمات حسب التاريخ", noClassEvals: "لا توجد تقييمات لهذا الفصل بعد.",
+    dayMeta: "{n} طالب تم تقييمه · {t} معلم",
+    classLbl: "الفصل", teacherLbl: "المعلم", searchLbl: "بحث", searchPh: "اسم أو تعليق",
+    allClasses: "كل الفصول", allTeachers: "كل المعلمين",
+    dl: "تحميل (Excel)", dlShown: "تحميل الصفوف المعروضة (Excel)", matchRows: "{n} تقييم مطابق",
+    showingNewest: "يعرض الأحدث {shown} من {total}. حمّل الملف للاطلاع على الكل.",
+    commentsCount: "{n} تعليق", incCount: "{n} تقييم طالب فيه حوادث · {t} حادثة في المجموع",
+    colDate: "التاريخ", colEvalDate: "تاريخ التقييم", colUploaded: "وقت الرفع", colClass: "الفصل", colName: "الاسم",
+    colStudent: "الطالب", colTeacher: "المعلم", colEvaluation: "التقييم", colScore: "الدرجة (0-5)",
+    colIncidents: "الحوادث", colIncident: "الحادثة", colComment: "التعليقات", colComments: "التعليقات",
+    colStudents: "الطلاب", colEvals: "التقييمات", colAvg: "المتوسط", colAbsentRate: "نسبة الغياب",
+    colLast: "آخر رفع", colClasses: "الفصول", colAbsent: "غياب",
+    xUpload: "وقت الرفع", xDate: "التاريخ", xStudent: "اسم الطالب", xClass: "الفصل", xTeacher: "المعلم",
+    xScore: "الدرجة (0-5)", xEvaluation: "التقييم", xWarning: "الحادثة (تنبيه)", xComments: "التعليقات",
+    xName: "الاسم", xIncident: "الحادثة",
+    printTitle: "{cls} · التقييمات ({n})",
+    fileAll: "OMHG EVA SCHOOL - كل الفصول", fileComments: "OMHG EVA SCHOOL - التعليقات", fileIncidents: "OMHG EVA SCHOOL - الحوادث",
+    fileShown: "OMHG EVA SCHOOL - التقييمات",
+    tabKpi: "مؤشرات المعلمين", tabAbsent: "الغياب", evalLbl: "التقييم", allEvals: "كل التقييمات", namePh: "اسم الطالب",
+    abCount: "{s} طالب غاب مرة على الأقل · {n} غياب في المجموع", abNone: "لا يوجد غياب في هذه الفترة.",
+    colTimesAbsent: "مرات الغياب", colOutOf: "من أصل", colAbsentDates: "أيام الغياب",
+    rangeLbl: "التاريخ:", rAll: "كل التواريخ", rWeek: "هذا الأسبوع", rMonth: "هذا الشهر", rTerm: "هذا الترم", rCustom: "مخصص", rTo: "إلى",
+    rShowing: "المعروض من {from} إلى {to}", rShowingAll: "المعروض: كل التواريخ", rPick: "اختر التاريخين.",
+    term1: "الترم الأول", term2: "الترم الثاني"
+  }
+};
+
+let LANG = localStorage.getItem("boardLang") || "en";
+const $ = id => document.getElementById(id);
+let DATA = null;     // { classes: [names], records: [...] }
+let PW = "";         // board password, kept for this browser tab only
+
+// t("key", {n: 3}) returns the text in the current language
+function t(key, vars) {
+  let s = (T[LANG] && T[LANG][key]) || T.en[key] || key;
+  if (vars) Object.keys(vars).forEach(k => { s = s.split("{" + k + "}").join(vars[k]); });
+  return s;
+}
+
+// Evaluation name in the current language
+const evalLabel = name => (LANG === "ar" ? (EVAL_AR[name] || name) : name);
+
+// ---------- language and theme ----------
+function applyLang() {
+  document.documentElement.lang = LANG;
+  document.documentElement.dir = LANG === "ar" ? "rtl" : "ltr";
+  document.querySelectorAll("[data-i18n]").forEach(e => { e.textContent = t(e.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-ph]").forEach(e => { e.placeholder = t(e.dataset.i18nPh); });
+  $("langBtn").textContent = t("langBtn");
+  applyThemeText();
+  if (DATA) { $("stamp").textContent = t("asOf") + " " + DATA.generated; renderAll(); }
+  if ($("vKpi") && !$("vKpi").hidden) drawKpi();
+}
+
+$("langBtn").onclick = () => {
+  LANG = LANG === "en" ? "ar" : "en";
+  localStorage.setItem("boardLang", LANG);
+  applyLang();
+};
+
+function applyThemeText() {
+  const dark = document.documentElement.getAttribute("data-theme") === "dark";
+  $("themeBtn").textContent = dark ? t("light") : t("dark");
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  localStorage.setItem("theme", theme);
+  applyThemeText();
+}
+$("themeBtn").onclick = () =>
+  applyTheme(document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark");
+applyTheme(localStorage.getItem("theme") ||
+  (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+
+// ---------- helpers ----------
+function el(tag, text, cls) {
+  const e = document.createElement(tag);
+  if (text !== undefined && text !== null) e.textContent = String(text);
+  if (cls) e.className = cls;
+  return e;
+}
+
+function table(headers, rows) {
+  const wrap = el("div", null, "tw");
+  const tb = el("table");
+  const thead = el("thead");
+  const hr = el("tr");
+  headers.forEach(h => hr.appendChild(el("th", h)));
+  thead.appendChild(hr);
+  tb.appendChild(thead);
+  const body = el("tbody");
+  rows.forEach(r => {
+    const tr = el("tr");
+    if (r.cls) tr.className = r.cls;
+    r.cells.forEach(c => tr.appendChild(el("td", c)));
+    body.appendChild(tr);
+  });
+  tb.appendChild(body);
+  wrap.appendChild(tb);
+  return wrap;
+}
+
+function setView(id) {
+  ["vOverview", "vTeachers", "vClasses", "vAll", "vComments", "vIncidents", "vAbsent", "vKpi"].forEach(v => $(v).hidden = v !== id);
+  document.querySelectorAll(".tab").forEach(b => b.classList.toggle("on", b.dataset.view === id));
+  // the date filter doesn't apply to the KPIs, which have their own month
+  ["range", "rangeNote"].forEach(x => { if ($(x)) $(x).style.display = id === "vKpi" ? "none" : ""; });
+  if (id === "vKpi") drawKpi();
+}
+
+// ---------- teacher KPIs ----------
+let KPI_TEACHERS = null;
+async function drawKpi() {
+  if (!window.KPI) return;
+  const box = $("kpiBox");
+  if (!KPI_TEACHERS) {
+    KPI_TEACHERS = [];
+    try {   // the teacher list comes from Setup (same list as the teacher page)
+      const cfg = window.FEEDBACK_CONFIG || {};
+      const rows = await (await fetch(BOARD_URL + "?action=lists&key=" + encodeURIComponent(cfg.key || ""))).json();
+      if (Array.isArray(rows)) KPI_TEACHERS = rows.filter(r => r.Type === "Teacher").map(r => r.Name);
+    } catch (e) { /* the table still shows its columns and rules */ }
+  }
+  window.KPI.render(box, { teachers: KPI_TEACHERS, lang: LANG });
+}
+
+function avgOf(list) {
+  const scored = list.filter(r => r.evaluation !== "Absent").map(r => r.score);
+  if (!scored.length) return "–";
+  return Math.round(scored.reduce((a, b) => a + b, 0) / scored.length * 100) / 100;
+}
+
+// Number of evaluations = distinct (class, date) pairs: one class evaluated on one date counts once
+function sessionsOf(list) {
+  return new Set(list.map(r => r.class + "||" + r.date)).size;
+}
+
+function group(list, keyFn) {
+  const g = {};
+  list.forEach(r => { const k = keyFn(r); (g[k] = g[k] || []).push(r); });
+  return g;
+}
+
+function summarize(list) {
+  const absent = list.filter(r => r.evaluation === "Absent").length;
+  return {
+    evals: sessionsOf(list),
+    students: new Set(list.map(r => r.class + "||" + r.student)).size,
+    classes: new Set(list.map(r => r.class)).size,
+    teachers: new Set(list.map(r => r.teacher)).size,
+    avg: avgOf(list),
+    incidents: list.reduce((s, r) => s + r.incidents, 0),
+    absentRate: list.length ? Math.round(absent / list.length * 100) + "%" : "–",
+    last: list.reduce((m, r) => (r.uploaded > m ? r.uploaded : m), "") || "–"
+  };
+}
+
+// ---------- data ----------
+async function fetchData(pw) {
+  const res = await fetch(BOARD_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },   // avoids a browser preflight request
+    body: JSON.stringify({ action: "boardData", key: pw })
+  });
+  if (!res.ok) throw new Error("HTTP " + res.status);
+  const out = await res.json();
+  if (out.error) throw new Error(out.error);
+  return out;
+}
+
+async function refresh() {
+  $("appMsg").innerHTML = "";
+  $("refresh").disabled = true;
+  try {
+    DATA = await fetchData(PW);
+    $("stamp").textContent = t("asOf") + " " + DATA.generated;
+    renderAll();
+  } catch (e) {
+    if (/unauthorized/.test(e.message)) return signOut(t("badPw"));
+    $("appMsg").appendChild(el("div", t("loadErr") + e.message, "msg"));
+  } finally {
+    $("refresh").disabled = false;
+  }
+}
+
+function signOut(note) {
+  PW = "";
+  sessionStorage.removeItem("boardKey");
+  DATA = null;
+  $("app").hidden = true;
+  $("signOut").hidden = true;
+  $("gate").hidden = false;
+  $("pw").value = "";
+  $("gMsg").innerHTML = "";
+  if (note) $("gMsg").appendChild(el("div", note, "msg"));
+}
+
+function showApp() {
+  $("gate").hidden = true;
+  $("app").hidden = false;
+  $("signOut").hidden = false;
+}
+
+$("openBtn").onclick = async () => {
+  const pw = $("pw").value.trim();
+  if (!pw) return;
+  $("openBtn").disabled = true;
+  try {
+    PW = pw;
+    DATA = await fetchData(pw);
+    sessionStorage.setItem("boardKey", pw);
+    $("stamp").textContent = t("asOf") + " " + DATA.generated;
+    showApp();
+    renderAll();
+  } catch (e) {
+    PW = "";
+    $("gMsg").innerHTML = "";
+    $("gMsg").appendChild(el("div", /unauthorized/.test(e.message) ? t("badPw") : t("loadErr") + e.message, "msg"));
+  } finally {
+    $("openBtn").disabled = false;
+  }
+};
+$("pw").addEventListener("keydown", e => { if (e.key === "Enter") $("openBtn").click(); });
+$("signOut").onclick = () => signOut("");
+$("refresh").onclick = refresh;
+document.querySelectorAll(".tab").forEach(b => b.onclick = () => setView(b.dataset.view));
+
+// ---------- date filter ----------
+// Week: Sunday to Saturday. Term 1: 1 Sep - 31 Jan. Term 2: 1 Feb - 30 Jun (July and August count with term 2).
+let RANGE = localStorage.getItem("boardRange") || "all";
+let CUSTOM = JSON.parse(localStorage.getItem("boardCustom") || '{"from":"","to":""}');
+const ymd = d => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const showDay = s => { const [y, m, d] = s.split("-"); return d + "/" + m + "/" + y; };
+
+function rangeDates() {
+  const now = new Date(), y = now.getFullYear(), m = now.getMonth();
+  if (RANGE === "week") {
+    const a = new Date(y, m, now.getDate() - now.getDay());
+    return { from: ymd(a), to: ymd(new Date(a.getFullYear(), a.getMonth(), a.getDate() + 6)) };
+  }
+  if (RANGE === "month") return { from: ymd(new Date(y, m, 1)), to: ymd(new Date(y, m + 1, 0)) };
+  if (RANGE === "term") {
+    if (m >= 8) return { from: y + "-09-01", to: (y + 1) + "-01-31", term: 1 };
+    if (m === 0) return { from: (y - 1) + "-09-01", to: y + "-01-31", term: 1 };
+    return { from: y + "-02-01", to: m >= 6 ? y + "-08-31" : y + "-06-30", term: 2 };
+  }
+  if (RANGE === "custom") {
+    if (!CUSTOM.from || !CUSTOM.to) return { from: "", to: "", missing: true };
+    return CUSTOM.from <= CUSTOM.to ? { ...CUSTOM } : { from: CUSTOM.to, to: CUSTOM.from };
+  }
+  return null;
+}
+
+function drawRange(r) {
+  document.querySelectorAll("#range .chip").forEach(b => b.classList.toggle("on", b.dataset.range === RANGE));
+  $("customBox").hidden = RANGE !== "custom";
+  $("rFrom").value = CUSTOM.from; $("rTo").value = CUSTOM.to;
+  $("rangeNote").textContent = !r ? t("rShowingAll") : r.missing ? t("rPick")
+    : (r.term ? t(r.term === 1 ? "term1" : "term2") + " · " : "") + t("rShowing", { from: showDay(r.from), to: showDay(r.to) });
+}
+
+document.querySelectorAll("#range .chip").forEach(b => b.onclick = () => {
+  RANGE = b.dataset.range; localStorage.setItem("boardRange", RANGE);
+  if (DATA) renderAll(); else drawRange(rangeDates());
+});
+["rFrom", "rTo"].forEach(id => $(id).onchange = () => {
+  CUSTOM = { from: $("rFrom").value, to: $("rTo").value };
+  localStorage.setItem("boardCustom", JSON.stringify(CUSTOM));
+  if (DATA) renderAll();
+});
+
+// ---------- rendering ----------
+// Every tab and every download uses DATA.records, so filtering it here filters everything.
+function renderAll() {
+  if (!DATA.allRecords) DATA.allRecords = DATA.records;
+  const r = rangeDates();
+  DATA.records = !r ? DATA.allRecords : r.missing ? DATA.allRecords
+    : DATA.allRecords.filter(x => x.date >= r.from && x.date <= r.to);
+  drawRange(r);
+  renderViews();
+}
+
+function renderViews() {
+  const recs = DATA.records;
+  const classNames = [...new Set([...DATA.classes, ...recs.map(r => r.class)])].sort();
+  const teacherNames = [...new Set(recs.map(r => r.teacher))].sort();
+  const all = summarize(recs);
+
+  // Overview: one line first
+  const absStu = new Set(recs.filter(r => r.evaluation === "Absent").map(r => r.class + "||" + r.student)).size;
+  const clsAvg = classNames.map(c => [c, avgOf(recs.filter(r => r.class === c))]).filter(x => typeof x[1] === "number");
+  const watch = clsAvg.length > 1 ? clsAvg.slice().sort((a, b) => a[1] - b[1])[0] : null;
+  $("summary").innerHTML = "";
+  $("summary").append(el("div", t("sumHead"), "sumK"),
+    el("div", recs.length ? t("sumLine", { evals: all.evals, avg: all.avg, abs: absStu }) + (watch ? t("sumWatch", { cls: watch[0], cavg: watch[1] }) : "") : t("sumNone"), "sumV"));
+
+  // Overview
+  const kpis = $("kpis");
+  kpis.innerHTML = "";
+  [
+    [t("kEvals"), all.evals],
+    [t("kStudents"), all.students],
+    [t("kAvg"), all.avg],
+    [t("kInc"), all.incidents],
+    [t("kAbsent"), all.absentRate],
+    [t("kTeachers"), all.teachers]
+  ].forEach(([l, v]) => {
+    const k = el("div", null, "kpi");
+    k.append(el("div", l, "l"), el("div", v, "v"));
+    kpis.appendChild(k);
+  });
+
+  const dist = $("dist");
+  dist.innerHTML = "";
+  const counts = EVALS.map(e => [e, recs.filter(r => r.evaluation === e).length]);
+  const maxC = Math.max(1, ...counts.map(c => c[1]));
+  counts.forEach(([name, n]) => dist.appendChild(barRow(evalLabel(name), n, maxC,
+    t("levelsCount", { n: n, p: recs.length ? Math.round(n / recs.length * 100) : 0 }))));
+
+  const byClass = group(recs, r => r.class);
+  $("classTable").innerHTML = "";
+  $("classTable").appendChild(table(
+    [t("colClass"), t("colStudents"), t("colEvals"), t("colAvg"), t("colIncidents"), t("colAbsentRate"), t("colLast")],
+    classNames.map(c => {
+      const s = summarize(byClass[c] || []);
+      return { cells: [c, s.students, s.evals, s.avg, s.incidents, s.absentRate, s.last] };
+    })));
+
+  // Teachers
+  const byTeacher = group(recs, r => r.teacher);
+  const maxT = Math.max(1, ...teacherNames.map(n => sessionsOf(byTeacher[n] || [])));
+  $("teacherBars").innerHTML = "";
+  teacherNames.forEach(n => {
+    const c = sessionsOf(byTeacher[n] || []);
+    $("teacherBars").appendChild(barRow(n, c, maxT, t("evalCount", { n: c })));
+  });
+  $("teacherTable").innerHTML = "";
+  $("teacherTable").appendChild(table(
+    [t("colTeacher"), t("colEvals"), t("colClasses"), t("colStudents"), t("colLast")],
+    teacherNames.map(n => {
+      const s = summarize(byTeacher[n] || []);
+      return { cells: [n, s.evals, s.classes, s.students, s.last] };
+    })));
+
+  // teacher × class averages
+  const mx = $("teacherMatrix");
+  mx.innerHTML = "";
+  if (teacherNames.length && classNames.length) {
+    const tb = document.createElement("table"); tb.className = "matrix";
+    const hr = document.createElement("tr");
+    [t("colTeacher"), ...classNames].forEach(h => hr.appendChild(el("th", h)));
+    const thead = document.createElement("thead"); thead.appendChild(hr); tb.appendChild(thead);
+    const tbody = document.createElement("tbody");
+    teacherNames.forEach(n => {
+      const tr = document.createElement("tr");
+      tr.appendChild(el("td", n));
+      classNames.forEach(c => {
+        const v = avgOf((byTeacher[n] || []).filter(r => r.class === c));
+        const td = el("td", typeof v === "number" ? v.toFixed(1) : "—", "m");
+        if (typeof v === "number") td.classList.add(v < 3 ? "lo" : v < 3.5 ? "h1" : v < 4 ? "h2" : v < 4.5 ? "h3" : "h4");
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    tb.appendChild(tbody); mx.appendChild(tb);
+  }
+
+  // Class tab
+  fillSelect($("clsPick"), classNames, $("clsPick").value);
+  renderClass();
+
+  // All evaluations tab
+  fillSelect($("fCls"), classNames, $("fCls").value, "allClasses");
+  fillSelect($("fTeacher"), teacherNames, $("fTeacher").value, "allTeachers");
+  const fe = $("fEval"), keepE = fe.value;
+  fe.innerHTML = "";
+  fe.appendChild(new Option(t("allEvals"), ""));
+  EVALS.forEach(e => fe.appendChild(new Option(evalLabel(e), e)));
+  fe.value = keepE;
+  renderAllTable();
+  fillSelect($("abCls"), classNames, $("abCls").value, "allClasses");
+  renderAbsent();
+
+  // Comments and incidents tabs
+  fillSelect($("cmCls"), classNames, $("cmCls").value, "allClasses");
+  fillSelect($("cmTeacher"), teacherNames, $("cmTeacher").value, "allTeachers");
+  fillSelect($("inCls"), classNames, $("inCls").value, "allClasses");
+  fillSelect($("inTeacher"), teacherNames, $("inTeacher").value, "allTeachers");
+  renderComments();
+  renderIncidents();
+}
+
+function barRow(label, n, max, text) {
+  const row = el("div", null, "barrow");
+  row.appendChild(el("span", label));
+  const track = el("div", null, "track");
+  const fill = el("div", null, "fill");
+  fill.style.width = Math.round(n / max * 100) + "%";
+  track.appendChild(fill);
+  row.append(track, el("span", text));
+  return row;
+}
+
+// allKey: translation key for the "all" option, if the dropdown should have one
+function fillSelect(sel, values, keep, allKey) {
+  sel.innerHTML = "";
+  if (allKey) sel.add(new Option(t(allKey), ""));
+  values.forEach(v => sel.add(new Option(v, v)));
+  sel.value = values.includes(keep) ? keep : (allKey ? "" : values[0] || "");
+}
+
+function sortRecs(list) {
+  return list.slice().sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : (b.uploaded > a.uploaded ? 1 : -1)));
+}
+
+function renderClass() {
+  const cls = $("clsPick").value;
+  const list = DATA.records.filter(r => r.class === cls);
+  const s = summarize(list);
+  const kp = $("clsKpis");
+  kp.innerHTML = "";
+  [[t("kStudents"), s.students], [t("kEvals"), s.evals], [t("kAvg"), s.avg],
+   [t("kInc"), s.incidents], [t("kAbsent"), s.absentRate], [t("colLast"), s.last]]
+    .forEach(([l, v]) => {
+      const k = el("div", null, "kpi");
+      k.append(el("div", l, "l"), el("div", v, "v"));
+      kp.appendChild(k);
+    });
+
+  const byStudent = group(list, r => r.student);
+  $("clsStudents").innerHTML = "";
+  $("clsStudents").appendChild(table(
+    [t("colStudent"), t("colEvals"), t("colAvg"), t("colIncidents"), t("colAbsent")],
+    Object.keys(byStudent).sort().map(name => {
+      const rs = byStudent[name];
+      const inc = rs.reduce((a, r) => a + r.incidents, 0);
+      return {
+        cls: inc > 0 ? "inc" : "",
+        cells: [name, rs.length, avgOf(rs), inc, rs.filter(r => r.evaluation === "Absent").length]
+      };
+    })));
+
+  renderClassDates(list);
+}
+
+// Toggle list for one class: one row per evaluation date, newest first.
+function renderClassDates(list) {
+  const box = $("clsRecent");
+  box.innerHTML = "";
+  if (!list.length) {
+    box.appendChild(el("div", t("noClassEvals"), "muted"));
+    return;
+  }
+  const byDate = group(list, r => r.date);
+  Object.keys(byDate).sort().reverse().forEach((day, i) => {
+    const recs = byDate[day];
+    const teachers = new Set(recs.map(r => r.teacher)).size;
+
+    const det = el("details", null, "daycard");
+    det.open = i === 0;
+    const sum = el("summary");
+    sum.append(
+      el("span", day),
+      el("span", t("dayMeta", { n: recs.length, t: teachers }), "daymeta"));
+    det.appendChild(sum);
+
+    const sorted = recs.slice().sort((a, b) =>
+      a.uploaded < b.uploaded ? 1 : a.uploaded > b.uploaded ? -1 : a.student.localeCompare(b.student));
+    det.appendChild(table(
+      [t("colUploaded"), t("colStudent"), t("colTeacher"), t("colEvaluation"), t("colScore"), t("colIncidents"), t("colComment")],
+      sorted.map(r => ({
+        cls: r.incidents > 0 ? "inc" : "",
+        cells: [r.uploaded, r.student, r.teacher, evalLabel(r.evaluation), r.score, r.incidents, r.comment]
+      }))));
+    box.appendChild(det);
+  });
+}
+
+function filteredRecs() {
+  const c = $("fCls").value, tch = $("fTeacher").value, ev = $("fEval").value, q = $("fQ").value.trim().toLowerCase();
+  return sortRecs(DATA.records.filter(r =>
+    (!c || r.class === c) && (!tch || r.teacher === tch) && (!ev || r.evaluation === ev) && (!q || r.student.toLowerCase().includes(q))));
+}
+
+function renderAllTable() {
+  const list = filteredRecs();
+  $("allCount").textContent = t("matchRows", { n: list.length });
+  $("allTable").innerHTML = "";
+  $("allTable").appendChild(table(
+    [t("colDate"), t("colClass"), t("colTeacher"), t("colStudent"), t("colEvaluation"), t("colScore"), t("colIncidents"), t("colComment")],
+    list.slice(0, 300).map(r => ({
+      cls: r.incidents > 0 ? "inc" : "",
+      cells: [r.date, r.class, r.teacher, r.student, evalLabel(r.evaluation), r.score, r.incidents, r.comment]
+    }))));
+  if (list.length > 300) $("allTable").appendChild(el("div", t("showingNewest", { shown: 300, total: list.length }), "muted"));
+}
+
+["clsPick"].forEach(id => $(id).onchange = renderClass);
+["fCls", "fTeacher", "fEval"].forEach(id => $(id).onchange = renderAllTable);
+$("abCls").onchange = renderAbsent;
+$("abQ").oninput = renderAbsent;
+
+// ---------- absences tab ----------
+// One row per student (class + name): how many times absent in the chosen dates, out of how many evaluations, and the dates.
+function absentRows() {
+  const c = $("abCls").value, q = $("abQ").value.trim().toLowerCase();
+  const byStudent = group(DATA.records.filter(r => (!c || r.class === c) && (!q || r.student.toLowerCase().includes(q))),
+    r => r.class + "||" + r.student);
+  return Object.values(byStudent).map(list => {
+    const abs = list.filter(r => r.evaluation === "Absent").map(r => r.date).sort().reverse();
+    return { student: list[0].student, cls: list[0].class, n: abs.length, of: list.length, dates: [...new Set(abs)] };
+  }).filter(x => x.n > 0).sort((a, b) => b.n - a.n || a.cls.localeCompare(b.cls) || a.student.localeCompare(b.student));
+}
+
+function renderAbsent() {
+  const rows = absentRows();
+  $("abCount").textContent = rows.length ? t("abCount", { s: rows.length, n: rows.reduce((m, x) => m + x.n, 0) }) : t("abNone");
+  $("abTable").innerHTML = "";
+  if (!rows.length) return;
+  $("abTable").appendChild(table(
+    [t("colStudent"), t("colClass"), t("colTimesAbsent"), t("colOutOf"), t("colAbsentDates")],
+    rows.map(x => ({ cls: x.n >= 3 ? "inc" : "", cells: [x.student, x.cls, x.n, x.of, x.dates.join(" · ")] }))));
+}
+$("fQ").oninput = renderAllTable;
+["cmCls", "cmTeacher"].forEach(id => $(id).onchange = renderComments);
+$("cmQ").oninput = renderComments;
+["inCls", "inTeacher"].forEach(id => $(id).onchange = renderIncidents);
+$("inQ").oninput = renderIncidents;
+
+// ---------- comments and incidents tabs ----------
+function filterBy(clsId, teacherId, qId, base) {
+  const c = $(clsId).value, tch = $(teacherId).value, q = $(qId).value.trim().toLowerCase();
+  return sortRecs(base.filter(r =>
+    (!c || r.class === c) &&
+    (!tch || r.teacher === tch) &&
+    (!q || r.student.toLowerCase().includes(q) || r.comment.toLowerCase().includes(q))));
+}
+
+function noteIfLong(container, total, shown) {
+  if (total > shown) container.appendChild(el("div", t("showingNewest", { shown: shown, total: total }), "muted"));
+}
+
+function renderComments() {
+  const base = DATA.records.filter(r => r.comment.trim() !== "");
+  const list = filterBy("cmCls", "cmTeacher", "cmQ", base);
+  $("cmCount").textContent = t("commentsCount", { n: list.length });
+  const box = $("cmTable");
+  box.innerHTML = "";
+  box.appendChild(table(
+    [t("colDate"), t("colClass"), t("colName"), t("colTeacher"), t("colComments")],
+    list.slice(0, 500).map(r => ({ cells: [r.date, r.class, r.student, r.teacher, r.comment] }))));
+  noteIfLong(box, list.length, 500);
+}
+
+function renderIncidents() {
+  const base = DATA.records.filter(r => r.incidents > 0);
+  const list = filterBy("inCls", "inTeacher", "inQ", base);
+  const total = list.reduce((s, r) => s + r.incidents, 0);
+  $("inCount").textContent = t("incCount", { n: list.length, t: total });
+  const box = $("inTable");
+  box.innerHTML = "";
+  box.appendChild(table(
+    [t("colDate"), t("colClass"), t("colName"), t("colTeacher"), t("colIncident"), t("colComments")],
+    list.slice(0, 500).map(r => ({
+      cls: "inc",
+      cells: [r.date, r.class, r.student, r.teacher, r.incidents, r.comment]
+    }))));
+  noteIfLong(box, list.length, 500);
+}
+
+// ---------- Excel (headers follow the page language) ----------
+function safeSheetName(name) {
+  return String(name).replace(/[\\\/\?\*\[\]:]/g, " ").substring(0, 31);
+}
+
+function rowsFor(list) {
+  const header = [t("xUpload"), t("xDate"), t("xStudent"), t("xClass"), t("xTeacher"),
+                  t("xScore"), t("xEvaluation"), t("xWarning"), t("xComments")];
+  return [header].concat(list.map(r => [
+    r.uploaded, r.date, r.student, r.class, r.teacher, r.score, evalLabel(r.evaluation),
+    r.incidents > 0 ? r.incidents : "", r.comment
+  ]));
+}
+
+function downloadWorkbook(sheets, filename) {
+  const wb = XLSX.utils.book_new();
+  sheets.forEach(([name, list]) =>
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rowsFor(list)), safeSheetName(name)));
+  XLSX.writeFile(wb, filename + ".xlsx");
+}
+
+function downloadTable(filename, headers, rows) {
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([headers].concat(rows)), safeSheetName(filename));
+  XLSX.writeFile(wb, filename + ".xlsx");
+}
+
+$("xlsCls").onclick = () => {
+  const cls = $("clsPick").value;
+  const list = sortRecs(DATA.records.filter(r => r.class === cls)).reverse();
+  downloadWorkbook([[cls, list]], cls + " - " + t("colEvals"));
+};
+
+$("xlsAll").onclick = () => {
+  const names = [...new Set(DATA.records.map(r => r.class))].sort();
+  const byClass = group(DATA.records, r => r.class);
+  downloadWorkbook(names.map(n => [n, sortRecs(byClass[n]).reverse()]), t("fileAll"));
+};
+
+$("xlsFilter").onclick = () => {
+  const list = filteredRecs().slice().reverse();
+  downloadWorkbook([[t("tabAll"), list]], t("fileShown"));
+};
+
+$("xlsAbsent").onclick = () => {
+  downloadTable(t("tabAbsent") + " - OMHG EVA SCHOOL",
+    [t("colStudent"), t("colClass"), t("colTimesAbsent"), t("colOutOf"), t("colAbsentDates")],
+    absentRows().map(x => [x.student, x.cls, x.n, x.of, x.dates.join(", ")]));
+};
+
+$("xlsComments").onclick = () => {
+  const list = filterBy("cmCls", "cmTeacher", "cmQ", DATA.records.filter(r => r.comment.trim() !== "")).reverse();
+  downloadTable(t("fileComments"),
+    [t("xDate"), t("xClass"), t("xName"), t("xTeacher"), t("xComments")],
+    list.map(r => [r.date, r.class, r.student, r.teacher, r.comment]));
+};
+
+$("xlsIncidents").onclick = () => {
+  const list = filterBy("inCls", "inTeacher", "inQ", DATA.records.filter(r => r.incidents > 0)).reverse();
+  downloadTable(t("fileIncidents"),
+    [t("xDate"), t("xClass"), t("xName"), t("xTeacher"), t("xIncident"), t("xComments")],
+    list.map(r => [r.date, r.class, r.student, r.teacher, r.incidents, r.comment]));
+};
+
+// ---------- print one class ----------
+$("printCls").onclick = () => {
+  const cls = $("clsPick").value;
+  const list = sortRecs(DATA.records.filter(r => r.class === cls)).reverse();
+  const area = $("printArea");
+  area.innerHTML = "";
+  area.appendChild(el("h2", t("printTitle", { cls: cls, n: list.length })));
+  area.appendChild(table(
+    [t("colDate"), t("colStudent"), t("colTeacher"), t("colEvaluation"), t("colScore"), t("colIncidents"), t("colComment")],
+    list.map(r => ({
+      cls: r.incidents > 0 ? "inc" : "",
+      cells: [r.date, r.student, r.teacher, evalLabel(r.evaluation), r.score, r.incidents, r.comment]
+    }))));
+  window.print();
+};
+
+// ---------- start ----------
+applyLang();
+(async function start() {
+  const saved = sessionStorage.getItem("boardKey");
+  if (!saved) { $("gate").hidden = false; return; }
+  PW = saved;
+  try {
+    DATA = await fetchData(saved);
+    $("stamp").textContent = t("asOf") + " " + DATA.generated;
+    showApp();
+    renderAll();
+  } catch (e) {
+    signOut(/unauthorized/.test(e.message) ? t("badPw") : t("loadErr") + e.message);
+  }
+})();
+
+// ---------- inside the admin page ----------
+// The admin page shows this board in a frame and sends its admin key, so no board password is needed.
+// Only the page that contains this board can sign it in this way.
+window.addEventListener("message", e => {
+  if (e.source !== window.parent || window.parent === window) return;
+  const m = e.data || {};
+  if (m.type !== "omhg-admin-key" || !m.key) return;
+  PW = m.key;
+  document.documentElement.classList.add("embedded");
+  showApp();
+  refresh();
+});
+if (window.parent !== window) window.parent.postMessage({ type: "omhg-board-ready" }, "*");
+</script>
+<footer class="copyFoot">© 2026 George Ayad · OMHG EVA SCHOOL · All rights reserved</footer>
+</body>
+</html>

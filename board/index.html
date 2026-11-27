@@ -6,6 +6,8 @@
 <title>OMHG EVA SCHOOL · Board overview</title>
 <script src="../config.js"></script>
 <script src="../kpi.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{--brand:#F7C948;--brand-dark:#D9A900;--brand-tint:#FFF8E1;--bg:#FBF8EE;--card:#ffffff;--ink:#1d1d1d;--muted:#666666;--line:#e6e9ee;--border:#ccd3db;--red:#d32f2f;--red-bg:#fdecea;--bar:#F7C948}
 [data-theme="dark"]{--bg:#16161a;--card:#22222a;--ink:#f2f2f2;--muted:#a8a8b3;--line:#33333d;--border:#4a4a56;--brand-tint:#2e2a18;--red-bg:#3a1e1e;--bar:#E0B232}
@@ -68,6 +70,51 @@ select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-s
 .range input[type=date]{min-width:0;padding:6px 8px;font-size:13px}
 .range .lbl{font-size:13px;color:var(--muted)}
 .rangeNote{font-size:13px;color:var(--muted);margin:0 0 10px}
+
+/* ===== Design D (Nov 2026) ===== */
+:root{--bg:#F6F6F4;--line:#E4E4E7;--border:#D4D4D8;--muted:#52525B;--ink:#18181B;--brand-tint:#FEF6DA}
+[data-theme="dark"]{--bg:#0E0E11;--card:#17171C;--line:#26262D;--border:#2E2E36;--muted:#A1A1AA;--ink:#F4F4F5;--brand-tint:#2A2414}
+body{font-family:Inter,system-ui,"Segoe UI",Tahoma,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+[dir="rtl"] body{font-family:"IBM Plex Sans Arabic",Inter,Tahoma,Arial,sans-serif}
+header{background:var(--card);color:var(--ink);border-bottom:1px solid var(--line);padding:10px 20px}
+header img{height:38px}
+header .title{font-size:16px}
+.btn{border-radius:10px;border-color:var(--line);min-height:40px}
+.btn:hover{background:var(--bg)}
+.btn.head{color:var(--ink);border-color:var(--line)}
+.btn.dark{background:#18181B;color:#fff;border-color:#18181B}
+[data-theme="dark"] .btn.dark{background:#F7C948;color:#141414;border-color:#F7C948}
+main{max-width:1200px;margin:0 auto;padding:0 20px 40px}
+.tabs{gap:2px;border-bottom:1px solid var(--line);margin:0 -20px 18px;padding:8px 20px 0;background:var(--card);flex-wrap:nowrap;overflow-x:auto}
+.tab{border:0;border-bottom:2px solid transparent;border-radius:0;background:transparent;color:var(--muted);padding:12px 14px;white-space:nowrap}
+.tab:hover{color:var(--ink)}
+.tab.on{background:transparent;color:var(--ink);border-bottom-color:#18181B}
+[data-theme="dark"] .tab.on{border-bottom-color:#F7C948}
+.tabs #refresh{margin-bottom:6px;align-self:center}
+#gate{margin-top:60px}
+.card{border-radius:14px;padding:20px}
+.kpis{gap:14px}
+.kpi{border-radius:14px;padding:16px}
+.kpi .v{font-size:28px;font-weight:700;letter-spacing:-.02em}
+th{font-weight:600;font-size:12px;letter-spacing:.02em}
+.track{height:10px;border-radius:99px;background:var(--bg)}.fill{height:10px;border-radius:99px}
+select,input{border-radius:10px;min-height:40px}
+.range{gap:4px;background:#EDEDEA;border-radius:12px;padding:4px;display:inline-flex;margin:0 0 8px}
+[data-theme="dark"] .range{background:#1C1C22}
+.range .lbl{padding:0 8px}
+.range .chip{border:0;background:transparent;color:var(--muted);border-radius:9px;padding:9px 14px;font-size:14px}
+.range .chip.on{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.08);font-weight:600}
+.range #customBox{padding:0 6px}
+.sumCard{padding:22px 24px}
+.sumK{font-size:13px;color:var(--muted)}
+.sumV{font-size:24px;font-weight:700;line-height:1.35;letter-spacing:-.02em;margin-top:4px}
+[dir="rtl"] .sumV{letter-spacing:0}
+table.matrix{border-collapse:separate;border-spacing:4px;min-width:0}
+table.matrix th,table.matrix td{border:0;text-align:center}
+table.matrix td:first-child,table.matrix th:first-child{text-align:start;white-space:nowrap}
+table.matrix td.m{border-radius:6px;font-weight:600;min-width:56px}
+td.m.h1{background:#FEF3CC}td.m.h2{background:#FDEBB0}td.m.h3{background:#F9D96B}td.m.h4{background:#F7C948}td.m.lo{background:#FFE4D1;color:#9A3412}
+[data-theme="dark"] td.m.h1{background:#2E2915}[data-theme="dark"] td.m.h2{background:#3A3214}[data-theme="dark"] td.m.h3{background:#4A3E12}[data-theme="dark"] td.m.h4{background:#5C4A0E}[data-theme="dark"] td.m.lo{background:#3B2416;color:#FDBA74}
 </style>
 </head>
 <body>
@@ -122,6 +169,7 @@ select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-s
 
     <!-- OVERVIEW -->
     <div id="vOverview">
+      <div class="card sumCard" id="summary"></div>
       <div class="kpis" id="kpis"></div>
       <div class="card">
         <h2 data-i18n="levelsTitle"></h2>
@@ -143,6 +191,11 @@ select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-s
       <div class="card">
         <h2 data-i18n="teacherDetails"></h2>
         <div id="teacherTable"></div>
+      </div>
+      <div class="card">
+        <h2 data-i18n="matrixTitle"></h2>
+        <div class="tw" id="teacherMatrix"></div>
+        <div class="muted" data-i18n="matrixNote"></div>
       </div>
     </div>
 
@@ -255,6 +308,8 @@ const T = {
     tabOverview: "Overview", tabTeachers: "Teachers", tabClasses: "Classes", tabAll: "All evaluations",
     tabComments: "Comments", tabIncidents: "Incidents",
     asOf: "Data as of", badPw: "The board password is not correct.", loadErr: "Could not load the data: ",
+    sumHead: "In one line", sumLine: "{evals} evaluations, average {avg} / 5. Students absent at least once: {abs}.", sumWatch: " {cls} is the class to watch ({cavg}).", sumNone: "No evaluations in these dates yet.",
+    matrixTitle: "Teachers × classes (average out of 5)", matrixNote: "Darker = higher average. Orange = below 3.", 
     kEvals: "Evaluations (by date)", kStudents: "Students", kAvg: "Average score (0-5)", kInc: "Incidents",
     kAbsent: "Absent rate", kTeachers: "Teachers who uploaded",
     levelsTitle: "Student ratings by level", levelsCount: "{n} ({p}%)",
@@ -294,6 +349,8 @@ const T = {
     tabOverview: "نظرة عامة", tabTeachers: "المعلمون", tabClasses: "الفصول", tabAll: "كل التقييمات",
     tabComments: "التعليقات", tabIncidents: "الحوادث",
     asOf: "البيانات حتى", badPw: "كلمة مرور المجلس غير صحيحة.", loadErr: "تعذر تحميل البيانات: ",
+    sumHead: "باختصار", sumLine: "{evals} تقييم، بمتوسط {avg} من 5. عدد الطلاب الذين غابوا مرة على الأقل: {abs}.", sumWatch: " الفصل الذي يحتاج متابعة: {cls} ({cavg}).", sumNone: "لا توجد تقييمات في هذه الفترة بعد.",
+    matrixTitle: "المعلمون × الفصول (المتوسط من 5)", matrixNote: "اللون الأغمق = متوسط أعلى. البرتقالي = أقل من 3.",
     kEvals: "التقييمات (حسب التاريخ)", kStudents: "الطلاب", kAvg: "متوسط الدرجة (من 5)", kInc: "الحوادث",
     kAbsent: "نسبة الغياب", kTeachers: "المعلمون الذين رفعوا تقييمات",
     levelsTitle: "تقييمات الطلاب حسب المستوى", levelsCount: "{n} ({p}%)",
@@ -591,6 +648,14 @@ function renderViews() {
   const teacherNames = [...new Set(recs.map(r => r.teacher))].sort();
   const all = summarize(recs);
 
+  // Overview: one line first
+  const absStu = new Set(recs.filter(r => r.evaluation === "Absent").map(r => r.class + "||" + r.student)).size;
+  const clsAvg = classNames.map(c => [c, avgOf(recs.filter(r => r.class === c))]).filter(x => typeof x[1] === "number");
+  const watch = clsAvg.length > 1 ? clsAvg.slice().sort((a, b) => a[1] - b[1])[0] : null;
+  $("summary").innerHTML = "";
+  $("summary").append(el("div", t("sumHead"), "sumK"),
+    el("div", recs.length ? t("sumLine", { evals: all.evals, avg: all.avg, abs: absStu }) + (watch ? t("sumWatch", { cls: watch[0], cavg: watch[1] }) : "") : t("sumNone"), "sumV"));
+
   // Overview
   const kpis = $("kpis");
   kpis.innerHTML = "";
@@ -638,6 +703,29 @@ function renderViews() {
       const s = summarize(byTeacher[n] || []);
       return { cells: [n, s.evals, s.classes, s.students, s.last] };
     })));
+
+  // teacher × class averages
+  const mx = $("teacherMatrix");
+  mx.innerHTML = "";
+  if (teacherNames.length && classNames.length) {
+    const tb = document.createElement("table"); tb.className = "matrix";
+    const hr = document.createElement("tr");
+    [t("colTeacher"), ...classNames].forEach(h => hr.appendChild(el("th", h)));
+    const thead = document.createElement("thead"); thead.appendChild(hr); tb.appendChild(thead);
+    const tbody = document.createElement("tbody");
+    teacherNames.forEach(n => {
+      const tr = document.createElement("tr");
+      tr.appendChild(el("td", n));
+      classNames.forEach(c => {
+        const v = avgOf((byTeacher[n] || []).filter(r => r.class === c));
+        const td = el("td", typeof v === "number" ? v.toFixed(1) : "—", "m");
+        if (typeof v === "number") td.classList.add(v < 3 ? "lo" : v < 3.5 ? "h1" : v < 4 ? "h2" : v < 4.5 ? "h3" : "h4");
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    });
+    tb.appendChild(tbody); mx.appendChild(tb);
+  }
 
   // Class tab
   fillSelect($("clsPick"), classNames, $("clsPick").value);
