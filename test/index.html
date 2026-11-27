@@ -367,6 +367,31 @@
   .joinBtn{display:inline-flex;align-items:center;gap:8px;margin-top:10px;padding:10px 14px;border-radius:10px;background:#4B53BC;color:#fff;text-decoration:none;font-weight:600;font-size:14px}
   .vis.unreadM{border-color:#F2DC94;background:rgba(247,201,72,.07)}
   .hHubRow a{color:#4B53BC;font-weight:600}
+
+  #tStats{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+  .stats small{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}
+  table.tGrid td.given{background:#EEF4FF}table.tGrid td.given small{color:#1E40AF}
+  [data-theme="dark"] table.tGrid td.given{background:#1E2A44}[data-theme="dark"] table.tGrid td.given small{color:#C7D7FE}
+  .tmGrid td.tmG,.tmLegend i.tmG{background:#DCE7FF}
+  .tag.ok{background:#E6F4EA;color:#17652A}
+  .rqBar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0 4px}.rqBar button{width:auto;min-height:42px}
+  .rqForm{border:1px solid var(--line);border-radius:14px;padding:16px;margin:10px 0;background:var(--bg)}
+  .rqForm h3{margin:0 0 10px;font-size:16px}.rqForm > label{margin-top:12px}
+  .rqTypes{display:flex;flex-wrap:wrap;gap:6px}.rqTypes label{margin:0;cursor:pointer}
+  .rqTypes input,.rqSess input{position:absolute;opacity:0;width:1px;height:1px}
+  .rqTypes span{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:99px;font-size:14px;background:var(--card);color:var(--ink)}
+  .rqTypes input:checked+span{background:#18181B;color:#fff;border-color:#18181B}
+  .rqSess{display:flex;flex-direction:column;gap:6px}.rqSess label{margin:0;cursor:pointer}
+  .rqSess span{display:flex;gap:8px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-size:14px;color:var(--ink)}
+  .rqSess span small{margin-left:auto;color:var(--muted)}
+  .rqSess input:checked+span{border-color:#1E40AF;background:#EEF4FF}
+  [data-theme="dark"] .rqSess input:checked+span{background:#1E2A44}
+  .rqTypes input:focus-visible+span,.rqSess input:focus-visible+span{outline:2px solid #D9A900}
+  .rqQuick{display:flex;gap:6px;margin-top:6px}.rqQuick button{width:auto;padding:6px 12px;font-size:13px}
+  .rqBtns{display:flex;gap:8px;margin-top:14px}.rqBtns button{width:auto}
+  .rqH{font-size:15px;margin:16px 0 6px}
+  .rqItem{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}.rqItem > div{flex:1}.rqItem small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+  .rqItem button{width:auto;padding:6px 12px;font-size:13px}
   .hHubRow:last-child{border-bottom:0}.hHubRow .tag{margin-top:1px}
 </style>
 </head>
@@ -638,6 +663,23 @@
       <div class="tablewrap"><table class="tGrid" id="tGrid"></table></div>
       <div id="tSubs"></div>
       <div id="tMsg"></div>
+      <div class="rqBar"><button class="secondary" type="button" id="rqOpen">Request a substitution</button><span class="hint" style="margin:0">Early leave, late arrival or another duty: you are not marked absent.</span></div>
+      <div class="rqForm" id="rqForm" hidden>
+        <h3>Request a substitution</h3>
+        <div class="rqTypes" role="radiogroup" aria-label="Type">
+          <label><input type="radio" name="rqType" value="early" checked><span>Early leave</span></label>
+          <label><input type="radio" name="rqType" value="late"><span>Late arrival</span></label>
+          <label><input type="radio" name="rqType" value="duty"><span>Other duty</span></label>
+        </div>
+        <label for="rqDate">Day</label>
+        <input type="date" id="rqDate">
+        <div id="rqSessions"></div>
+        <label for="rqNote">Note <span class="hint" style="display:inline">(optional)</span></label>
+        <input id="rqNote" maxlength="300" placeholder="e.g. Doctor's appointment">
+        <div class="rqBtns"><button class="primary" type="button" id="rqSend">Send request</button><button class="ghost" type="button" id="rqCancel">Cancel</button></div>
+        <div id="rqMsg"></div>
+      </div>
+      <div id="rqMine"></div>
     </div>
 
     <!-- TIMETABLE: the whole team's day, view only -->
@@ -782,6 +824,68 @@ async function post(action, data) {
   return out;
 }
 
+// ---------- substitution requests (early leave, late arrival, other duty; Requests.gs) ----------
+let T_WEEK = null;
+const RQ_ST = { pending: 'Waiting', approved: 'Approved', refused: 'Not approved' };
+function rqMineDraw(list) {
+  $('rqMine').innerHTML = list.length ? '<h3 class="rqH">My requests</h3>' + list.map(r => `<div class="rqItem ${r.status}">
+      <span class="tag ${r.status === 'approved' ? 'ok' : r.status === 'refused' ? 'abs' : 'due'}">${RQ_ST[r.status] || r.status}</span>
+      <div><b>${hEsc(r.typeName)}</b> · ${hubDay(r.date)} · session${r.sessions.length > 1 ? 's' : ''} ${r.sessions.join(', ')}${r.note ? ` · “${hEsc(r.note)}”` : ''}
+        ${r.reply ? `<small>Reply from ${hEsc(String(r.by).split(' ')[0])}: “${hEsc(r.reply)}”</small>` : r.status !== 'pending' ? `<small>by ${hEsc(String(r.by).split(' ')[0])}</small>` : ''}</div>
+      ${r.status === 'pending' ? `<button class="ghost" type="button" data-rqcancel="${r.id}">Cancel</button>` : ''}</div>`).join('') : '';
+}
+async function rqLoadDay() {
+  const date = $('rqDate').value;
+  if (!date) { $('rqSessions').innerHTML = ''; return; }
+  $('rqSessions').innerHTML = '<div class="hint">Loading your classes…</div>';
+  try {
+    const w = (T_WEEK && date >= T_WEEK.weekStart && date <= tAdd(T_WEEK.weekStart, 6)) ? T_WEEK : await post('myTimetable', { ...session(), date });
+    const day = Math.round((new Date(date) - new Date(w.weekStart)) / 86400000);
+    const list = w.classes.filter(c => c.day === day && !c.factory && !c.absent && !c.given).sort((a, b) => a.session - b.session);
+    $('rqSessions').innerHTML = list.length ? `<label>Which classes need someone else?</label><div class="rqSess">${list.map(c =>
+        `<label><input type="checkbox" value="${c.session}"><span><b>Session ${c.session}</b> · ${hEsc(c.cls)} <small>${fmtTime(SESSION_TIMES[c.session - 1][0])}</small></span></label>`).join('')}</div>
+        <div class="rqQuick"><button class="ghost" type="button" data-rqq="all">All</button><button class="ghost" type="button" data-rqq="last">From the last…</button></div>`
+      : '<div class="hint">You have no classes to give on that day.</div>';
+  } catch (err) { if (isAuthError(err)) return signOut(err.message); $('rqSessions').innerHTML = `<div class="hint">${hEsc(err.message)}</div>`; }
+}
+$('rqOpen').onclick = () => {
+  $('rqForm').hidden = false; $('rqMsg').innerHTML = ''; $('rqNote').value = '';
+  if (!$('rqDate').value) $('rqDate').value = tIso(new Date());
+  $('rqDate').min = tIso(new Date());
+  rqLoadDay(); $('rqForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+$('rqCancel').onclick = () => { $('rqForm').hidden = true; };
+$('rqDate').onchange = rqLoadDay;
+$('rqForm').addEventListener('click', e => {
+  const q = e.target.closest('[data-rqq]'); if (!q) return;
+  const boxes = [...$('rqSessions').querySelectorAll('input[type=checkbox]')];
+  if (q.dataset.rqq === 'all') boxes.forEach(b => { b.checked = true; });
+  else { // early leave: tick from the chosen class to the end of the day
+    const first = boxes.findIndex(b => b.checked);
+    boxes.forEach((b, i) => { b.checked = first === -1 ? i === boxes.length - 1 : i >= first; });
+  }
+});
+$('rqSend').onclick = async () => {
+  const sessions = [...$('rqSessions').querySelectorAll('input:checked')].map(b => Number(b.value));
+  const type = (document.querySelector('input[name=rqType]:checked') || {}).value;
+  if (!sessions.length) { $('rqMsg').innerHTML = '<div class="msg err">Tick the classes that need someone else.</div>'; return; }
+  $('rqSend').disabled = true;
+  try {
+    await post('ttRequest', { ...session(), request: { date: $('rqDate').value, type, sessions, note: $('rqNote').value.trim() } });
+    $('rqForm').hidden = true;
+    showIn($('tMsg'), 'Request sent. The seniors choose who takes your classes; you will see the answer here and in Team hub.', true);
+    tLoad($('tDate').value);
+  } catch (err) { if (isAuthError(err)) return signOut(err.message); $('rqMsg').innerHTML = `<div class="msg err">${hEsc(err.message)}</div>`; }
+  finally { $('rqSend').disabled = false; }
+};
+$('rqMine').addEventListener('click', async e => {
+  const b = e.target.closest('[data-rqcancel]'); if (!b) return;
+  if (!confirm('Cancel this request?')) return;
+  b.disabled = true;
+  try { await post('ttRequestCancel', { ...session(), id: b.dataset.rqcancel }); tLoad($('tDate').value); }
+  catch (err) { b.disabled = false; showIn($('tMsg'), err.message, false); }
+});
+
 // ---------- Today (the teacher's home) ----------
 let homeSeq = 0;
 const hEsc = t => String(t == null ? '' : t).replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
@@ -808,8 +912,8 @@ function homeDraw(w, today) {
   const items = [];
   if (day >= 0 && day <= 4) {
     (w.classes || []).filter(x => x.day === day).forEach(x => items.push({ s: x.session, cls: x.cls,
-      note: x.factory || x.factoryDay ? 'Factory day' : x.absent ? (x.coveredBy ? 'You are absent · ' + x.coveredBy + ' covers' : 'You are absent') : x.subject,
-      tag: x.factory || x.factoryDay ? 'fac' : x.absent ? 'abs' : '', can: !(x.factory || x.factoryDay || x.absent) }));
+      note: x.factory || x.factoryDay ? 'Factory day' : x.given ? 'Given to ' + String(x.coveredBy).split(' ')[0] + (x.reason ? ' · ' + x.reason.split(':')[0].toLowerCase() : '') : x.absent ? (x.coveredBy ? 'You are absent · ' + x.coveredBy + ' covers' : 'You are absent') : x.subject,
+      tag: x.factory || x.factoryDay ? 'fac' : x.given ? 'giv' : x.absent ? 'abs' : '', can: !(x.factory || x.factoryDay || x.absent || x.given) }));
     (w.subs || []).filter(x => x.day === day).forEach(x => items.push({ s: x.session, cls: x.cls,
       note: x.type === 'Extra' ? 'Extra class' : 'Cover for ' + String(x.forTeacher).split(' ')[0], tag: 'cov', can: true }));
     (w.visits || []).filter(v => v.day === day).forEach(v => {
@@ -842,7 +946,7 @@ function homeDraw(w, today) {
     const t = T(i.s), past = i.s && nowM >= hMins(t[1]);
     return `<div class="hRow ${i === pick ? 'on' : ''} ${past ? 'past' : ''}"><span class="s">${i.s ? 'S' + i.s : ''}<small>${i.s ? fmtTime(t[0]) : ''}</small></span>
       <b>${hEsc(i.cls)}</b><span class="n">${hEsc(i.note)}</span>
-      <span class="tags">${i.visit ? `<span class="tag vis">Visit · ${hEsc(i.visit)}</span>` : ''}${i.tag === 'cov' ? '<span class="tag cov">Cover</span>' : ''}${i.tag === 'abs' ? '<span class="tag abs">Absent</span>' : ''}${i.tag === 'fac' ? '<span class="tag fac">Factory</span>' : ''}</span></div>`;
+      <span class="tags">${i.visit ? `<span class="tag vis">Visit · ${hEsc(i.visit)}</span>` : ''}${i.tag === 'cov' ? '<span class="tag cov">Cover</span>' : ''}${i.tag === 'abs' ? '<span class="tag abs">Absent</span>' : ''}${i.tag === 'fac' ? '<span class="tag fac">Factory</span>' : ''}${i.tag === 'giv' ? '<span class="tag vis">Substituted</span>' : ''}</span></div>`;
   }).join('') : '<div class="hint" style="margin:4px 0">Nothing on your timetable today.</div>';
 }
 function homeHub() {
@@ -2815,13 +2919,16 @@ $('tNext').onclick = () => tLoad(tAdd($('tDate').value || tIso(new Date()), 7));
 $('tToday').onclick = () => tLoad(tIso(new Date()));
 
 function tRender(w) {
-  const c = w.counts || { planned: 0, absent: 0, subs: 0, extra: 0, total: 0 };
-  const added = (c.subs || 0) + (c.extra || 0);
+  const c = w.counts || { planned: 0, absent: 0, given: 0, subs: 0, extra: 0, total: 0 };
+  const added = (c.subs || 0) + (c.extra || 0), gv = (c.absent || 0) + (c.given || 0);
   $('tStats').innerHTML =
-    `<div><span>Classes</span><b>${c.planned}</b></div>` +
-    `<div><span>Absent or factory</span><b>${c.absent ? '−' + c.absent : 0}</b></div>` +
-    `<div><span>Substitutions + extra</span><b>${added ? '+' + added : 0}</b></div>` +
-    `<div><span>Total this week${c.max !== undefined ? ' · max ' + c.max : ''}</span><b>${c.total}</b></div>`;
+    `<div><span>Planned</span><b>${c.planned}</b></div>` +
+    `<div><span>Given to others</span><b>${gv ? '−' + gv : 0}</b>${gv ? `<small>${[c.absent ? c.absent + ' absent' : '', c.given ? c.given + ' substituted' : ''].filter(Boolean).join(' · ')}</small>` : ''}</div>` +
+    `<div><span>Covered + extra</span><b>${added ? '+' + added : 0}</b></div>` +
+    `<div><span>Taken this week</span><b>${c.total}</b>${c.max !== undefined ? `<small>of max ${c.max}</small>` : ''}</div>` +
+    `<div><span>Factory days</span><b>${c.factoryDays || 0}</b></div>`;
+  T_WEEK = w;
+  rqMineDraw(w.requests || []);
   const esc = t => String(t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
   const today = tIso(new Date());
   let html = '<tr><th class="d">Day</th>' + [1, 2, 3, 4, 5, 6, 7, 8].map(s =>
@@ -2839,12 +2946,13 @@ function tRender(w) {
       } else if (!mine && !sub && (w.factoryDays || []).includes(day)) {
         html += '<td class="fac" title="Factory day"><small>factory</small></td>';
       } else if (mine) {
-        const note = mine.absent ? (mine.coveredBy ? 'absent · ' + esc(mine.coveredBy) + ' covers' : 'absent') : esc(mine.subject);
-        html += `<td class="${mine.absent ? 'abs' : ''}"><b>${esc(mine.cls)}</b><small>${note}</small></td>`;
+        const note = mine.given ? 'given to ' + esc(String(mine.coveredBy).split(' ')[0]) + (mine.reason ? ' · ' + esc(mine.reason.split(':')[0].toLowerCase()) : '')
+          : mine.absent ? (mine.coveredBy ? 'absent · ' + esc(mine.coveredBy) + ' covers' : 'absent') : esc(mine.subject);
+        html += `<td class="${mine.given ? 'given' : mine.absent ? 'abs' : ''}"><b>${esc(mine.cls)}</b><small>${note}</small></td>`;
       } else if (sub) {
         html += sub.type === 'Extra'
           ? `<td class="sub" title="Extra class"><b>${esc(sub.cls)}</b><small>extra class</small></td>`
-          : `<td class="sub" title="Substitution for ${esc(sub.forTeacher)}"><b>${esc(sub.cls)}</b><small>for ${esc(sub.forTeacher)}</small></td>`;
+          : `<td class="sub" title="${sub.type === 'Sub' ? 'You take the class of ' : 'Substitution for '}${esc(sub.forTeacher)}"><b>${esc(sub.cls)}</b><small>for ${esc(sub.forTeacher)}</small></td>`;
       } else html += '<td></td>';
     }
     html += '</tr>';
@@ -2902,6 +3010,7 @@ function teamHTML(o) {
   o.teachers.forEach(t => {
     const mine = dayPlanned.filter(p => p.teacher === t);
     const absent = dayCover.filter(c => c.type === 'Absent' && c.teacher === t);
+    const given = dayCover.filter(c => c.type === 'Sub' && c.teacher === t);
     const covering = dayCover.filter(c => c.substitute === t);
     const name = `<td class="tmN" title="${esc(t)}">${esc(tmFirst(t))}</td>`;
     const rowCls = t === o.me ? ' class="me"' : '';
@@ -2914,8 +3023,9 @@ function teamHTML(o) {
     for (let s = 1; s <= 8; s++) {
       const p = mine.find(x => x.session === s);
       const c = covering.find(x => x.session === s);
-      if (c) html += `<td class="tmS" title="${c.type === 'Extra' ? 'Extra class' : 'Substitution for ' + esc(c.teacher)}">${esc(c.cls)}</td>`;
+      if (c) html += `<td class="tmS" title="${c.type === 'Extra' ? 'Extra class' : (c.type === 'Sub' ? 'Takes the class of ' : 'Substitution for ') + esc(c.teacher)}">${esc(c.cls)}</td>`;
       else if (p && absent.some(a => a.session === s)) html += `<td class="tmA" title="Absent">${esc(p.cls)}</td>`;
+      else if (p && given.some(a => a.session === s)) html += `<td class="tmG" title="Given to ${esc(given.find(a => a.session === s).substitute)}">${esc(p.cls)}</td>`;
       else if (p) html += `<td class="tmC">${esc(p.cls)}</td>`;
       else { html += '<td class="tmE"></td>'; free[s - 1]++; }
     }
@@ -2923,7 +3033,7 @@ function teamHTML(o) {
   });
   html += '<tr class="tmFree"><td class="tmN">Free</td>' + free.map(n => `<td>${n}</td>`).join('') + '</tr></table></div>';
   html += '<div class="tmLegend"><span><i class="tmC"></i>Class</span><span><i class="tmF"></i>Factory</span>' +
-    '<span><i class="tmS"></i>Substitution / extra</span><span><i class="tmA"></i>Absent</span><span><i class="tmE"></i>Free</span></div>';
+    '<span><i class="tmS"></i>Substitution / extra</span><span><i class="tmG"></i>Given (not absent)</span><span><i class="tmA"></i>Absent</span><span><i class="tmE"></i>Free</span></div>';
   if (!anything) html += '<p class="tmNone">No classes on this day.</p>';
   return html;
 }

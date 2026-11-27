@@ -530,6 +530,20 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
 
 .tw{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
 #paneEvals .card{min-width:0;overflow:hidden}
+
+.ttGrid td.given{background:#EEF4FF}.ttGrid td.given small{color:#1E40AF}
+[data-theme="dark"] .ttGrid td.given{background:#1E2A44}[data-theme="dark"] .ttGrid td.given small{color:#C7D7FE}
+.subTag{display:inline-block;font-size:11px;font-weight:600;padding:1px 7px;border-radius:99px;background:#EEF4FF;color:#1E40AF}
+.ttStat small{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}
+.tmGrid td.tmG,.tmLegend i.tmG{background:#DCE7FF}
+.reqItem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.reqTop{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px}
+.reqRows{margin-top:8px;display:flex;flex-direction:column;gap:6px}
+.reqSess{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-size:14px}.reqSess span:first-child{min-width:220px}.reqSess select{width:auto;min-width:260px}
+.reqBtns{display:flex;gap:8px;margin-top:10px}
+.reqDone{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:4px;margin-top:6px}
+
+.ttStats{grid-template-columns:repeat(auto-fit,minmax(150px,1fr)) !important}
 </style>
 </head>
 <body>
@@ -1023,6 +1037,13 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
   <div id="paneTT" hidden>
     <div id="ttStatus"></div>
 
+    <!-- SUBSTITUTION REQUESTS from teachers (Requests.gs) -->
+    <div class="card" id="reqCard" hidden>
+      <h2 id="reqHead">Substitution requests</h2>
+      <p class="hint" style="margin:-4px 0 10px">Early leave, late arrival or other duty. The teacher is not absent: choose who takes each class, then approve.</p>
+      <div id="reqList"></div>
+    </div>
+
     <!-- WEEK: absences and substitutions -->
     <div class="card">
       <h2>Week: absences and substitutions</h2>
@@ -1050,7 +1071,8 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
       </div>
       <div class="ttStats" id="wkStats"></div>
       <div class="ttWrap"><table class="ttGrid" id="wkGrid"></table></div>
-      <p class="hint">Click a day name to make it an absent day, a factory day, or a normal day again. On a factory day
+      <p class="hint">Click a class to mark it absent, or to give it to another teacher without marking the teacher absent (substitution).
+        Click a day name to make it an absent day, a factory day, or a normal day again. On a factory day
         (from the timetable or added), click the day name to move it to another teacher or cancel it. A factory day puts the
         teacher's classes that day under Needs cover and lowers their max by 5; a cancelled one gives the 5 back. Click a class to mark that session only absent; click again to undo.
         Click a free session (+ extra) to give the teacher an extra class.</p>
@@ -1066,8 +1088,8 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
       <p class="hint">A factory day = more than 7 sessions of field training (تدريب ميداني) in a day. Its sessions are
         not counted as classes, and it lowers the teacher's days available by 1. Fewer field-training sessions in a day
         count as normal classes. Max = 5 classes for each available day (5 days = 25,
-        4 = 20, 3 = 15); you can change the days or type any max for this week. Total = classes − absent + substitutions
-        + extra classes; Left = max − total. ⚠ marks a teacher with 6 or more classes on a day.
+        4 = 20, 3 = 15); you can change the days or type any max for this week. Taken = planned − absent − given to others
+        (substitutions, not absent) + classes covered + extra classes; Left = max − taken. ⚠ marks a teacher with 6 or more classes on a day.
         Press Save week to keep changes.</p>
     </div>
 
@@ -1598,6 +1620,10 @@ async function homeInit() {
   }
   try { Object.keys(localStorage).filter(k => k.indexOf('visitDraft:') === 0).forEach(k => items.unshift({ lvl: 'amb', tag: 'DRAFT', text: '<b>Unfinished visit form</b> saved on this device', act: k === 'visitDraft:new' ? 'visits' : 'vfill:' + k.slice(11), btn: 'Continue' })); } catch (e) {}
   if (W.dirty) items.unshift({ lvl: 'blue', tag: 'UNSAVED', text: '<b>Timetable changes not saved</b>', act: 'tt', btn: 'Open' });
+  try {
+    const Q = (await post('ttRequests')).requests || [];
+    Q.filter(q => q.status === 'pending').reverse().forEach(q => items.unshift({ lvl: 'amb', tag: q.typeName.toUpperCase(), text: `<b>${aEsc(q.teacher)}</b> asks for a substitution · ${aDay(q.date)} · session${q.sessions.length > 1 ? 's' : ''} ${q.sessions.join(', ')}${q.note ? ' · “' + aEsc(q.note) + '”' : ''}`, act: 'req:' + q.date, btn: 'Choose' }));
+  } catch (e) { /* no timetable yet */ }
   $('aAttn').innerHTML = items.length ? items.map(i => `<div class="aRow"><span class="aTag ${i.lvl}">${i.tag}</span><div class="t">${i.text}</div><button type="button" class="btn alt small" data-act="${aEsc(i.act)}">${i.btn}</button></div>`).join('')
     : '<div class="aEmpty">Nothing needs you right now.</div>';
 }
@@ -1615,6 +1641,7 @@ document.addEventListener('click', e => {
   if (!a) return;
   const act = a.dataset.act || a.dataset.q;
   if (act === 'tt') return showPane('tt');
+  if (act.indexOf('req:') === 0) { showPane('tt'); return loadWeek(act.slice(4)).then(() => $('reqCard').scrollIntoView({ behavior: 'smooth', block: 'start' })); }
   if (act === 'kpi') return showPane('kpi');
   if (act === 'visit') return homeGoHub('visits', () => $('hubUnplanned').click());
   if (act === 'meet') return homeGoHub('', () => window.hubPlanMeeting && window.hubPlanMeeting());
@@ -1685,7 +1712,7 @@ async function loadWeek(date) {
   try {
     const out = await post('ttWeek', { date: want });
     Object.assign(W, { dayMenu: null, loaded: true, weekStart: out.weekStart, teachers: out.teachers, plannedAll: out.planned,
-      cover: out.cover, limits: out.limits || {}, versions: out.versions, dirty: false, adding: null,
+      cover: out.cover, limits: out.limits || {}, versions: out.versions, dirty: false, adding: null, cellMenu: null, requests: out.requests || [],
       extraClasses: out.extraClasses || W.extraClasses, perDay: out.perDay || 5, dayWarning: out.dayWarning || 6 });
     applyPlanned();
     $('wkSave').disabled = true;
@@ -1708,6 +1735,9 @@ $('wkNext').onclick = () => loadWeek(addDays(W.weekStart || isoDay(new Date()), 
 $('wkTeacher').onchange = () => { W.adding = null; W.dayMenu = null; localStorage.setItem('ttTeacher', $('wkTeacher').value); renderWeek(); };
 
 const coverAt = (t, date, s) => W.cover.find(c => c.type === 'Absent' && c.teacher === t && c.date === date && c.session === s);
+// a substitution: the class goes to another teacher, but the teacher is NOT absent (early leave, late arrival, other duty)
+const subAt = (t, date, s) => W.cover.find(c => c.type === 'Sub' && c.teacher === t && c.date === date && c.session === s);
+const SUB_REASONS = ['Early leave', 'Late arrival', 'Other duty'];
 // a factory day the admin gave this teacher (saved as a "Factory" row; their classes that day are absences to cover)
 const givenFactory = (t, date) => W.cover.some(c => c.type === 'Factory' && c.teacher === t && c.date === date);
 const dayIdx = date => Math.round((new Date(date) - new Date(W.weekStart)) / 86400000);
@@ -1730,23 +1760,23 @@ function factoryDays(t) {
 // Same rules as the server: classes (no field training) − absent + substitutions + extra classes
 function weekCounts() {
   const c = {};
-  const blank = () => ({ planned: 0, absent: 0, subs: 0, extra: 0, perDay: {} });
+  const blank = () => ({ planned: 0, absent: 0, given: 0, subs: 0, extra: 0, perDay: {} });
   W.teachers.forEach(t => { c[t] = blank(); });
   const get = t => (c[t] = c[t] || blank());
   const add = (t, date) => { const x = get(t); x.perDay[date] = (x.perDay[date] || 0) + 1; };
   W.planned.filter(p => !p.factory).forEach(p => {
     get(p.teacher).planned++;
-    if (!coverAt(p.teacher, p.date, p.session)) add(p.teacher, p.date);
+    if (!coverAt(p.teacher, p.date, p.session) && !subAt(p.teacher, p.date, p.session)) add(p.teacher, p.date);
   });
   W.cover.forEach(r => {
     if (r.type === 'Factory' || r.type === 'NoFactory') return;
     if (r.type === 'Extra') { if (r.substitute) { get(r.substitute).extra++; add(r.substitute, r.date); } return; }
-    get(r.teacher).absent++;
+    if (r.type === 'Sub') get(r.teacher).given++; else get(r.teacher).absent++;
     if (r.substitute) { get(r.substitute).subs++; add(r.substitute, r.date); }
   });
   Object.keys(c).forEach(t => {
     const x = c[t];
-    x.total = x.planned - x.absent + x.subs + x.extra;
+    x.total = x.planned - x.absent - x.given + x.subs + x.extra;   // the classes the teacher really takes this week
     const auto = Math.max(0, 5 - factoryDays(t).length);
     const l = W.limits[t] && W.limits[t].saved ? W.limits[t] : { days: auto, max: auto * W.perDay };
     x.days = l.days;
@@ -1808,7 +1838,7 @@ function freeUp(t, date, why) {
 }
 function myClasses(t, date) { return W.planned.filter(p => p.teacher === t && p.date === date && !p.factory); }
 function markAllAbsent(t, date) {
-  myClasses(t, date).forEach(p => { if (!coverAt(t, date, p.session)) W.cover.push({ type: 'Absent', teacher: t, date, session: p.session, cls: p.cls, subject: p.subject, substitute: '' }); });
+  myClasses(t, date).forEach(p => { if (!coverAt(t, date, p.session) && !subAt(t, date, p.session)) W.cover.push({ type: 'Absent', teacher: t, date, session: p.session, cls: p.cls, subject: p.subject, substitute: '' }); });
 }
 function dayNormal(t, date) {
   const covered = myClasses(t, date).filter(p => coverAt(t, date, p.session) && coverAt(t, date, p.session).substitute).length;
@@ -1936,6 +1966,7 @@ function teamHTML(o) {
   o.teachers.forEach(t => {
     const mine = dayPlanned.filter(p => p.teacher === t);
     const absent = dayCover.filter(c => c.type === 'Absent' && c.teacher === t);
+    const given = dayCover.filter(c => c.type === 'Sub' && c.teacher === t);
     const covering = dayCover.filter(c => c.substitute === t);
     const name = `<td class="tmN" title="${esc(t)}">${esc(tmFirst(t))}</td>`;
     const rowCls = t === o.me ? ' class="me"' : '';
@@ -1948,8 +1979,9 @@ function teamHTML(o) {
     for (let s = 1; s <= 8; s++) {
       const p = mine.find(x => x.session === s);
       const c = covering.find(x => x.session === s);
-      if (c) html += `<td class="tmS" title="${c.type === 'Extra' ? 'Extra class' : 'Substitution for ' + esc(c.teacher)}">${esc(c.cls)}</td>`;
+      if (c) html += `<td class="tmS" title="${c.type === 'Extra' ? 'Extra class' : (c.type === 'Sub' ? 'Takes the class of ' : 'Substitution for ') + esc(c.teacher)}">${esc(c.cls)}</td>`;
       else if (p && absent.some(a => a.session === s)) html += `<td class="tmA" title="Absent">${esc(p.cls)}</td>`;
+      else if (p && given.some(a => a.session === s)) html += `<td class="tmG" title="Given to ${esc(given.find(a => a.session === s).substitute)} (not absent)">${esc(p.cls)}</td>`;
       else if (p) html += `<td class="tmC">${esc(p.cls)}</td>`;
       else { html += '<td class="tmE"></td>'; free[s - 1]++; }
     }
@@ -1957,7 +1989,7 @@ function teamHTML(o) {
   });
   html += '<tr class="tmFree"><td class="tmN">Free</td>' + free.map(n => `<td>${n}</td>`).join('') + '</tr></table></div>';
   html += '<div class="tmLegend"><span><i class="tmC"></i>Class</span><span><i class="tmF"></i>Factory</span>' +
-    '<span><i class="tmS"></i>Substitution / extra</span><span><i class="tmA"></i>Absent</span><span><i class="tmE"></i>Free</span></div>';
+    '<span><i class="tmS"></i>Substitution / extra</span><span><i class="tmG"></i>Given (not absent)</span><span><i class="tmA"></i>Absent</span><span><i class="tmE"></i>Free</span></div>';
   if (!anything) html += '<p class="tmNone">No classes on this day.</p>';
   return html;
 }
@@ -1982,12 +2014,15 @@ function renderWeek() {
   tmDraw();
   const t = $('wkTeacher').value;
   const counts = weekCounts();
-  const me = counts[t] || { planned: 0, absent: 0, subs: 0, extra: 0, total: 0, max: 0, room: 0, busyDays: [] };
-  const stat = (l, v, warn) => `<div class="ttStat${warn ? ' warn' : ''}"><span>${l}</span><b>${v}</b></div>`;
+  const me = counts[t] || { planned: 0, absent: 0, given: 0, subs: 0, extra: 0, total: 0, max: 0, room: 0, busyDays: [], factory: 0 };
+  const stat = (l, v, warn, note) => `<div class="ttStat${warn ? ' warn' : ''}"><span>${l}</span><b>${v}</b>${note ? `<small>${note}</small>` : ''}</div>`;
+  const gv = me.absent + me.given;
   $('wkStats').innerHTML = !t ? '' :
-    stat('Classes', me.planned) + stat('Absent or factory', me.absent ? '−' + me.absent : 0) +
-    stat('Substitutions + extra', (me.subs + me.extra) ? '+' + (me.subs + me.extra) : 0) +
-    stat(`Total of max ${me.max} · ${me.room < 0 ? 'over by ' + (-me.room) : me.room + ' left'}`, me.total, me.room < 0) +
+    stat('Planned', me.planned, false, 'in the timetable') +
+    stat('Given to others', gv ? '−' + gv : 0, false, gv ? [me.absent ? me.absent + ' absent' : '', me.given ? me.given + ' substituted' : ''].filter(Boolean).join(' · ') : '') +
+    stat('Covered + extra', (me.subs + me.extra) ? '+' + (me.subs + me.extra) : 0, false, (me.subs + me.extra) ? [me.subs ? me.subs + ' covered' : '', me.extra ? me.extra + ' extra' : ''].filter(Boolean).join(' · ') : '') +
+    stat('Taken this week', me.total, me.room < 0, `of max ${me.max} · ${me.room < 0 ? 'over by ' + (-me.room) : me.room + ' left'}`) +
+    stat('Factory days', me.factory || 0) +
     (me.busyDays.length ? `<div class="dayWarn">⚠ ${me.busyDays.map(d => `${me.perDay[d]} classes on ${TT_DAYS[dayIdx(d)]}`).join(', ')}</div>` : '');
 
   const grid = $('wkGrid');
@@ -2065,7 +2100,7 @@ function renderWeek() {
     for (let s = 1; s <= 8; s++) {
       const td = document.createElement('td');
       const p = mine.find(x => x.session === s);
-      const sub = W.cover.find(c => c.type === 'Absent' && c.substitute === t && c.date === date && c.session === s);
+      const sub = W.cover.find(c => (c.type === 'Absent' || c.type === 'Sub') && c.substitute === t && c.date === date && c.session === s);
       const extra = W.cover.find(c => c.type === 'Extra' && c.substitute === t && c.date === date && c.session === s);
       if (p && p.factory) {
         td.className = 'fac';
@@ -2080,14 +2115,39 @@ function renderWeek() {
         td.className = 'fac';
         td.innerHTML = '<small>factory</small>';
       } else if (p) {
-        const c = coverAt(t, date, s);
-        td.className = 'click' + (c ? (c.substitute ? ' cov' : ' abs') : '');
-        td.innerHTML = `<b>${esc(p.cls)}</b><small>${c ? (c.substitute ? 'covered by ' + esc(c.substitute) : 'absent') : esc(p.subject)}</small>`;
-        td.title = c ? 'Click to undo the absence' : 'Click to mark absent this session';
-        td.onclick = () => toggleAbsent(p);
+        const c = coverAt(t, date, s), g = subAt(t, date, s);
+        const menu = W.cellMenu && W.cellMenu.date === date && W.cellMenu.session === s;
+        if (g) {
+          td.className = 'click given';
+          td.innerHTML = `<b>${esc(p.cls)}</b><small>${g.substitute ? 'given to ' + esc(g.substitute.split(' ')[0]) : 'to give · choose who'}${g.reason ? ' · ' + esc(g.reason.split(':')[0].toLowerCase()) : ''}</small>`;
+          td.title = 'Substitution (not absent). Click to undo it';
+          td.onclick = () => {
+            if (!window.confirm(`Undo the substitution of ${p.cls} on ${dn}, session ${s}? The class goes back to ${t}.`)) return;
+            W.cover.splice(W.cover.indexOf(g), 1); markWeekDirty();
+          };
+        } else if (menu) {
+          td.className = 'click';
+          const sel = document.createElement('select');
+          sel.setAttribute('aria-label', `${t}, ${dn} session ${s}`);
+          [['', p.cls + '…'], ['absent', 'Mark absent'], ['sub', 'Substitute (not absent)'], ['-', 'Cancel']].forEach(([v, l]) => sel.add(new Option(l, v)));
+          sel.onclick = e => e.stopPropagation();
+          sel.onchange = () => {
+            const v = sel.value; W.cellMenu = null;
+            if (v === 'absent') return toggleAbsent(p);
+            if (v === 'sub') { W.cover.push({ type: 'Sub', teacher: t, date, session: s, cls: p.cls, subject: p.subject, substitute: '', reason: 'Other duty' }); return markWeekDirty(); }
+            renderWeek();
+          };
+          td.appendChild(sel);
+          setTimeout(() => sel.focus(), 0);
+        } else {
+          td.className = 'click' + (c ? (c.substitute ? ' cov' : ' abs') : '');
+          td.innerHTML = `<b>${esc(p.cls)}</b><small>${c ? (c.substitute ? 'covered by ' + esc(c.substitute) : 'absent') : esc(p.subject)}</small>`;
+          td.title = c ? 'Click to undo the absence' : 'Click: mark absent, or give this class to another teacher';
+          td.onclick = () => { if (c) return toggleAbsent(p); W.adding = null; W.cellMenu = { date, session: s }; renderWeek(); };
+        }
       } else if (sub) {
         td.className = 'subcell';
-        td.innerHTML = `<b>${esc(sub.cls)}</b><small>covers ${esc(sub.teacher)}</small>`;
+        td.innerHTML = `<b>${esc(sub.cls)}</b><small>${sub.type === 'Sub' ? 'takes' : 'covers'} ${esc(sub.teacher)}</small>`;
       } else if (extra) {
         td.className = 'subcell click';
         td.innerHTML = `<b>${esc(extra.cls)}</b><small>extra class</small>`;
@@ -2132,7 +2192,64 @@ function renderWeek() {
   renderFactoryList();
   renderNeeds(counts);
   renderSum(counts);
+  renderRequests(counts);
 }
+
+// ----- substitution requests from teachers -----
+const REQ_PICK = {};   // request id → { session: substitute } chosen so far
+function renderRequests(counts) {
+  const R = W.requests || [], pend = R.filter(r => r.status === 'pending'), done = R.filter(r => r.status !== 'pending').slice(0, 5);
+  $('reqCard').hidden = !R.length;
+  $('reqHead').textContent = pend.length ? `Substitution requests · ${pend.length} waiting` : 'Substitution requests';
+  const sessTxt = l => l.length > 2 && l[l.length - 1] - l[0] === l.length - 1 ? `sessions ${l[0]}–${l[l.length - 1]}` : 'session' + (l.length > 1 ? 's ' : ' ') + l.join(', ');
+  $('reqList').innerHTML = pend.map(r => {
+    const here = r.weekStart === W.weekStart, pick = REQ_PICK[r.id] = REQ_PICK[r.id] || {};
+    const rows = here ? r.classes.map(c => {
+      const free = freeTeachers({ teacher: r.teacher, date: r.date, session: c.session })
+        .sort((a, b) => (counts[b] ? counts[b].room : 0) - (counts[a] ? counts[a].room : 0) || a.localeCompare(b));
+      return `<div class="reqSess"><span><b>Session ${c.session}</b> · ${esc(c.cls)}${c.subject ? ' · ' + esc(c.subject) : ''}</span>
+        <select data-reqpick="${r.id}" data-s="${c.session}" aria-label="Who takes session ${c.session}"><option value="">Choose who takes it</option>${free.map(x => {
+          const k = counts[x] || { total: 0, max: 0, room: 0 };
+          return `<option value="${esc(x)}" ${pick[c.session] === x ? 'selected' : ''}>${esc(x)} · ${k.total} of ${k.max} · ${k.room <= 0 ? 'full' : k.room + ' left'}</option>`;
+        }).join('')}</select>${free.length ? '' : '<span class="warnTxt">nobody is free</span>'}</div>`;
+    }).join('') : `<button type="button" class="btn alt small" data-reqweek="${r.date}">Open the week of ${shortDate(r.weekStart)} to choose</button>`;
+    return `<div class="reqItem"><div class="reqTop"><span class="aTag amb">${esc(r.typeName.toUpperCase())}</span>
+        <b>${esc(r.teacher)}</b> · ${esc(TT_DAYS[Math.round((new Date(r.date) - new Date(r.weekStart)) / 86400000)] || '')} ${shortDate(r.date)} · ${sessTxt(r.sessions)}</div>
+      ${r.note ? `<div class="hint" style="margin:4px 0 0">“${esc(r.note)}”</div>` : ''}
+      <div class="reqRows">${rows}</div>
+      <div class="reqBtns">${here ? `<button type="button" class="btn save small" data-reqok="${r.id}">Approve</button>` : ''}<button type="button" class="btn rm small" data-reqno="${r.id}">Refuse</button></div></div>`;
+  }).join('') + (done.length ? `<div class="reqDone">${done.map(r => `<div>${r.status === 'approved' ? '✓ Approved' : '✗ Refused'} · ${esc(r.teacher)} · ${esc(r.typeName)} · ${shortDate(r.date)} · by ${esc(String(r.by).split(' ')[0])}${r.reply ? ' · “' + esc(r.reply) + '”' : ''}</div>`).join('')}</div>` : '');
+}
+document.addEventListener('change', e => {
+  const s = e.target.closest('[data-reqpick]'); if (!s) return;
+  (REQ_PICK[s.dataset.reqpick] = REQ_PICK[s.dataset.reqpick] || {})[s.dataset.s] = s.value;
+});
+document.addEventListener('click', async e => {
+  const wk = e.target.closest('[data-reqweek]'), ok = e.target.closest('[data-reqok]'), no = e.target.closest('[data-reqno]');
+  if (wk) return loadWeek(wk.dataset.reqweek);
+  if (!ok && !no) return;
+  const sen = localStorage.getItem('hubSenior') || '';
+  if (!sen) return ttMsg('First choose who you are (George or Ramy) in Team hub.', false);
+  const id = (ok || no).dataset.reqok || (ok || no).dataset.reqno, r = W.requests.find(x => x.id === id);
+  if (W.dirty && !window.confirm('This week has changes you have not saved. They will be lost. Continue?')) return;
+  let body;
+  if (ok) {
+    const pick = REQ_PICK[id] || {}, miss = r.sessions.filter(x => !pick[x]);
+    if (miss.length) return ttMsg(`Choose who takes session ${miss[0]} of ${r.teacher}'s request.`, false);
+    body = { id, approve: true, assign: pick, senior: sen };
+  } else {
+    const reply = window.prompt(`Refuse ${r.teacher}'s ${r.typeName.toLowerCase()} request? Write a short reason for them (optional):`, '');
+    if (reply === null) return;
+    body = { id, approve: false, reply, senior: sen };
+  }
+  (ok || no).disabled = true;
+  try {
+    await post('ttRequestDecide', body);
+    W.dirty = false;
+    await loadWeek(W.weekStart);
+    ttMsg(ok ? `Approved. ${r.teacher} and the teachers who take the classes were told. ${r.teacher} is not marked absent.` : `Refused. ${r.teacher} was told.`, true);
+  } catch (err) { (ok || no).disabled = false; ttMsg(err.message, false); }
+});
 
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -2148,7 +2265,7 @@ function freeTeachers(r) {
 function renderNeeds(counts) {
   const box = $('needList');
   box.innerHTML = '';
-  const list = W.cover.filter(r => r.type === 'Absent')
+  const list = W.cover.filter(r => r.type === 'Absent' || r.type === 'Sub')
     .sort((a, b) => a.date.localeCompare(b.date) || a.session - b.session || a.teacher.localeCompare(b.teacher));
   const open = list.filter(r => !r.substitute).length;
   $('needHead').textContent = list.length ? `Needs cover · ${open} of ${list.length} still open` : 'Needs cover';
@@ -2158,7 +2275,7 @@ function renderNeeds(counts) {
     row.className = 'needRow' + (r.substitute ? ' done' : '');
     const day = TT_DAYS[dayIdx(r.date)] || r.date;
     const label = document.createElement('span');
-    label.innerHTML = `<b>${esc(day.slice(0, 3))} ${esc(shortDate(r.date))} · session ${r.session}</b><small>${esc(r.teacher)}${givenFactory(r.teacher, r.date) ? ' (factory day' + (W.cover.some(c => c.type === 'NoFactory' && c.date === r.date) ? ', instead of ' + W.cover.filter(c => c.type === 'NoFactory' && c.date === r.date).map(c => c.teacher).join(', ') : '') + ')' : ''} · ${esc(r.cls)}${r.subject ? ' · ' + esc(r.subject) : ''}</small>`;
+    label.innerHTML = `<b>${esc(day.slice(0, 3))} ${esc(shortDate(r.date))} · session ${r.session}</b><small>${r.type === 'Sub' ? '<span class="subTag">Substitution · not absent</span> ' : ''}${esc(r.teacher)}${givenFactory(r.teacher, r.date) ? ' (factory day' + (W.cover.some(c => c.type === 'NoFactory' && c.date === r.date) ? ', instead of ' + W.cover.filter(c => c.type === 'NoFactory' && c.date === r.date).map(c => c.teacher).join(', ') : '') + ')' : ''} · ${esc(r.cls)}${r.subject ? ' · ' + esc(r.subject) : ''}</small>`;
     const sel = document.createElement('select');
     sel.setAttribute('aria-label', `Substitute for ${r.teacher}, ${day} session ${r.session}`);
     sel.add(new Option('No substitute', ''));
@@ -2182,14 +2299,24 @@ function renderNeeds(counts) {
     };
     if (r.substitute && counts[r.substitute] && counts[r.substitute].room < 0) warn.textContent = `${r.substitute} is over their max of ${counts[r.substitute].max}`;
     if (!free.length) warn.textContent = 'nobody is free at this time';
-    row.append(label, sel, warn);
+    if (r.type === 'Sub') {
+      sel.options[0].text = 'Choose who takes it';
+      const rs = document.createElement('select');
+      rs.setAttribute('aria-label', 'Reason');
+      const cur = String(r.reason || 'Other duty');
+      const base = SUB_REASONS.find(x => cur.indexOf(x) === 0) || 'Other duty';
+      SUB_REASONS.forEach(x => rs.add(new Option(x, x)));
+      rs.value = base;
+      rs.onchange = () => { r.reason = rs.value + (cur.indexOf(':') !== -1 && cur.indexOf(base) === 0 ? cur.slice(cur.indexOf(':')) : ''); markWeekDirty(); };
+      row.append(label, sel, rs, warn);
+    } else row.append(label, sel, warn);
     box.appendChild(row);
   });
 }
 
 function renderSum(counts) {
   const t = $('wkSum');
-  t.innerHTML = '<tr><th>Teacher</th><th>Days</th><th>Max</th><th>Classes</th><th>Absent</th><th>Subs</th><th>Extra</th><th>Total</th><th>Left</th></tr>';
+  t.innerHTML = '<tr><th>Teacher</th><th>Days</th><th>Max</th><th>Planned</th><th>Absent</th><th>Given</th><th>Covered</th><th>Extra</th><th>Taken</th><th>Left</th></tr>';
   W.teachers.forEach(name => {
     const c = counts[name];
     const tr = document.createElement('tr');
@@ -2226,6 +2353,7 @@ function renderSum(counts) {
     td(max).className = 'num';
     td(String(c.planned));
     td(c.absent ? '−' + c.absent : '');
+    td(c.given ? '−' + c.given : '');
     td(c.subs ? '+' + c.subs : '');
     td(c.extra ? '+' + c.extra : '');
     td(`<b>${c.total}</b>`);
@@ -2238,7 +2366,10 @@ $('wkSave').onclick = async () => {
   const abs = W.cover.filter(r => r.type === 'Absent');
   const open = abs.filter(r => !r.substitute).length;
   const extra = W.cover.filter(r => r.type === 'Extra').length;
-  if (!window.confirm(`Save the week of ${shortDate(W.weekStart)}?\n\n${abs.length} absent session(s), ${abs.length - open} covered, ${open} without a substitute, ${extra} extra class(es).`)) return;
+  const subs = W.cover.filter(r => r.type === 'Sub');
+  const noSub = subs.filter(r => !r.substitute);
+  if (noSub.length) return ttMsg(`Choose who takes ${noSub[0].teacher}'s class on ${shortDate(noSub[0].date)}, session ${noSub[0].session} (under Needs cover), or undo that substitution.`, false);
+  if (!window.confirm(`Save the week of ${shortDate(W.weekStart)}?\n\n${abs.length} absent session(s), ${abs.length - open} covered, ${open} without a substitute, ${subs.length} substitution(s), ${extra} extra class(es).`)) return;
   const btn = $('wkSave');
   btn.disabled = true;
   btn.textContent = 'Saving…';
@@ -2246,8 +2377,8 @@ $('wkSave').onclick = async () => {
     const counts = weekCounts();
     await post('ttSaveWeek', {
       weekStart: W.weekStart,
-      cover: W.cover.map(r => ({ type: ['Extra', 'Factory', 'NoFactory'].includes(r.type) ? r.type : 'Absent', teacher: r.teacher, date: r.date,
-        session: r.session, substitute: r.substitute || '', cls: r.cls })),
+      cover: W.cover.map(r => ({ type: ['Extra', 'Factory', 'NoFactory', 'Sub'].includes(r.type) ? r.type : 'Absent', teacher: r.teacher, date: r.date,
+        session: r.session, substitute: r.substitute || '', cls: r.cls, reason: r.reason || '' })),
       limits: W.teachers.map(t => ({ teacher: t, days: counts[t].days, max: counts[t].max }))
     });
     W.dirty = false;
@@ -4331,21 +4462,21 @@ function ttpTeacherWeek(t) {
     if (atFactory(t, date)) { html += `<td colspan="8" style="text-align:center"><b>Factory day</b>${factoryClass(t, date) ? ' · ' + esc(factoryClass(t, date)) : ''}</td></tr>`; return; }
     for (let s = 1; s <= 8; s++) {
       const p = W.planned.find(x => x.teacher === t && x.date === date && x.session === s && !x.factory);
-      const c = coverAt(t, date, s);
-      const sub = W.cover.find(x => (x.type === 'Absent' || x.type === 'Extra') && x.substitute === t && x.date === date && x.session === s);
+      const c = coverAt(t, date, s) || subAt(t, date, s);
+      const sub = W.cover.find(x => (x.type === 'Absent' || x.type === 'Extra' || x.type === 'Sub') && x.substitute === t && x.date === date && x.session === s);
       html += '<td>' + (sub ? `<b>${esc(sub.cls)}</b><br>${sub.type === 'Extra' ? 'extra' : 'covers ' + esc(String(sub.teacher).split(' ')[0])}`
-        : p ? `<b>${esc(p.cls)}</b>${c ? '<br>absent' + (c.substitute ? ' · ' + esc(String(c.substitute).split(' ')[0]) : '') : ''}` : '') + '</td>';
+        : p ? `<b>${esc(p.cls)}</b>${c ? '<br>' + (c.type === 'Sub' ? 'given' : 'absent') + (c.substitute ? ' · ' + esc(String(c.substitute).split(' ')[0]) : '') : ''}` : '') + '</td>';
     }
     html += '</tr>';
   });
   return html + '</tbody></table>';
 }
 function ttpCoverList() {
-  const rows = W.cover.filter(c => c.type === 'Absent' || c.type === 'Extra').slice().sort((a, b) => a.date.localeCompare(b.date) || a.session - b.session);
+  const rows = W.cover.filter(c => c.type === 'Absent' || c.type === 'Extra' || c.type === 'Sub').slice().sort((a, b) => a.date.localeCompare(b.date) || a.session - b.session);
   const fac = W.cover.filter(c => c.type === 'Factory' || c.type === 'NoFactory');
   let html = rows.length ? '<table><thead><tr><th>Day</th><th>Session</th><th>Class</th><th>Teacher</th><th>Covered by</th></tr></thead><tbody>' +
     rows.map(r => `<tr><td>${TT_DAYS[TT_DAYS.findIndex((_, d) => addDays(W.weekStart, d) === r.date)] || ''} ${shortDate(r.date)}</td><td>${r.session}</td><td><b>${esc(r.cls)}</b></td>` +
-      `<td>${r.type === 'Extra' ? 'extra class' : esc(r.teacher) + (givenFactory(r.teacher, r.date) ? ' (factory day)' : ' (absent)')}</td><td>${r.substitute ? esc(r.substitute) : '<b>needs cover</b>'}</td></tr>`).join('') + '</tbody></table>'
+      `<td>${r.type === 'Extra' ? 'extra class' : esc(r.teacher) + (r.type === 'Sub' ? ' (' + esc(r.reason || 'substitution') + ', not absent)' : givenFactory(r.teacher, r.date) ? ' (factory day)' : ' (absent)')}</td><td>${r.substitute ? esc(r.substitute) : '<b>needs cover</b>'}</td></tr>`).join('') + '</tbody></table>'
     : '<p style="font-size:10px">No absences, substitutions or extra classes this week.</p>';
   if (fac.length) html += '<h3>Factory day changes</h3><table><thead><tr><th>Date</th><th>Teacher</th><th>Change</th></tr></thead><tbody>' +
     fac.map(f => `<tr><td>${shortDate(f.date)}</td><td>${esc(f.teacher)}</td><td>${f.type === 'Factory' ? 'Factory day' + (f.cls ? ' · ' + esc(f.cls) : '') : 'No factory (cancelled)'}</td></tr>`).join('') + '</tbody></table>';
