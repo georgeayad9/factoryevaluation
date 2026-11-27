@@ -392,12 +392,14 @@
   .rqH{font-size:15px;margin:16px 0 6px}
   .rqItem{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}.rqItem > div{flex:1}.rqItem small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
   .rqItem button{width:auto;padding:6px 12px;font-size:13px}
+  .lgDark{display:none}[data-theme="dark"] .lgDark{display:block}[data-theme="dark"] .lgLight{display:none}
   .hHubRow:last-child{border-bottom:0}.hHubRow .tag{margin-top:1px}
 </style>
 </head>
 <body>
 <header>
-  <img src="logo.png" alt="EVA Pharma logo" class="logo" onerror="this.remove()">
+  <img src="logo.png" alt="EVA Pharma logo" class="logo lgLight" onerror="this.remove()">
+  <img src="logo-white.png" alt="EVA Pharma logo" class="logo lgDark" onerror="this.remove()">
   <span class="title">OMHG EVA SCHOOL</span>
   <button class="theme" id="themeBtn" type="button">Dark</button>
 </header>

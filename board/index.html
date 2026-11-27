@@ -123,12 +123,14 @@ td.m.h1{background:#FEF3CC}td.m.h2{background:#FDEBB0}td.m.h3{background:#F9D96B
 .meetCard summary:hover{background:var(--bg)}
 .meetCard .meetBody{padding:4px 18px 18px}
 .embedded .meetTab{display:none !important}
+.lgDark{display:none}[data-theme="dark"] .lgDark{display:block}[data-theme="dark"] .lgLight{display:none}
 </style>
 </head>
 <body>
 
 <header>
-  <img src="../logo.png" alt="EVA Pharma logo" onerror="this.remove()">
+  <img src="../logo.png" alt="EVA Pharma logo" class="lgLight" onerror="this.remove()">
+  <img src="../logo-white.png" alt="EVA Pharma logo" class="lgDark" onerror="this.remove()">
   <span class="title" data-i18n="title"></span>
   <button class="btn head" id="langBtn" type="button"></button>
   <button class="btn head" id="themeBtn" type="button"></button>
