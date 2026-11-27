@@ -625,7 +625,9 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
 .asWarn td{background:#FEF9C3}.asChk{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--ink);margin:4px 0}
 .asMvList{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:2px 12px;max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0}
 .asRowB{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:8px 0}.asRowB .hint{margin:0}
-.asH3{font-size:15px;margin:16px 0 6px}.asCompT input,.asCompT select{width:100%;min-width:70px}.asCompT textarea{width:100%;min-width:220px;font:inherit;font-size:13px}
+.asH3{font-size:15px;margin:16px 0 6px}.asAr{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.asCompT td{vertical-align:top}.asCompT .asOuts td{background:var(--bg)}.asOP{display:flex;flex-direction:column;gap:6px;margin:0 0 8px}.asOPH,.asOPR{display:grid;grid-template-columns:24px 1fr 1fr 40px;gap:8px;align-items:center}.asOPH{font-size:12px;color:var(--muted);font-weight:600}.asOPR input{width:100%;min-width:0}.asOPR span{color:var(--muted);font-weight:700}
+.asCompT input[data-f="name"],.asCompT input[data-f="nameAr"]{min-width:200px}.asCompT input[data-f="short"]{min-width:110px}.asCompT input,.asCompT select{width:100%;min-width:70px}.asCompT textarea{width:100%;min-width:220px;font:inherit;font-size:13px}
 </style>
 </head>
 <body>
@@ -3216,6 +3218,7 @@ $('grExport').onclick = () => {
 
 // ---------- student profile: every class grading session and factory evaluation of one student ----------
 const PROF_EV = { Outstanding: 'O', Proficient: 'P', Developing: 'D', 'Needs Improvement': 'N', Unsatisfactory: 'U', Absent: 'A' };
+try { window.PROF_LANG = window.PROF_LANG || localStorage.getItem('profLang') || 'en'; } catch (err) { window.PROF_LANG = 'en'; }
 function profHTML(p) {
   const e = t => String(t === undefined || t === null ? '' : t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
   const d = p.daily, f = p.factory;
@@ -3231,22 +3234,27 @@ function profHTML(p) {
   let h = `<div class="profHead"><div class="profAv">${e((p.student || '?').trim()[0])}</div><div><h2>${e(p.student)}</h2>` +
     `<small>${e(group || '')}${p.own ? ' · your grades and evaluations only' : ' · all teachers'}</small></div>` +
     `<button class="profX" type="button" data-prof-close aria-label="Close">×</button></div>` +
-    `<div class="profTools"><button type="button" class="profBtn" data-prof-print>Print / PDF</button><button type="button" class="profBtn" data-prof-xlsx>Excel</button></div>`;
+    `<div class="profTools"><button type="button" class="profBtn" data-prof-print>Print / PDF</button><button type="button" class="profBtn" data-prof-xlsx>Excel</button>${(p.competencies || []).length ? `<button type="button" class="profBtn" data-prof-lang title="Language of the competencies (screen, print and Excel)">${window.PROF_LANG === 'ar' ? 'English' : 'عربي'}</button>` : ''}</div>`;
   h += `<div class="profKpi"><div><b>${pct(got, outOf)}</b><span>Class average</span></div>` +
     `<div><b>${pct(att.P + att.L, d.length)}</b><span>Attendance (${att.P} present · ${att.L} late)</span></div>` +
     `<div><b>${att.A}</b><span>Absent sessions</span></div><div><b>${f.length}</b><span>Factory evaluations</span></div>` +
     `<div><b>${incidents}</b><span>Factory incidents</span></div></div>`;
-  // competencies: final letter (the attempt the student passed on) and every attempt with its learning outcomes
-  const cps = p.competencies || [];
+  // competencies: final letter (the attempt the student passed on) and every attempt with its learning outcomes.
+  // The language (English / عربي) is chosen with the button on top and is used for printing and Excel too.
+  const cps = p.competencies || [], AR = window.PROF_LANG === 'ar';
   if (cps.length) {
     const lc = { A: 'ok', B: 'ok', C: 'q', D: 'q', F: 'bad' };
-    h += '<h3>Competencies</h3><div class="profWrap"><table class="profT"><tr><th>Competency</th><th>Result</th><th>Attempts</th></tr>' +
+    const T = AR ? { h: 'الجدارات', c: 'الجدارة', r: 'النتيجة', a: 'المحاولات', f: 'رسب في ٤ محاولات · يعيد السنة', p: n => 'نجح في المحاولة ' + n, plan: 'التقييم مخطط', re: 'يحتاج إعادة: ', old: ' · سنة سابقة (أعاد السنة)', abs: 'غائب' }
+      : { h: 'Competencies', c: 'Competency', r: 'Result', a: 'Attempts', f: 'failed 4 attempts · repeats the year', p: n => 'passed on attempt ' + n, plan: 'assessment planned', re: 'retake needed: ', old: ' · earlier year (repeated)', abs: 'absent' };
+    const on = o => AR ? (o.ar || o.name) : o.name;
+    h += `<div class="profComp"${AR ? ' dir="rtl" style="text-align:right"' : ''}><h3>${T.h}</h3><div class="profWrap"><table class="profT"><tr><th>${T.c}</th><th>${T.r}</th><th>${T.a}</th></tr>` +
       cps.map(c => {
-        const res = c.letter ? `<span class="pill ${lc[c.letter]}">${c.letter}</span> <small>${c.letter === 'F' ? 'failed 4 attempts · repeats the year' : 'passed on attempt ' + ('ABCD'.indexOf(c.letter) + 1)}</small>` : (c.open ? '<small>assessment planned</small>' : c.tries ? `<small>retake needed: ${e(c.need.join(', '))}</small>` : '—');
-        const tries = c.attempts.map((t, i) => `<div><small>${day(t.date)}${t.void ? ' · earlier year (repeated)' : ''} · ${e(String(t.assessor).split(' ')[0])}:</small> ` +
-          (t.absent ? '<span class="pill A">absent</span>' : t.outcomes.map(o => `<span class="pill ${o.mark === 'P' ? 'ok' : 'bad'}">${o.mark === 'P' ? '✓' : '✗'} ${e(o.name)}</span>`).join(' ')) + '</div>').join('');
-        return `<tr><td><b>${e(c.code)}</b> ${e(c.name)}</td><td>${res}</td><td>${tries || '—'}</td></tr>`;
-      }).join('') + '</table></div>';
+        const res = c.letter ? `<span class="pill ${lc[c.letter]}">${c.letter}</span> <small>${c.letter === 'F' ? T.f : T.p('ABCD'.indexOf(c.letter) + 1)}</small>`
+          : c.open ? `<small>${T.plan}</small>` : c.tries ? `<small>${T.re}${e(c.need.map(n => { const f = c.attempts.flatMap(t => t.outcomes).find(o => o.name === n); return f ? on(f) : n; }).join(AR ? '، ' : ', '))}</small>` : '—';
+        const tries = c.attempts.map(t => `<div><small>${day(t.date)}${t.void ? T.old : ''} · ${e(String(t.assessor).split(' ')[0])}:</small> ` +
+          (t.absent ? `<span class="pill A">${T.abs}</span>` : t.outcomes.map(o => `<span class="pill ${o.mark === 'P' ? 'ok' : 'bad'}">${o.mark === 'P' ? '✓' : '✗'} ${e(on(o))}</span>`).join(' ')) + '</div>').join('');
+        return `<tr><td><b>${e(c.code)}</b> ${e(AR ? (c.nameAr || c.name) : (c.short || c.name))}</td><td>${res}</td><td>${tries || '—'}</td></tr>`;
+      }).join('') + '</table></div></div>';
   }
   h += '<h3>Class grades</h3>';
   if (!d.length) h += '<p class="profNote">No class grading yet.</p>';
@@ -3487,7 +3495,14 @@ function profSheets(p) {
         r.behaviour, r.participation, r.assignment, r.assignmentTitle || '', r.quiz, r.quizTitle || '', r.total, r.outOf])] },
     { name: 'Factory evaluations', bold: [0, 2], rows: [[`${p.student} · ${group}`], [],
       ['Date', 'Teacher', 'Class', 'Evaluation', 'Score /5', 'Incident', 'Comment'],
-      ...p.factory.map(x => [x.date, x.teacher, x.cls, x.evaluation, x.evaluation === 'Absent' ? '' : x.score, x.incidents ? 'Yes' : '', x.comment])] }
+      ...p.factory.map(x => [x.date, x.teacher, x.cls, x.evaluation, x.evaluation === 'Absent' ? '' : x.score, x.incidents ? 'Yes' : '', x.comment])] },
+    ...((p.competencies || []).length ? [(() => { const AR = window.PROF_LANG === 'ar';
+      return { name: AR ? 'الجدارات' : 'Competencies', bold: [0, 2], rows: [[AR ? 'الجدارات' : 'Competencies'], [],
+        AR ? ['الكود', 'الجدارة', 'النتيجة', 'التاريخ', 'المقيّم', 'ناتج التعلم', 'ناجح / راسب'] : ['Code', 'Competency', 'Result', 'Date', 'Assessed by', 'Learning outcome', 'Pass / Fail'],
+        ...p.competencies.flatMap(c => { const nm = AR ? (c.nameAr || c.name) : c.name;
+          const rows = c.attempts.flatMap(t => t.absent ? [[c.code, nm, c.letter, t.date, t.assessor, '', AR ? 'غائب' : 'Absent']]
+            : t.outcomes.map(o => [c.code, nm, c.letter, t.date, t.assessor, AR ? (o.ar || o.name) : o.name, o.mark === 'P' ? (AR ? 'ناجح' : 'Pass') : (AR ? 'راسب' : 'Fail')]));
+          return rows.length ? rows : [[c.code, nm, c.letter, '', '', '', '']]; })] }; })()] : [])
   ];
 }
 
@@ -3495,6 +3510,12 @@ let PROF_LAST = null;
 document.addEventListener('click', ev => {
   if (!PROF_LAST) return;
   const p = PROF_LAST, group = p.dept ? `${p.cls} ${p.dept}` : p.cls;
+  if (ev.target.closest('[data-prof-lang]')) {
+    window.PROF_LANG = window.PROF_LANG === 'ar' ? 'en' : 'ar';
+    try { localStorage.setItem('profLang', window.PROF_LANG); } catch (err) { /* private mode */ }
+    const card = document.querySelector('#profBox .profCard'); if (card) card.innerHTML = profHTML(p);
+    return;
+  }
   if (ev.target.closest('[data-prof-print]')) {
     prPrint({ file: `Student profile - ${p.student}`, pages: [{ title: 'Student profile',
       sub: `${p.own ? 'Your grades and evaluations only' : 'All teachers'} · printed ${prToday()}`, html: profHTML(p) }] });
@@ -5911,7 +5932,7 @@ else adminGateShow(gateNote);
     const groups = GR.map(gr => ({ gr, cols: cols.filter(x => x.grade === gr) })).filter(x => x.cols.length);
     let h = '<div class="card asGridCard"><div class="tw"><table class="asT"><thead><tr><th rowspan="2" class="asNameH">Student</th>' +
       groups.map(x => `<th colspan="${x.cols.length}" class="asGrpH">${GRP[x.gr]} year</th>`).join('') + '<th rowspan="2">Passed</th></tr><tr>' +
-      groups.map(x => x.cols.map(k => `<th class="asCode" title="${e(k.name)}${k.track ? ' · ' + e(k.track) : ''} · taught by ${e(k.taughtBy)}"><b>${e(k.code)}</b><small>${e(k.name)}</small></th>`).join('')).join('') + '</tr></thead><tbody>';
+      groups.map(x => x.cols.map(k => `<th class="asCode" title="${e(k.name)} · ${e(k.nameAr)}${k.track ? ' · ' + e(k.track) : ''} · taught by ${e(k.taughtBy)}"><b>${e(k.code)}</b><small>${e(k.short || k.name)}</small></th>`).join('')).join('') + '</tr></thead><tbody>';
     const flat = groups.flatMap(x => x.cols);
     Object.keys(byCls).sort().forEach(cl => {
       h += `<tr class="asClsRow"><td colspan="${flat.length + 2}">${e(cl)} · ${byCls[cl].length}</td></tr>`;
@@ -5943,7 +5964,7 @@ else adminGateShow(gateNote);
         const k = comp(a.code);
         const res = a.status === 'Open' ? `<span class="pill q">${a.date < today ? 'not marked yet' : 'planned'}</span> <small>${a.students.length} students</small>`
           : `<span class="pill ok">${a.passed || 0} passed</span> <small>of ${a.marked || 0}${a.absent ? ' · ' + a.absent + ' absent' : ''}</small>`;
-        return `<tr><td>${day(a.date)}</td><td><b>${e(a.code)}</b> ${e(k.name)}${a.source === 'import' ? ' <small>imported</small>' : ''}</td><td>${e(a.cls)}${a.track ? ' <small>' + e(a.track) + '</small>' : ''}</td>` +
+        return `<tr><td>${day(a.date)}</td><td><b>${e(a.code)}</b> ${e(k.short || k.name)}${a.source === 'import' ? ' <small>imported</small>' : ''}</td><td>${e(a.cls)}${a.track ? ' <small>' + e(a.track) + '</small>' : ''}</td>` +
           `<td>${a.attempt > 1 ? 'Retake ' + a.attempt : '1st'}</td><td>${e(a.assessor)}</td><td>${e(a.taughtBy)}</td><td>${res}</td>` +
           `<td><button class="btn alt sm" type="button" data-asopen="${e(a.id)}">${a.status === 'Open' ? 'Mark' : 'View'}</button></td></tr>`;
       }).join('') + '</table></div></div>';
@@ -5991,7 +6012,7 @@ else adminGateShow(gateNote);
       const el = eligible(cls, k), left = el.filter(s => { const v = st(s.name, k.code); return !v || (!v.letter && !v.open); });
       if (!left.length) return '';
       const re = left.filter(s => (st(s.name, k.code) || {}).tries);
-      return `<option value="${e(k.code)}">${e(k.code)} ${e(k.name)}${k.track ? ' (' + e(k.track) + ')' : ''} — ${re.length ? 'retake · ' + re.length + (left.length > re.length ? ' + ' + (left.length - re.length) + ' first try' : '') : left.length + ' students'}</option>`;
+      return `<option value="${e(k.code)}">${e(k.code)} ${e(k.short || k.name)}${k.track ? ' (' + e(k.track) + ')' : ''} — ${re.length ? 'retake · ' + re.length + (left.length > re.length ? ' + ' + (left.length - re.length) + ' first try' : '') : left.length + ' students'}</option>`;
     }).filter(Boolean);
     $('asNComp').innerHTML = opts.length ? opts.join('') : '<option value="">Nothing left: every competency of this class has a result or is planned</option>';
     nComp();
@@ -6006,7 +6027,8 @@ else adminGateShow(gateNote);
     const outs = re.length && prev ? prev.outcomes : (k.outcomes.length ? k.outcomes : ['']);
     $('asNInfo').innerHTML = re.length ? `<b>Retake</b> (attempt ${1 + Math.max(...re.map(s => st(s.name, k.code).tries))}) for ${re.length} student(s): each one only retakes the learning outcomes they failed.` +
       `<br>${re.map(s => e(s.name) + ' <small>(' + e(st(s.name, k.code).need.join(', ')) + ')</small>').join(' · ')}` : `First attempt for <b>${left.length}</b> student(s) of ${e(cls)}.`;
-    $('asNOut').innerHTML = outs.map((o, i) => `<div class="asOutRow"><span>${i + 1}</span><input value="${e(o)}" placeholder="Learning outcome ${i + 1}" ${re.length && prev ? 'disabled' : ''}>${re.length && prev ? '' : '<button class="btn alt sm" type="button" data-rmout>✕</button>'}</div>`).join('');
+    const arOf = o => { const j = k.outcomes.indexOf(o); return j === -1 ? '' : k.outcomesAr[j] || ''; };
+    $('asNOut').innerHTML = outs.map((o, i) => `<div class="asOutRow"><span>${i + 1}</span><div style="flex:1"><input style="width:100%" value="${e(o)}" placeholder="Learning outcome ${i + 1}" ${re.length && prev ? 'disabled' : ''}>${arOf(o) ? `<small class="asAr" dir="rtl">${e(arOf(o))}</small>` : ''}</div>${re.length && prev ? '' : '<button class="btn alt sm" type="button" data-rmout>✕</button>'}</div>`).join('');
     $('asNAddOut').hidden = !!(re.length && prev);
   }
   async function nSave() {
@@ -6039,8 +6061,8 @@ else adminGateShow(gateNote);
     const m = MARKS[s.name];
     return `<div class="asMk${m.absent ? ' abs' : ''}"><div class="asMkH"><b>${e(s.name)}</b>${s.tries ? ` <span class="pill q">retake · attempt ${s.tries + 1}</span>` : ''}` +
       `<span class="asMkBtns"><button type="button" class="btn alt sm" data-allp="${e(s.name)}">All ✓</button><button type="button" class="btn alt sm${m.absent ? ' on' : ''}" data-abs="${e(s.name)}">Absent</button></span></div>` +
-      (m.absent ? '<div class="hint">Absent: does not use an attempt.</div>' : '<div class="asMkO">' + M.outcomes.map(o => s.need.includes(o)
-        ? `<div class="asMkRow"><span>${e(o)}</span><span class="asPF"><button type="button" class="${m.marks[o] === 'P' ? 'on p' : ''}" data-st="${e(s.name)}" data-o="${e(o)}" data-v="P">✓ Pass</button><button type="button" class="${m.marks[o] === 'F' ? 'on f' : ''}" data-st="${e(s.name)}" data-o="${e(o)}" data-v="F">✗ Fail</button></span></div>`
+      (m.absent ? '<div class="hint">Absent: does not use an attempt.</div>' : '<div class="asMkO">' + M.outcomes.map((o, oi) => s.need.includes(o)
+        ? `<div class="asMkRow"><span>${e(o)}${(M.outcomesAr || [])[oi] ? `<small class="asAr" dir="rtl">${e(M.outcomesAr[oi])}</small>` : ''}</span><span class="asPF"><button type="button" class="${m.marks[o] === 'P' ? 'on p' : ''}" data-st="${e(s.name)}" data-o="${e(o)}" data-v="P">✓ Pass</button><button type="button" class="${m.marks[o] === 'F' ? 'on f' : ''}" data-st="${e(s.name)}" data-o="${e(o)}" data-v="F">✗ Fail</button></span></div>`
         : `<div class="asMkRow done"><span>${e(o)}</span><small>passed before</small></div>`).join('') + '</div>') + '</div>';
   }).join('');
   window.asMarkSum = (M, MARKS) => {
@@ -6206,7 +6228,7 @@ else adminGateShow(gateNote);
     mvDraw();
     $('asTrackList').innerHTML = AS.classes.filter(c => c.grade === 'Senior').map(c => `<div class="asRowB"><b>${e(c.name)}</b><select data-track="${e(c.name)}"><option value="">Mixed (both tracks)</option><option>Operation</option><option>Utilities</option></select></div>`).join('') || '<p class="hint">No senior class yet.</p>';
     $('asTrackList').querySelectorAll('[data-track]').forEach(s => { s.value = (AS.classes.find(c => c.name === s.dataset.track) || {}).track || ''; });
-    COMPS = AS.comps.map(c => Object.assign({}, c, { outcomes: c.outcomes.slice() }));
+    COMPS = AS.comps.map(c => Object.assign({}, c, { outcomes: c.outcomes.slice(), outcomesAr: (c.outcomesAr || []).slice() }));
     compDraw();
   }
   function mvDraw() {
@@ -6224,18 +6246,25 @@ else adminGateShow(gateNote);
     catch (err) { $('asMvMsg').textContent = err.message; }
   }
   function compDraw() {
-    $('asCompBox').innerHTML = GR.map(g => `<h3 class="asH3">${GRP[g]}</h3><div class="tw"><table class="actT asCompT"><tr><th>Code</th><th>Name</th>${g === 'Senior' ? '<th>Track</th>' : ''}<th>Taught by</th><th>Learning outcomes <small>(one per line)</small></th><th>In use</th><th></th></tr>` +
-      COMPS.map((c, i) => c.grade !== g ? '' : `<tr data-ci="${i}"><td><input data-f="code" value="${e(c.code)}" size="5"></td><td><input data-f="name" value="${e(c.name)}"></td>` +
+    $('asCompBox').innerHTML = GR.map(g => `<h3 class="asH3">${GRP[g]} · ${COMPS.filter(c => c.grade === g).reduce((n, c) => n + (Number(c.hours) || 0), 0)} hours</h3><div class="tw"><table class="actT asCompT"><tr><th>Code</th><th>Short <small>(schedule)</small></th><th>English name</th><th>الاسم بالعربي</th>${g === 'Senior' ? '<th>Track</th>' : ''}<th>Taught by</th><th>Term</th><th>Hours</th><th>Outcomes</th><th>In use</th><th></th></tr>` +
+      COMPS.map((c, i) => c.grade !== g ? '' : `<tr data-ci="${i}"><td><input data-f="code" value="${e(c.code)}" size="4"></td><td><input data-f="short" value="${e(c.short || '')}" size="10"></td><td><input data-f="name" value="${e(c.name)}"></td><td><input data-f="nameAr" dir="rtl" value="${e(c.nameAr || '')}"></td>` +
         (g === 'Senior' ? `<td><select data-f="track"><option value="">Both</option><option${c.track === 'Operation' ? ' selected' : ''}>Operation</option><option${c.track === 'Utilities' ? ' selected' : ''}>Utilities</option></select></td>` : '') +
         `<td><select data-f="taughtBy"><option value="">—</option>${AS.teachers.map(t => `<option${t === c.taughtBy ? ' selected' : ''}>${e(t)}</option>`).join('')}</select></td>` +
-        `<td><textarea data-f="outcomes" rows="${Math.max(2, c.outcomes.length)}" placeholder="Typed in each new assessment">${e(c.outcomes.join('\n'))}</textarea></td>` +
-        `<td><input type="checkbox" data-f="active"${c.active ? ' checked' : ''}></td><td><button class="btn alt sm" type="button" data-cdel="${i}">✕</button></td></tr>`).join('') + '</table></div>').join('');
+        `<td><select data-f="term"><option value="">—</option><option${String(c.term) === '1' ? ' selected' : ''}>1</option><option${String(c.term) === '2' ? ' selected' : ''}>2</option></select></td><td><input data-f="hours" value="${e(c.hours || '')}" size="3"></td>` +
+        `<td><button class="btn alt sm" type="button" data-couts="${i}">${c.outcomes.length} ▾</button></td>` +
+        `<td><input type="checkbox" data-f="active"${c.active ? ' checked' : ''}></td><td><button class="btn alt sm" type="button" data-cdel="${i}">✕</button></td></tr>` +
+        `<tr class="asOuts" data-co="${i}" hidden><td colspan="${g === 'Senior' ? 11 : 10}"><div class="asOP" data-ci2="${i}"><div class="asOPH"><span>#</span><span>Learning outcome in English</span><span dir="rtl">ناتج التعلم بالعربي</span><span></span></div>` +
+        c.outcomes.map((o, j) => outRow(j, o, (c.outcomesAr || [])[j] || '')).join('') + `</div><button class="btn alt sm" type="button" data-oadd="${i}">+ Add learning outcome</button></td></tr>`).join('') + '</table></div>').join('');
   }
+  const outRow = (j, en, ar) => `<div class="asOPR"><span>${j + 1}</span><input data-oen value="${e(en)}" placeholder="In English"><input data-oar dir="rtl" value="${e(ar)}" placeholder="بالعربي"><button class="btn alt sm" type="button" data-orm>✕</button></div>`;
   function compRead() {
-    $('asCompBox').querySelectorAll('[data-ci]').forEach(tr => {
+    $('asCompBox').querySelectorAll('tr[data-ci]').forEach(tr => {
       const c = COMPS[tr.dataset.ci];
-      tr.querySelectorAll('[data-f]').forEach(x => { const f = x.dataset.f;
-        c[f] = f === 'active' ? x.checked : f === 'outcomes' ? x.value.split('\n').map(s => s.trim()).filter(Boolean) : x.value.trim(); });
+      tr.querySelectorAll('[data-f]').forEach(x => { const f = x.dataset.f; c[f] = f === 'active' ? x.checked : x.value.trim(); });
+    });
+    $('asCompBox').querySelectorAll('.asOP[data-ci2]').forEach(box => {
+      const rows = [...box.querySelectorAll('.asOPR')].map(r => [r.querySelector('[data-oen]').value.trim(), r.querySelector('[data-oar]').value.trim()]).filter(r => r[0] || r[1]);
+      const c = COMPS[box.dataset.ci2]; c.outcomes = rows.map(r => r[0] || r[1]); c.outcomesAr = rows.map(r => r[1]);
     });
   }
   async function compSave() {
@@ -6308,9 +6337,12 @@ else adminGateShow(gateNote);
     if (t.closest('#asMarkCancel')) { mCancel(); return; }
     if (t.closest('#asImpGo')) { impGo(); return; }
     if (t.closest('#asMvGo')) { mvGo(); return; }
-    if (t.closest('#asCompAdd')) { compRead(); COMPS.push({ code: '', name: '', grade: $('asCompBox').dataset.addTo || 'Junior', track: '', taughtBy: '', outcomes: [], active: true }); const g = prompt('Which year? Junior, Wheeler or Senior', 'Junior'); if (!g) { COMPS.pop(); return; } COMPS[COMPS.length - 1].grade = GR.find(x => x.toLowerCase() === g.trim().toLowerCase()) || 'Junior'; compDraw(); return; }
+    if (t.closest('#asCompAdd')) { compRead(); COMPS.push({ code: '', name: '', short: '', nameAr: '', outcomesAr: [], term: '', hours: '', grade: $('asCompBox').dataset.addTo || 'Junior', track: '', taughtBy: '', outcomes: [], active: true }); const g = prompt('Which year? Junior, Wheeler or Senior', 'Junior'); if (!g) { COMPS.pop(); return; } COMPS[COMPS.length - 1].grade = GR.find(x => x.toLowerCase() === g.trim().toLowerCase()) || 'Junior'; compDraw(); return; }
     if (t.closest('[data-cdel]')) { compRead(); const c = COMPS[t.closest('[data-cdel]').dataset.cdel]; if (AS.assessments.some(a => a.code === c.code) && !confirm(c.code + ' already has assessments. Remove it from the list anyway? (Untick "In use" to keep its results visible.)')) return; COMPS.splice(Number(t.closest('[data-cdel]').dataset.cdel), 1); compDraw(); return; }
     if (t.closest('#asCompSave')) { compSave(); return; }
+    if (t.closest('[data-oadd]')) { const box = $('asCompBox').querySelector(`.asOP[data-ci2="${t.closest('[data-oadd]').dataset.oadd}"]`); box.insertAdjacentHTML('beforeend', outRow(box.querySelectorAll('.asOPR').length, '', '')); box.lastElementChild.querySelector('input').focus(); return; }
+    if (t.closest('[data-orm]')) { const box = t.closest('.asOP'); t.closest('.asOPR').remove(); box.querySelectorAll('.asOPR > span').forEach((x, j) => { x.textContent = j + 1; }); return; }
+    if (t.closest('[data-couts]')) { const r = $('asCompBox').querySelector(`[data-co="${t.closest('[data-couts]').dataset.couts}"]`); if (r) r.hidden = !r.hidden; return; }
     if (t.closest('#asSYClose')) { closeOpen(); return; }
     if (t.closest('#asCloseGo')) { closeGo(); return; }
   });

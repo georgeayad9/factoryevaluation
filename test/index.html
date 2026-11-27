@@ -409,6 +409,7 @@
 .asPF button.on.p{background:#16a34a;border-color:#16a34a;color:#fff}.asPF button.on.f{background:#dc2626;border-color:#dc2626;color:#fff}
 .asTBar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 14px;display:flex;gap:10px;align-items:center;justify-content:flex-end;z-index:91}
 .asTBar .hint{margin:0 auto 0 0}
+.asAr{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
 .asTRes{display:inline-block;min-width:24px;text-align:center;border-radius:6px;font-weight:700;padding:1px 6px}
 </style>
 </head>
@@ -2630,6 +2631,7 @@ const PROF_ACTION = 'studentProfile';   // a teacher sees only their own grades 
 
 // ---------- student profile: every class grading session and factory evaluation of one student ----------
 const PROF_EV = { Outstanding: 'O', Proficient: 'P', Developing: 'D', 'Needs Improvement': 'N', Unsatisfactory: 'U', Absent: 'A' };
+try { window.PROF_LANG = window.PROF_LANG || localStorage.getItem('profLang') || 'en'; } catch (err) { window.PROF_LANG = 'en'; }
 function profHTML(p) {
   const e = t => String(t === undefined || t === null ? '' : t).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
   const d = p.daily, f = p.factory;
@@ -2645,22 +2647,27 @@ function profHTML(p) {
   let h = `<div class="profHead"><div class="profAv">${e((p.student || '?').trim()[0])}</div><div><h2>${e(p.student)}</h2>` +
     `<small>${e(group || '')}${p.own ? ' · your grades and evaluations only' : ' · all teachers'}</small></div>` +
     `<button class="profX" type="button" data-prof-close aria-label="Close">×</button></div>` +
-    `<div class="profTools"><button type="button" class="profBtn" data-prof-print>Print / PDF</button><button type="button" class="profBtn" data-prof-xlsx>Excel</button></div>`;
+    `<div class="profTools"><button type="button" class="profBtn" data-prof-print>Print / PDF</button><button type="button" class="profBtn" data-prof-xlsx>Excel</button>${(p.competencies || []).length ? `<button type="button" class="profBtn" data-prof-lang title="Language of the competencies (screen, print and Excel)">${window.PROF_LANG === 'ar' ? 'English' : 'عربي'}</button>` : ''}</div>`;
   h += `<div class="profKpi"><div><b>${pct(got, outOf)}</b><span>Class average</span></div>` +
     `<div><b>${pct(att.P + att.L, d.length)}</b><span>Attendance (${att.P} present · ${att.L} late)</span></div>` +
     `<div><b>${att.A}</b><span>Absent sessions</span></div><div><b>${f.length}</b><span>Factory evaluations</span></div>` +
     `<div><b>${incidents}</b><span>Factory incidents</span></div></div>`;
-  // competencies: final letter (the attempt the student passed on) and every attempt with its learning outcomes
-  const cps = p.competencies || [];
+  // competencies: final letter (the attempt the student passed on) and every attempt with its learning outcomes.
+  // The language (English / عربي) is chosen with the button on top and is used for printing and Excel too.
+  const cps = p.competencies || [], AR = window.PROF_LANG === 'ar';
   if (cps.length) {
     const lc = { A: 'ok', B: 'ok', C: 'q', D: 'q', F: 'bad' };
-    h += '<h3>Competencies</h3><div class="profWrap"><table class="profT"><tr><th>Competency</th><th>Result</th><th>Attempts</th></tr>' +
+    const T = AR ? { h: 'الجدارات', c: 'الجدارة', r: 'النتيجة', a: 'المحاولات', f: 'رسب في ٤ محاولات · يعيد السنة', p: n => 'نجح في المحاولة ' + n, plan: 'التقييم مخطط', re: 'يحتاج إعادة: ', old: ' · سنة سابقة (أعاد السنة)', abs: 'غائب' }
+      : { h: 'Competencies', c: 'Competency', r: 'Result', a: 'Attempts', f: 'failed 4 attempts · repeats the year', p: n => 'passed on attempt ' + n, plan: 'assessment planned', re: 'retake needed: ', old: ' · earlier year (repeated)', abs: 'absent' };
+    const on = o => AR ? (o.ar || o.name) : o.name;
+    h += `<div class="profComp"${AR ? ' dir="rtl" style="text-align:right"' : ''}><h3>${T.h}</h3><div class="profWrap"><table class="profT"><tr><th>${T.c}</th><th>${T.r}</th><th>${T.a}</th></tr>` +
       cps.map(c => {
-        const res = c.letter ? `<span class="pill ${lc[c.letter]}">${c.letter}</span> <small>${c.letter === 'F' ? 'failed 4 attempts · repeats the year' : 'passed on attempt ' + ('ABCD'.indexOf(c.letter) + 1)}</small>` : (c.open ? '<small>assessment planned</small>' : c.tries ? `<small>retake needed: ${e(c.need.join(', '))}</small>` : '—');
-        const tries = c.attempts.map((t, i) => `<div><small>${day(t.date)}${t.void ? ' · earlier year (repeated)' : ''} · ${e(String(t.assessor).split(' ')[0])}:</small> ` +
-          (t.absent ? '<span class="pill A">absent</span>' : t.outcomes.map(o => `<span class="pill ${o.mark === 'P' ? 'ok' : 'bad'}">${o.mark === 'P' ? '✓' : '✗'} ${e(o.name)}</span>`).join(' ')) + '</div>').join('');
-        return `<tr><td><b>${e(c.code)}</b> ${e(c.name)}</td><td>${res}</td><td>${tries || '—'}</td></tr>`;
-      }).join('') + '</table></div>';
+        const res = c.letter ? `<span class="pill ${lc[c.letter]}">${c.letter}</span> <small>${c.letter === 'F' ? T.f : T.p('ABCD'.indexOf(c.letter) + 1)}</small>`
+          : c.open ? `<small>${T.plan}</small>` : c.tries ? `<small>${T.re}${e(c.need.map(n => { const f = c.attempts.flatMap(t => t.outcomes).find(o => o.name === n); return f ? on(f) : n; }).join(AR ? '، ' : ', '))}</small>` : '—';
+        const tries = c.attempts.map(t => `<div><small>${day(t.date)}${t.void ? T.old : ''} · ${e(String(t.assessor).split(' ')[0])}:</small> ` +
+          (t.absent ? `<span class="pill A">${T.abs}</span>` : t.outcomes.map(o => `<span class="pill ${o.mark === 'P' ? 'ok' : 'bad'}">${o.mark === 'P' ? '✓' : '✗'} ${e(on(o))}</span>`).join(' ')) + '</div>').join('');
+        return `<tr><td><b>${e(c.code)}</b> ${e(AR ? (c.nameAr || c.name) : (c.short || c.name))}</td><td>${res}</td><td>${tries || '—'}</td></tr>`;
+      }).join('') + '</table></div></div>';
   }
   h += '<h3>Class grades</h3>';
   if (!d.length) h += '<p class="profNote">No class grading yet.</p>';
@@ -2897,7 +2904,14 @@ function profSheets(p) {
         r.behaviour, r.participation, r.assignment, r.assignmentTitle || '', r.quiz, r.quizTitle || '', r.total, r.outOf])] },
     { name: 'Factory evaluations', bold: [0, 2], rows: [[`${p.student} · ${group}`], [],
       ['Date', 'Teacher', 'Class', 'Evaluation', 'Score /5', 'Incident', 'Comment'],
-      ...p.factory.map(x => [x.date, x.teacher, x.cls, x.evaluation, x.evaluation === 'Absent' ? '' : x.score, x.incidents ? 'Yes' : '', x.comment])] }
+      ...p.factory.map(x => [x.date, x.teacher, x.cls, x.evaluation, x.evaluation === 'Absent' ? '' : x.score, x.incidents ? 'Yes' : '', x.comment])] },
+    ...((p.competencies || []).length ? [(() => { const AR = window.PROF_LANG === 'ar';
+      return { name: AR ? 'الجدارات' : 'Competencies', bold: [0, 2], rows: [[AR ? 'الجدارات' : 'Competencies'], [],
+        AR ? ['الكود', 'الجدارة', 'النتيجة', 'التاريخ', 'المقيّم', 'ناتج التعلم', 'ناجح / راسب'] : ['Code', 'Competency', 'Result', 'Date', 'Assessed by', 'Learning outcome', 'Pass / Fail'],
+        ...p.competencies.flatMap(c => { const nm = AR ? (c.nameAr || c.name) : c.name;
+          const rows = c.attempts.flatMap(t => t.absent ? [[c.code, nm, c.letter, t.date, t.assessor, '', AR ? 'غائب' : 'Absent']]
+            : t.outcomes.map(o => [c.code, nm, c.letter, t.date, t.assessor, AR ? (o.ar || o.name) : o.name, o.mark === 'P' ? (AR ? 'ناجح' : 'Pass') : (AR ? 'راسب' : 'Fail')]));
+          return rows.length ? rows : [[c.code, nm, c.letter, '', '', '', '']]; })] }; })()] : [])
   ];
 }
 
@@ -2905,6 +2919,12 @@ let PROF_LAST = null;
 document.addEventListener('click', ev => {
   if (!PROF_LAST) return;
   const p = PROF_LAST, group = p.dept ? `${p.cls} ${p.dept}` : p.cls;
+  if (ev.target.closest('[data-prof-lang]')) {
+    window.PROF_LANG = window.PROF_LANG === 'ar' ? 'en' : 'ar';
+    try { localStorage.setItem('profLang', window.PROF_LANG); } catch (err) { /* private mode */ }
+    const card = document.querySelector('#profBox .profCard'); if (card) card.innerHTML = profHTML(p);
+    return;
+  }
   if (ev.target.closest('[data-prof-print]')) {
     prPrint({ file: `Student profile - ${p.student}`, pages: [{ title: 'Student profile',
       sub: `${p.own ? 'Your grades and evaluations only' : 'All teachers'} · printed ${prToday()}`, html: profHTML(p) }] });
@@ -3566,8 +3586,8 @@ loadLists();
       const m = MARKS[s.name];
       return `<div class="asMk${m.absent ? ' abs' : ''}"><div class="asMkH"><b>${e(s.name)}</b>${s.tries ? ` <span class="pill" style="background:#FDF1C8;color:#5c4500">retake · attempt ${s.tries + 1}</span>` : ''}` +
         `<span class="asMkBtns"><button type="button" data-allp="${e(s.name)}">All ✓</button><button type="button" class="${m.absent ? 'on' : ''}" data-abs="${e(s.name)}">Absent</button></span></div>` +
-        (m.absent ? '<div class="hint">Absent: does not use an attempt.</div>' : '<div class="asMkO">' + MK.outcomes.map(o => s.need.includes(o)
-          ? `<div class="asMkRow"><span>${e(o)}</span><span class="asPF"><button type="button" class="${m.marks[o] === 'P' ? 'on p' : ''}" data-st="${e(s.name)}" data-o="${e(o)}" data-v="P">✓ Pass</button><button type="button" class="${m.marks[o] === 'F' ? 'on f' : ''}" data-st="${e(s.name)}" data-o="${e(o)}" data-v="F">✗ Fail</button></span></div>`
+        (m.absent ? '<div class="hint">Absent: does not use an attempt.</div>' : '<div class="asMkO">' + MK.outcomes.map((o, oi) => s.need.includes(o)
+          ? `<div class="asMkRow"><span>${e(o)}${(MK.outcomesAr || [])[oi] ? `<small class="asAr" dir="rtl">${e(MK.outcomesAr[oi])}</small>` : ''}</span><span class="asPF"><button type="button" class="${m.marks[o] === 'P' ? 'on p' : ''}" data-st="${e(s.name)}" data-o="${e(o)}" data-v="P">✓ Pass</button><button type="button" class="${m.marks[o] === 'F' ? 'on f' : ''}" data-st="${e(s.name)}" data-o="${e(o)}" data-v="F">✗ Fail</button></span></div>`
           : `<div class="asMkRow done"><span>${e(o)}</span><small>passed before</small></div>`).join('') + '</div>') + '</div>';
     }).join('');
     let done = 0, pass = 0, fail = 0, abs = 0;
