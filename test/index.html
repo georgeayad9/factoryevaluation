@@ -12,6 +12,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#F7C948">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --brand:#F7C948; --brand-dark:#D9A900; --brand-soft:#FFF3C4; --brand-tint:#FFF8E1;
@@ -273,6 +275,95 @@
   table.tGrid td.visit{box-shadow:inset 0 0 0 2px #2f6fbf}
   table.tGrid td small.vtag{color:#2f6fbf;font-weight:600}
   .nbadge{display:inline-block;min-width:18px;padding:0 5px;margin-left:6px;border-radius:999px;background:#d32f2f;color:#fff;font-size:12px;line-height:18px;vertical-align:middle}
+
+  /* ===== Design D (Nov 2026): clean light, Inter, sidebar on laptops, bottom tabs on phones ===== */
+  :root{--bg:#F6F6F4;--line:#E4E4E7;--border:#D4D4D8;--brand-tint:#FEF6DA;--hover:#FEF6DA;--muted:#52525B;--label:#52525B;--ink:#18181B;--stu-border:#E4E4E7}
+  [data-theme="dark"]{--bg:#0E0E11;--card:#17171C;--field:#0E0E11;--line:#26262D;--border:#2E2E36;--muted:#A1A1AA;--label:#A1A1AA;--ink:#F4F4F5;--brand-tint:#2A2414;--hover:#2A2414;--stu-border:#26262D}
+  body{font-family:Inter,system-ui,"Segoe UI",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  header{background:var(--card);color:var(--ink);border-bottom:1px solid var(--line);padding:10px 20px;font-size:16px}
+  header .logo{height:38px}
+  .theme{border-color:var(--line);color:var(--ink);height:38px;border-radius:10px}
+  main{max-width:1200px;margin:20px auto;padding:0 16px}
+  .card{border:1px solid var(--line);box-shadow:none;border-radius:14px;padding:18px}
+  select,input,textarea{border-radius:10px;border-color:var(--border)}
+  button.primary{background:#18181B;color:#fff;border:0;border-radius:10px;min-height:46px;font-size:15px}
+  [data-theme="dark"] button.primary{background:#F7C948;color:#141414}
+  button.secondary,button.ghost{background:var(--card);border:1px solid var(--line);border-radius:10px;color:var(--ink)}
+  button.secondary:hover,button.ghost:hover{background:var(--bg)}
+  .tabs:not(.nav){gap:4px;background:#EDEDEA;border-radius:12px;padding:4px}
+  [data-theme="dark"] .tabs:not(.nav){background:#1C1C22}
+  .tabs:not(.nav) .tab,.tabs.kind .tab{border:0;background:transparent;border-radius:9px;color:var(--muted);font-weight:500}
+  .tabs:not(.nav) .tab.on{background:var(--card);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+  .tabs.kind .tab small{color:var(--muted)}
+  .who{font-size:13px}
+  .stats div{background:var(--bg);border:1px solid var(--line)}
+  /* navigation */
+  .nav .tab{display:flex;align-items:center;gap:10px;border:0;background:transparent;color:var(--muted);font-weight:500;font-size:14px;border-radius:10px;cursor:pointer}
+  .nav .tab .ic{display:inline-flex;width:22px;height:22px}.nav .tab .ic svg{width:20px;height:20px}
+  .nav .tab.on{background:var(--brand-tint);color:var(--ink);font-weight:600}
+  .nav .tab .lbl{display:flex;align-items:center;gap:4px}
+  .navBrand{display:none}
+  @media (min-width:900px){
+    #app{display:grid;grid-template-columns:220px minmax(0,1fr);column-gap:28px;row-gap:0;align-items:start}
+    #app > *{grid-column:2}
+    #app > #nav{grid-column:1;grid-row:1 / span 40;position:sticky;top:16px;display:flex;flex-direction:column;gap:2px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin:0}
+    .nav .tab{height:44px;padding:0 12px;justify-content:flex-start;width:100%}
+    .nav .tab .lbl{flex:1;justify-content:space-between}
+    .navBrand{display:flex;gap:10px;align-items:center;padding:4px 8px 14px;font-size:14px}
+    .navBrand .mark{width:32px;height:32px;border-radius:8px;background:#F7C948;color:#18181B;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .navBrand small{display:block;font-size:12px;color:var(--muted)}
+  }
+  @media (max-width:899px){
+    body{padding-bottom:86px}
+    #nav{position:fixed;left:0;right:0;bottom:0;z-index:50;display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin:0;background:var(--card);border-top:1px solid var(--line);padding:6px 4px calc(10px + env(safe-area-inset-bottom))}
+    .nav .tab{flex-direction:column;gap:3px;height:auto;padding:6px 0;font-size:11px;background:transparent !important}
+    .nav .tab .ic{width:44px;height:28px;border-radius:99px;align-items:center;justify-content:center}
+    .nav .tab.on .ic{background:var(--brand-tint)}
+    .nav .tab .nbadge{position:absolute;margin:-30px 0 0 26px}
+    .nav .tab{position:relative}
+  }
+  /* timetable */
+  table.tGrid td{border-color:var(--line);border-radius:0}
+  table.tGrid td.sub{background:#FEF3C7}table.tGrid td.sub small{color:#92400E}
+  table.tGrid td.visit{background:#EEF4FF;outline:1px solid #93B4F5;outline-offset:-1px}
+  table.tGrid td.visit small.vtag{color:#1E40AF}
+  [data-theme="dark"] table.tGrid td.sub{background:#3A2F10}[data-theme="dark"] table.tGrid td.sub small{color:#FCE3A0}
+  [data-theme="dark"] table.tGrid td.visit{background:#1E2A44}[data-theme="dark"] table.tGrid td.visit small.vtag{color:#C7D7FE}
+  table.tGrid tr.today th.d{color:var(--ink);font-weight:700}
+  /* Today */
+  .hHead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:14px;margin-bottom:18px}
+  .hDate{font-size:13px;color:var(--muted)}
+  .hHead h1{margin:4px 0 0;font-size:28px;letter-spacing:-.02em}
+  .hQuick{display:flex;gap:8px;flex-wrap:wrap}
+  .hQuick button{width:auto;min-height:44px;padding:0 18px;font-size:14px;font-weight:600}
+  .hGrid{display:flex;flex-wrap:wrap;gap:0 16px;align-items:flex-start}
+  .hGrid > .hCol:first-child{flex:3 1 420px;min-width:0}.hGrid > .hCol:last-child{flex:2 1 300px;min-width:0}
+  .hNow{background:#F7C948;color:#18181B;border-radius:18px;padding:20px;margin-bottom:16px;display:flex;flex-direction:column;gap:8px}
+  .hNow.quiet{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+  .hNow .k{font-size:13px;font-weight:600;opacity:.8}
+  .hNow .c{font-size:28px;font-weight:700;letter-spacing:-.02em}.hNow .c span{font-size:18px;font-weight:500;opacity:.8}
+  .hNow .v{display:inline-block;align-self:flex-start;background:#fff;color:#1E40AF;border-radius:99px;padding:4px 10px;font-size:12px;font-weight:600}
+  .hEval{margin-top:6px;height:48px;border:0;border-radius:12px;background:#18181B;color:#fff;font:600 15px Inter,system-ui,sans-serif;cursor:pointer}
+  .hNow.quiet .hEval{background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+  .hT{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.hT h2{margin:0;font-size:16px}
+  .linkBtn{border:0;background:none;color:#7A5C00;font:600 13px Inter,system-ui,sans-serif;cursor:pointer;padding:8px 0}
+  [data-theme="dark"] .linkBtn{color:#F7C948}
+  .hRow{display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:10px;margin-bottom:6px;background:var(--bg)}
+  .hRow.on{outline:2px solid #F7C948}.hRow.past{opacity:.55}
+  .hRow .s{width:44px;font-size:12px;color:var(--muted);font-weight:600}.hRow .s small{display:block;font-weight:400}
+  .hRow b{font-size:15px}.hRow .n{font-size:13px;color:var(--muted)}
+  .hRow .tags{margin-left:auto;display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+  .tag{display:inline-block;font-size:11.5px;font-weight:600;border-radius:99px;padding:3px 9px;white-space:nowrap}
+  .tag.vis{background:#EEF4FF;color:#1E40AF}.tag.cov{background:#FEF3C7;color:#92400E}.tag.abs{background:#FEE2E2;color:#991B1B}.tag.fac{background:#F4F4F5;color:#52525B}.tag.due{background:#F4F4F5;color:#3F3F46}
+  .hHubRow{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;line-height:1.45}
+  button.small,.tmDay,.profBtn{border-color:var(--line) !important;border-radius:10px}
+  button.small:hover,.tmDay:hover{background:var(--bg)}
+  .tmDay.on{background:#18181B !important;color:#fff !important;border-color:#18181B !important}.tmDay.on small{color:#D4D4D8 !important}
+  .ann{border-color:var(--line);border-radius:12px;padding:11px 12px}
+  .ann.new{background:rgba(247,201,72,.09);border-color:#F2DC94}
+  [data-theme="dark"] .ann.new{background:rgba(247,201,72,.07);border-color:#5A4A1C}
+  .hubT{border-radius:14px}
+  .hHubRow:last-child{border-bottom:0}.hHubRow .tag{margin-top:1px}
 </style>
 </head>
 <body>
@@ -304,10 +395,12 @@
 
     <!-- Main sections -->
     <div class="nav" id="nav">
-      <button class="tab on" data-sec="evals" type="button">Evaluations<small>class or factory</small></button>
-      <button class="tab" data-sec="time" type="button">Timetable</button>
-      <button class="tab" data-sec="assess" type="button">Assessments<small>coming soon</small></button>
-      <button class="tab" data-sec="team" type="button">Team hub<small>coming soon</small></button>
+      <div class="navBrand"><span class="mark">E</span><span><b>OMHG EVA</b><small>Teacher</small></span></div>
+      <button class="tab on" data-sec="home" type="button"><span class="ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span class="lbl">Today</span></button>
+      <button class="tab" data-sec="evals" type="button"><span class="ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg></span><span class="lbl">Evaluate</span></button>
+      <button class="tab" data-sec="time" type="button"><span class="ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></span><span class="lbl">Timetable</span></button>
+      <button class="tab" data-sec="assess" type="button"><span class="ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span class="lbl">Assessments</span></button>
+      <button class="tab" data-sec="team" type="button"><span class="ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5M15 15c3 0 6 1.5 6 4.5"/></svg></span><span class="lbl">Team hub</span></button>
     </div>
 
     <!-- Evaluations: class (daily grading) or factory -->
@@ -513,6 +606,22 @@
       <button class="primary" id="upSave" type="button" hidden style="margin-top:12px">Save all</button>
     </div>
 
+    <!-- TODAY: the teacher's home -->
+    <div id="homeCard" hidden>
+      <div class="hHead"><div><div class="hDate" id="hDate"></div><h1 id="hHello">Hello</h1></div>
+        <div class="hQuick"><button class="ghost" type="button" data-hgo="eval">Factory evaluation</button><button class="primary" type="button" data-hgo="grade">+ Class grading</button></div></div>
+      <div class="hGrid">
+        <div class="hCol">
+          <div class="hNow" id="hNow"></div>
+          <div class="card hList"><div class="hT"><h2>Today</h2><button class="linkBtn" type="button" data-hgo="time">Full week</button></div><div id="hToday"></div></div>
+        </div>
+        <div class="hCol">
+          <div class="card" id="hHub" hidden><div class="hT"><h2>Team hub</h2><button class="linkBtn" type="button" data-hgo="team">Open</button></div><div id="hHubBody"></div></div>
+        </div>
+      </div>
+      <div id="hMsg"></div>
+    </div>
+
     <!-- TIMETABLE: the teacher's week -->
     <div class="card" id="tCard" hidden>
       <div class="tWeekBar">
@@ -664,6 +773,108 @@ async function post(action, data) {
   return out;
 }
 
+// ---------- Today (the teacher's home) ----------
+let homeSeq = 0;
+const hEsc = t => String(t == null ? '' : t).replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
+const hMins = t => { const [h, m] = String(t).split(':').map(Number); return h * 60 + m; };
+async function homeLoad() {
+  const now = new Date(), seq = ++homeSeq;
+  const hr = now.getHours();
+  $('hHello').textContent = (hr < 12 ? 'Good morning, ' : hr < 17 ? 'Good afternoon, ' : 'Good evening, ') + String(me).split(' ')[0];
+  $('hDate').textContent = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+  homeHub();
+  if (!$('hToday').innerHTML) $('hToday').innerHTML = '<div class="hint">Loading…</div>';
+  try {
+    const today = tIso(now);
+    const w = await post('myTimetable', { ...session(), date: today });
+    if (seq !== homeSeq) return;
+    homeDraw(w, today);
+  } catch (err) {
+    if (isAuthError(err)) return signOut(err.message);
+    $('hToday').innerHTML = `<div class="hint">${hEsc(err.message)}</div>`;
+  }
+}
+function homeDraw(w, today) {
+  const day = Math.round((new Date(today) - new Date(w.weekStart)) / 86400000);
+  const items = [];
+  if (day >= 0 && day <= 4) {
+    (w.classes || []).filter(x => x.day === day).forEach(x => items.push({ s: x.session, cls: x.cls,
+      note: x.factory || x.factoryDay ? 'Factory day' : x.absent ? (x.coveredBy ? 'You are absent · ' + x.coveredBy + ' covers' : 'You are absent') : x.subject,
+      tag: x.factory || x.factoryDay ? 'fac' : x.absent ? 'abs' : '', can: !(x.factory || x.factoryDay || x.absent) }));
+    (w.subs || []).filter(x => x.day === day).forEach(x => items.push({ s: x.session, cls: x.cls,
+      note: x.type === 'Extra' ? 'Extra class' : 'Cover for ' + String(x.forTeacher).split(' ')[0], tag: 'cov', can: true }));
+    (w.visits || []).filter(v => v.day === day).forEach(v => {
+      const it = items.find(i => !v.session || i.s === v.session);
+      if (it) it.visit = String(v.by).split(' ')[0];
+      else items.push({ s: v.session || 0, cls: v.cls || '', note: '', visit: String(v.by).split(' ')[0] });
+    });
+  }
+  items.sort((a, b) => a.s - b.s);
+  const nowM = new Date().getHours() * 60 + new Date().getMinutes();
+  const T = s => SESSION_TIMES[s - 1] || ['', ''];
+  const cur = items.find(i => i.s && nowM >= hMins(T(i.s)[0]) && nowM < hMins(T(i.s)[1]));
+  const next = items.find(i => i.s && hMins(T(i.s)[0]) > nowM);
+  const pick = cur || next;
+  // the big card
+  if (pick) {
+    const t = T(pick.s);
+    $('hNow').innerHTML = `<div class="k">${cur ? 'Now' : 'Next'} · Session ${pick.s} · ${cur ? 'until ' + fmtTime(t[1]) : fmtTime(t[0])}</div>
+      <div class="c">${hEsc(pick.cls)}${pick.note ? ' <span>· ' + hEsc(pick.note) + '</span>' : ''}</div>
+      ${pick.visit ? `<div class="v">Class visit · ${hEsc(pick.visit)}</div>` : ''}
+      ${pick.can ? `<button type="button" class="hEval" data-hcls="${hEsc(pick.cls)}">Evaluate this class</button>` : ''}`;
+    $('hNow').className = 'hNow';
+  } else {
+    $('hNow').innerHTML = `<div class="k">${items.length ? 'All done for today' : 'No classes today'}</div>
+      <div class="c">${items.length ? 'Nice work.' : 'Enjoy the day.'}</div>
+      <button type="button" class="hEval" data-hgo="time">Open my timetable</button>`;
+    $('hNow').className = 'hNow quiet';
+  }
+  $('hToday').innerHTML = items.length ? items.map(i => {
+    const t = T(i.s), past = i.s && nowM >= hMins(t[1]);
+    return `<div class="hRow ${i === pick ? 'on' : ''} ${past ? 'past' : ''}"><span class="s">${i.s ? 'S' + i.s : ''}<small>${i.s ? fmtTime(t[0]) : ''}</small></span>
+      <b>${hEsc(i.cls)}</b><span class="n">${hEsc(i.note)}</span>
+      <span class="tags">${i.visit ? `<span class="tag vis">Visit · ${hEsc(i.visit)}</span>` : ''}${i.tag === 'cov' ? '<span class="tag cov">Cover</span>' : ''}${i.tag === 'abs' ? '<span class="tag abs">Absent</span>' : ''}${i.tag === 'fac' ? '<span class="tag fac">Factory</span>' : ''}</span></div>`;
+  }).join('') : '<div class="hint" style="margin:4px 0">Nothing on your timetable today.</div>';
+}
+function homeHub() {
+  const H = HUB_T;
+  $('hHub').hidden = !H.enabled;
+  if (!H.enabled) return;
+  const unread = (H.announcements || []).filter(a => !a.read);
+  const open = (H.tasks || []).filter(t => t.state === 'pending' || t.state === 'overdue');
+  const reports = (H.visits || []).filter(v => v.status !== 'planned' && !v.seen);
+  const rules = (H.rules || []).filter(r => !r.read);
+  let h = '';
+  reports.forEach(v => { h += `<div class="hHubRow"><span class="tag vis">Report</span><span>Your visit report for ${hubDay(v.date)} is ready: <b>${v.score}%</b>.</span></div>`; });
+  const shown = unread.filter(a => !(reports.length && a.kind === 'visit' && /report/i.test(a.text)));
+  shown.slice(0, 3).forEach(a => { h += `<div class="hHubRow"><span class="tag ${a.kind === 'visit' ? 'vis' : 'cov'}">${a.kind === 'visit' ? 'Visit' : a.kind === 'schedule' ? 'Schedule' : 'News'}</span><span>${hEsc(a.text)}</span></div>`; });
+  if (shown.length > 3) h += `<div class="hint">+ ${shown.length - 3} more announcements</div>`;
+  open.slice(0, 3).forEach(t => { h += `<div class="hHubRow"><span class="tag ${t.state === 'overdue' ? 'abs' : 'due'}">${t.state === 'overdue' ? 'Overdue' : 'Due ' + hubDay(t.occurrence).split(' ')[0]}</span><span>${hEsc(t.title)}</span></div>`; });
+  if (rules.length) h += `<div class="hHubRow"><span class="tag due">Rule</span><span>${rules.length} new rule${rules.length > 1 ? 's' : ''} to read</span></div>`;
+  $('hHubBody').innerHTML = h || '<div class="hint" style="margin:4px 0">You are all caught up.</div>';
+}
+document.addEventListener('click', e => {
+  const go = e.target.closest('[data-hgo]'), ev = e.target.closest('[data-hcls]');
+  if (ev) {
+    const cls = ev.dataset.hcls;
+    // timetable codes (J1, W1, S1) or full names (Junior 1)
+    const code = n => String(n).split(/\s+/).map(w => /^\d+$/.test(w) ? w : w[0]).join('').toUpperCase();
+    const want = String(cls).replace(/\s+/g, '').toUpperCase();
+    const keys = Object.keys(GROUPS || {}).filter(k => { const c = groupParts(k).cls; return c === cls || code(c) === want; });
+    const last = localStorage.getItem('lastGrp');
+    const key = keys.includes(last) ? last : keys[0];
+    if (key) { localStorage.setItem('lastGrp', key); $('dGrp').value = ''; }
+    gMode = 'daily';
+    setSection('grade');
+    return;
+  }
+  if (!go) return;
+  const g = go.dataset.hgo;
+  if (g === 'grade') gMode = 'daily';
+  if (g === 'eval') mode = 'new';
+  setSection(g);
+});
+
 // ---------- Team hub (tasks and rules from the seniors) ----------
 let HUB_T = { enabled: false };
 const hubEsc = t => String(t == null ? '' : t).replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
@@ -675,7 +886,9 @@ async function hubLoad() {
   if (!me) return;
   try { HUB_T = await post('hubMy', session()); } catch (e) { return; }
   const tab = document.querySelector('#nav .tab[data-sec="team"]');
-  if (tab) tab.innerHTML = HUB_T.enabled ? 'Team hub' + (HUB_T.badge ? `<span class="nbadge">${HUB_T.badge}</span>` : '') : 'Team hub<small>coming soon</small>';
+  const lbl = tab && tab.querySelector('.lbl');
+  if (lbl) lbl.innerHTML = 'Team hub' + (HUB_T.enabled && HUB_T.badge ? `<span class="nbadge">${HUB_T.badge}</span>` : '');
+  if (section === 'home') homeHub();
   if (section === 'team') { $('soon').hidden = HUB_T.enabled; $('hubCard').hidden = !HUB_T.enabled; }
   if (HUB_T.enabled) hubDraw();
 }
@@ -779,7 +992,7 @@ function showApp() {
   fillClassSelect();
   fillMineClasses();
   fillGradeClasses();
-  section = localStorage.getItem('evalKind') === 'eval' ? 'eval' : 'grade';   // the last one used; Class first time
+  section = 'home';   // the Today page first
   mode = 'new';
   showSection();
 }
@@ -952,7 +1165,10 @@ function showSection() {
   $('gradeTabs').hidden = !isGrade;
   const isTime = section === 'time';
   const isHub = section === 'team' && HUB_T.enabled;
-  $('soon').hidden = isEval || isGrade || isTime || isHub;
+  const isHome = section === 'home';
+  $('homeCard').hidden = !isHome;
+  if (isHome) homeLoad();
+  $('soon').hidden = isEval || isGrade || isTime || isHub || isHome;
   $('hubCard').hidden = !isHub;
   if (section === 'team') hubLoad();
   $('tCard').hidden = !isTime;
