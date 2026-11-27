@@ -256,6 +256,22 @@
   .st.done{background:#e6f4ea;color:#17652a}.st.late{background:#fff1cc;color:#7a5200}.st.overdue{background:#fdecea;color:#8a1c12}
   .hubEmptyT{color:var(--muted);font-size:14px;padding:6px 2px 10px}
   .tmini{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:7px 0;border-bottom:1px solid var(--line)}
+  .ann{display:flex;gap:10px;align-items:flex-start;padding:9px 10px;border-radius:10px;margin-bottom:6px;border:1px solid var(--line);font-size:14px}
+  .ann.new{background:rgba(247,201,72,.14);border-color:var(--brand,#F7C948)}
+  .ann .ic{font-size:16px;line-height:1.3}
+  .ann small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+  .vis{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px}
+  .vis.next{border-color:#7aa7e0;background:rgba(12,68,124,.05)}
+  .vis b.tt{font-size:15px}
+  .vis .mt{font-size:13px;color:var(--muted);margin-top:3px}
+  .vis .sc{font-size:20px;font-weight:700;float:right}
+  .vis details{margin-top:8px}
+  .vis summary{cursor:pointer;font-size:14px;font-weight:600}
+  .st.safety{background:#fdecea;color:#8a1c12}
+  .vis .row{display:flex;gap:8px;margin-top:10px}
+  .vis .row button{padding:8px 14px;font-size:14px}
+  table.tGrid td.visit{box-shadow:inset 0 0 0 2px #2f6fbf}
+  table.tGrid td small.vtag{color:#2f6fbf;font-weight:600}
   .nbadge{display:inline-block;min-width:18px;padding:0 5px;margin-left:6px;border-radius:999px;background:#d32f2f;color:#fff;font-size:12px;line-height:18px;vertical-align:middle}
 </style>
 </head>
@@ -523,6 +539,14 @@
       <h2 style="margin:0 0 2px;font-size:18px">Team hub</h2>
       <p class="hint" style="margin:0 0 12px">Tasks and rules from the seniors.</p>
       <div id="hubMsgT"></div>
+      <div id="hubAnnWrap" hidden>
+        <h3 class="hubH" style="display:flex;justify-content:space-between;align-items:center">Announcements <button class="ghost" type="button" id="hubAnnAll" style="padding:5px 10px;font-size:13px">Mark all as read</button></h3>
+        <div id="hubAnnT"></div>
+      </div>
+      <div id="hubVisWrap" hidden>
+        <h3 class="hubH">Class visits</h3>
+        <div id="hubVisT"></div>
+      </div>
       <h3 class="hubH">My tasks</h3>
       <div id="hubMine"></div>
       <h3 class="hubH">Rules</h3>
@@ -541,6 +565,7 @@
 
 <!-- Sheet URL and key live in config.js. Edit that file only. -->
 <script src="config.js"></script>
+<script src="visits.js"></script>
 <script>
 // ===================== SETTINGS =====================
 const CFG = window.FEEDBACK_CONFIG || { url: "", key: "" };
@@ -657,11 +682,27 @@ async function hubLoad() {
 
 function hubDraw() {
   const H = HUB_T;
+  // announcements: schedule changes, visits (newest first)
+  const ANN_IC = { schedule: '🗓', visit: '👁', task: '✅', rule: '📌' };
+  $('hubAnnWrap').hidden = !(H.announcements || []).length;
+  $('hubAnnAll').hidden = !(H.announcements || []).some(a => !a.read);
+  $('hubAnnT').innerHTML = (H.announcements || []).map(a => `<div class="ann ${a.read ? '' : 'new'}"><span class="ic">${ANN_IC[a.kind] || '📣'}</span>
+    <div>${hubEsc(a.text)}<small>${hubDay(a.time)} ${hubEsc(a.time.slice(11, 16))}</small></div></div>`).join('');
+  // class visits: upcoming, then reports
+  const V = H.visits || [];
+  $('hubVisWrap').hidden = !V.length;
+  $('hubVisT').innerHTML = V.map(v => v.status === 'planned'
+    ? `<div class="vis next"><b class="tt">👁 Class visit planned</b>
+        <div class="mt"><b>${hubDay(v.date)}</b>${v.session ? ' · session ' + v.session : ''}${v.cls ? ' · ' + hubEsc(v.cls) : ''} · by ${hubEsc(String(v.by).split(' ')[0])} · ${v.form === 'workshop' ? 'workshop form' : 'classroom observation form'}</div></div>`
+    : `<div class="vis"><span class="sc">${v.score}%</span><b class="tt">Visit report · ${hubDay(v.date)}</b>
+        <div class="mt">${v.session ? 'Session ' + v.session + ' · ' : ''}${hubEsc(v.cls || '')} · by ${hubEsc(String(v.by).split(' ')[0])}${v.seen ? ' · seen ✓' : ''}</div>
+        <details ${v.seen ? '' : 'open'}><summary>Open the report</summary>${window.VISIT ? VISIT.report(v, H.forms, V.find(x => x.id === v.follows)) : ''}</details>
+        ${v.seen ? '' : `<div class="row" style="margin-top:8px"><button type="button" data-vseen="${v.id}">I've seen this report</button></div>`}</div>`).join('');
   $('hubMine').innerHTML = H.tasks.length ? H.tasks.map(t => {
     const isDone = t.state === 'done' || t.state === 'late';
     return `<div class="hubT ${t.state === 'overdue' ? 'overdue' : ''}">
       <b class="tt">${hubEsc(t.title)}</b>
-      <div class="mt"><span class="st ${t.state}">${HUB_STATE[t.state]} ${hubDay(t.occurrence)}</span> · from ${hubEsc(String(t.by).split(' ')[0])}${t.kind === 'reporting' ? ' · reporting' : ''}</div>
+      <div class="mt"><span class="st ${t.state}">${HUB_STATE[t.state]} ${hubDay(t.occurrence)}</span>${t.kind === 'safety' ? ' <span class="st safety">Safety · high priority</span>' : ''} · from ${hubEsc(String(t.by).split(' ')[0])}${t.kind === 'reporting' ? ' · reporting' : ''}</div>
       ${t.details ? `<div class="dt">${hubEsc(t.details)}</div>` : ''}
       ${isDone ? `<div class="row"><span class="mt">✓ Marked done ${hubDay(t.done)} ${hubEsc(t.done.slice(11, 16))}${t.note ? ' · “' + hubEsc(t.note) + '”' : ''}</span>
           <button class="ghost" type="button" data-undo="${t.id}" data-occ="${t.occurrence}">Undo</button></div>`
@@ -681,9 +722,12 @@ function hubDraw() {
 
 document.addEventListener('click', async e => {
   const done = e.target.closest('#hubMine [data-done]'), undo = e.target.closest('#hubMine [data-undo]'), read = e.target.closest('#hubRulesT [data-read]');
-  if (!done && !undo && !read) return;
-  const btn = done || undo || read; btn.disabled = true;
+  const seen = e.target.closest('#hubVisT [data-vseen]'), annAll = e.target.closest('#hubAnnAll');
+  if (!done && !undo && !read && !seen && !annAll) return;
+  const btn = done || undo || read || seen || annAll; btn.disabled = true;
   try {
+    if (seen) { await post('hubVisitSeen', { ...session(), visit: seen.dataset.vseen }); await hubLoad(); return; }
+    if (annAll) { await post('hubAnnRead', session()); await hubLoad(); return; }
     if (done) {
       const note = (document.querySelector(`[data-note="${done.dataset.done}|${done.dataset.occ}"]`) || {}).value || '';
       await post('hubTaskDone', { ...session(), task: done.dataset.done, occurrence: done.dataset.occ, note });
@@ -2561,7 +2605,17 @@ function tRender(w) {
     html += '</tr>';
   });
   $('tGrid').innerHTML = html;
+  // planned class visits (Team hub): outline the session and say who is visiting
+  const rows = $('tGrid').querySelectorAll('tr');
+  (w.visits || []).forEach(v => {
+    const row = rows[v.day + 1];
+    if (!row) return;
+    const cells = row.querySelectorAll('td');
+    const targets = v.session ? [cells[v.session - 1]] : [...cells].filter(c => c.textContent.trim());
+    targets.filter(Boolean).forEach(c => { c.classList.add('visit'); c.insertAdjacentHTML('beforeend', `<small class="vtag">👁 visit · ${esc(String(v.by).split(' ')[0])}</small>`); });
+  });
   const notes = [];
+  if ((w.visits || []).length) notes.push(`<b>👁 Class visit:</b> ` + w.visits.map(v => `${T_DAYS[v.day]}${v.session ? ' session ' + v.session : ''}${v.cls ? ' (' + esc(v.cls) + ')' : ''} by ${esc(String(v.by).split(' ')[0])}`).join(' · '));
   if (w.subs.length) notes.push(`<b>Added this week:</b> ` + w.subs.map(x =>
     `${T_DAYS[x.day]} session ${x.session}, ${esc(x.cls)} ${x.type === 'Extra' ? '(extra class)' : 'for ' + esc(x.forTeacher)}`).join(' · '));
   if ((w.factoryCancelled || []).length) notes.push(`<b>No factory this week on:</b> ${w.factoryCancelled.map(d => T_DAYS[d]).join(', ')}. You are free those days.`);

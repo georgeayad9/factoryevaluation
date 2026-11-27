@@ -7,6 +7,7 @@
 <!-- Server address (and test mode, in the test copy) -->
 <script src="config.js"></script>
 <script src="kpi.js"></script>
+<script src="visits.js"></script>
 <!-- Home-screen icon and name for the admin page -->
 <link rel="icon" type="image/png" sizes="32x32" href="icons/admin-favicon-32.png">
 <link rel="apple-touch-icon" href="icons/admin-apple-touch-icon.png">
@@ -64,6 +65,13 @@
 .hubAct{display:flex;gap:8px;margin-top:10px}
 .hubAct .btn{padding:6px 12px;font-size:13px}
 .hubWarn{font-size:13px;color:var(--err-ink);margin-top:8px}
+.tag.safety{background:#fdecea;color:#8a1c12}
+.vHead{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0 12px;margin-bottom:6px}
+.vHead label{display:block;font-size:13px;color:var(--muted);margin:0 0 10px}
+.vHead label input,.vHead label select{margin-top:4px}
+.vInfo{font-size:14px;color:var(--muted);margin:0 0 8px}
+.vInfo b{color:var(--ink)}
+.score{font-weight:700;font-size:15px}
 .hubEmpty{color:var(--muted);font-size:14px;padding:16px 4px}
 .copyFoot{text-align:center;font-size:12px;color:var(--muted);padding:24px 12px 30px}
 @media print{.copyFoot,.ovl{display:none !important}}
@@ -730,7 +738,7 @@ header .hdrList .btn:hover{background:var(--bg)}
           <label class="hubSwitch"><input type="checkbox" id="hubOn"> <span>Visible to teachers</span></label>
         </div>
       </div>
-      <div class="hubTabs"><button type="button" id="hubTabTasks" class="on">Tasks</button><button type="button" id="hubTabRules">Rules</button></div>
+      <div class="hubTabs"><button type="button" id="hubTabTasks" class="on">Tasks</button><button type="button" id="hubTabRules">Rules</button><button type="button" id="hubTabVisits">Class visits</button></div>
       <div id="hubMsg"></div>
 
       <div id="hubTasksBox">
@@ -751,6 +759,27 @@ header .hdrList .btn:hover{background:var(--bg)}
           <div class="hubBtns"><button class="btn save" type="button" id="htSave">Save task</button><button class="btn alt" type="button" id="htCancel">Cancel</button></div>
         </div>
         <div id="hubTaskList"></div>
+      </div>
+
+      <div id="hubVisitsBox" hidden>
+        <div class="hubBtns"><button class="btn save" type="button" id="hubPlanVisit">+ Plan a visit</button><button class="btn alt" type="button" id="hubUnplanned">+ Record an unplanned visit</button></div>
+        <div class="hubForm" id="hubVisitForm" hidden>
+          <input type="hidden" id="hvId">
+          <p class="hint" style="margin:0 0 10px">A planned visit is announced to the teacher and shows in their timetable.</p>
+          <div class="hubRow">
+            <label>Teacher <select id="hvTeacher"></select></label>
+            <label>Date <input type="date" id="hvDate"></label>
+            <label>Session <select id="hvSession"><option value="">Any</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option></select></label>
+            <label>Class <input id="hvCls" list="hvClsList" placeholder="e.g. W1" maxlength="20"><datalist id="hvClsList"><option>J1</option><option>J2</option><option>W1</option><option>W2</option><option>S1</option></datalist></label>
+          </div>
+          <div class="hubRow">
+            <label>Form <select id="hvForm"><option value="class">Classroom observation</option><option value="workshop">Workshop follow-up + safety check</option></select></label>
+            <label id="hvKindWrap" hidden>Workshop <select id="hvKind"><option value="electrical">Electrical</option><option value="mechanical">Mechanical</option></select></label>
+            <label>Follows up <select id="hvFollows"><option value="">— a new visit —</option></select></label>
+          </div>
+          <div class="hubBtns"><button class="btn save" type="button" id="hvSave">Plan visit</button><button class="btn alt" type="button" id="hvCancel">Cancel</button></div>
+        </div>
+        <div id="hubVisitList"></div>
       </div>
 
       <div id="hubRulesBox" hidden>
@@ -4279,6 +4308,24 @@ sessionStorage.removeItem('adminGateNote');
 if (ADMIN_KEY) adminStart();
 else adminGateShow(gateNote);
 </script>
+<!-- TEAM HUB: fill in / view a class visit -->
+<div class="ovl" id="visitOvl" data-keep="1" hidden>
+  <div class="ovlCard wide" role="dialog" aria-labelledby="visitTitle">
+    <div class="ovlHead"><h2 id="visitTitle">Class visit</h2><button class="btn alt" type="button" data-close>✕</button></div>
+    <div id="visitHead"></div>
+    <div id="visitFormBox"></div>
+    <div class="vScore"><span>Result: <b id="visitScore">—</b></span><span id="visitMsg"></span>
+      <button class="btn save" type="button" id="visitSave">Save report</button></div>
+  </div>
+</div>
+<div class="ovl" id="visitViewOvl" hidden>
+  <div class="ovlCard wide" role="dialog" aria-labelledby="visitViewTitle">
+    <div class="ovlHead"><h2 id="visitViewTitle">Visit report</h2>
+      <div class="hubBtns"><button class="btn alt" type="button" id="visitPrint">🖨 Print</button><button class="btn alt" type="button" id="visitEdit">Edit</button><button class="btn alt" type="button" data-close>✕</button></div></div>
+    <div id="visitViewBox"></div>
+  </div>
+</div>
+
 <!-- SECURITY: passwords and activity log (⋯ menu) -->
 <div class="ovl" id="pwOvl" hidden>
   <div class="ovlCard" role="dialog" aria-labelledby="pwTitle">
@@ -4334,12 +4381,14 @@ else adminGateShow(gateNote);
     if (!HUB) return;
     $('hubTabTasks').innerHTML = `Tasks<span class="n">${HUB.tasks.length}</span>`;
     $('hubTabRules').innerHTML = `Rules<span class="n">${HUB.rules.length}</span>`;
-    $('hubTasksBox').hidden = view !== 'tasks'; $('hubRulesBox').hidden = view !== 'rules';
-    $('hubTabTasks').classList.toggle('on', view === 'tasks'); $('hubTabRules').classList.toggle('on', view === 'rules');
+    $('hubTabVisits').innerHTML = `Class visits<span class="n">${(HUB.visits || []).filter(v => v.status === 'planned').length}</span>`;
+    $('hubTasksBox').hidden = view !== 'tasks'; $('hubRulesBox').hidden = view !== 'rules'; $('hubVisitsBox').hidden = view !== 'visits';
+    $('hubTabTasks').classList.toggle('on', view === 'tasks'); $('hubTabRules').classList.toggle('on', view === 'rules'); $('hubTabVisits').classList.toggle('on', view === 'visits');
+    drawVisits();
     const forWho = a => a === 'ALL' ? 'the whole team' : a;
     const rep = { none: '', weekly: ' · every week', monthly: ' · every month' };
     $('hubTaskList').innerHTML = HUB.tasks.length ? HUB.tasks.map(t => `<div class="hubItem">
-        <h3>${esc(t.title)} ${t.kind === 'reporting' ? '<span class="tag rep">Reporting · KPIs</span>' : ''} ${t.visibility === 'private' ? '<span class="tag">Private</span>' : ''}</h3>
+        <h3>${esc(t.title)} ${t.kind === 'reporting' ? '<span class="tag rep">Reporting · KPIs</span>' : ''}${t.kind === 'safety' ? '<span class="tag safety">Safety · high priority</span>' : ''} ${t.visibility === 'private' ? '<span class="tag">Private</span>' : ''}</h3>
         <div class="hubMeta">For ${esc(forWho(t.assigned))} · due <b>${day(t.occurrence)}</b>${rep[t.repeat] || ''} · by ${esc(first(t.by))}</div>
         ${t.details ? `<div class="hubDet">${esc(t.details)}</div>` : ''}
         <div class="hubChips">${t.statuses.map(s => `<span class="chip ${s.status}" title="${esc(s.done ? 'Done ' + when(s.done) + (s.note ? ' · ' + s.note : '') : '')}">${esc(s.teacher)} · ${STATE[s.status]}${s.note ? ' 💬' : ''}</span>`).join('')}</div>
@@ -4355,7 +4404,131 @@ else adminGateShow(gateNote);
       </div>`).join('') : '<div class="hubEmpty">No rules yet. Publish the first one with “+ New rule”.</div>';
   }
 
+  // ----- class visits -----
+  const FORM_NAME = { class: 'Classroom observation', workshop: 'Workshop follow-up' };
+  function drawVisits() {
+    const V = HUB.visits || [];
+    const byId = {}; V.forEach(v => { byId[v.id] = v; });
+    $('hubVisitList').innerHTML = V.length ? V.map(v => {
+      const prev = v.follows && byId[v.follows];
+      const what = FORM_NAME[v.form] + (v.workshop ? ' · ' + v.workshop : '');
+      if (v.status === 'planned') return `<div class="hubItem">
+          <h3>${esc(v.teacher)} <span class="tag">Planned</span></h3>
+          <div class="hubMeta"><b>${day(v.date)}</b>${v.session ? ' · session ' + v.session : ''}${v.cls ? ' · ' + esc(v.cls) : ''} · ${what} · by ${esc(first(v.by))}${prev ? ' · follows up ' + day(prev.date) : ''}</div>
+          <div class="hubAct"><button class="btn save" type="button" data-vfill="${v.id}">Fill in the form</button><button class="btn alt" type="button" data-vedit="${v.id}">Change</button><button class="btn alt" type="button" data-vcancel="${v.id}">Cancel visit</button></div>
+        </div>`;
+      return `<div class="hubItem">
+          <h3>${esc(v.teacher)} <span class="score">${v.score === '' ? '—' : v.score + '%'}</span> ${v.planned === 'planned' ? '<span class="tag">Planned</span>' : '<span class="tag">Unplanned</span>'}</h3>
+          <div class="hubMeta"><b>${day(v.date)}</b>${v.session ? ' · session ' + v.session : ''}${v.cls ? ' · ' + esc(v.cls) : ''} · ${what} · by ${esc(first(v.by))}${prev ? ` · follows up ${day(prev.date)} (${prev.score}%)` : ''} · ${v.seen ? 'seen by the teacher ✓' : 'not seen yet'}</div>
+          <div class="hubAct"><button class="btn alt" type="button" data-vview="${v.id}">Open report</button></div>
+        </div>`;
+    }).join('') : '<div class="hubEmpty">No visits yet. Plan one, or record an unplanned visit.</div>';
+  }
+  const visitForm = v => {
+    $('hubVisitForm').hidden = false;
+    $('hvTeacher').innerHTML = HUB.teachers.map(n => `<option>${esc(n)}</option>`).join('');
+    $('hvId').value = v ? v.id : ''; $('hvTeacher').value = v ? v.teacher : HUB.teachers[0];
+    $('hvDate').value = v ? v.date : ''; $('hvSession').value = v ? String(v.session || '') : ''; $('hvCls').value = v ? v.cls : '';
+    $('hvForm').value = v ? v.form : 'class'; $('hvKind').value = v && v.workshop ? v.workshop : 'electrical';
+    fillFollows($('hvFollows'), $('hvTeacher').value, v ? v.follows : '');
+    $('hvKindWrap').hidden = $('hvForm').value !== 'workshop';
+    $('hvSave').textContent = v ? 'Save changes' : 'Plan visit';
+  };
+  const fillFollows = (sel, teacher, val) => {
+    sel.innerHTML = '<option value="">— a new visit —</option>' + (HUB.visits || []).filter(x => x.status === 'done' && x.teacher === teacher)
+      .map(x => `<option value="${x.id}">${day(x.date)} · ${x.score}%</option>`).join('');
+    sel.value = val || '';
+  };
+  $('hvTeacher').onchange = () => fillFollows($('hvFollows'), $('hvTeacher').value, '');
+  $('hvForm').onchange = () => { $('hvKindWrap').hidden = $('hvForm').value !== 'workshop'; };
+  $('hubPlanVisit').onclick = () => { if (needSenior()) visitForm(null); };
+  $('hvCancel').onclick = () => { $('hubVisitForm').hidden = true; };
+  $('hvSave').onclick = async () => {
+    if (!needSenior()) return;
+    const visit = { id: $('hvId').value || undefined, teacher: $('hvTeacher').value, date: $('hvDate').value, session: $('hvSession').value,
+      cls: $('hvCls').value.trim(), form: $('hvForm').value, workshop: $('hvKind').value, follows: $('hvFollows').value };
+    $('hvSave').disabled = true;
+    try { await post('hubVisitSave', { visit, senior: senior() }); $('hubVisitForm').hidden = true; say(visit.id ? 'Visit changed. The teacher was told.' : 'Visit planned. The teacher was told, and it shows in their timetable.', true); await load(); }
+    catch (e) { say(e.message); } finally { $('hvSave').disabled = false; }
+  };
+
+  // the form itself (overlay)
+  let EDIT = null;
+  function openEditor(v) {
+    EDIT = v;
+    const unplanned = !v.id;
+    $('visitTitle').textContent = unplanned ? 'Unplanned class visit' : 'Class visit · ' + v.teacher;
+    $('visitMsg').textContent = '';
+    if (unplanned) {
+      $('visitHead').innerHTML = `<div class="vHead">
+        <label>Teacher <select id="uvTeacher">${HUB.teachers.map(n => `<option>${esc(n)}</option>`).join('')}</select></label>
+        <label>Date <input type="date" id="uvDate" value="${HUB.today}"></label>
+        <label>Session <select id="uvSession"><option value="">—</option>${[1, 2, 3, 4, 5, 6, 7, 8].map(n => `<option>${n}</option>`).join('')}</select></label>
+        <label>Class <input id="uvCls" list="hvClsList" maxlength="20"></label>
+        <label>Form <select id="uvForm"><option value="class">Classroom observation</option><option value="workshop">Workshop follow-up + safety check</option></select></label>
+        <label>Follows up <select id="uvFollows"></select></label></div>`;
+      fillFollows($('uvFollows'), $('uvTeacher').value, '');
+      $('uvTeacher').onchange = () => fillFollows($('uvFollows'), $('uvTeacher').value, '');
+      $('uvForm').onchange = () => { EDIT.form = $('uvForm').value; drawForm(); };
+    } else {
+      $('visitHead').innerHTML = `<p class="vInfo"><b>${day(v.date)}</b>${v.session ? ' · session ' + v.session : ''}${v.cls ? ' · ' + esc(v.cls) : ''} · ${v.planned === 'planned' ? 'Scheduled' : 'Unscheduled'}${v.follows ? ' · Follow-up' : ''}</p>`;
+    }
+    drawForm();
+    $('visitOvl').hidden = false;
+  }
+  function drawForm() {
+    VISIT.editor($('visitFormBox'), HUB.forms, EDIT, sc => { $('visitScore').textContent = sc.pct === null ? '—' : sc.pct + '%'; });
+  }
+  $('hubUnplanned').onclick = () => { if (needSenior()) openEditor({ form: 'class', planned: 'unplanned', answers: {} }); };
+  $('visitSave').onclick = async () => {
+    if (!needSenior()) return;
+    const r = VISIT.read($('visitFormBox'), HUB.forms, EDIT);
+    const visit = { id: EDIT.id, answers: r.answers, strengths: r.strengths, improve: r.improve, next: r.next, workshop: r.workshop || EDIT.workshop };
+    if (!EDIT.id) Object.assign(visit, { teacher: $('uvTeacher').value, date: $('uvDate').value, session: $('uvSession').value,
+      cls: $('uvCls').value.trim(), form: $('uvForm').value, follows: $('uvFollows').value });
+    $('visitSave').disabled = true; $('visitMsg').textContent = 'Saving…';
+    try {
+      const out = await post('hubVisitReport', { visit, senior: senior() });
+      $('visitOvl').hidden = true;
+      say('Report saved (' + out.score + '%).' + (out.safetyTasks ? ` ${out.safetyTasks} safety task${out.safetyTasks > 1 ? 's were' : ' was'} added for the teacher.` : ''), true);
+      await load();
+    } catch (e) { $('visitMsg').textContent = e.message; }
+    finally { $('visitSave').disabled = false; }
+  };
+
+  // the finished report (overlay), with print
+  let VIEW = null;
+  function openReport(v) {
+    VIEW = v;
+    const prev = v.follows && (HUB.visits || []).find(x => x.id === v.follows);
+    $('visitViewTitle').textContent = 'Visit report · ' + v.teacher;
+    $('visitViewBox').innerHTML = VISIT.report(v, HUB.forms, prev);
+    $('visitViewOvl').hidden = false;
+  }
+  $('visitEdit').onclick = () => { $('visitViewOvl').hidden = true; if (needSenior()) openEditor(VIEW); };
+  $('visitPrint').onclick = () => {
+    const v = VIEW, prev = v.follows && (HUB.visits || []).find(x => x.id === v.follows);
+    const html = VISIT.report(v, HUB.forms, prev) +
+      `<div style="display:flex;justify-content:space-between;margin-top:40px;font-size:13px"><span>Teacher signature: ____________________</span><span>Observer signature: ____________________</span></div>`;
+    const css = '<style>#prDoc .vRep table{width:100%;border-collapse:collapse;font-size:11px}#prDoc .vRep th,#prDoc .vRep td{border:1px solid #999;padding:4px 6px;text-align:left}#prDoc .vRep td.r{text-align:center}#prDoc .vRep .head{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:11px}#prDoc .vRep .head b{display:block;font-size:12px}#prDoc .vRep .big{font-size:18px}#prDoc .vRep .txt{font-size:12px;margin:6px 0}#prDoc .vRep .txt b{display:block}#prDoc .vRep .no{color:#c00;font-weight:700}</style>';
+    prPrint({ pages: [{ title: v.form === 'workshop' ? VISIT.word(HUB.forms.workshop.title, v.workshop) : HUB.forms.class.title,
+      sub: v.teacher + ' · ' + VISIT.day(v.date), html: css + html }], file: 'Class visit - ' + v.teacher + ' - ' + v.date });
+  };
+  $('hubVisitList').onclick = async e => {
+    const f = e.target.closest('[data-vfill]'), ed = e.target.closest('[data-vedit]'), ca = e.target.closest('[data-vcancel]'), vw = e.target.closest('[data-vview]');
+    const find = id => HUB.visits.find(v => v.id === id);
+    if (f) { if (needSenior()) openEditor(Object.assign({ answers: {} }, find(f.dataset.vfill))); }
+    if (ed) { if (needSenior()) visitForm(find(ed.dataset.vedit)); }
+    if (vw) openReport(find(vw.dataset.vview));
+    if (ca) {
+      const v = find(ca.dataset.vcancel);
+      if (!confirm(`Cancel the visit to ${v.teacher} on ${day(v.date)}? The teacher will be told.`)) return;
+      try { await post('hubVisitCancel', { id: v.id, senior: senior(), visit: { teacher: v.teacher, date: v.date, session: v.session } }); say('Visit cancelled. The teacher was told.', true); await load(); } catch (err) { say(err.message); }
+    }
+  };
+
   // ----- controls -----
+  $('hubTabVisits').onclick = () => { view = 'visits'; draw(); };
   $('hubTabTasks').onclick = () => { view = 'tasks'; draw(); };
   $('hubTabRules').onclick = () => { view = 'rules'; draw(); };
   $('hubSenior').onchange = () => localStorage.setItem('hubSenior', senior());
@@ -4427,9 +4600,14 @@ else adminGateShow(gateNote);
   const $ = id => document.getElementById(id);
   const open = id => { $(id).hidden = false; };
   document.querySelectorAll('.ovl').forEach(o => {
-    o.addEventListener('click', e => { if (e.target === o || e.target.closest('[data-close]')) o.hidden = true; });
+    o.addEventListener('click', e => {
+      if (e.target.closest('[data-close]')) {
+        if (o.dataset.keep && !confirm('Close the form? Anything not saved will be lost.')) return;
+        o.hidden = true;
+      } else if (e.target === o && !o.dataset.keep) o.hidden = true;   // a form being filled in only closes with ✕
+    });
   });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.ovl').forEach(o => o.hidden = true); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.ovl:not([data-keep])').forEach(o => o.hidden = true); });
 
   // show the two menu items once signed in
   const showItems = () => { const on = !!ADMIN_KEY; $('pwBtn').hidden = !on; $('actBtn').hidden = !on; };
@@ -4472,7 +4650,8 @@ else adminGateShow(gateNote);
     setPasswords: 'Password changed', locked: '⚠ Password blocked after wrong tries',
     hubTaskSave: 'Team hub: task saved', hubTaskCancel: 'Team hub: task cancelled', hubTaskDone: 'Team hub: task marked done',
     hubRuleSave: 'Team hub: rule published', hubRuleArchive: 'Team hub: rule archived', hubRuleRead: 'Team hub: rule read',
-    hubSetEnabled: 'Team hub: switched on/off for teachers'
+    hubSetEnabled: 'Team hub: switched on/off for teachers', hubVisitSave: 'Team hub: class visit planned', hubVisitCancel: 'Team hub: class visit cancelled',
+    hubVisitReport: 'Team hub: class visit report saved', hubVisitSeen: 'Team hub: visit report seen by the teacher'
   };
   let ACT = [];
   const esc = t => String(t).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
