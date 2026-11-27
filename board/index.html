@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OMHG EVA SCHOOL · Board overview</title>
 <script src="../config.js"></script>
+<script src="../kpi.js"></script>
 <style>
 :root{--brand:#F7C948;--brand-dark:#D9A900;--brand-tint:#FFF8E1;--bg:#FBF8EE;--card:#ffffff;--ink:#1d1d1d;--muted:#666666;--line:#e6e9ee;--border:#ccd3db;--red:#d32f2f;--red-bg:#fdecea;--bar:#F7C948}
 [data-theme="dark"]{--bg:#16161a;--card:#22222a;--ink:#f2f2f2;--muted:#a8a8b3;--line:#33333d;--border:#4a4a56;--brand-tint:#2e2a18;--red-bg:#3a1e1e;--bar:#E0B232}
@@ -60,6 +61,7 @@ select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-s
 .embedded #signOut{display:none !important}
 .copyFoot{text-align:center;font-size:12px;color:var(--muted,#888);padding:24px 12px 30px}@media print{.copyFoot{display:none !important}}
 .embedded .copyFoot{display:none !important}
+.embedded .kpiTab{display:none !important}
 .range{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 6px}
 .range .chip{padding:7px 12px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--ink);cursor:pointer;font-size:13px}
 .range .chip.on{background:#1d1d1d;color:var(--brand);border-color:#1d1d1d;font-weight:600}
@@ -99,6 +101,7 @@ select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-s
       <button class="tab" data-view="vComments" type="button" data-i18n="tabComments"></button>
       <button class="tab" data-view="vIncidents" type="button" data-i18n="tabIncidents"></button>
       <button class="tab" data-view="vAbsent" type="button" data-i18n="tabAbsent"></button>
+      <button class="tab kpiTab" data-view="vKpi" type="button" data-i18n="tabKpi"></button>
       <button class="btn" id="refresh" type="button" style="margin-inline-start:auto" data-i18n="refresh"></button>
     </div>
     <!-- DATE FILTER: applies to every tab and every download -->
@@ -192,6 +195,9 @@ select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-s
     </div>
 
     <!-- ABSENCES: one row per student absent at least once in the chosen dates -->
+    <!-- TEACHER KPIs (shared with the seniors' admin page; see ../kpi.js) -->
+    <div id="vKpi" hidden><div class="card" id="kpiBox"></div></div>
+
     <div id="vAbsent" hidden>
       <div class="row noprint">
         <label><span data-i18n="classLbl"></span> <select id="abCls"></select></label>
@@ -275,7 +281,7 @@ const T = {
     printTitle: "{cls} · evaluations ({n})",
     fileAll: "OMHG EVA SCHOOL - all classes", fileComments: "OMHG EVA SCHOOL - comments", fileIncidents: "OMHG EVA SCHOOL - incidents",
     fileShown: "OMHG EVA SCHOOL - evaluations",
-    tabAbsent: "Absences", evalLbl: "Evaluation", allEvals: "All ratings", namePh: "Student name",
+    tabKpi: "Teacher KPIs", tabAbsent: "Absences", evalLbl: "Evaluation", allEvals: "All ratings", namePh: "Student name",
     abCount: "{s} student(s) absent at least once · {n} absence(s) in total", abNone: "No absences in these dates.",
     colTimesAbsent: "Times absent", colOutOf: "Out of", colAbsentDates: "Absent on",
     rangeLbl: "Dates:", rAll: "All dates", rWeek: "This week", rMonth: "This month", rTerm: "This term", rCustom: "Custom", rTo: "to",
@@ -314,7 +320,7 @@ const T = {
     printTitle: "{cls} · التقييمات ({n})",
     fileAll: "OMHG EVA SCHOOL - كل الفصول", fileComments: "OMHG EVA SCHOOL - التعليقات", fileIncidents: "OMHG EVA SCHOOL - الحوادث",
     fileShown: "OMHG EVA SCHOOL - التقييمات",
-    tabAbsent: "الغياب", evalLbl: "التقييم", allEvals: "كل التقييمات", namePh: "اسم الطالب",
+    tabKpi: "مؤشرات المعلمين", tabAbsent: "الغياب", evalLbl: "التقييم", allEvals: "كل التقييمات", namePh: "اسم الطالب",
     abCount: "{s} طالب غاب مرة على الأقل · {n} غياب في المجموع", abNone: "لا يوجد غياب في هذه الفترة.",
     colTimesAbsent: "مرات الغياب", colOutOf: "من أصل", colAbsentDates: "أيام الغياب",
     rangeLbl: "التاريخ:", rAll: "كل التواريخ", rWeek: "هذا الأسبوع", rMonth: "هذا الشهر", rTerm: "هذا الترم", rCustom: "مخصص", rTo: "إلى",
@@ -347,6 +353,7 @@ function applyLang() {
   $("langBtn").textContent = t("langBtn");
   applyThemeText();
   if (DATA) { $("stamp").textContent = t("asOf") + " " + DATA.generated; renderAll(); }
+  if ($("vKpi") && !$("vKpi").hidden) drawKpi();
 }
 
 $("langBtn").onclick = () => {
@@ -399,8 +406,27 @@ function table(headers, rows) {
 }
 
 function setView(id) {
-  ["vOverview", "vTeachers", "vClasses", "vAll", "vComments", "vIncidents", "vAbsent"].forEach(v => $(v).hidden = v !== id);
+  ["vOverview", "vTeachers", "vClasses", "vAll", "vComments", "vIncidents", "vAbsent", "vKpi"].forEach(v => $(v).hidden = v !== id);
   document.querySelectorAll(".tab").forEach(b => b.classList.toggle("on", b.dataset.view === id));
+  // the date filter doesn't apply to the KPIs, which have their own month
+  ["range", "rangeNote"].forEach(x => { if ($(x)) $(x).style.display = id === "vKpi" ? "none" : ""; });
+  if (id === "vKpi") drawKpi();
+}
+
+// ---------- teacher KPIs ----------
+let KPI_TEACHERS = null;
+async function drawKpi() {
+  if (!window.KPI) return;
+  const box = $("kpiBox");
+  if (!KPI_TEACHERS) {
+    KPI_TEACHERS = [];
+    try {   // the teacher list comes from Setup (same list as the teacher page)
+      const cfg = window.FEEDBACK_CONFIG || {};
+      const rows = await (await fetch(BOARD_URL + "?action=lists&key=" + encodeURIComponent(cfg.key || ""))).json();
+      if (Array.isArray(rows)) KPI_TEACHERS = rows.filter(r => r.Type === "Teacher").map(r => r.Name);
+    } catch (e) { /* the table still shows its columns and rules */ }
+  }
+  window.KPI.render(box, { teachers: KPI_TEACHERS, lang: LANG });
 }
 
 function avgOf(list) {
