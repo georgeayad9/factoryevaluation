@@ -5,7 +5,7 @@
 // key: the same value as SECRET in Code.gs (the test copy uses the same Code.gs as the live site)
 window.FEEDBACK_CONFIG = {
   url: "https://colorless-falcon-665.eu-west-1.convex.site/exec",
-  key: "mybbIp-pobfod-2xabgy-Cvswe345-Pol34",
+  key: "mybbIp-pobfod-2xabgy-CviUs345-Po45l34",
   env: "test"
 };
 
