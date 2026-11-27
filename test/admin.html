@@ -34,6 +34,37 @@
 .actT td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
 .actT td:first-child{white-space:nowrap;color:var(--muted)}
 .actT tr.warn td{background:var(--err-bg)}
+.hubTop{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.hubTop h2{margin:0}
+.hubCtl{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center}
+.hubCtl label{display:flex;align-items:center;gap:8px;font-size:14px;margin:0}
+.hubCtl select{width:auto;padding:7px 10px}
+.hubSwitch input{width:auto;margin:0}
+.hubTabs{display:flex;gap:6px;border-bottom:1px solid var(--line);margin:4px 0 14px}
+.hubTabs button{border:0;background:transparent;padding:9px 14px;font-size:15px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px}
+.hubTabs button.on{color:var(--ink);border-bottom-color:var(--brand)}
+.hubTabs .n{display:inline-block;min-width:18px;padding:0 5px;margin-left:5px;border-radius:999px;background:var(--line);font-size:12px}
+.hubForm{border:1px solid var(--line);border-radius:12px;padding:14px;margin:12px 0;background:var(--bg)}
+.hubForm label{display:block;font-size:13px;color:var(--muted);margin:0 0 10px}
+.hubForm label input,.hubForm label select,.hubForm label textarea{margin-top:4px}
+.hubRow{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:0 12px}
+.hubBtns{display:flex;gap:8px}
+.hubItem{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:10px 0}
+.hubItem h3{margin:0;font-size:16px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.hubMeta{font-size:13px;color:var(--muted);margin:4px 0 0}
+.hubDet{font-size:14px;margin:8px 0 0;white-space:pre-wrap}
+.hubChips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{font-size:12.5px;padding:4px 9px;border-radius:999px;background:var(--line);color:var(--ink)}
+.chip.done{background:#e6f4ea;color:#17652a}.chip.late{background:#fff1cc;color:#7a5200}
+.chip.overdue{background:#fdecea;color:#8a1c12}.chip.pending{background:var(--line);color:var(--muted)}
+[data-theme="dark"] .chip.done{background:#16351f;color:#9fe0b0}[data-theme="dark"] .chip.late{background:#3a3320;color:#ffd77a}
+[data-theme="dark"] .chip.overdue{background:#3d1b18;color:#ffb4ab}
+.tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px;background:var(--brand-soft);color:var(--ink)}
+.tag.rep{background:#e6f4ea;color:#17652a}
+.hubAct{display:flex;gap:8px;margin-top:10px}
+.hubAct .btn{padding:6px 12px;font-size:13px}
+.hubWarn{font-size:13px;color:var(--err-ink);margin-top:8px}
+.hubEmpty{color:var(--muted);font-size:14px;padding:16px 4px}
 .copyFoot{text-align:center;font-size:12px;color:var(--muted);padding:24px 12px 30px}
 @media print{.copyFoot,.ovl{display:none !important}}
 :root{--brand:#F7C948;--brand-dark:#D9A900;--brand-soft:#FFF3C4;--bg:#FBF8EE;--card:#ffffff;--ink:#1d1d1d;--muted:#6b6b6b;--line:#e8e2cf;--danger:#d32f2f;--ok-bg:#e6f4ea;--ok-ink:#17652a;--err-bg:#fdecea;--err-ink:#8a1c12}
@@ -385,7 +416,7 @@ header .hdrList .btn:hover{background:var(--bg)}
         <button type="button" id="tabLists">Setup<small>teachers, classes and students</small></button>
         <button type="button" id="tabAssess">Assessments<small>coming soon</small></button>
         <button type="button" id="tabKpi">Teacher KPIs<small>shared with the board</small></button>
-        <button type="button" id="tabTeam">Team hub<small>coming soon</small></button>
+        <button type="button" id="tabTeam">Team hub<small>tasks and rules</small></button>
       </div>
     </div>
   </nav>
@@ -691,9 +722,47 @@ header .hdrList .btn:hover{background:var(--bg)}
   </div>
   <!-- ===================== TEAM HUB ===================== -->
   <div id="paneTeam" hidden>
-    <div class="card soonCard">
-      <h2>Team hub</h2>
-      <p>Coming soon.</p>
+    <div class="card">
+      <div class="hubTop">
+        <div><h2>Team hub</h2><p class="hint" style="margin:2px 0 0">Tasks and rules for the team.</p></div>
+        <div class="hubCtl">
+          <label>You are <select id="hubSenior"><option value="">Choose…</option></select></label>
+          <label class="hubSwitch"><input type="checkbox" id="hubOn"> <span>Visible to teachers</span></label>
+        </div>
+      </div>
+      <div class="hubTabs"><button type="button" id="hubTabTasks" class="on">Tasks</button><button type="button" id="hubTabRules">Rules</button></div>
+      <div id="hubMsg"></div>
+
+      <div id="hubTasksBox">
+        <button class="btn save" type="button" id="hubNewTask">+ New task</button>
+        <div class="hubForm" id="hubTaskForm" hidden>
+          <input type="hidden" id="htId">
+          <label>Task <input id="htTitle" placeholder="e.g. Upload the monthly plan" maxlength="120"></label>
+          <label>Details <span class="hint">(optional)</span> <textarea id="htDetails" rows="2" maxlength="1000"></textarea></label>
+          <div class="hubRow">
+            <label>For <select id="htAssigned"></select></label>
+            <label>Due <input type="date" id="htDue"></label>
+            <label>Repeats <select id="htRepeat"><option value="none">Once</option><option value="weekly">Every week</option><option value="monthly">Every month</option></select></label>
+          </div>
+          <div class="hubRow">
+            <label>Who can see it <select id="htVis"><option value="shared">Shared: the team sees it and who did it</option><option value="private">Private: only this teacher</option></select></label>
+            <label>Type <select id="htKind"><option value="general">General</option><option value="reporting">Reporting: counts in the KPIs</option></select></label>
+          </div>
+          <div class="hubBtns"><button class="btn save" type="button" id="htSave">Save task</button><button class="btn alt" type="button" id="htCancel">Cancel</button></div>
+        </div>
+        <div id="hubTaskList"></div>
+      </div>
+
+      <div id="hubRulesBox" hidden>
+        <button class="btn save" type="button" id="hubNewRule">+ New rule</button>
+        <div class="hubForm" id="hubRuleForm" hidden>
+          <input type="hidden" id="hrId">
+          <label>Title <input id="hrTitle" placeholder="e.g. Phones in the workshop" maxlength="120"></label>
+          <label>The rule <textarea id="hrText" rows="4" maxlength="3000"></textarea></label>
+          <div class="hubBtns"><button class="btn save" type="button" id="hrSave">Publish rule</button><button class="btn alt" type="button" id="hrCancel">Cancel</button></div>
+        </div>
+        <div id="hubRuleList"></div>
+      </div>
     </div>
   </div>
   <!-- ===================== ASSESSMENTS ===================== -->
@@ -1240,6 +1309,7 @@ function showPane(p) {
   if (p === 'teachers') pfInit();
   if (p === 'evals') evInit();
   if (p === 'kpi') kpiInit();
+  if (p === 'team' && window.hubInit) window.hubInit();
 }
 
 // ---------- teacher KPIs (the table and rules come from kpi.js) ----------
@@ -4234,6 +4304,123 @@ else adminGateShow(gateNote);
     <div id="actOut" class="muted">Loading…</div>
   </div>
 </div>
+<script>
+// ===================== TEAM HUB (module 1: tasks and rules; server side in Hub.gs) =====================
+(() => {
+  const $ = id => document.getElementById(id);
+  const esc = t => String(t == null ? '' : t).replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
+  const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const day = s => { if (!s) return ''; const [y, m, d] = s.slice(0, 10).split('-').map(Number); const dt = new Date(y, m - 1, d); return `${DAYS[dt.getDay()]} ${d} ${MON[m - 1]}`; };
+  const when = s => s ? day(s) + (s.length > 10 ? ' ' + s.slice(11, 16) : '') : '';
+  const first = n => String(n).split(' ')[0];
+  const STATE = { done: '✓ done', late: '✓ late', overdue: '✗ overdue', pending: 'waiting' };
+  let HUB = null, view = 'tasks';
+
+  const say = (t, ok) => { $('hubMsg').innerHTML = t ? `<div class="msg ${ok ? 'ok' : 'err'}">${esc(t)}</div>` : ''; if (t && ok) setTimeout(() => { $('hubMsg').innerHTML = ''; }, 3000); };
+  const senior = () => $('hubSenior').value;
+
+  async function load() {
+    try { HUB = await post('hubAdmin'); } catch (e) { say(e.message); return; }
+    const keep = localStorage.getItem('hubSenior') || '';
+    $('hubSenior').innerHTML = '<option value="">Choose…</option>' + HUB.seniors.map(n => `<option ${n === keep ? 'selected' : ''}>${esc(n)}</option>`).join('');
+    $('hubOn').checked = HUB.enabled;
+    $('htAssigned').innerHTML = '<option value="ALL">The whole team</option>' + HUB.teachers.map(n => `<option>${esc(n)}</option>`).join('');
+    draw();
+  }
+  window.hubInit = load;
+  if (!$('paneTeam').hidden && ADMIN_KEY) load();   // the page opened straight on Team hub
+
+  function draw() {
+    if (!HUB) return;
+    $('hubTabTasks').innerHTML = `Tasks<span class="n">${HUB.tasks.length}</span>`;
+    $('hubTabRules').innerHTML = `Rules<span class="n">${HUB.rules.length}</span>`;
+    $('hubTasksBox').hidden = view !== 'tasks'; $('hubRulesBox').hidden = view !== 'rules';
+    $('hubTabTasks').classList.toggle('on', view === 'tasks'); $('hubTabRules').classList.toggle('on', view === 'rules');
+    const forWho = a => a === 'ALL' ? 'the whole team' : a;
+    const rep = { none: '', weekly: ' · every week', monthly: ' · every month' };
+    $('hubTaskList').innerHTML = HUB.tasks.length ? HUB.tasks.map(t => `<div class="hubItem">
+        <h3>${esc(t.title)} ${t.kind === 'reporting' ? '<span class="tag rep">Reporting · KPIs</span>' : ''} ${t.visibility === 'private' ? '<span class="tag">Private</span>' : ''}</h3>
+        <div class="hubMeta">For ${esc(forWho(t.assigned))} · due <b>${day(t.occurrence)}</b>${rep[t.repeat] || ''} · by ${esc(first(t.by))}</div>
+        ${t.details ? `<div class="hubDet">${esc(t.details)}</div>` : ''}
+        <div class="hubChips">${t.statuses.map(s => `<span class="chip ${s.status}" title="${esc(s.done ? 'Done ' + when(s.done) + (s.note ? ' · ' + s.note : '') : '')}">${esc(s.teacher)} · ${STATE[s.status]}${s.note ? ' 💬' : ''}</span>`).join('')}</div>
+        ${t.missedEarlier ? `<div class="hubWarn">${t.missedEarlier} earlier due date${t.missedEarlier > 1 ? 's' : ''} (last 60 days) still not done.</div>` : ''}
+        <div class="hubAct"><button class="btn alt" type="button" data-edit="${t.id}">Edit</button><button class="btn alt" type="button" data-cancel="${t.id}">Cancel task</button></div>
+      </div>`).join('') : '<div class="hubEmpty">No tasks yet. Create the first one with “+ New task”.</div>';
+    $('hubRuleList').innerHTML = HUB.rules.length ? HUB.rules.map(r => `<div class="hubItem">
+        <h3>${esc(r.title)}</h3>
+        <div class="hubMeta">by ${esc(first(r.by))} · ${day(r.created)} · read by <b>${r.readers.length} of ${r.readers.length + r.notRead.length}</b></div>
+        <div class="hubDet">${esc(r.text)}</div>
+        <div class="hubChips">${r.readers.map(x => `<span class="chip done" title="${esc(when(x.read))}">${esc(x.teacher)} ✓</span>`).join('')}${r.notRead.map(n => `<span class="chip pending">${esc(n)} · not yet</span>`).join('')}</div>
+        <div class="hubAct"><button class="btn alt" type="button" data-redit="${r.id}">Edit</button><button class="btn alt" type="button" data-archive="${r.id}">Archive</button></div>
+      </div>`).join('') : '<div class="hubEmpty">No rules yet. Publish the first one with “+ New rule”.</div>';
+  }
+
+  // ----- controls -----
+  $('hubTabTasks').onclick = () => { view = 'tasks'; draw(); };
+  $('hubTabRules').onclick = () => { view = 'rules'; draw(); };
+  $('hubSenior').onchange = () => localStorage.setItem('hubSenior', senior());
+  $('hubOn').onchange = async () => {
+    const on = $('hubOn').checked;
+    if (on && !confirm('Open Team hub to all teachers now?')) { $('hubOn').checked = false; return; }
+    try { await post('hubSetEnabled', { enabled: on, senior: senior() }); say(on ? 'Teachers can now see Team hub.' : 'Team hub is hidden from teachers.', true); }
+    catch (e) { $('hubOn').checked = !on; say(e.message); }
+  };
+  const needSenior = () => { if (senior()) return true; say('First choose who you are (George or Ramy) at the top.'); $('hubSenior').focus(); return false; };
+
+  // tasks
+  const taskForm = t => {
+    $('hubTaskForm').hidden = false;
+    $('htId').value = t ? t.id : ''; $('htTitle').value = t ? t.title : ''; $('htDetails').value = t ? t.details : '';
+    $('htAssigned').value = t ? t.assigned : 'ALL'; $('htDue').value = t ? t.due : '';
+    $('htRepeat').value = t ? t.repeat : 'none'; $('htVis').value = t ? t.visibility : 'shared'; $('htKind').value = t ? t.kind : 'general';
+    $('htSave').textContent = t ? 'Save changes' : 'Save task'; $('htTitle').focus();
+  };
+  $('hubNewTask').onclick = () => { if (needSenior()) taskForm(null); };
+  $('htCancel').onclick = () => { $('hubTaskForm').hidden = true; };
+  $('htSave').onclick = async () => {
+    if (!needSenior()) return;
+    const task = { id: $('htId').value || undefined, title: $('htTitle').value.trim(), details: $('htDetails').value.trim(), assigned: $('htAssigned').value,
+      due: $('htDue').value, repeat: $('htRepeat').value, visibility: $('htVis').value, kind: $('htKind').value };
+    $('htSave').disabled = true;
+    try { await post('hubTaskSave', { task, senior: senior() }); $('hubTaskForm').hidden = true; say(task.id ? 'Task updated.' : 'Task created.', true); await load(); }
+    catch (e) { say(e.message); } finally { $('htSave').disabled = false; }
+  };
+  $('hubTaskList').onclick = async e => {
+    const ed = e.target.closest('[data-edit]'), ca = e.target.closest('[data-cancel]');
+    if (ed) { if (needSenior()) taskForm(HUB.tasks.find(t => t.id === ed.dataset.edit)); }
+    if (ca) {
+      const t = HUB.tasks.find(x => x.id === ca.dataset.cancel);
+      if (!confirm(`Cancel the task “${t.title}”? It disappears for the teachers. What was already done stays recorded.`)) return;
+      try { await post('hubTaskCancel', { id: t.id, senior: senior(), task: { title: t.title, assigned: t.assigned, due: t.occurrence } }); say('Task cancelled.', true); await load(); } catch (err) { say(err.message); }
+    }
+  };
+
+  // rules
+  const ruleForm = r => {
+    $('hubRuleForm').hidden = false;
+    $('hrId').value = r ? r.id : ''; $('hrTitle').value = r ? r.title : ''; $('hrText').value = r ? r.text : '';
+    $('hrSave').textContent = r ? 'Save changes' : 'Publish rule'; $('hrTitle').focus();
+  };
+  $('hubNewRule').onclick = () => { if (needSenior()) ruleForm(null); };
+  $('hrCancel').onclick = () => { $('hubRuleForm').hidden = true; };
+  $('hrSave').onclick = async () => {
+    if (!needSenior()) return;
+    const rule = { id: $('hrId').value || undefined, title: $('hrTitle').value.trim(), text: $('hrText').value.trim() };
+    $('hrSave').disabled = true;
+    try { await post('hubRuleSave', { rule, senior: senior() }); $('hubRuleForm').hidden = true; say(rule.id ? 'Rule updated.' : 'Rule published.', true); await load(); }
+    catch (e) { say(e.message); } finally { $('hrSave').disabled = false; }
+  };
+  $('hubRuleList').onclick = async e => {
+    const ed = e.target.closest('[data-redit]'), ar = e.target.closest('[data-archive]');
+    if (ed) { if (needSenior()) ruleForm(HUB.rules.find(r => r.id === ed.dataset.redit)); }
+    if (ar) {
+      const r = HUB.rules.find(x => x.id === ar.dataset.archive);
+      if (!confirm(`Archive the rule “${r.title}”? Teachers won't see it any more.`)) return;
+      try { await post('hubRuleArchive', { id: r.id, senior: senior(), rule: { title: r.title } }); say('Rule archived.', true); await load(); } catch (err) { say(err.message); }
+    }
+  };
+})();
+</script>
 <footer class="copyFoot">© 2026 George Ayad · OMHG EVA SCHOOL · All rights reserved</footer>
 <script>
 (() => {
@@ -4282,7 +4469,10 @@ else adminGateShow(gateNote);
     ttSaveVersion: 'Timetable uploaded', ttSaveWeek: 'Week saved (cover, factory days)',
     pfNoteSave: 'Conduct note saved', pfNoteDelete: 'Conduct note deleted', pfCats: 'Conduct categories changed',
     notifySettings: 'Notification settings changed', adminViews: 'Saved views changed',
-    setPasswords: 'Password changed', locked: '⚠ Password blocked after wrong tries'
+    setPasswords: 'Password changed', locked: '⚠ Password blocked after wrong tries',
+    hubTaskSave: 'Team hub: task saved', hubTaskCancel: 'Team hub: task cancelled', hubTaskDone: 'Team hub: task marked done',
+    hubRuleSave: 'Team hub: rule published', hubRuleArchive: 'Team hub: rule archived', hubRuleRead: 'Team hub: rule read',
+    hubSetEnabled: 'Team hub: switched on/off for teachers'
   };
   let ACT = [];
   const esc = t => String(t).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));

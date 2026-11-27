@@ -242,6 +242,21 @@
 .profBtn{background:transparent;border:1px solid var(--brand-dark);color:var(--ink);border-radius:8px;padding:6px 12px;font-size:13px;cursor:pointer}
 
 .copyFoot{text-align:center;font-size:12px;color:var(--muted,#888);padding:24px 12px 30px}@media print{.copyFoot{display:none !important}}
+  .hubH{font-size:15px;margin:18px 0 8px}
+  .hubT{border:1px solid var(--line);border-radius:12px;padding:12px;margin:0 0 10px}
+  .hubT.overdue{border-color:#e7a29b;background:rgba(211,47,47,.05)}
+  .hubT.unread{border-color:var(--brand,#F7C948);background:rgba(247,201,72,.10)}
+  .hubT b.tt{font-size:15px;display:block}
+  .hubT .mt{font-size:13px;color:var(--muted);margin-top:3px}
+  .hubT .dt{font-size:14px;margin-top:8px;white-space:pre-wrap}
+  .hubT .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+  .hubT .row input{flex:1;min-width:160px;padding:8px 10px;font-size:14px}
+  .hubT .row button{padding:8px 14px;font-size:14px}
+  .st{font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px;background:var(--line)}
+  .st.done{background:#e6f4ea;color:#17652a}.st.late{background:#fff1cc;color:#7a5200}.st.overdue{background:#fdecea;color:#8a1c12}
+  .hubEmptyT{color:var(--muted);font-size:14px;padding:6px 2px 10px}
+  .tmini{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:7px 0;border-bottom:1px solid var(--line)}
+  .nbadge{display:inline-block;min-width:18px;padding:0 5px;margin-left:6px;border-radius:999px;background:#d32f2f;color:#fff;font-size:12px;line-height:18px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -503,6 +518,21 @@
       <div id="tmBox"></div>
     </div>
 
+    <!-- TEAM HUB (tasks and rules; server side in Hub.gs) -->
+    <div class="card" id="hubCard" hidden>
+      <h2 style="margin:0 0 2px;font-size:18px">Team hub</h2>
+      <p class="hint" style="margin:0 0 12px">Tasks and rules from the seniors.</p>
+      <div id="hubMsgT"></div>
+      <h3 class="hubH">My tasks</h3>
+      <div id="hubMine"></div>
+      <h3 class="hubH">Rules</h3>
+      <div id="hubRulesT"></div>
+      <div id="hubTeamWrap" hidden>
+        <h3 class="hubH">Team tasks <span class="hint">(shared tasks of your colleagues)</span></h3>
+        <div id="hubTeamT"></div>
+      </div>
+    </div>
+
     <!-- COMING SOON -->
     <div class="card soon" id="soon" hidden></div>
 
@@ -609,6 +639,67 @@ async function post(action, data) {
   return out;
 }
 
+// ---------- Team hub (tasks and rules from the seniors) ----------
+let HUB_T = { enabled: false };
+const hubEsc = t => String(t == null ? '' : t).replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
+const HUB_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], HUB_MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const hubDay = s => { if (!s) return ''; const [y, m, d] = s.slice(0, 10).split('-').map(Number); const dt = new Date(y, m - 1, d); return `${HUB_DAYS[dt.getDay()]} ${d} ${HUB_MON[m - 1]}`; };
+const HUB_STATE = { done: 'Done', late: 'Done late', overdue: 'Overdue', pending: 'Due' };
+
+async function hubLoad() {
+  if (!me) return;
+  try { HUB_T = await post('hubMy', session()); } catch (e) { return; }
+  const tab = document.querySelector('#nav .tab[data-sec="team"]');
+  if (tab) tab.innerHTML = HUB_T.enabled ? 'Team hub' + (HUB_T.badge ? `<span class="nbadge">${HUB_T.badge}</span>` : '') : 'Team hub<small>coming soon</small>';
+  if (section === 'team') { $('soon').hidden = HUB_T.enabled; $('hubCard').hidden = !HUB_T.enabled; }
+  if (HUB_T.enabled) hubDraw();
+}
+
+function hubDraw() {
+  const H = HUB_T;
+  $('hubMine').innerHTML = H.tasks.length ? H.tasks.map(t => {
+    const isDone = t.state === 'done' || t.state === 'late';
+    return `<div class="hubT ${t.state === 'overdue' ? 'overdue' : ''}">
+      <b class="tt">${hubEsc(t.title)}</b>
+      <div class="mt"><span class="st ${t.state}">${HUB_STATE[t.state]} ${hubDay(t.occurrence)}</span> · from ${hubEsc(String(t.by).split(' ')[0])}${t.kind === 'reporting' ? ' · reporting' : ''}</div>
+      ${t.details ? `<div class="dt">${hubEsc(t.details)}</div>` : ''}
+      ${isDone ? `<div class="row"><span class="mt">✓ Marked done ${hubDay(t.done)} ${hubEsc(t.done.slice(11, 16))}${t.note ? ' · “' + hubEsc(t.note) + '”' : ''}</span>
+          <button class="ghost" type="button" data-undo="${t.id}" data-occ="${t.occurrence}">Undo</button></div>`
+        : `<div class="row"><input placeholder="Note (optional)" maxlength="300" data-note="${t.id}|${t.occurrence}">
+          <button type="button" data-done="${t.id}" data-occ="${t.occurrence}">Mark done</button></div>`}
+    </div>`;
+  }).join('') : '<div class="hubEmptyT">No tasks for you right now.</div>';
+  $('hubRulesT').innerHTML = H.rules.length ? H.rules.map(r => `<div class="hubT ${r.read ? '' : 'unread'}">
+      <b class="tt">${hubEsc(r.title)}</b>
+      <div class="mt">from ${hubEsc(String(r.by).split(' ')[0])} · ${hubDay(r.created)}${r.read ? ' · read ' + hubDay(r.read) : ''}</div>
+      <div class="dt">${hubEsc(r.text)}</div>
+      ${r.read ? '' : `<div class="row"><button type="button" data-read="${r.id}">I've read it</button></div>`}
+    </div>`).join('') : '<div class="hubEmptyT">No rules yet.</div>';
+  $('hubTeamWrap').hidden = !H.team.length;
+  $('hubTeamT').innerHTML = H.team.map(x => `<div class="tmini"><span>${hubEsc(x.title)} · <b>${hubEsc(x.teacher)}</b></span><span><span class="st ${x.state}">${HUB_STATE[x.state]} ${hubDay(x.occurrence)}</span></span></div>`).join('');
+}
+
+document.addEventListener('click', async e => {
+  const done = e.target.closest('#hubMine [data-done]'), undo = e.target.closest('#hubMine [data-undo]'), read = e.target.closest('#hubRulesT [data-read]');
+  if (!done && !undo && !read) return;
+  const btn = done || undo || read; btn.disabled = true;
+  try {
+    if (done) {
+      const note = (document.querySelector(`[data-note="${done.dataset.done}|${done.dataset.occ}"]`) || {}).value || '';
+      await post('hubTaskDone', { ...session(), task: done.dataset.done, occurrence: done.dataset.occ, note });
+    } else if (undo) {
+      if (!confirm('Undo “done” for this task?')) { btn.disabled = false; return; }
+      await post('hubTaskDone', { ...session(), task: undo.dataset.undo, occurrence: undo.dataset.occ, undo: true });
+    } else {
+      await post('hubRuleRead', { ...session(), rule: read.dataset.read });
+    }
+    await hubLoad();
+  } catch (err) {
+    btn.disabled = false;
+    $('hubMsgT').innerHTML = `<div class="msg err">${hubEsc(err.message)}</div>`;
+  }
+});
+
 // True when the PIN or name was refused (wrong, changed, or locked out).
 const isAuthError = e => /Wrong name or PIN|Too many wrong PINs/.test(e.message);
 
@@ -639,6 +730,7 @@ function showGate(note) {
 function showApp() {
   gate.hidden = true;
   app.hidden = false;
+  setTimeout(hubLoad, 400);   // Team hub badge
   $('whoName').textContent = me;
   fillClassSelect();
   fillMineClasses();
@@ -815,7 +907,10 @@ function showSection() {
   $('evalTabs').hidden = !isEval;
   $('gradeTabs').hidden = !isGrade;
   const isTime = section === 'time';
-  $('soon').hidden = isEval || isGrade || isTime;
+  const isHub = section === 'team' && HUB_T.enabled;
+  $('soon').hidden = isEval || isGrade || isTime || isHub;
+  $('hubCard').hidden = !isHub;
+  if (section === 'team') hubLoad();
   $('tCard').hidden = !isTime;
   if (!isTime) $('tmCard').hidden = true;
   if (isTime) tLoad();
