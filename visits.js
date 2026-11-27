@@ -29,29 +29,61 @@
   }
 
   const CSS = `
-.vForm h4{margin:18px 0 6px;font-size:15px}
-.vForm .vDom{border:1px solid var(--line);border-radius:12px;margin:10px 0;overflow:hidden}
-.vForm .vDomH{display:flex;justify-content:space-between;gap:8px;background:var(--brand-soft,#FFF3C4);padding:8px 12px;font-weight:600;font-size:14px}
-.vForm .vDomH span{font-weight:500;color:var(--muted)}
-.vForm .vIt{padding:9px 12px;border-top:1px solid var(--line)}
-.vForm .vIt:first-of-type{border-top:0}
-.vForm .vTx{font-size:14px;margin-bottom:6px}
-.vForm .vRate{display:flex;flex-wrap:wrap;gap:6px}
-.vForm .vRate label{display:inline-flex;align-items:center;gap:0;margin:0;cursor:pointer}
-.vForm .vRate input{position:absolute;opacity:0;width:1px;height:1px}
-.vForm .vRate span{display:inline-block;min-width:40px;text-align:center;padding:6px 9px;border:1px solid var(--line);border-radius:8px;font-size:13px;font-weight:600;background:var(--card);color:var(--ink)}
-.vForm .vRate input:checked+span{background:#1d1d1d;color:var(--brand,#F7C948);border-color:#1d1d1d}
-.vForm .vRate input:focus-visible+span{outline:2px solid var(--brand-dark,#D9A900)}
-.vForm .vRate.safe input[value=no]:checked+span{background:#d32f2f;color:#fff;border-color:#d32f2f}
-.vForm .vNote{width:100%;margin-top:6px;padding:7px 9px;font-size:13px}
-.vForm .vStrat{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:4px 12px;font-size:13px}
-.vForm .vStrat label{display:flex;gap:6px;align-items:center;margin:0;color:var(--ink)}
-.vForm .vStrat input{width:auto;margin:0}
-.vForm textarea{width:100%}
-.vForm .vTexts label{display:block;font-size:13px;color:var(--muted);margin:10px 0 0}
-.vForm .vTexts{margin-bottom:14px}
-.vScore{position:sticky;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 0;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;z-index:2}
-.vScore b{font-size:18px}
+.vWiz{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-start}
+.vRail{flex:1 1 250px;max-width:300px;min-width:0;display:flex;flex-direction:column;gap:12px;position:sticky;top:76px}
+.vOverall{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.vOverall .l{font-size:12.5px;color:var(--muted)}
+.vOverall .n b{font-size:32px;letter-spacing:-.02em}.vOverall .n span{color:var(--muted);font-size:15px}
+.vOverall .p{font-size:13px;font-weight:600;color:var(--brand-dark,#9A7400)}
+.vOverall .bar{height:8px;border-radius:99px;background:var(--line);margin-top:10px;overflow:hidden}
+.vOverall .bar i{display:block;height:100%;width:0;background:var(--brand,#F7C948);border-radius:99px;transition:width .2s}
+.vSteps{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px;display:flex;flex-direction:column}
+.vSteps button{display:flex;justify-content:space-between;gap:8px;align-items:center;text-align:left;border:0;background:transparent;color:var(--ink);font:inherit;font-size:14px;padding:11px 12px;border-radius:9px;cursor:pointer;min-height:44px}
+.vSteps button:hover{background:var(--bg)}
+.vSteps button.on{background:var(--brand-soft,#FEF6DA);font-weight:600}
+.vSteps button b{font-weight:600;color:var(--muted);white-space:nowrap}
+.vSteps button.done b{color:var(--ink)}
+.vSteps button b.bad{color:#d32f2f}
+.vPane{flex:3 1 460px;min-width:0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px 24px;scroll-margin-top:80px}
+.vStepH{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:6px}
+.vStepH h3{margin:0;font-size:20px;letter-spacing:-.01em}
+.vStepH span{font-size:13px;color:var(--muted)}.vStepH span b{font-weight:600;color:var(--ink)}
+.vScale{margin:6px 0 4px;font-size:13px;color:var(--muted)}
+.vIt{padding:18px 0;border-bottom:1px solid var(--line)}
+.vTx{font-size:15px;margin-bottom:10px;line-height:1.45}
+.vRate{display:grid;grid-template-columns:repeat(var(--n,5),minmax(0,1fr));gap:6px}
+.vRate.n5{--n:5}.vRate.n4{--n:4}.vRate.n3{--n:3}.vRate.n2{--n:2}
+.vRate label{margin:0;cursor:pointer;display:block}
+.vRate input{position:absolute;opacity:0;width:1px;height:1px}
+.vRate span{display:flex;align-items:center;justify-content:center;height:48px;border:1px solid var(--line);border-radius:10px;font-size:16px;font-weight:600;background:var(--card);color:var(--ink)}
+.vRate label:hover span{border-color:var(--muted)}
+.vRate input:checked+span{background:#18181B;color:#F7C948;border-color:#18181B;font-weight:700}
+.vRate input:focus-visible+span{outline:2px solid var(--brand-dark,#D9A900);outline-offset:2px}
+.vRate.safe input[value=no]:checked+span{background:#d32f2f;color:#fff;border-color:#d32f2f}
+.vRate.safe input[value=yes]:checked+span{background:#17652a;color:#fff;border-color:#17652a}
+.vKind{margin:16px 0 6px}.vKind span{font-size:14px}
+.vAddNote{border:0;background:none;padding:10px 0 0;font:inherit;font-size:13px;font-weight:600;color:var(--brand-dark,#9A7400);cursor:pointer}
+.vNote{width:100%;box-sizing:border-box;margin-top:10px;height:42px;padding:0 12px;font-size:14px;border-radius:10px}
+.vPane h4{margin:20px 0 10px;font-size:15px}.vPane h4 span{font-weight:400;color:var(--muted);font-size:13px}
+.vChips{display:flex;flex-wrap:wrap;gap:8px}
+.vChips label{margin:0;cursor:pointer}
+.vChips input{position:absolute;opacity:0;width:1px;height:1px}
+.vChips span{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border:1px solid var(--line);border-radius:99px;font-size:14px;color:var(--ink);background:var(--card)}
+.vChips input:checked+span{background:#18181B;color:#fff;border-color:#18181B}
+.vChips input:focus-visible+span{outline:2px solid var(--brand-dark,#D9A900)}
+.vTexts label{display:block;font-size:13px;color:var(--muted);margin:16px 0 0}
+.vTexts textarea{width:100%;box-sizing:border-box;margin-top:6px;border-radius:10px;padding:10px 12px;font:inherit;font-size:14px}
+.vNav{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:22px}
+.vNav .btn{min-height:44px}
+.vDone{font-size:13px;color:var(--muted)}
+@media (max-width:760px){
+ .vRail{position:static;max-width:none;flex-basis:100%}
+ .vSteps{flex-direction:row;overflow-x:auto;gap:4px}
+ .vSteps button{flex:0 0 auto;flex-direction:column;align-items:flex-start;gap:2px;font-size:13px}
+ .vPane{padding:18px 16px;flex-basis:100%}
+ .vWiz{gap:12px}
+ .vRate span{height:52px}
+}
 .vRep table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
 .vRep th{text-align:left;color:var(--muted);font-weight:600;font-size:12px;padding:6px 8px;border-bottom:1px solid var(--line)}
 .vRep td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -69,56 +101,110 @@
     const s = document.createElement('style'); s.id = 'visitCss'; s.textContent = CSS; document.head.appendChild(s);
   }
 
-  // ----- the form, to fill in (admin page) -----
+  // ----- the form, to fill in (admin page): one area at a time -----
   // visit: { form, workshop, answers, strengths, improve, next }; onChange(score) is called on every change
+  const band = p => p === null ? '' : p >= 85 ? 'Excellent' : p >= 70 ? 'Good' : p >= 50 ? 'Developing' : 'Needs improvement';
   function editor(box, forms, visit, onChange) {
     addCss();
     const a = visit.answers || {}, items = a.items || {}, notes = a.notes || {}, safety = a.safety || {};
     const strat = a.strategies || [], kind = visit.workshop || 'electrical';
-    const radios = (name, val, scale, cls) => `<div class="vRate ${cls || ''}">${scale.map(([v, label]) =>
-      `<label title="${esc(label)}"><input type="radio" name="${name}" value="${v}" ${String(val) === String(v) ? 'checked' : ''}><span>${esc(cls === 'safe' ? label : (typeof v === 'number' && visit.form === 'workshop' ? LETTER[v] : (v === 'NO' ? 'N/O' : v)))}</span></label>`).join('')}</div>`;
-    let html = '<div class="vForm">';
-    if (visit.form === 'class') {
-      const F = forms.class;
-      html += `<p class="hint">4 Excellent · 3 Good · 2 Developing · 1 Needs improvement · N/O Not observed (not counted)</p>`;
-      F.domains.forEach(d => {
-        html += `<div class="vDom"><div class="vDomH">${esc(d.id + '. ' + d.name)} <span>${d.weight}%</span></div>`;
-        d.items.forEach((t, i) => {
-          const k = d.id + '.' + (i + 1);
-          html += `<div class="vIt"><div class="vTx">${esc(t)}</div>${radios('it' + k, items[k], F.scale)}
-            <input class="vNote" data-note="${k}" placeholder="Evidence / notes (optional)" value="${esc(notes[k] || '')}"></div>`;
-        });
-        html += '</div>';
-      });
-      html += `<h4>Teaching strategies used <span class="hint">(for reference, not scored)</span></h4><div class="vStrat">${F.strategies.map(s =>
-        `<label><input type="checkbox" data-strat="${esc(s)}" ${strat.indexOf(s) !== -1 ? 'checked' : ''}> ${esc(s)}</label>`).join('')}</div>
-        <input class="vNote" data-other placeholder="Other strategy" value="${esc(a.other || '')}">`;
+    const isClass = visit.form === 'class', F = forms[visit.form];
+    const rate = (name, val, scale, safe) => `<div class="vRate n${scale.length}${safe ? ' safe' : ''}">${scale.map(([v, label]) => {
+      const txt = safe ? label : (typeof v === 'number' && !isClass ? LETTER[v] : (v === 'NO' ? 'N/O' : v));
+      return `<label title="${esc(label)}"><input type="radio" name="${name}" value="${v}" ${String(val) === String(v) ? 'checked' : ''}><span>${esc(txt)}</span></label>`;
+    }).join('')}</div>`;
+    const noteBox = k => `<div class="vNoteWrap">${notes[k] ? '' : '<button type="button" class="vAddNote">+ Evidence / note</button>'}
+      <input class="vNote" data-note="${k}" placeholder="Evidence / note (optional)" value="${esc(notes[k] || '')}" ${notes[k] ? '' : 'hidden'}></div>`;
+    const item = (text, inner, word) => `<div class="vIt"><div class="vTx">${word ? `<span data-word="${esc(text)}">${esc(hubWordFor(text, kind))}</span>` : esc(text)}</div>${inner}</div>`;
+    // the steps
+    const steps = [];
+    if (isClass) {
+      F.domains.forEach(d => steps.push({ key: 'd' + d.id, name: d.id + ' · ' + d.name, weight: d.weight,
+        body: `<p class="vScale">4 Excellent · 3 Good · 2 Developing · 1 Needs improvement · N/O not counted</p>` +
+          d.items.map((t, i) => { const k = d.id + '.' + (i + 1); return item(t, rate('it' + k, items[k], F.scale) + noteBox(k)); }).join(''),
+        keys: d.items.map((_, i) => d.id + '.' + (i + 1)) }));
+      steps.push({ key: 'fb', name: 'Strategies & feedback', body:
+        `<h4>Teaching strategies used <span>(not scored)</span></h4><div class="vChips">${F.strategies.map(s =>
+          `<label><input type="checkbox" data-strat="${esc(s)}" ${strat.indexOf(s) !== -1 ? 'checked' : ''}><span>${esc(s)}</span></label>`).join('')}</div>
+         <input class="vNote" data-other placeholder="Other strategy" value="${esc(a.other || '')}">` });
     } else {
-      const F = forms.workshop;
-      html += `<div class="vRate" style="margin:4px 0 10px">${['electrical', 'mechanical'].map(k =>
-        `<label><input type="radio" name="vKind" value="${k}" ${kind === k ? 'checked' : ''}><span>${k === 'electrical' ? 'Electrical workshop' : 'Mechanical workshop'}</span></label>`).join('')}</div>
-        <p class="hint">E Excellent · G Good · S Satisfactory · NI Needs improvement</p><div class="vDom">`;
-      F.items.forEach((t, i) => {
-        const k = String(i + 1);
-        html += `<div class="vIt"><div class="vTx">${i + 1}. <span data-word="${esc(t)}">${esc(word(t, kind))}</span></div>${radios('it' + k, items[k], F.scale)}</div>`;
-      });
-      html += `</div><h4>${esc(F.safetyTitle)} <span class="hint">(a “No” creates a safety task for the teacher)</span></h4><div class="vDom">`;
-      F.safety.forEach((t, i) => {
-        const k = String(i + 1);
-        html += `<div class="vIt"><div class="vTx"><span data-word="${esc(t)}">${esc(word(t, kind))}</span></div>${radios('sf' + k, safety[k], [['yes', 'Yes'], ['no', 'No'], ['na', 'N/A']], 'safe')}</div>`;
-      });
-      html += '</div>';
+      const half = Math.ceil(F.items.length / 2);
+      const crit = (from, to) => F.items.slice(from, to).map((t, j) => { const i = from + j, k = String(i + 1);
+        return item(t, rate('it' + k, items[k], F.scale), true).replace('<div class="vTx">', `<div class="vTx"><b>${i + 1}.</b> `); }).join('');
+      steps.push({ key: 'w1', name: `Criteria 1–${half}`, keys: F.items.slice(0, half).map((_, i) => String(i + 1)),
+        body: `<div class="vRate n2 vKind">${['electrical', 'mechanical'].map(k => `<label><input type="radio" name="vKind" value="${k}" ${kind === k ? 'checked' : ''}><span>${k === 'electrical' ? 'Electrical workshop' : 'Mechanical workshop'}</span></label>`).join('')}</div>
+          <p class="vScale">E Excellent · G Good · S Satisfactory · NI Needs improvement</p>` + crit(0, half) });
+      steps.push({ key: 'w2', name: `Criteria ${half + 1}–${F.items.length}`, keys: F.items.slice(half).map((_, i) => String(half + i + 1)),
+        body: `<p class="vScale">E Excellent · G Good · S Satisfactory · NI Needs improvement</p>` + crit(half, F.items.length) });
+      steps.push({ key: 'sf', name: 'Safety check', safety: F.safety.map((_, i) => String(i + 1)),
+        body: `<p class="vScale">Each “No” creates a safety task for the teacher, due in 3 days.</p>` + F.safety.map((t, i) =>
+          item(t, rate('sf' + (i + 1), safety[String(i + 1)], [['yes', 'Yes'], ['no', 'No'], ['na', 'N/A']], true), true)).join('') });
+      steps.push({ key: 'fb', name: 'Feedback', body: '' });
     }
-    const T = forms[visit.form].texts;
-    html += `<div class="vTexts">${T.map(([k, label]) => `<label>${esc(label)}<textarea rows="2" data-text="${k}">${esc(visit[k] || '')}</textarea></label>`).join('')}</div></div>`;
-    box.innerHTML = html;
-    const fire = () => onChange && onChange(score(forms, visit.form, read(box, forms, visit).answers));
-    box.addEventListener('change', e => {
-      if (e.target.name === 'vKind') box.querySelectorAll('[data-word]').forEach(s => { s.textContent = word(s.dataset.word, e.target.value); });
-      fire();
-    });
-    fire();
+    const texts = `<div class="vTexts">${F.texts.map(([k, label]) => `<label>${esc(label)}<textarea rows="3" data-text="${k}">${esc(visit[k] || '')}</textarea></label>`).join('')}</div>`;
+    steps[steps.length - 1].body += texts;
+
+    box.innerHTML = `<div class="vWiz">
+      <aside class="vRail">
+        <div class="vOverall"><div class="l">Overall${isClass ? ' (weighted)' : ''}</div><div class="n"><b data-ov>—</b> <span>/ 4</span></div>
+          <div class="p" data-pct></div><div class="bar"><i data-bar></i></div></div>
+        <nav class="vSteps" aria-label="Areas">${steps.map((s, i) => `<button type="button" data-go="${i}"><span>${esc(s.name)}</span><b data-st="${i}"></b></button>`).join('')}</nav>
+      </aside>
+      <section class="vPane">${steps.map((s, i) => `<div class="vStep" data-step="${i}" ${i ? 'hidden' : ''}>
+        <div class="vStepH"><h3>${esc(s.name)}</h3>${s.weight ? `<span>Weight ${s.weight}%<b data-sc="${i}"></b></span>` : ''}</div>
+        ${s.body}
+        <div class="vNav">${i ? `<button type="button" class="btn alt" data-go="${i - 1}">← ${esc(steps[i - 1].name.replace(/^\d+ · /, ''))}</button>` : '<span></span>'}
+          ${i < steps.length - 1 ? `<button type="button" class="btn save" data-go="${i + 1}">Next: ${esc(steps[i + 1].name.replace(/^\d+ · /, ''))} →</button>` : '<span class="vDone">Last step. Press “Send report” at the top when you are ready.</span>'}</div>
+      </div>`).join('')}</section></div>`;
+
+    let cur = 0;
+    const go = i => {
+      cur = i;
+      box.querySelectorAll('.vStep').forEach(s => { s.hidden = Number(s.dataset.step) !== i; });
+      box.querySelectorAll('.vSteps [data-go]').forEach(b => b.classList.toggle('on', Number(b.dataset.go) === i));
+      const pane = box.querySelector('.vPane'); if (pane) pane.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    };
+    const refresh = () => {
+      const r = read(box, forms, visit), sc = score(forms, visit.form, r.answers);
+      box.querySelector('[data-ov]').textContent = sc.avg === null ? '—' : sc.avg.toFixed(2);
+      box.querySelector('[data-pct]').textContent = sc.pct === null ? 'Nothing rated yet' : sc.pct + '% · ' + band(sc.pct);
+      box.querySelector('[data-bar]').style.width = (sc.pct || 0) + '%';
+      steps.forEach((s, i) => {
+        const el = box.querySelector(`[data-st="${i}"]`), scEl = box.querySelector(`[data-sc="${i}"]`);
+        let txt = '', done = false;
+        if (isClass && s.weight) {
+          const p = sc.per.find(x => x.name === F.domains[i].name);
+          const rated = s.keys.filter(k => r.answers.items[k] !== undefined).length;
+          done = rated === s.keys.length;
+          txt = rated === 0 ? '—' : done ? (p.avg === null ? 'N/O' : p.avg.toFixed(2)) : `${rated} of ${s.keys.length}`;
+          if (scEl) scEl.textContent = p.avg === null ? '' : ' · area score ' + p.avg.toFixed(2);
+        } else if (s.keys) {
+          const rated = s.keys.filter(k => r.answers.items[k] !== undefined).length;
+          done = rated === s.keys.length; txt = rated === 0 ? '—' : `${rated} of ${s.keys.length}`;
+        } else if (s.safety) {
+          const vals = s.safety.map(k => r.answers.safety[k]).filter(Boolean), nos = vals.filter(v => v === 'no').length;
+          done = vals.length === s.safety.length; txt = nos ? `${nos} No` : vals.length ? `${vals.length} of ${s.safety.length}` : '—';
+          el.classList.toggle('bad', nos > 0);
+        } else {
+          const n = ['strengths', 'improve', 'next'].filter(k => r[k]).length;
+          done = n === 3; txt = n ? `${n} of 3` : '—';
+        }
+        el.textContent = txt; el.parentElement.classList.toggle('done', done);
+      });
+      onChange && onChange(sc, r);
+    };
+    box.onclick = e => {
+      const g = e.target.closest('[data-go]'); if (g) { go(Number(g.dataset.go)); return; }
+      const n = e.target.closest('.vAddNote'); if (n) { const inp = n.parentElement.querySelector('.vNote'); inp.hidden = false; n.remove(); inp.focus(); }
+    };
+    box.onchange = e => {
+      if (e.target.name === 'vKind') box.querySelectorAll('[data-word]').forEach(s => { s.textContent = hubWordFor(s.dataset.word, e.target.value); });
+      refresh();
+    };
+    box.oninput = e => { if (e.target.matches('textarea,.vNote')) refresh(); };
+    go(0); refresh();
   }
+  const hubWordFor = (t, k) => word(t, k);
 
   // reads the filled form back
   function read(box, forms, visit) {

@@ -66,6 +66,18 @@
 .hubAct .btn{padding:6px 12px;font-size:13px}
 .hubWarn{font-size:13px;color:var(--err-ink);margin-top:8px}
 .tag.safety{background:#fdecea;color:#8a1c12}
+.ovl.vFull{padding:0;background:var(--bg);align-items:stretch;overflow:auto}
+.ovl.vFull .ovlCard{max-width:none;width:100%;max-height:none;min-height:100%;border-radius:0;padding:0;background:var(--bg);box-shadow:none;overflow:visible}
+.vTop{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
+.vTopIn{max-width:1180px;margin:0 auto;padding:12px 24px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.vTopIn h2{margin:0;font-size:16px}
+.vTopInfo{font-size:14px;color:var(--muted)}
+.vTopInfo .pill{display:inline-block;margin-left:6px;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;background:#EEF4FF;color:#1E40AF}
+.vTopMsg{margin-left:auto;font-size:13px;color:var(--muted)}
+.vTopIn .btn{min-height:42px}
+.vBody{max-width:1180px;margin:0 auto;padding:22px 24px 60px;box-sizing:border-box}
+@media (max-width:760px){.vBody{padding:14px 12px 60px}.vTopIn{padding:10px 12px}.vTopMsg{margin-left:0;flex-basis:100%;order:9}}
+.vBody #visitHead:not(:empty){background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px 6px;margin-bottom:18px}
 .vHead{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0 12px;margin-bottom:6px}
 .vHead label{display:block;font-size:13px;color:var(--muted);margin:0 0 10px}
 .vHead label input,.vHead label select{margin-top:4px}
@@ -4309,13 +4321,20 @@ if (ADMIN_KEY) adminStart();
 else adminGateShow(gateNote);
 </script>
 <!-- TEAM HUB: fill in / view a class visit -->
-<div class="ovl" id="visitOvl" data-keep="1" hidden>
-  <div class="ovlCard wide" role="dialog" aria-labelledby="visitTitle">
-    <div class="ovlHead"><h2 id="visitTitle">Class visit</h2><button class="btn alt" type="button" data-close>✕</button></div>
-    <div id="visitHead"></div>
-    <div id="visitFormBox"></div>
-    <div class="vScore"><span>Result: <b id="visitScore">—</b></span><span id="visitMsg"></span>
-      <button class="btn save" type="button" id="visitSave">Save report</button></div>
+<div class="ovl vFull" id="visitOvl" data-keep="1" hidden>
+  <div class="ovlCard" role="dialog" aria-labelledby="visitTitle">
+    <div class="vTop"><div class="vTopIn">
+      <button class="btn alt" type="button" data-close>← Class visits</button>
+      <h2 id="visitTitle">Class visit</h2>
+      <div id="visitInfo" class="vTopInfo"></div>
+      <span id="visitMsg" class="vTopMsg"></span>
+      <span hidden>Result: <b id="visitScore">—</b></span>
+      <button class="btn save" type="button" id="visitSave">Send report</button>
+    </div></div>
+    <div class="vBody">
+      <div id="visitHead"></div>
+      <div id="visitFormBox"></div>
+    </div>
   </div>
 </div>
 <div class="ovl" id="visitViewOvl" hidden>
@@ -4457,8 +4476,14 @@ else adminGateShow(gateNote);
   function openEditor(v) {
     EDIT = v;
     const unplanned = !v.id;
-    $('visitTitle').textContent = unplanned ? 'Unplanned class visit' : 'Class visit · ' + v.teacher;
+    $('visitTitle').textContent = unplanned ? 'Unplanned class visit' : v.teacher;
     $('visitMsg').textContent = '';
+    $('visitInfo').innerHTML = unplanned ? '' : `${v.cls ? esc(v.cls) + ' · ' : ''}${v.session ? 'session ' + v.session + ' · ' : ''}${day(v.date)}${v.by ? ' · observer ' + esc(v.by) : ''}<span class="pill">${v.planned === 'planned' ? 'Scheduled' : 'Unscheduled'}${v.follows ? ' · Follow-up' : ''}</span>`;
+    // a draft left from earlier (saved automatically on this device)
+    const dr = draftGet(v);
+    if (dr && !(v.answers && v.answers.items && Object.keys(v.answers.items).length) && confirm('You have an unfinished draft of this visit on this device. Continue it?')) {
+      v = EDIT = Object.assign({}, v, { answers: dr.answers, strengths: dr.strengths, improve: dr.improve, next: dr.next, workshop: dr.workshop || v.workshop });
+    }
     if (unplanned) {
       $('visitHead').innerHTML = `<div class="vHead">
         <label>Teacher <select id="uvTeacher">${HUB.teachers.map(n => `<option>${esc(n)}</option>`).join('')}</select></label>
@@ -4471,14 +4496,22 @@ else adminGateShow(gateNote);
       $('uvTeacher').onchange = () => fillFollows($('uvFollows'), $('uvTeacher').value, '');
       $('uvForm').onchange = () => { EDIT.form = $('uvForm').value; drawForm(); };
     } else {
-      $('visitHead').innerHTML = `<p class="vInfo"><b>${day(v.date)}</b>${v.session ? ' · session ' + v.session : ''}${v.cls ? ' · ' + esc(v.cls) : ''} · ${v.planned === 'planned' ? 'Scheduled' : 'Unscheduled'}${v.follows ? ' · Follow-up' : ''}</p>`;
+      $('visitHead').innerHTML = '';
     }
     drawForm();
     $('visitOvl').hidden = false;
   }
   function drawForm() {
-    VISIT.editor($('visitFormBox'), HUB.forms, EDIT, sc => { $('visitScore').textContent = sc.pct === null ? '—' : sc.pct + '%'; });
+    let t = null;
+    VISIT.editor($('visitFormBox'), HUB.forms, EDIT, (sc, r) => {
+      $('visitScore').textContent = sc.pct === null ? '—' : sc.pct + '%';
+      clearTimeout(t); t = setTimeout(() => { draftPut(EDIT, r); $('visitMsg').textContent = 'Draft saved on this device'; }, 600);
+    });
   }
+  const draftKey = v => 'visitDraft:' + (v.id || 'new');
+  const draftGet = v => { try { return JSON.parse(localStorage.getItem(draftKey(v)) || 'null'); } catch (e) { return null; } };
+  const draftPut = (v, r) => { try { if (Object.keys(r.answers.items).length || r.strengths || r.improve || r.next) localStorage.setItem(draftKey(v), JSON.stringify(r)); } catch (e) {} };
+  const draftDrop = v => { try { localStorage.removeItem(draftKey(v)); } catch (e) {} };
   $('hubUnplanned').onclick = () => { if (needSenior()) openEditor({ form: 'class', planned: 'unplanned', answers: {} }); };
   $('visitSave').onclick = async () => {
     if (!needSenior()) return;
@@ -4489,6 +4522,7 @@ else adminGateShow(gateNote);
     $('visitSave').disabled = true; $('visitMsg').textContent = 'Saving…';
     try {
       const out = await post('hubVisitReport', { visit, senior: senior() });
+      draftDrop(EDIT);
       $('visitOvl').hidden = true;
       say('Report saved (' + out.score + '%).' + (out.safetyTasks ? ` ${out.safetyTasks} safety task${out.safetyTasks > 1 ? 's were' : ' was'} added for the teacher.` : ''), true);
       await load();
