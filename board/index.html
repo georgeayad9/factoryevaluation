@@ -58,6 +58,8 @@ select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-s
   @page{size:A4 landscape;margin:12mm}
 }
 .embedded #signOut{display:none !important}
+.copyFoot{text-align:center;font-size:12px;color:var(--muted,#888);padding:24px 12px 30px}@media print{.copyFoot{display:none !important}}
+.embedded .copyFoot{display:none !important}
 .range{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 6px}
 .range .chip{padding:7px 12px;border-radius:999px;border:1px solid var(--border);background:var(--card);color:var(--ink);cursor:pointer;font-size:13px}
 .range .chip.on{background:#1d1d1d;color:var(--brand);border-color:#1d1d1d;font-weight:600}
@@ -924,5 +926,6 @@ window.addEventListener("message", e => {
 });
 if (window.parent !== window) window.parent.postMessage({ type: "omhg-board-ready" }, "*");
 </script>
+<footer class="copyFoot">© 2026 George Ayad · OMHG EVA SCHOOL · All rights reserved</footer>
 </body>
 </html>
