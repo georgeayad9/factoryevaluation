@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OMHG EVA SCHOOL · Board overview</title>
+<script src="../config.js"></script>
 <style>
 :root{--brand:#F7C948;--brand-dark:#D9A900;--brand-tint:#FFF8E1;--bg:#FBF8EE;--card:#ffffff;--ink:#1d1d1d;--muted:#666666;--line:#e6e9ee;--border:#ccd3db;--red:#d32f2f;--red-bg:#fdecea;--bar:#F7C948}
 [data-theme="dark"]{--bg:#16161a;--card:#22222a;--ink:#f2f2f2;--muted:#a8a8b3;--line:#33333d;--border:#4a4a56;--brand-tint:#2e2a18;--red-bg:#3a1e1e;--bar:#E0B232}
@@ -224,7 +225,8 @@ select,input{padding:8px;border:1px solid var(--border);border-radius:8px;font-s
 <script>
 // ===================== SETTINGS =====================
 // The web app URL of the tracker (ends with /exec). Not secret: data needs the board password.
-const BOARD_URL = "https://script.google.com/macros/s/AKfycbzXI1B0s_Hr2np_BiJlc0ibmYsMIoL2yaxOaIzYqogtfAdUXbe7wBUfGdaF_qf0wmchRg/exec";
+// The server address comes from ../config.js (shared with the other pages); the address below is only a fallback.
+const BOARD_URL = (window.FEEDBACK_CONFIG && window.FEEDBACK_CONFIG.url) || "https://script.google.com/macros/s/AKfycbzXI1B0s_Hr2np_BiJlc0ibmYsMIoL2yaxOaIzYqogtfAdUXbe7wBUfGdaF_qf0wmchRg/exec";
 // =====================================================
 
 const EVALS = ["Outstanding", "Proficient", "Developing", "Needs Improvement", "Unsatisfactory", "Absent"];
