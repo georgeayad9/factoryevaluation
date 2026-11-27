@@ -590,6 +590,42 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
 .tmDay{border-color:var(--line) !important;border-radius:10px}
 .tmDay.on{background:#18181B !important;color:#fff !important;border-color:#18181B !important}.tmDay.on small{color:#D4D4D8 !important}
 @media (max-width:700px){#paneTT .ttBar{position:static}.ttBarIn > select{flex:1 1 100%}}
+/* ---------- assessments ---------- */
+.asTop{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:4px 0 12px}
+.asH1{margin:0;font-size:26px}.asBtns{display:flex;gap:8px;flex-wrap:wrap}
+.asFilters{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;padding:12px 14px}
+.asFilters label{display:flex;flex-direction:column;font-size:12px;color:var(--muted);gap:3px;margin:0}
+.asFilters select,.asFilters input{min-width:0;max-width:170px}
+.asLegend{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font-size:13px;color:var(--muted);margin:0 0 10px}
+.asLegend label.asOnlyF{margin:0 0 0 auto;display:flex;gap:6px;align-items:center;white-space:nowrap;font-size:13px;color:var(--ink)}.asLegend label.asOnlyF input{width:auto;margin:0}
+.asL{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:24px;padding:0 5px;border-radius:7px;font-weight:700;font-size:13px}
+.asL.A{background:#DCFCE7;color:#14532D}.asL.B{background:#ECFCCB;color:#3F6212}.asL.C{background:#FEF3C7;color:#78350F}.asL.D{background:#FFEDD5;color:#7C2D12}
+.asL.F{background:#DC2626;color:#fff}.asL.R{background:#FEE2E2;color:#991B1B}.asL.O{background:#DBEAFE;color:#1E40AF}.asL.N,.asL.X{background:transparent;color:var(--muted);font-weight:400}
+.asGridCard{padding:0;overflow:hidden}
+.asT{border-collapse:separate;border-spacing:0;width:100%;font-size:14px}
+.asT th,.asT td{padding:6px 6px;border-bottom:1px solid var(--line);text-align:center;white-space:nowrap}
+.asT .asNameH,.asT .asName{text-align:left;position:sticky;left:0;background:var(--card);z-index:1;min-width:190px}
+.asT .asGrpH{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;border-left:2px solid var(--line)}
+.asCode b{display:block;font-size:12px}.asCode small{display:block;font-size:11px;color:var(--muted);font-weight:400;max-width:92px;overflow:hidden;text-overflow:ellipsis}
+.asClsRow td{background:var(--bg);text-align:left;font-weight:700;font-size:13px;position:sticky;left:0}
+.asStu{border:0;background:none;padding:0;font:inherit;color:var(--ink);cursor:pointer;text-align:left}.asStu:hover{text-decoration:underline}
+.asRep{font-size:10px;font-weight:800;background:#DC2626;color:#fff;border-radius:5px;padding:1px 5px;letter-spacing:.03em}
+.asPass{font-weight:700}.asFirst td{font-weight:700;background:var(--bg);font-size:13px}.asFirst td:first-child{text-align:left;position:sticky;left:0}
+.asListT td{vertical-align:middle}.btn.sm{padding:4px 10px;font-size:13px}
+.asBar{display:inline-block;width:90px;height:8px;border-radius:9px;background:var(--line);margin-right:8px;vertical-align:middle;overflow:hidden}.asBar i{display:block;height:100%;background:#16a34a}
+.asTwo{display:grid;grid-template-columns:1fr 1fr;gap:10px}@media(max-width:560px){.asTwo{grid-template-columns:1fr}}
+.asOutRow{display:flex;gap:8px;align-items:center;margin:0 0 6px}.asOutRow span{width:20px;color:var(--muted);font-weight:700}.asOutRow input{flex:1}
+.asFoot{display:flex;gap:10px;justify-content:flex-end;align-items:center;margin-top:14px;flex-wrap:wrap}.asFoot .hint{margin:0 auto 0 0}
+.asMk{border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:0 0 10px}.asMk.abs{opacity:.6}
+.asMkH{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.asMkBtns{margin-left:auto;display:flex;gap:6px}.btn.sm.on{background:var(--ink);color:var(--card)}
+.asMkRow{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:6px 0;border-top:1px dashed var(--line)}.asMkRow:first-child{border-top:0}
+.asMkRow.done{color:var(--muted)}.asMkO{margin-top:6px}
+.asPF{display:flex;gap:6px}.asPF button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;padding:7px 12px;font-weight:600;cursor:pointer;min-width:84px}
+.asPF button.on.p{background:#16a34a;border-color:#16a34a;color:#fff}.asPF button.on.f{background:#dc2626;border-color:#dc2626;color:#fff}
+.asWarn td{background:#FEF9C3}.asChk{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--ink);margin:4px 0}
+.asMvList{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:2px 12px;max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0}
+.asRowB{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin:8px 0}.asRowB .hint{margin:0}
+.asH3{font-size:15px;margin:16px 0 6px}.asCompT input,.asCompT select{width:100%;min-width:70px}.asCompT textarea{width:100%;min-width:220px;font:inherit;font-size:13px}
 </style>
 </head>
 <body>
@@ -743,6 +779,26 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
     <ul id="sList"></ul>
   </div>
 
+  <div class="card" id="asSetYear">
+    <h2>School year</h2>
+    <div class="asRowB"><div><b id="asSYYear">—</b><div class="hint" style="margin:2px 0 0">At the end of the year: seniors are archived with all their grades, everyone else moves one year up, and students with an F stay in their year.</div></div><button class="btn alt" type="button" id="asSYClose">Close school year…</button></div>
+  </div>
+  <div class="card" id="asSetMove">
+    <h2>Move students between classes</h2>
+    <p class="hint">Only between classes of the same year (e.g. Wheeler 1 → Wheeler 2, Senior 1 → Senior 2). Save other changes on this page first.</p>
+    <div class="asTwo"><label>From<select id="asMvFrom"></select></label><label>To<select id="asMvTo"></select></label></div>
+    <div id="asMvList" class="asMvList"></div>
+    <div class="asRowB"><span class="hint" id="asMvMsg"></span><button class="btn save" type="button" id="asMvGo">Move selected</button></div>
+    <h3 class="asH3">Senior class tracks</h3>
+    <p class="hint">Mixed = one class with both tracks (each student keeps Operation or Utilities). Choosing a track gives it to every student of the class.</p>
+    <div id="asTrackList"></div>
+  </div>
+  <div class="card" id="asSetComp">
+    <h2>Competencies</h2>
+    <p class="hint">The list every assessment is planned from. "Taught by" and the learning outcomes are filled in for each new assessment, and can be changed there for one class.</p>
+    <div id="asCompBox"><div class="hint">Loading…</div></div>
+    <div class="asRowB"><button class="btn alt" type="button" id="asCompAdd">+ Add competency</button><span class="hint" id="asCompMsg"></span><button class="btn save" type="button" id="asCompSave">Save competencies</button></div>
+  </div>
   <p class="hint">
     A teacher is not tied to a class. Each evaluation is saved with the name of the teacher who made it.<br>
     Removing a teacher stops their sign-in but keeps their past evaluations. Removing a class removes its students
@@ -1074,10 +1130,26 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
   </div>
   <!-- ===================== ASSESSMENTS ===================== -->
   <div id="paneAssess" hidden>
-    <div class="card soonCard">
-      <h2>Assessments</h2>
-      <p>Coming soon.</p>
+    <div class="asTop">
+      <div><h1 class="asH1">Assessments</h1><div class="hint" id="asYearTxt" style="margin:2px 0 0">Loading…</div></div>
+      <div class="asBtns"><button class="btn alt" type="button" id="asImportBtn">Import Excel</button><button class="btn alt" type="button" id="asExportBtn">Export Excel</button><button class="btn save" type="button" id="asNewBtn">+ New assessment</button></div>
     </div>
+    <div class="card asFilters">
+      <label>School year<select id="asFYear"></select></label>
+      <label>Year group<select id="asFGrade"><option value="">All</option><option>Junior</option><option>Wheeler</option><option>Senior</option></select></label>
+      <label>Class<select id="asFCls"></select></label>
+      <label>Month<input type="month" id="asFMonth"></label>
+      <label>Week of<input type="date" id="asFWeek"></label>
+      <label>Teacher<select id="asFTeacher"></select></label>
+      <label>as<select id="asFRole"><option value="assessor">assessed by</option><option value="taughtBy">taught by</option></select></label>
+      <label>Search<input type="search" id="asFQ" placeholder="Student…"></label>
+      <button class="btn alt" type="button" id="asFClear">Clear</button>
+    </div>
+    <div id="asMsg"></div>
+    <nav class="hubTabs" id="asTabs"><button type="button" data-ast="grid" class="on">Final status</button><button type="button" data-ast="list">Assessments <span class="n" id="asOpenN"></span></button><button type="button" data-ast="kpi">First try by teacher</button></nav>
+    <section data-asp="grid"><div class="asLegend"><span class="asL A">A</span> 1st try <span class="asL B">B</span> 2nd <span class="asL C">C</span> 3rd <span class="asL D">D</span> 4th (last) <span class="asL F">F</span> failed · repeats the year <span class="asL R">R2</span> retake needed <span class="asL O">…</span> planned <span class="asL N">·</span> not yet <label class="asOnlyF"><input type="checkbox" id="asFOnly"> only students who need a retake or failed</label></div><div id="asGrid"></div></section>
+    <section data-asp="list" hidden><div id="asList"></div></section>
+    <section data-asp="kpi" hidden><p class="hint">Share of students who passed every learning outcome on the first attempt, by the teacher who <b>taught</b> the competency. It follows the year, month, week and year group filters above. This is what the Assessments KPI (40 points) will use.</p><div id="asKpi"></div></section>
   </div>
   <!-- ===================== TIMETABLE ===================== -->
   <div id="paneTT" hidden>
@@ -1479,6 +1551,7 @@ async function loadLists() {
     if (!$('paneGrades').hidden) grInit();
     if (!$('paneHome').hidden) homeStats();
     if (!$('paneEvals').hidden) evFill();
+    if (!$('paneLists').hidden && window.asSetupInit) window.asSetupInit(true);
   } catch (e) {
     if (/unauthorized/i.test(e.message)) return adminSignOut('That admin password is not correct. Sign in again.');
     showMsg('Could not load the lists: ' + e.message + '. Saving stays off until they load.', false);
@@ -1646,7 +1719,7 @@ function showPane(p) {
   $('tabMore').classList.toggle('on', !!more);
   $('tabMore').innerHTML = more ? `⋯ More<small>${more}</small>` : '⋯ More';
   $('moreList').hidden = true;
-  $('main').classList.toggle('wide', p === 'evals' || p === 'grades' || p === 'tt' || p === 'kpi');
+  $('main').classList.toggle('wide', p === 'evals' || p === 'grades' || p === 'tt' || p === 'kpi' || p === 'assess');
   localStorage.setItem('adminPane', p);
   if (p === 'tt' && !W.loaded) loadWeek();
   if (p === 'grades') grInit();
@@ -1657,6 +1730,8 @@ function showPane(p) {
   if (p === 'kpi') kpiInit();
   if (p === 'team' && window.hubInit) window.hubInit();
   if (p === 'home') homeInit();
+  if (p === 'assess' && window.asInit) window.asInit();
+  if (p === 'lists' && window.asSetupInit && ADMIN_KEY) window.asSetupInit();
 }
 
 // ---------- Home: counts, what needs attention, quick actions ----------
@@ -3161,6 +3236,18 @@ function profHTML(p) {
     `<div><b>${pct(att.P + att.L, d.length)}</b><span>Attendance (${att.P} present · ${att.L} late)</span></div>` +
     `<div><b>${att.A}</b><span>Absent sessions</span></div><div><b>${f.length}</b><span>Factory evaluations</span></div>` +
     `<div><b>${incidents}</b><span>Factory incidents</span></div></div>`;
+  // competencies: final letter (the attempt the student passed on) and every attempt with its learning outcomes
+  const cps = p.competencies || [];
+  if (cps.length) {
+    const lc = { A: 'ok', B: 'ok', C: 'q', D: 'q', F: 'bad' };
+    h += '<h3>Competencies</h3><div class="profWrap"><table class="profT"><tr><th>Competency</th><th>Result</th><th>Attempts</th></tr>' +
+      cps.map(c => {
+        const res = c.letter ? `<span class="pill ${lc[c.letter]}">${c.letter}</span> <small>${c.letter === 'F' ? 'failed 4 attempts · repeats the year' : 'passed on attempt ' + ('ABCD'.indexOf(c.letter) + 1)}</small>` : (c.open ? '<small>assessment planned</small>' : c.tries ? `<small>retake needed: ${e(c.need.join(', '))}</small>` : '—');
+        const tries = c.attempts.map((t, i) => `<div><small>${day(t.date)}${t.void ? ' · earlier year (repeated)' : ''} · ${e(String(t.assessor).split(' ')[0])}:</small> ` +
+          (t.absent ? '<span class="pill A">absent</span>' : t.outcomes.map(o => `<span class="pill ${o.mark === 'P' ? 'ok' : 'bad'}">${o.mark === 'P' ? '✓' : '✗'} ${e(o.name)}</span>`).join(' ')) + '</div>').join('');
+        return `<tr><td><b>${e(c.code)}</b> ${e(c.name)}</td><td>${res}</td><td>${tries || '—'}</td></tr>`;
+      }).join('') + '</table></div>';
+  }
   h += '<h3>Class grades</h3>';
   if (!d.length) h += '<p class="profNote">No class grading yet.</p>';
   else h += '<div class="profWrap"><table class="profT"><tr><th>Date</th><th>Session</th><th>Teacher</th><th>Attendance</th><th>Behaviour</th><th>Participation</th><th>Quiz / assignment</th><th>Total</th></tr>' +
@@ -5625,6 +5712,45 @@ else adminGateShow(gateNote);
   };
 })();
 </script>
+<div class="ovl" id="asNewOvl" hidden data-keep="1">
+  <div class="ovlCard" role="dialog" aria-labelledby="asNewTitle">
+    <div class="ovlHead"><h2 id="asNewTitle">New assessment</h2><button class="btn alt" type="button" data-close aria-label="Close">✕</button></div>
+    <label>Class<select id="asNCls"></select></label>
+    <label>Competency (only the ones this class still needs)<select id="asNComp"></select></label>
+    <div class="hint" id="asNInfo"></div>
+    <div class="asTwo"><label>Assessed by<select id="asNAssessor"></select></label><label>Taught by (for the KPI)<select id="asNTaught"></select></label></div>
+    <label>Date<input type="date" id="asNDate"></label>
+    <label>Learning outcomes <small>(the student must pass every one)</small></label>
+    <div id="asNOut"></div>
+    <button class="btn alt" type="button" id="asNAddOut">+ Add a learning outcome</button>
+    <div id="asNMsg"></div>
+    <div class="asFoot"><button class="btn alt" type="button" data-close>Cancel</button><button class="btn save" type="button" id="asNSave">Plan assessment</button></div>
+  </div>
+</div>
+<div class="ovl feDrawer" id="asMarkOvl" hidden>
+  <div class="ovlCard" role="dialog" aria-labelledby="asMarkTitle">
+    <div class="feDH"><div style="flex:1"><div class="hint" style="margin:0" id="asMarkKind">Assessment</div><h2 id="asMarkTitle"></h2><div class="hint" id="asMarkSub" style="margin:2px 0 0"></div></div><button class="btn alt" type="button" data-close aria-label="Close">✕</button></div>
+    <div class="feDSum" id="asMarkSum"></div>
+    <div class="feDList" id="asMarkList"></div>
+    <div class="feDF"><button class="btn rm" type="button" id="asMarkCancel">Remove this assessment</button><span class="hint" id="asMarkMsg"></span><button class="btn save" type="button" id="asMarkSave">Save results</button></div>
+  </div>
+</div>
+<div class="ovl" id="asImpOvl" hidden data-keep="1">
+  <div class="ovlCard wide" role="dialog" aria-labelledby="asImpTitle">
+    <div class="ovlHead"><h2 id="asImpTitle">Import past assessments</h2><button class="btn alt" type="button" data-close aria-label="Close">✕</button></div>
+    <p class="hint">Choose the Excel file (like grades-omhg.xlsx). Each sheet needs a name column and one column per competency (1-01-safety, 5-01-sensors…). The letter is the attempt the student passed on: A 1st, B 2nd, C 3rd, D 4th, F failed. Students are matched by name; check the ones marked in yellow.</p>
+    <input type="file" id="asImpFile" accept=".xlsx">
+    <div id="asImpBox"></div>
+    <div class="asFoot"><span class="hint" id="asImpMsg"></span><button class="btn save" type="button" id="asImpGo" disabled>Import</button></div>
+  </div>
+</div>
+<div class="ovl" id="asCloseOvl" hidden data-keep="1">
+  <div class="ovlCard wide" role="dialog" aria-labelledby="asCloseTitle">
+    <div class="ovlHead"><h2 id="asCloseTitle">Close the school year</h2><button class="btn alt" type="button" data-close aria-label="Close">✕</button></div>
+    <div id="asCloseBox"><div class="hint">Loading…</div></div>
+    <div class="asFoot"><label class="asChk"><input type="checkbox" id="asCloseOk"> I checked the lists. This cannot be undone (a copy of the student list is kept in the tab “Setup backup”).</label><button class="btn save" type="button" id="asCloseGo" disabled>Close the year</button></div>
+  </div>
+</div>
 <footer class="copyFoot">© 2026 George Ayad · OMHG EVA SCHOOL · All rights reserved</footer>
 <script>
 (() => {
@@ -5702,6 +5828,505 @@ else adminGateShow(gateNote);
     try { ACT = (await post('activityList', { limit: 400 })).rows || []; drawAct(); }
     catch (e) { $('actOut').innerHTML = `<div class="msg err">${esc(e.message)}</div>`; }
   };
+})();
+</script>
+<script>
+// ===================== ASSESSMENTS (admin) =====================
+(() => {
+  const $ = id => document.getElementById(id);
+  const e = t => String(t === undefined || t === null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const key = s => String(s || '').trim().toLowerCase().replace(/\s+/g, ' ');
+  const GR = ['Junior', 'Wheeler', 'Senior'], GRP = { Junior: 'Juniors', Wheeler: 'Wheelers', Senior: 'Seniors' };
+  const gradeOf = c => ({ j: 'Junior', w: 'Wheeler', s: 'Senior' }[String(c || '').trim().toLowerCase()[0]] || '');
+  const senior = () => { const s = localStorage.getItem('hubSenior') || ''; if (!s) alert('First choose who you are (George or Ramy) in Team hub.'); return s; };
+  const day = ymd => { const [y, m, d] = String(ymd).split('-').map(Number); return isNaN(d) ? ymd : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date(y, m - 1, d).getDay()] + ' ' + d + '/' + m + (y !== new Date().getFullYear() ? '/' + y : ''); };
+  const weekStart = ymd => { const [y, m, d] = ymd.split('-').map(Number); const t = new Date(Date.UTC(y, m - 1, d)); t.setUTCDate(t.getUTCDate() - t.getUTCDay()); return t.toISOString().slice(0, 10); };
+  const addDays = (ymd, n) => { const [y, m, d] = ymd.split('-').map(Number); const t = new Date(Date.UTC(y, m - 1, d + n)); return t.toISOString().slice(0, 10); };
+  const msg = (id, text, ok) => { $(id).innerHTML = text ? `<div class="msg ${ok ? 'ok' : 'err'}">${e(text)}</div>` : ''; };
+  let AS = null, TAB = 'grid';
+  const comp = code => (AS.comps.find(c => c.code === code) || { code, name: code, grade: '' });
+  const st = (name, code) => ((AS.status[key(name)] || {})[code]) || null;
+  const allStudents = () => AS.students.concat(AS.archived.map(a => ({ name: a.name, cls: a.cls, grade: 'Senior', track: a.track, archived: a.year })));
+
+  async function load() {
+    try { AS = await post('asOverview'); }
+    catch (err) { msg('asMsg', 'Could not load the assessments: ' + err.message); return false; }
+    return true;
+  }
+  window.asInit = async () => {
+    if (!AS) { $('asGrid').innerHTML = '<div class="hint">Loading…</div>'; if (!(await load())) return; fillFilters(); }
+    draw();
+  };
+  function fillFilters() {
+    $('asYearTxt').textContent = 'School year ' + AS.year;
+    const years = [...new Set([AS.year].concat(AS.assessments.map(a => a.year)))].filter(Boolean).sort().reverse();
+    const keepY = $('asFYear').value;
+    $('asFYear').innerHTML = years.map(y => `<option>${e(y)}</option>`).join('') + '<option value="">All years</option>';
+    $('asFYear').value = keepY === '' || years.includes(keepY) ? (keepY || (keepY === '' && $('asFYear').dataset.set ? '' : AS.year)) : AS.year;
+    $('asFYear').dataset.set = '1';
+    const keepC = $('asFCls').value;
+    $('asFCls').innerHTML = '<option value="">All classes</option>' + AS.classes.map(c => `<option>${e(c.name)}</option>`).join('') + (AS.archived.length ? '<option value="@arch">Archived students</option>' : '');
+    $('asFCls').value = keepC;
+    const keepT = $('asFTeacher').value;
+    $('asFTeacher').innerHTML = '<option value="">All teachers</option>' + AS.teachers.map(t => `<option>${e(t)}</option>`).join('');
+    $('asFTeacher').value = keepT;
+  }
+  // the assessments that match the filters
+  function filtered() {
+    const y = $('asFYear').value, g = $('asFGrade').value, c = $('asFCls').value, mo = $('asFMonth').value, wk = $('asFWeek').value,
+      t = $('asFTeacher').value, role = $('asFRole').value;
+    const ws = wk ? weekStart(wk) : '', we = wk ? addDays(ws, 6) : '';
+    return AS.assessments.filter(a => a.status !== 'Cancelled' && (!y || a.year === y) && (!g || comp(a.code).grade === g) &&
+      (!c || c === '@arch' || key(a.cls) === key(c)) && (!mo || a.date.slice(0, 7) === mo) && (!wk || (a.date >= ws && a.date <= we)) &&
+      (!t || key(a[role]) === key(t)));
+  }
+  function draw() {
+    if (!AS) return;
+    $('asOpenN').textContent = AS.assessments.filter(a => a.status === 'Open').length || '';
+    document.querySelectorAll('#asTabs [data-ast]').forEach(b => b.classList.toggle('on', b.dataset.ast === TAB));
+    document.querySelectorAll('#paneAssess [data-asp]').forEach(s => { s.hidden = s.dataset.asp !== TAB; });
+    if (TAB === 'grid') drawGrid(); else if (TAB === 'list') drawList(); else drawKpi();
+  }
+  const cell = (s, c) => {
+    if (!s) return '<span class="asL N">·</span>';
+    if (s.letter) return `<span class="asL ${s.letter}" title="${s.letter === 'F' ? 'Failed 4 attempts' : 'Passed on attempt ' + ('ABCD'.indexOf(s.letter) + 1)}">${s.letter}</span>`;
+    if (s.open) return `<span class="asL O" title="Assessment planned">…</span>`;
+    if (s.tries) return `<span class="asL R" title="Retake needed: ${e(s.need.join(', '))}">R${s.tries + 1}</span>`;
+    return '<span class="asL N">·</span>';
+  };
+  function drawGrid() {
+    const F = filtered(), g = $('asFGrade').value, c = $('asFCls').value, q = key($('asFQ').value), onlyF = $('asFOnly').checked;
+    const narrowed = $('asFMonth').value || $('asFWeek').value || $('asFTeacher').value;
+    const codes = new Set(F.map(a => a.code));
+    // students: by class (or the archived ones), year group and search; with a month/week/teacher filter only the ones assessed then
+    const inF = new Set(); F.forEach(a => a.students.forEach(n => inF.add(key(n))));
+    let studs = (c === '@arch' ? allStudents().filter(s => s.archived) : AS.students)
+      .filter(s => (!c || c === '@arch' || key(s.cls) === key(c)) && (!g || s.grade === g || (c === '@arch')) && (!q || key(s.name).includes(q)) && (!narrowed || inF.has(key(s.name))));
+    // columns grouped by year group, in the order of Setup → Competencies
+    const cols = AS.comps.filter(x => codes.has(x.code));
+    if (!cols.length) { $('asGrid').innerHTML = `<div class="card"><p class="hint">No assessments match these filters yet. Press <b>+ New assessment</b> to plan one, or <b>Import Excel</b> for past results.</p></div>`; return; }
+    if (onlyF) studs = studs.filter(s => cols.some(x => { const v = st(s.name, x.code); return v && (v.letter === 'F' || (!v.letter && v.tries)); }));
+    const byCls = {};
+    studs.forEach(s => { (byCls[s.cls] = byCls[s.cls] || []).push(s); });
+    const groups = GR.map(gr => ({ gr, cols: cols.filter(x => x.grade === gr) })).filter(x => x.cols.length);
+    let h = '<div class="card asGridCard"><div class="tw"><table class="asT"><thead><tr><th rowspan="2" class="asNameH">Student</th>' +
+      groups.map(x => `<th colspan="${x.cols.length}" class="asGrpH">${GRP[x.gr]} year</th>`).join('') + '<th rowspan="2">Passed</th></tr><tr>' +
+      groups.map(x => x.cols.map(k => `<th class="asCode" title="${e(k.name)}${k.track ? ' · ' + e(k.track) : ''} · taught by ${e(k.taughtBy)}"><b>${e(k.code)}</b><small>${e(k.name)}</small></th>`).join('')).join('') + '</tr></thead><tbody>';
+    const flat = groups.flatMap(x => x.cols);
+    Object.keys(byCls).sort().forEach(cl => {
+      h += `<tr class="asClsRow"><td colspan="${flat.length + 2}">${e(cl)} · ${byCls[cl].length}</td></tr>`;
+      byCls[cl].sort((a, b) => a.name.localeCompare(b.name, 'ar')).forEach(s => {
+        const gi = GR.indexOf(s.grade), later = k => s.grade && GR.indexOf(k.grade) > gi;
+        const due = flat.filter(k => (!k.track || !s.track || k.track === s.track) && !later(k));
+        const passed = due.filter(k => { const v = st(s.name, k.code); return v && v.letter && v.letter !== 'F'; }).length;
+        const failed = flat.some(k => (st(s.name, k.code) || {}).letter === 'F');
+        h += `<tr><td class="asName"><button type="button" class="asStu" data-prof="${e(s.name)}">${e(s.name)}</button>${s.track ? ` <small>${e(s.track[0])}</small>` : ''}${failed ? ' <span class="asRep">REPEATING</span>' : ''}${s.archived ? ` <small>archived ${e(s.archived)}</small>` : ''}</td>` +
+          flat.map(k => `<td>${later(k) && !st(s.name, k.code) ? '' : k.track && s.track && k.track !== s.track ? '<span class="asL X">–</span>' : cell(st(s.name, k.code), k)}</td>`).join('') +
+          `<td class="asPass">${passed}/${due.length}</td></tr>`;
+      });
+    });
+    // first-try pass rate of each competency, for the students shown
+    h += '<tr class="asFirst"><td>First try pass</td>' + flat.map(k => {
+      const f = studs.map(s => st(s.name, k.code)).filter(v => v && v.first);
+      const p = f.filter(v => v.first.pass).length;
+      return `<td>${f.length ? Math.round(p / f.length * 100) + '%' : '—'}</td>`;
+    }).join('') + '<td></td></tr>';
+    h += '</tbody></table></div></div>';
+    $('asGrid').innerHTML = h;
+  }
+  function drawList() {
+    const F = filtered().slice().sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
+    if (!F.length) { $('asList').innerHTML = '<div class="card"><p class="hint">No assessments match these filters.</p></div>'; return; }
+    const today = AS.today;
+    $('asList').innerHTML = '<div class="card"><div class="tw"><table class="actT asListT"><tr><th>Date</th><th>Competency</th><th>Class</th><th>Attempt</th><th>Assessed by</th><th>Taught by</th><th>Result</th><th></th></tr>' +
+      F.map(a => {
+        const k = comp(a.code);
+        const res = a.status === 'Open' ? `<span class="pill q">${a.date < today ? 'not marked yet' : 'planned'}</span> <small>${a.students.length} students</small>`
+          : `<span class="pill ok">${a.passed || 0} passed</span> <small>of ${a.marked || 0}${a.absent ? ' · ' + a.absent + ' absent' : ''}</small>`;
+        return `<tr><td>${day(a.date)}</td><td><b>${e(a.code)}</b> ${e(k.name)}${a.source === 'import' ? ' <small>imported</small>' : ''}</td><td>${e(a.cls)}${a.track ? ' <small>' + e(a.track) + '</small>' : ''}</td>` +
+          `<td>${a.attempt > 1 ? 'Retake ' + a.attempt : '1st'}</td><td>${e(a.assessor)}</td><td>${e(a.taughtBy)}</td><td>${res}</td>` +
+          `<td><button class="btn alt sm" type="button" data-asopen="${e(a.id)}">${a.status === 'Open' ? 'Mark' : 'View'}</button></td></tr>`;
+      }).join('') + '</table></div></div>';
+  }
+  function drawKpi() {
+    const y = $('asFYear').value, g = $('asFGrade').value, mo = $('asFMonth').value, wk = $('asFWeek').value, t = $('asFTeacher').value;
+    const ws = wk ? weekStart(wk) : '', we = wk ? addDays(ws, 6) : '';
+    const T = {};
+    Object.keys(AS.status).forEach(sk => Object.keys(AS.status[sk]).forEach(code => {
+      const f = AS.status[sk][code].first;
+      if (!f || (y && f.year !== y) || (g && comp(code).grade !== g) || (mo && f.date.slice(0, 7) !== mo) || (wk && (f.date < ws || f.date > we)) || (t && key(f.taughtBy) !== key(t))) return;
+      const r = (T[f.taughtBy] = T[f.taughtBy] || { n: 0, p: 0, codes: {} });
+      r.n++; if (f.pass) r.p++;
+      const c = (r.codes[code] = r.codes[code] || { n: 0, p: 0 }); c.n++; if (f.pass) c.p++;
+    }));
+    const names = Object.keys(T).sort();
+    if (!names.length) { $('asKpi').innerHTML = '<div class="card"><p class="hint">No first attempts in this period.</p></div>'; return; }
+    $('asKpi').innerHTML = '<div class="card"><table class="actT"><tr><th>Taught by</th><th>First try pass</th><th>Students</th><th>By competency</th></tr>' +
+      names.map(n => { const r = T[n], pc = Math.round(r.p / r.n * 100);
+        return `<tr><td><b>${e(n)}</b></td><td><div class="asBar"><i style="width:${pc}%"></i></div><b>${pc}%</b></td><td>${r.p} of ${r.n}</td><td>` +
+          Object.keys(r.codes).sort().map(c => `<span class="pill ${r.codes[c].p === r.codes[c].n ? 'ok' : 'q'}">${e(c)} ${Math.round(r.codes[c].p / r.codes[c].n * 100)}%</span>`).join(' ') + '</td></tr>'; }).join('') + '</table></div>';
+  }
+
+  // ---------- new assessment ----------
+  function eligible(clsName, k) {
+    const cl = AS.classes.find(c => key(c.name) === key(clsName));
+    return AS.students.filter(s => key(s.cls) === key(clsName) && (!k.track || !s.track || s.track === k.track) && (!cl || !cl.track || !k.track || cl.track === k.track));
+  }
+  function nOpen() {
+    if (!AS) return;
+    const keep = $('asNCls').value;
+    $('asNCls').innerHTML = AS.classes.map(c => `<option>${e(c.name)}</option>`).join('');
+    if (keep) $('asNCls').value = keep;
+    const tOpt = AS.teachers.map(t => `<option>${e(t)}</option>`).join('');
+    $('asNAssessor').innerHTML = '<option value="">Choose…</option>' + tOpt;
+    $('asNTaught').innerHTML = '<option value="">Choose…</option>' + tOpt;
+    if (!$('asNDate').value) $('asNDate').value = AS.today;
+    msg('asNMsg', '');
+    nComps();
+    $('asNewOvl').hidden = false;
+  }
+  function nComps() {
+    const cls = $('asNCls').value, cl = AS.classes.find(c => c.name === cls) || {}, g = gradeOf(cls);
+    const opts = AS.comps.filter(k => k.active && k.grade === g && (!cl.track || !k.track || k.track === cl.track)).map(k => {
+      const el = eligible(cls, k), left = el.filter(s => { const v = st(s.name, k.code); return !v || (!v.letter && !v.open); });
+      if (!left.length) return '';
+      const re = left.filter(s => (st(s.name, k.code) || {}).tries);
+      return `<option value="${e(k.code)}">${e(k.code)} ${e(k.name)}${k.track ? ' (' + e(k.track) + ')' : ''} — ${re.length ? 'retake · ' + re.length + (left.length > re.length ? ' + ' + (left.length - re.length) + ' first try' : '') : left.length + ' students'}</option>`;
+    }).filter(Boolean);
+    $('asNComp').innerHTML = opts.length ? opts.join('') : '<option value="">Nothing left: every competency of this class has a result or is planned</option>';
+    nComp();
+  }
+  function nComp() {
+    const cls = $('asNCls').value, k = AS.comps.find(x => x.code === $('asNComp').value);
+    if (!k) { $('asNInfo').textContent = ''; $('asNOut').innerHTML = ''; return; }
+    $('asNTaught').value = AS.teachers.includes(k.taughtBy) ? k.taughtBy : '';
+    const left = eligible(cls, k).filter(s => { const v = st(s.name, k.code); return !v || (!v.letter && !v.open); });
+    const re = left.filter(s => (st(s.name, k.code) || {}).tries);
+    const prev = AS.assessments.filter(a => a.code === k.code && key(a.cls) === key(cls) && a.status !== 'Cancelled').sort((a, b) => a.date < b.date ? 1 : -1)[0];
+    const outs = re.length && prev ? prev.outcomes : (k.outcomes.length ? k.outcomes : ['']);
+    $('asNInfo').innerHTML = re.length ? `<b>Retake</b> (attempt ${1 + Math.max(...re.map(s => st(s.name, k.code).tries))}) for ${re.length} student(s): each one only retakes the learning outcomes they failed.` +
+      `<br>${re.map(s => e(s.name) + ' <small>(' + e(st(s.name, k.code).need.join(', ')) + ')</small>').join(' · ')}` : `First attempt for <b>${left.length}</b> student(s) of ${e(cls)}.`;
+    $('asNOut').innerHTML = outs.map((o, i) => `<div class="asOutRow"><span>${i + 1}</span><input value="${e(o)}" placeholder="Learning outcome ${i + 1}" ${re.length && prev ? 'disabled' : ''}>${re.length && prev ? '' : '<button class="btn alt sm" type="button" data-rmout>✕</button>'}</div>`).join('');
+    $('asNAddOut').hidden = !!(re.length && prev);
+  }
+  async function nSave() {
+    const sen = senior(); if (!sen) return;
+    const assessment = { cls: $('asNCls').value, code: $('asNComp').value, assessor: $('asNAssessor').value, taughtBy: $('asNTaught').value, date: $('asNDate').value,
+      outcomes: [...$('asNOut').querySelectorAll('input')].map(i => i.value.trim()).filter(Boolean) };
+    $('asNSave').disabled = true;
+    try {
+      const r = await post('asNew', { assessment, senior: sen });
+      $('asNewOvl').hidden = true;
+      await load(); fillFilters(); TAB = 'list'; draw();
+      msg('asMsg', `Planned for ${r.students} student(s)${r.attempt > 1 ? ' (retake, attempt ' + r.attempt + ')' : ''}. ${assessment.assessor} was told in Team hub and marks it from their page.`, true);
+    } catch (err) { msg('asNMsg', err.message); }
+    $('asNSave').disabled = false;
+  }
+
+  // ---------- mark / view one assessment ----------
+  let MK = null, MARKS = {};
+  async function mOpen(id) {
+    $('asMarkOvl').hidden = false; $('asMarkList').innerHTML = '<div class="hint">Loading…</div>'; $('asMarkMsg').textContent = '';
+    try { MK = await post('asGet', { id }); } catch (err) { $('asMarkList').innerHTML = `<div class="msg err">${e(err.message)}</div>`; return; }
+    MARKS = {};
+    MK.students.forEach(s => { MARKS[s.name] = { absent: s.absent, marks: Object.assign({}, s.marks) }; });
+    $('asMarkKind').textContent = MK.attempt > 1 ? 'Retake · attempt ' + MK.attempt : 'Assessment · 1st attempt';
+    $('asMarkTitle').textContent = MK.code + ' ' + MK.name + ' · ' + MK.cls;
+    $('asMarkSub').textContent = day(MK.date) + ' · assessed by ' + MK.assessor + ' · taught by ' + MK.taughtBy + (MK.status === 'Marked' ? ' · marked ' + MK.marked : ' · not marked yet');
+    mDraw();
+  }
+  window.asMarkHTML = (M, MARKS) => M.students.map(s => {
+    const m = MARKS[s.name];
+    return `<div class="asMk${m.absent ? ' abs' : ''}"><div class="asMkH"><b>${e(s.name)}</b>${s.tries ? ` <span class="pill q">retake · attempt ${s.tries + 1}</span>` : ''}` +
+      `<span class="asMkBtns"><button type="button" class="btn alt sm" data-allp="${e(s.name)}">All ✓</button><button type="button" class="btn alt sm${m.absent ? ' on' : ''}" data-abs="${e(s.name)}">Absent</button></span></div>` +
+      (m.absent ? '<div class="hint">Absent: does not use an attempt.</div>' : '<div class="asMkO">' + M.outcomes.map(o => s.need.includes(o)
+        ? `<div class="asMkRow"><span>${e(o)}</span><span class="asPF"><button type="button" class="${m.marks[o] === 'P' ? 'on p' : ''}" data-st="${e(s.name)}" data-o="${e(o)}" data-v="P">✓ Pass</button><button type="button" class="${m.marks[o] === 'F' ? 'on f' : ''}" data-st="${e(s.name)}" data-o="${e(o)}" data-v="F">✗ Fail</button></span></div>`
+        : `<div class="asMkRow done"><span>${e(o)}</span><small>passed before</small></div>`).join('') + '</div>') + '</div>';
+  }).join('');
+  window.asMarkSum = (M, MARKS) => {
+    let done = 0, pass = 0, fail = 0, abs = 0;
+    M.students.forEach(s => { const m = MARKS[s.name]; if (m.absent) { abs++; done++; return; }
+      const all = s.need.every(o => m.marks[o]); if (!all) return; done++; if (s.need.every(o => m.marks[o] === 'P')) pass++; else fail++; });
+    return { done, total: M.students.length, html: `<span class="feChip" style="--c:#2563eb">${done} of ${M.students.length} marked</span><span class="feChip" style="--c:#16a34a">${pass} pass</span><span class="feChip" style="--c:#dc2626">${fail} retake</span>${abs ? `<span class="feChip" style="--c:#999">${abs} absent</span>` : ''}` };
+  };
+  window.asMarkClick = (ev, M, MARKS) => {
+    const b = ev.target.closest('[data-st],[data-allp],[data-abs]'); if (!b) return false;
+    if (b.dataset.st) { const m = MARKS[b.dataset.st].marks; m[b.dataset.o] = m[b.dataset.o] === b.dataset.v ? '' : b.dataset.v; }
+    else if (b.dataset.allp) { const s = M.students.find(x => x.name === b.dataset.allp); MARKS[s.name].absent = false; s.need.forEach(o => { MARKS[s.name].marks[o] = 'P'; }); }
+    else if (b.dataset.abs) MARKS[b.dataset.abs].absent = !MARKS[b.dataset.abs].absent;
+    return true;
+  };
+  window.asMarkBody = (M, MARKS) => M.students.map(s => MARKS[s.name].absent ? { student: s.name, absent: true } : { student: s.name, marks: MARKS[s.name].marks });
+  function mDraw() {
+    $('asMarkList').innerHTML = asMarkHTML(MK, MARKS);
+    const s = asMarkSum(MK, MARKS);
+    $('asMarkSum').innerHTML = s.html;
+    $('asMarkSave').disabled = s.done < s.total;
+  }
+  async function mSave() {
+    const sen = senior(); if (!sen) return;
+    $('asMarkSave').disabled = true;
+    try {
+      const r = await post('asMarkAdmin', { id: MK.id, results: asMarkBody(MK, MARKS), senior: sen });
+      $('asMarkOvl').hidden = true; await load(); draw();
+      msg('asMsg', `Saved: ${r.passed} passed${r.retake ? ', ' + r.retake + ' need a retake' : ''}${r.failed ? ', ' + r.failed + ' failed the last attempt (F)' : ''}.`, true);
+    } catch (err) { $('asMarkMsg').textContent = err.message; $('asMarkSave').disabled = false; }
+  }
+  async function mCancel() {
+    const sen = senior(); if (!sen) return;
+    if (!confirm('Remove this assessment' + (MK.status === 'Marked' ? ' and its results' : '') + '?')) return;
+    try { await post('asCancel', { id: MK.id, senior: sen }); $('asMarkOvl').hidden = true; await load(); draw(); msg('asMsg', 'Removed.', true); }
+    catch (err) { $('asMarkMsg').textContent = err.message; }
+  }
+
+  // ---------- export ----------
+  function exportXlsx() {
+    const groups = GR.map(g => ({ g, cols: AS.comps.filter(k => k.grade === g) }));
+    const sheets = AS.classes.map(c => {
+      const cols = groups.find(x => x.g === c.grade).cols;
+      const rows = [[c.name + ' · ' + AS.year], [], ['Student', 'Track', ...cols.map(k => k.code + ' ' + k.name), 'Passed']];
+      AS.students.filter(s => s.cls === c.name).sort((a, b) => a.name.localeCompare(b.name, 'ar')).forEach(s => {
+        const v = cols.map(k => { const x = st(s.name, k.code); return !x ? '' : x.letter || (x.open ? 'planned' : x.tries ? 'R' + (x.tries + 1) : ''); });
+        rows.push([s.name, s.track, ...v, v.filter(l => /^[ABCD]$/.test(l)).length]);
+      });
+      return { name: c.name.slice(0, 31), rows, bold: [0, 2] };
+    });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(xlsxBlob(sheets)); a.download = `Assessments - ${AS.year}.xlsx`;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+
+  // ---------- import ----------
+  const norm = s => String(s || '').normalize('NFKD').replace(/[ً-ٰٟ]/g, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/\s+/g, ' ').trim().toLowerCase();
+  async function readSheets(buf) {
+    const files = await unzip(buf);
+    const text = n => files[n] ? new TextDecoder().decode(files[n]) : '';
+    const xml = s => new DOMParser().parseFromString(s, 'application/xml');
+    if (!files['xl/workbook.xml']) throw new Error('this is not an Excel .xlsx file');
+    const rels = {}; for (const r of xml(text('xl/_rels/workbook.xml.rels')).getElementsByTagName('Relationship')) { const t = r.getAttribute('Target').replace(/^\//, ''); rels[r.getAttribute('Id')] = t.startsWith('xl/') ? t : 'xl/' + t; }
+    const shared = []; if (files['xl/sharedStrings.xml']) for (const si of xml(text('xl/sharedStrings.xml')).getElementsByTagName('si')) shared.push([...si.getElementsByTagName('t')].map(t => t.textContent).join(''));
+    const out = [];
+    for (const sh of xml(text('xl/workbook.xml')).getElementsByTagName('sheet')) {
+      const rid = sh.getAttribute('r:id') || sh.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships', 'id');
+      const grid = [];
+      for (const c of xml(text(rels[rid])).getElementsByTagName('c')) {
+        const m = /^([A-Z]+)(\d+)$/.exec(c.getAttribute('r') || ''); if (!m) continue;
+        const col = [...m[1]].reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0) - 1, row = Number(m[2]) - 1;
+        const t = c.getAttribute('t'), vEl = c.getElementsByTagName('v')[0];
+        let v = vEl ? vEl.textContent : '';
+        if (t === 's') v = shared[Number(v)] ?? ''; else if (t === 'inlineStr') v = [...c.getElementsByTagName('t')].map(x => x.textContent).join('');
+        (grid[row] = grid[row] || [])[col] = v;
+      }
+      out.push({ name: sh.getAttribute('name'), grid: Array.from(grid, r => r || []) });
+    }
+    return out;
+  }
+  let IMP = null;
+  async function impFile() {
+    const f = $('asImpFile').files[0]; if (!f) return;
+    $('asImpBox').innerHTML = '<div class="hint">Reading…</div>'; $('asImpGo').disabled = true;
+    try { IMP_SHEETS = await readSheets(await f.arrayBuffer()); } catch (err) { $('asImpBox').innerHTML = `<div class="msg err">${e(err.message)}</div>`; return; }
+    // this year's classes by default: OM-2024 (seniors), OM-2025 (wheelers), OM-2026 (juniors)
+    const withCodes = IMP_SHEETS.filter(sh => sh.grid.some(r => r.some(v => /^\d-\d{2}/.test(String(v || '').trim()))));
+    const y0 = Number(String(AS.year).slice(0, 4));
+    const want = withCodes.filter(sh => [y0 - 2, y0 - 1, y0].some(y => new RegExp('^OM-' + y + '$', 'i').test(sh.name.trim())));
+    IMP_PICK = new Set((want.length ? want : withCodes).map(sh => sh.name));
+    impAnalyse();
+  }
+  let IMP_SHEETS = [], IMP_PICK = new Set();
+  function impAnalyse() {
+    const sheets = IMP_SHEETS.filter(sh => IMP_PICK.has(sh.name));
+    const pickHtml = '<div class="asRowB" style="justify-content:flex-start">Sheets: ' + IMP_SHEETS.filter(sh => sh.grid.some(r => r.some(v => /^\d-\d{2}/.test(String(v || '').trim()))))
+      .map(sh => `<label class="asChk" style="margin:0"><input type="checkbox" data-impsheet="${e(sh.name)}"${IMP_PICK.has(sh.name) ? ' checked' : ''}> ${e(sh.name)}</label>`).join('') + '</div>';
+    const people = allStudents(), byNorm = {};
+    people.forEach(p => { byNorm[norm(p.name)] = p.name; });
+    const guess = n => { const k = norm(n); if (byNorm[k]) return { name: byNorm[k], sure: true };
+      const c = people.filter(p => { const q = norm(p.name); return q.startsWith(k) || k.startsWith(q); });
+      if (c.length === 1) return { name: c[0].name, sure: false };
+      const w = k.split(' '); const d = people.filter(p => norm(p.name).split(' ').slice(0, 3).join(' ') === w.slice(0, 3).join(' '));
+      return d.length === 1 ? { name: d[0].name, sure: false } : { name: '', sure: false }; };
+    const items = [], names = {}, unknown = new Set();
+    sheets.forEach(sh => {
+      const hi = sh.grid.findIndex(r => r.filter(v => /^\d-\d{2}/.test(String(v || '').trim())).length >= 1);
+      if (hi === -1) return;
+      const head = sh.grid[hi].map(v => String(v || '').trim());
+      let nc = head.findIndex(h => /name|الاسم|اسم/i.test(h));
+      if (nc === -1) nc = head.findIndex((h, i) => sh.grid.slice(hi + 1).filter(r => /[؀-ۿ]/.test(String(r[i] || ''))).length > 2);
+      if (nc === -1) return;
+      sh.grid.slice(hi + 1).forEach(r => {
+        const n = String(r[nc] || '').trim(); if (!n) return;
+        head.forEach((h, i) => {
+          const m = /^(\d-\d{2})/.exec(h); if (!m) return;
+          const L = String(r[i] || '').trim().toUpperCase(); if (!/^[ABCDF]$/.test(L)) return;
+          if (!AS.comps.some(k => k.code === m[1])) { unknown.add(h); return; }
+          items.push({ sheet: sh.name, file: n, code: m[1], letter: L });
+          const nk = sh.name + '|' + n;
+          if (!names[nk]) names[nk] = { sheet: sh.name, file: n, n: 0, g: guess(n) };
+          names[nk].n++;
+        });
+      });
+    });
+    IMP = { items, names };
+    const opts = '<option value="">— skip —</option>' + people.slice().sort((a, b) => (a.cls + a.name).localeCompare(b.cls + b.name, 'ar')).map(p => `<option value="${e(p.name)}">${e(p.cls)} · ${e(p.name)}</option>`).join('');
+    const list = Object.keys(names).sort((a, b) => (names[a].g.sure - names[b].g.sure) || a.localeCompare(b, 'ar'));
+    const bad = list.filter(k => !names[k].g.sure).length;
+    $('asImpBox').innerHTML = pickHtml + `<p><b>${items.length}</b> results for <b>${list.length}</b> students in ${[...new Set(items.map(i => i.sheet))].map(e).join(', ')}. ` +
+      (bad ? `<span class="pill q">${bad} name(s) to check</span>` : '<span class="pill ok">every name matched</span>') + '</p>' +
+      (unknown.size ? `<p class="hint">Not in Setup → Competencies, skipped: ${[...unknown].map(e).join(', ')}</p>` : '') +
+      '<div class="tw" style="max-height:48vh"><table class="actT"><tr><th>Sheet</th><th>Name in the file</th><th>Student on the site</th><th>Results</th></tr>' +
+      list.map(k => { const x = names[k]; return `<tr class="${x.g.sure ? '' : 'asWarn'}"><td>${e(x.sheet)}</td><td>${e(x.file)}</td><td><select data-impk="${e(k)}">${opts}</select></td><td>${x.n}</td></tr>`; }).join('') + '</table></div>';
+    $('asImpBox').querySelectorAll('[data-impk]').forEach(s => { s.value = names[s.dataset.impk].g.name; });
+    $('asImpGo').disabled = !items.length;
+    $('asImpMsg').textContent = 'Students who already have a result for a competency keep it.';
+  }
+  async function impGo() {
+    const sen = senior(); if (!sen) return;
+    const pick = {}; $('asImpBox').querySelectorAll('[data-impk]').forEach(s => { pick[s.dataset.impk] = s.value; });
+    const rows = IMP.items.filter(i => pick[i.sheet + '|' + i.file]).map(i => ({ student: pick[i.sheet + '|' + i.file], code: i.code, letter: i.letter }));
+    if (!rows.length) { $('asImpMsg').textContent = 'Choose at least one student.'; return; }
+    $('asImpGo').disabled = true; $('asImpMsg').textContent = 'Importing…';
+    try {
+      const r = await post('asImport', { rows, senior: sen });
+      $('asImpOvl').hidden = true; await load(); fillFilters(); $('asFYear').value = ''; draw();
+      msg('asMsg', `Imported ${r.imported} results.` + (r.skipped.length ? ` Skipped ${r.skipped.length}: ${r.skipped.slice(0, 6).join('; ')}${r.skipped.length > 6 ? '…' : ''}` : ''), true);
+    } catch (err) { $('asImpMsg').textContent = err.message; $('asImpGo').disabled = false; }
+  }
+
+  // ---------- Setup: school year, moves, tracks, competencies ----------
+  window.asSetupInit = async fresh => {
+    if ((fresh || !AS) && !(await load())) { $('asCompBox').innerHTML = '<div class="hint">Sign in to see the competencies.</div>'; return; }
+    setupDraw();
+  };
+  let COMPS = null;
+  function setupDraw() {
+    $('asSYYear').textContent = AS.year;
+    const keepF = $('asMvFrom').value;
+    $('asMvFrom').innerHTML = AS.classes.map(c => `<option>${e(c.name)}</option>`).join('');
+    if (keepF) $('asMvFrom').value = keepF;
+    mvDraw();
+    $('asTrackList').innerHTML = AS.classes.filter(c => c.grade === 'Senior').map(c => `<div class="asRowB"><b>${e(c.name)}</b><select data-track="${e(c.name)}"><option value="">Mixed (both tracks)</option><option>Operation</option><option>Utilities</option></select></div>`).join('') || '<p class="hint">No senior class yet.</p>';
+    $('asTrackList').querySelectorAll('[data-track]').forEach(s => { s.value = (AS.classes.find(c => c.name === s.dataset.track) || {}).track || ''; });
+    COMPS = AS.comps.map(c => Object.assign({}, c, { outcomes: c.outcomes.slice() }));
+    compDraw();
+  }
+  function mvDraw() {
+    const from = $('asMvFrom').value, g = gradeOf(from);
+    $('asMvTo').innerHTML = AS.classes.filter(c => c.grade === g && c.name !== from).map(c => `<option>${e(c.name)}${c.track ? ' (' + e(c.track) + ')' : ''}</option>`).join('') || '<option value="">No other class of this year</option>';
+    $('asMvList').innerHTML = AS.students.filter(s => s.cls === from).sort((a, b) => a.name.localeCompare(b.name, 'ar'))
+      .map(s => `<label class="asChk"><input type="checkbox" value="${e(s.name)}"> ${e(s.name)}${s.track ? ' <small>' + e(s.track) + '</small>' : ''}</label>`).join('') || '<p class="hint">No students.</p>';
+  }
+  async function mvGo() {
+    const sen = senior(); if (!sen) return;
+    if (typeof dirty !== 'undefined' && dirty) { alert('Save the other changes on this page first.'); return; }
+    const students = [...$('asMvList').querySelectorAll('input:checked')].map(i => i.value), to = $('asMvTo').value.replace(/ \((Operation|Utilities)\)$/, '');
+    if (!students.length || !to) { $('asMvMsg').textContent = 'Tick the students and choose the class.'; return; }
+    try { const r = await post('asMove', { students, to, senior: sen }); $('asMvMsg').textContent = `${r.moved} moved to ${to}.`; await load(); setupDraw(); if (typeof loadLists === 'function') loadLists(); }
+    catch (err) { $('asMvMsg').textContent = err.message; }
+  }
+  function compDraw() {
+    $('asCompBox').innerHTML = GR.map(g => `<h3 class="asH3">${GRP[g]}</h3><div class="tw"><table class="actT asCompT"><tr><th>Code</th><th>Name</th>${g === 'Senior' ? '<th>Track</th>' : ''}<th>Taught by</th><th>Learning outcomes <small>(one per line)</small></th><th>In use</th><th></th></tr>` +
+      COMPS.map((c, i) => c.grade !== g ? '' : `<tr data-ci="${i}"><td><input data-f="code" value="${e(c.code)}" size="5"></td><td><input data-f="name" value="${e(c.name)}"></td>` +
+        (g === 'Senior' ? `<td><select data-f="track"><option value="">Both</option><option${c.track === 'Operation' ? ' selected' : ''}>Operation</option><option${c.track === 'Utilities' ? ' selected' : ''}>Utilities</option></select></td>` : '') +
+        `<td><select data-f="taughtBy"><option value="">—</option>${AS.teachers.map(t => `<option${t === c.taughtBy ? ' selected' : ''}>${e(t)}</option>`).join('')}</select></td>` +
+        `<td><textarea data-f="outcomes" rows="${Math.max(2, c.outcomes.length)}" placeholder="Typed in each new assessment">${e(c.outcomes.join('\n'))}</textarea></td>` +
+        `<td><input type="checkbox" data-f="active"${c.active ? ' checked' : ''}></td><td><button class="btn alt sm" type="button" data-cdel="${i}">✕</button></td></tr>`).join('') + '</table></div>').join('');
+  }
+  function compRead() {
+    $('asCompBox').querySelectorAll('[data-ci]').forEach(tr => {
+      const c = COMPS[tr.dataset.ci];
+      tr.querySelectorAll('[data-f]').forEach(x => { const f = x.dataset.f;
+        c[f] = f === 'active' ? x.checked : f === 'outcomes' ? x.value.split('\n').map(s => s.trim()).filter(Boolean) : x.value.trim(); });
+    });
+  }
+  async function compSave() {
+    const sen = senior(); if (!sen) return;
+    compRead();
+    try { const r = await post('asCompSave', { comps: COMPS, senior: sen }); $('asCompMsg').textContent = `Saved ${r.saved} competencies.`; await load(); setupDraw(); }
+    catch (err) { $('asCompMsg').textContent = err.message; }
+  }
+
+  // ---------- close the school year ----------
+  let CP = null;
+  async function closeOpen() {
+    $('asCloseOvl').hidden = false; $('asCloseOk').checked = false; $('asCloseGo').disabled = true;
+    $('asCloseBox').innerHTML = '<div class="hint">Loading…</div>';
+    try { CP = await post('asClosePreview'); } catch (err) { $('asCloseBox').innerHTML = `<div class="msg err">${e(err.message)}</div>`; return; }
+    closeDraw();
+  }
+  function closeDraw() {
+    const P = CP.plan, arch = P.filter(x => x.action === 'archive'), up = P.filter(x => x.action === 'up'), rep = P.filter(x => x.action === 'repeat');
+    const open = P.reduce((s, x) => s + x.open, 0), unfinished = P.filter(x => x.action !== 'repeat' && x.passed < x.due);
+    const clsOpts = (g, v) => CP.classes.filter(c => c.grade === g).map(c => `<option value="${e(c.name)}"${c.name === v ? ' selected' : ''}>${e(c.name)}${c.track ? ' (' + e(c.track) + ')' : ''}</option>`).join('');
+    const next = g => GR[GR.indexOf(g) + 1];
+    let h = `<p>From <b>${e(CP.year)}</b> to <label style="display:inline">new school year <input id="asCloseNext" value="${e(CP.next)}" size="9"></label></p>` +
+      `<div class="aStats"><div class="aStat"><span>Archived (seniors)</span><b>${arch.length}</b></div><div class="aStat"><span>Move one year up</span><b>${up.length}</b></div><div class="aStat"><span>Repeat the year (F)</span><b>${rep.length}</b></div></div>`;
+    if (open) h += `<div class="msg err">${open} result(s) are still waiting in planned assessments. Mark or remove them first, or they stay with the old class.</div>`;
+    if (unfinished.length) h += `<p class="hint">${unfinished.length} student(s) move up without every competency of their year (no F, so they are not stopped): ${unfinished.slice(0, 8).map(x => e(x.student) + ' ' + x.passed + '/' + x.due).join(' · ')}${unfinished.length > 8 ? '…' : ''}</p>`;
+    h += '<h3 class="asH3">Seniors: archived with all their grades</h3>' + (arch.length ? '<p>' + arch.map(x => e(x.student) + ' <small>' + e(x.cls) + '</small>').join(' · ') + '</p>' : '<p class="hint">None.</p>');
+    h += '<h3 class="asH3">Move one year up</h3>' + (up.length ? '<div class="tw"><table class="actT"><tr><th>Student</th><th>Now</th><th>Next year</th><th>Track</th></tr>' +
+      up.map((x, i) => { const g = next(x.grade);
+        return `<tr><td>${e(x.student)}</td><td>${e(x.cls)}</td><td><select data-cto="${P.indexOf(x)}">${clsOpts(g, x.to)}</select></td><td>${g === 'Senior' ? `<select data-ctr="${P.indexOf(x)}"><option value="">Choose…</option><option${x.track === 'Operation' ? ' selected' : ''}>Operation</option><option${x.track === 'Utilities' ? ' selected' : ''}>Utilities</option></select>` : ''}</td></tr>`; }).join('') + '</table></div>' : '<p class="hint">None.</p>');
+    h += '<h3 class="asH3">Repeat the year</h3>' + (rep.length ? '<p class="hint">They stay in their class with the new students of that year and take every competency of the year again from the start. Their old results stay in their portfolio.</p><p>' +
+      rep.map(x => e(x.student) + ' <small>' + e(x.cls) + ' · F in ' + e(x.failed.join(', ')) + '</small>').join(' · ') + '</p>' : '<p class="hint">None.</p>');
+    $('asCloseBox').innerHTML = h;
+  }
+  function closeRead() {
+    $('asCloseBox').querySelectorAll('[data-cto]').forEach(s => { CP.plan[s.dataset.cto].to = s.value; });
+    $('asCloseBox').querySelectorAll('[data-ctr]').forEach(s => { const x = CP.plan[s.dataset.ctr]; x.track = s.value;
+      const c = CP.classes.find(k => k.grade === 'Senior' && k.track === s.value); if (c) { x.to = c.name; const t = $('asCloseBox').querySelector(`[data-cto="${s.dataset.ctr}"]`); if (t) t.value = c.name; } });
+  }
+  async function closeGo() {
+    const sen = senior(); if (!sen) return;
+    closeRead();
+    const miss = CP.plan.filter(x => x.action === 'up' && x.grade === 'Wheeler' && !x.track && !(CP.classes.find(c => c.name === x.to) || {}).track);
+    if (miss.length) { alert('Choose Operation or Utilities for: ' + miss.map(x => x.student).join(', ')); return; }
+    if (!confirm('Close ' + CP.year + ' now?')) return;
+    $('asCloseGo').disabled = true;
+    try {
+      const r = await post('asCloseYear', { plan: CP.plan, next: $('asCloseNext').value.trim(), confirm: true, senior: sen });
+      $('asCloseOvl').hidden = true; await load(); setupDraw(); fillFilters();
+      if (typeof loadLists === 'function') loadLists();
+      alert(`School year ${r.year} started: ${r.archived} archived, ${r.up} moved up, ${r.repeat} repeating. A copy of the old list is in the tab "${r.backup}". Add the new juniors in Students below.`);
+    } catch (err) { alert(err.message); $('asCloseGo').disabled = false; }
+  }
+
+  // ---------- events (delegated: the overlays sit after this script) ----------
+  document.addEventListener('click', ev => {
+    const t = ev.target;
+    if (t.closest('#asTabs [data-ast]')) { TAB = t.closest('[data-ast]').dataset.ast; draw(); return; }
+    if (t.closest('#asNewBtn')) { if (!AS) return; nOpen(); return; }
+    if (t.closest('#asImportBtn')) { if (!AS) return; $('asImpFile').value = ''; $('asImpBox').innerHTML = ''; $('asImpGo').disabled = true; $('asImpOvl').hidden = false; return; }
+    if (t.closest('#asExportBtn')) { if (AS) exportXlsx(); return; }
+    if (t.closest('#asFClear')) { ['asFGrade', 'asFCls', 'asFMonth', 'asFWeek', 'asFTeacher', 'asFQ'].forEach(id => { $(id).value = ''; }); $('asFYear').value = AS ? AS.year : ''; draw(); return; }
+    if (t.closest('[data-prof]') && t.closest('#asGrid')) { if (typeof profShow === 'function') profShow(t.closest('[data-prof]').dataset.prof); return; }
+    if (t.closest('[data-asopen]')) { mOpen(t.closest('[data-asopen]').dataset.asopen); return; }
+    if (t.closest('#asNAddOut')) { const n = $('asNOut').children.length + 1; $('asNOut').insertAdjacentHTML('beforeend', `<div class="asOutRow"><span>${n}</span><input placeholder="Learning outcome ${n}"><button class="btn alt sm" type="button" data-rmout>✕</button></div>`); $('asNOut').lastElementChild.querySelector('input').focus(); return; }
+    if (t.closest('[data-rmout]')) { t.closest('.asOutRow').remove(); [...$('asNOut').children].forEach((r, i) => { r.firstElementChild.textContent = i + 1; }); return; }
+    if (t.closest('#asNSave')) { nSave(); return; }
+    if (t.closest('#asMarkList') && MK) { if (asMarkClick(ev, MK, MARKS)) mDraw(); return; }
+    if (t.closest('#asMarkSave')) { mSave(); return; }
+    if (t.closest('#asMarkCancel')) { mCancel(); return; }
+    if (t.closest('#asImpGo')) { impGo(); return; }
+    if (t.closest('#asMvGo')) { mvGo(); return; }
+    if (t.closest('#asCompAdd')) { compRead(); COMPS.push({ code: '', name: '', grade: $('asCompBox').dataset.addTo || 'Junior', track: '', taughtBy: '', outcomes: [], active: true }); const g = prompt('Which year? Junior, Wheeler or Senior', 'Junior'); if (!g) { COMPS.pop(); return; } COMPS[COMPS.length - 1].grade = GR.find(x => x.toLowerCase() === g.trim().toLowerCase()) || 'Junior'; compDraw(); return; }
+    if (t.closest('[data-cdel]')) { compRead(); const c = COMPS[t.closest('[data-cdel]').dataset.cdel]; if (AS.assessments.some(a => a.code === c.code) && !confirm(c.code + ' already has assessments. Remove it from the list anyway? (Untick "In use" to keep its results visible.)')) return; COMPS.splice(Number(t.closest('[data-cdel]').dataset.cdel), 1); compDraw(); return; }
+    if (t.closest('#asCompSave')) { compSave(); return; }
+    if (t.closest('#asSYClose')) { closeOpen(); return; }
+    if (t.closest('#asCloseGo')) { closeGo(); return; }
+  });
+  document.addEventListener('change', ev => {
+    const t = ev.target;
+    if (t.closest('.asFilters') || t.id === 'asFOnly') { draw(); return; }
+    if (t.id === 'asNCls') { nComps(); return; }
+    if (t.id === 'asNComp') { nComp(); return; }
+    if (t.id === 'asImpFile') { impFile(); return; }
+    if (t.dataset && t.dataset.impsheet !== undefined) { if (t.checked) IMP_PICK.add(t.dataset.impsheet); else IMP_PICK.delete(t.dataset.impsheet); impAnalyse(); return; }
+    if (t.id === 'asMvFrom') { mvDraw(); return; }
+    if (t.id === 'asCloseOk') { $('asCloseGo').disabled = !t.checked; return; }
+    if (t.closest('#asCloseBox')) { closeRead(); return; }
+    if (t.dataset && t.dataset.track) { const sen = senior(); if (!sen) return; post('asTrack', { cls: t.dataset.track, track: t.value, senior: sen }).then(async () => { await load(); setupDraw(); if (typeof loadLists === 'function') loadLists(); }).catch(err => alert(err.message)); }
+  });
+  document.addEventListener('input', ev => { if (ev.target.id === 'asFQ') draw(); });
 })();
 </script>
 </body>

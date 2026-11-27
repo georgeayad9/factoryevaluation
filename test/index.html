@@ -394,6 +394,22 @@
   .rqItem button{width:auto;padding:6px 12px;font-size:13px}
   .lgDark{display:none}[data-theme="dark"] .lgDark{display:block}[data-theme="dark"] .lgLight{display:none}
   .hHubRow:last-child{border-bottom:0}.hHubRow .tag{margin-top:1px}
+/* ---------- assessments to mark ---------- */
+.asTRow{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--line)}.asTRow:first-of-type{border-top:0}
+.asTRow small{color:var(--muted)}
+#asTOvl{position:fixed;inset:0;z-index:90;background:var(--bg);overflow:auto}#asTOvl[hidden]{display:none}
+.asTIn{max-width:760px;margin:0 auto;padding:16px 14px 110px}
+.asTHead{display:flex;gap:10px;align-items:flex-start}.asTHead h2{margin:2px 0}.asTHead .x{margin-left:auto}
+.asTSum{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 14px}.asTSum span{font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;background:var(--line)}
+.asMk{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:0 0 10px}.asMk.abs{opacity:.6}
+.asMkH{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.asMkBtns{margin-left:auto;display:flex;gap:6px}
+.asMkBtns button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;padding:5px 10px;font-size:13px;cursor:pointer}.asMkBtns button.on{background:var(--ink);color:var(--card)}
+.asMkRow{display:flex;align-items:center;gap:10px;justify-content:space-between;padding:7px 0;border-top:1px dashed var(--line)}.asMkRow:first-child{border-top:0}.asMkRow.done{color:var(--muted)}.asMkO{margin-top:6px}
+.asPF{display:flex;gap:6px;flex-shrink:0}.asPF button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:9px 12px;font-weight:600;cursor:pointer;min-width:84px}
+.asPF button.on.p{background:#16a34a;border-color:#16a34a;color:#fff}.asPF button.on.f{background:#dc2626;border-color:#dc2626;color:#fff}
+.asTBar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 14px;display:flex;gap:10px;align-items:center;justify-content:flex-end;z-index:91}
+.asTBar .hint{margin:0 auto 0 0}
+.asTRes{display:inline-block;min-width:24px;text-align:center;border-radius:6px;font-weight:700;padding:1px 6px}
 </style>
 </head>
 <body>
@@ -647,6 +663,7 @@
           <div class="card hList"><div class="hT"><h2>Today</h2><button class="linkBtn" type="button" data-hgo="time">Full week</button></div><div id="hToday"></div></div>
         </div>
         <div class="hCol">
+          <div class="card" id="hAssess" hidden><div class="hT"><h2>Assessments to mark</h2></div><div id="hAssessBody"></div></div>
           <div class="card" id="hHub" hidden><div class="hT"><h2>Team hub</h2><button class="linkBtn" type="button" data-hgo="team">Open</button></div><div id="hHubBody"></div></div>
         </div>
       </div>
@@ -898,6 +915,7 @@ async function homeLoad() {
   $('hHello').textContent = (hr < 12 ? 'Good morning, ' : hr < 17 ? 'Good afternoon, ' : 'Good evening, ') + String(me).split(' ')[0];
   $('hDate').textContent = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
   homeHub();
+  if (window.asTLoad) window.asTLoad();
   if (!$('hToday').innerHTML) $('hToday').innerHTML = '<div class="hint">Loading…</div>';
   try {
     const today = tIso(now);
@@ -2632,6 +2650,18 @@ function profHTML(p) {
     `<div><b>${pct(att.P + att.L, d.length)}</b><span>Attendance (${att.P} present · ${att.L} late)</span></div>` +
     `<div><b>${att.A}</b><span>Absent sessions</span></div><div><b>${f.length}</b><span>Factory evaluations</span></div>` +
     `<div><b>${incidents}</b><span>Factory incidents</span></div></div>`;
+  // competencies: final letter (the attempt the student passed on) and every attempt with its learning outcomes
+  const cps = p.competencies || [];
+  if (cps.length) {
+    const lc = { A: 'ok', B: 'ok', C: 'q', D: 'q', F: 'bad' };
+    h += '<h3>Competencies</h3><div class="profWrap"><table class="profT"><tr><th>Competency</th><th>Result</th><th>Attempts</th></tr>' +
+      cps.map(c => {
+        const res = c.letter ? `<span class="pill ${lc[c.letter]}">${c.letter}</span> <small>${c.letter === 'F' ? 'failed 4 attempts · repeats the year' : 'passed on attempt ' + ('ABCD'.indexOf(c.letter) + 1)}</small>` : (c.open ? '<small>assessment planned</small>' : c.tries ? `<small>retake needed: ${e(c.need.join(', '))}</small>` : '—');
+        const tries = c.attempts.map((t, i) => `<div><small>${day(t.date)}${t.void ? ' · earlier year (repeated)' : ''} · ${e(String(t.assessor).split(' ')[0])}:</small> ` +
+          (t.absent ? '<span class="pill A">absent</span>' : t.outcomes.map(o => `<span class="pill ${o.mark === 'P' ? 'ok' : 'bad'}">${o.mark === 'P' ? '✓' : '✗'} ${e(o.name)}</span>`).join(' ')) + '</div>').join('');
+        return `<tr><td><b>${e(c.code)}</b> ${e(c.name)}</td><td>${res}</td><td>${tries || '—'}</td></tr>`;
+      }).join('') + '</table></div>';
+  }
   h += '<h3>Class grades</h3>';
   if (!d.length) h += '<p class="profNote">No class grading yet.</p>';
   else h += '<div class="profWrap"><table class="profT"><tr><th>Date</th><th>Session</th><th>Teacher</th><th>Attendance</th><th>Behaviour</th><th>Participation</th><th>Quiz / assignment</th><th>Total</th></tr>' +
@@ -3502,5 +3532,74 @@ fillEditOptions();
 loadLists();
 </script>
 <footer class="copyFoot">© 2026 George Ayad · OMHG EVA SCHOOL · All rights reserved</footer>
+<div id="asTOvl" hidden><div class="asTIn">
+  <div class="asTHead"><div><div class="hint" id="asTKind" style="margin:0"></div><h2 id="asTTitle"></h2><div class="hint" id="asTSub" style="margin:0"></div></div><button class="ghost x" type="button" id="asTClose">✕ Close</button></div>
+  <div class="asTSum" id="asTSum"></div>
+  <div id="asTList"></div>
+</div><div class="asTBar"><span class="hint" id="asTMsg"></span><button class="primary" type="button" id="asTSave">Save results</button></div></div>
+<script>
+// ===================== ASSESSMENTS the teacher marks (Assess.gs) =====================
+(() => {
+  const $ = id => document.getElementById(id);
+  const e = t => String(t === undefined || t === null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const day = ymd => { const [y, m, d] = String(ymd).split('-').map(Number); return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date(y, m - 1, d).getDay()] + ' ' + d + '/' + m; };
+  let LIST = [], MK = null, MARKS = {}, TODAY = '';
+  window.asTLoad = async () => {
+    const card = $('hAssess'); if (!card) return;
+    try { const r = await post('asMine', session()); LIST = r.assessments || []; TODAY = r.today; } catch (err) { card.hidden = true; return; }
+    const open = LIST.filter(a => a.status === 'Open'), done = LIST.filter(a => a.status === 'Marked');
+    card.hidden = !LIST.length;
+    $('hAssessBody').innerHTML = open.map(a => `<div class="asTRow"><span><b>${e(a.code)} ${e(a.name)}</b> · ${e(a.cls)}<br><small>${day(a.date)} · ${a.students.length} students${a.attempt > 1 ? ' · retake (attempt ' + a.attempt + ')' : ''}</small></span>` +
+      (a.date <= TODAY ? `<button class="primary" type="button" data-asm="${e(a.id)}">Mark</button>` : `<small>from ${day(a.date)}</small>`) + '</div>').join('') +
+      done.slice(-3).map(a => `<div class="asTRow"><span>${e(a.code)} ${e(a.name)} · ${e(a.cls)}<br><small>marked · ${day(a.date)}</small></span><button class="ghost" type="button" data-asm="${e(a.id)}">View / fix</button></div>`).join('');
+  };
+  function open(id) {
+    MK = LIST.find(a => a.id === id); if (!MK) return;
+    MARKS = {}; MK.students.forEach(s => { MARKS[s.name] = { absent: s.absent, marks: Object.assign({}, s.marks) }; });
+    $('asTKind').textContent = MK.attempt > 1 ? 'Retake · attempt ' + MK.attempt + ' · only the learning outcomes each student still needs' : 'Assessment · 1st attempt';
+    $('asTTitle').textContent = MK.code + ' ' + MK.name + ' · ' + MK.cls;
+    $('asTSub').textContent = day(MK.date) + ' · ' + MK.outcomes.length + ' learning outcome(s). A student passes when every one is passed.';
+    $('asTMsg').textContent = ''; $('asTOvl').hidden = false; window.scrollTo(0, 0); draw();
+  }
+  function draw() {
+    $('asTList').innerHTML = MK.students.map(s => {
+      const m = MARKS[s.name];
+      return `<div class="asMk${m.absent ? ' abs' : ''}"><div class="asMkH"><b>${e(s.name)}</b>${s.tries ? ` <span class="pill" style="background:#FDF1C8;color:#5c4500">retake · attempt ${s.tries + 1}</span>` : ''}` +
+        `<span class="asMkBtns"><button type="button" data-allp="${e(s.name)}">All ✓</button><button type="button" class="${m.absent ? 'on' : ''}" data-abs="${e(s.name)}">Absent</button></span></div>` +
+        (m.absent ? '<div class="hint">Absent: does not use an attempt.</div>' : '<div class="asMkO">' + MK.outcomes.map(o => s.need.includes(o)
+          ? `<div class="asMkRow"><span>${e(o)}</span><span class="asPF"><button type="button" class="${m.marks[o] === 'P' ? 'on p' : ''}" data-st="${e(s.name)}" data-o="${e(o)}" data-v="P">✓ Pass</button><button type="button" class="${m.marks[o] === 'F' ? 'on f' : ''}" data-st="${e(s.name)}" data-o="${e(o)}" data-v="F">✗ Fail</button></span></div>`
+          : `<div class="asMkRow done"><span>${e(o)}</span><small>passed before</small></div>`).join('') + '</div>') + '</div>';
+    }).join('');
+    let done = 0, pass = 0, fail = 0, abs = 0;
+    MK.students.forEach(s => { const m = MARKS[s.name]; if (m.absent) { abs++; done++; return; } if (!s.need.every(o => m.marks[o])) return; done++; if (s.need.every(o => m.marks[o] === 'P')) pass++; else fail++; });
+    $('asTSum').innerHTML = `<span>${done} of ${MK.students.length} marked</span><span style="background:#DCFCE7">${pass} pass</span><span style="background:#FEE2E2">${fail} retake</span>${abs ? `<span>${abs} absent</span>` : ''}`;
+    $('asTSave').disabled = done < MK.students.length;
+    $('asTMsg').textContent = done < MK.students.length ? 'Mark every student to save.' : '';
+  }
+  async function save() {
+    $('asTSave').disabled = true; $('asTMsg').textContent = 'Saving…';
+    try {
+      const results = MK.students.map(s => MARKS[s.name].absent ? { student: s.name, absent: true } : { student: s.name, marks: MARKS[s.name].marks });
+      const r = await post('asMark', { ...session(), id: MK.id, results });
+      $('asTOvl').hidden = true;
+      await window.asTLoad();
+      const box = $('hMsg'); if (box) box.innerHTML = `<div class="msg ok">Saved: ${r.passed} passed${r.retake ? ', ' + r.retake + ' need a retake (George or Ramy plan it)' : ''}${r.failed ? ', ' + r.failed + ' failed the last attempt' : ''}.</div>`;
+    } catch (err) { $('asTMsg').textContent = err.message; $('asTSave').disabled = false; }
+  }
+  document.addEventListener('click', ev => {
+    const t = ev.target;
+    const m = t.closest('[data-asm]'); if (m) { open(m.dataset.asm); return; }
+    if (t.closest('#asTClose')) { $('asTOvl').hidden = true; return; }
+    if (t.closest('#asTSave')) { save(); return; }
+    if (!t.closest('#asTList') || !MK) return;
+    const b = t.closest('[data-st],[data-allp],[data-abs]'); if (!b) return;
+    if (b.dataset.st) { const mm = MARKS[b.dataset.st].marks; mm[b.dataset.o] = mm[b.dataset.o] === b.dataset.v ? '' : b.dataset.v; }
+    else if (b.dataset.allp) { const s = MK.students.find(x => x.name === b.dataset.allp); MARKS[s.name].absent = false; s.need.forEach(o => { MARKS[s.name].marks[o] = 'P'; }); }
+    else if (b.dataset.abs) MARKS[b.dataset.abs].absent = !MARKS[b.dataset.abs].absent;
+    draw();
+  });
+  try { if (me) window.asTLoad(); } catch (err) { /* not signed in yet */ }
+})();
+</script>
 </body>
 </html>
