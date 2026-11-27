@@ -462,6 +462,58 @@ main,main.wide{max-width:1260px}
 #mnPresent input:checked+span{background:#E6F4EA;color:#17652A;border-color:#A7D7B5;text-decoration:none}
 #mnPresent input:focus-visible+span{outline:2px solid #D9A900}
 [data-theme="dark"] #mnPresent input:checked+span{background:#16351F;color:#9FE0B0;border-color:#2F6B40}
+
+.feHead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:14px;margin:4px 0 14px}
+.feHead h1{margin:0;font-size:26px;letter-spacing:-.02em}.feHead .hint{margin:4px 0 0;font-size:14px}
+.feBtns{display:flex;gap:8px;flex-wrap:wrap}.feBtns .btn{min-height:42px;font-size:13px}
+.feFilters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.feFilters select,.feFilters input{width:auto;min-height:42px}
+.feSeg{display:flex;gap:4px;background:#EDEDEA;border-radius:10px;padding:4px}
+[data-theme="dark"] .feSeg{background:#1C1C22}
+.feSeg button{height:34px;padding:0 12px;border:0;border-radius:7px;background:transparent;font:500 13px Inter,system-ui,sans-serif;color:var(--muted);cursor:pointer}
+.feSeg button.on{background:var(--card);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.feStats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:16px}
+.feStat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.feStat span{display:block;font-size:13px;color:var(--muted)}.feStat b{display:block;font-size:28px;margin-top:4px;letter-spacing:-.02em}.feStat small{font-size:15px;color:var(--muted);font-weight:500}
+.feStat.bad{background:#FEF2F2;border-color:#FECACA}.feStat.bad span,.feStat.bad b{color:#991B1B}
+[data-theme="dark"] .feStat.bad{background:#3B1A1A;border-color:#5B2727}[data-theme="dark"] .feStat.bad span,[data-theme="dark"] .feStat.bad b{color:#FCA5A5}
+.feT{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:10px}.feT h2{margin:0}.feT .hint{margin:0}
+.feT input{width:auto;min-width:220px;min-height:38px}
+.feGridT{border-collapse:separate;border-spacing:6px;font-size:13px;min-width:100%}
+.feGridT th{font-weight:500;color:var(--muted);text-align:left;white-space:nowrap}
+.feGridT th.feCls{color:var(--ink);font-weight:600}.feGridT th.feCls span{font-weight:400;color:var(--muted)}
+.feGridT td{vertical-align:top;min-width:120px}.feGridT td.feNone{color:#A1A1AA;padding:10px}
+.feCell{display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;border:1px solid transparent;border-radius:9px;padding:9px 10px;font:inherit;font-size:13px;color:var(--ink)}
+button.feCell{cursor:pointer}button.feCell:hover{filter:brightness(.97)}
+.feCell span{color:var(--muted);font-size:12px}
+.feCell.ok{background:#E6F4EA}.feCell.ok b{color:#17652A}
+.feCell.late{background:#FEF3C7}.feCell.late b{color:#92400E}
+.feCell.miss{background:#FEF2F2;border-color:#FECACA}.feCell.miss b{color:#991B1B}.feCell.miss .btn{margin-top:6px;align-self:flex-start;font-size:12px}
+.feCell.wait{background:var(--bg);border-color:var(--line)}
+[data-theme="dark"] .feCell.ok{background:#16351F}[data-theme="dark"] .feCell.ok b{color:#9FE0B0}[data-theme="dark"] .feCell.late{background:#3A2F10}[data-theme="dark"] .feCell.late b{color:#FCE3A0}[data-theme="dark"] .feCell.miss{background:#3B1A1A;border-color:#5B2727}[data-theme="dark"] .feCell.miss b{color:#FCA5A5}
+.feTwo{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}.feTwo > .card{flex:1 1 380px;min-width:0}
+.feRow{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}.feRow:last-child{border-bottom:0}
+.feRow .t{flex:1;line-height:1.45}.feRow.done .t{color:var(--muted)}.feRow .aTag{margin-top:2px}
+.feDaysT{width:100%;border-collapse:collapse;font-size:14px;min-width:720px}
+.feDaysT th{text-align:left;font-size:12px;color:var(--muted);font-weight:600;padding:8px;border-bottom:1px solid var(--line)}
+.feDaysT td{padding:10px 8px;border-bottom:1px solid var(--line)}
+.feBar{display:flex;height:10px;width:160px;border-radius:99px;overflow:hidden;background:var(--bg)}.feBar i{display:block;height:100%}
+.feLegend{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin-top:12px}.feLegend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.ovl.feDrawer{padding:0;justify-content:flex-end;align-items:stretch}
+.ovl.feDrawer .ovlCard{max-width:620px;width:100%;max-height:none;height:100%;border-radius:0;padding:0;display:flex;flex-direction:column}
+.feDH{display:flex;gap:12px;align-items:flex-start;padding:20px 24px;border-bottom:1px solid var(--line)}.feDH h2{margin:2px 0 0;font-size:22px}
+.feDSum{display:flex;gap:8px;flex-wrap:wrap;padding:12px 24px;border-bottom:1px solid var(--line)}
+.feChip{font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;background:color-mix(in srgb,var(--c) 18%,transparent);color:var(--ink)}
+.feDList{flex:1;overflow:auto;padding:4px 24px}
+.feStu{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.feStu.inc{background:rgba(220,38,38,.05);margin:0 -24px;padding:12px 24px}
+.feStu .n b{font-size:14px}.feCom{width:100%;box-sizing:border-box;margin-top:6px;min-height:34px;font-size:13px;padding:4px 10px}
+.feR{display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.feR button{width:36px;height:36px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:600 13px Inter,system-ui,sans-serif;cursor:pointer}
+.feR button.on{background:var(--c);border-color:var(--c);color:#fff}.feR button.on[data-ev="Proficient"],.feR button.on[data-ev="Developing"],.feR button.on[data-ev="Absent"]{color:#18181B}
+.feR .feInc{display:inline-flex !important;align-items:center;gap:4px;font-size:13px;color:#B91C1C;font-weight:700;margin:0 0 0 6px !important}.feR .feInc input{width:56px !important;min-height:36px;padding:0 6px;margin:0}
+.feDF{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:16px 24px;border-top:1px solid var(--line)}.feDF .hint{flex:1;margin:0}.feDF .btn{min-height:44px}
+@media (max-width:640px){.feStu{grid-template-columns:1fr}.feR{justify-content:flex-start}}
 </style>
 </head>
 <body>
@@ -701,22 +753,33 @@ main,main.wide{max-width:1260px}
   <!-- ===================== EVALUATIONS: the board ===================== -->
   <div id="paneEvals" hidden>
     <div id="evStatus"></div>
-    <!-- FACTORY REPORT -->
-    <div class="card">
-      <h2>Factory report</h2>
-      <p class="hint" style="margin-top:-6px">Results by class, incidents and comments for the dates you choose.</p>
-      <div class="row">
-        <div><label for="frCls">Class</label><select id="frCls"></select></div>
-        <div><label for="frFrom">From</label><input type="date" id="frFrom"></div>
-        <div><label for="frTo">To</label><input type="date" id="frTo"></div>
-      </div>
-      <div class="row">
-        <div class="auto"><button class="btn alt small" id="frXlsx" type="button">Excel</button></div>
-        <div class="auto"><button class="btn alt small" id="frPdf" type="button">PDF / print</button></div>
-      </div>
-      <div id="frMsg"></div>
+    <div class="feHead">
+      <div><h1>Factory evaluations</h1><p class="hint">What was evaluated, what is missing, and what needs you.</p></div>
+      <div class="feBtns"><button class="btn alt" id="feUpBtn" type="button">Upload past evaluations</button><button class="btn alt" id="frPdf" type="button">PDF / print</button><button class="btn save" id="frXlsx" type="button">Export Excel</button></div>
     </div>
-    <details class="card evUp" id="evUpBox">
+    <div class="feFilters">
+      <div class="feSeg" id="feRange"><button type="button" data-r="week">This week</button><button type="button" data-r="month">This month</button><button type="button" data-r="term">This term</button><button type="button" data-r="custom">Custom</button></div>
+      <span id="feCustom" hidden><input type="date" id="frFrom" aria-label="From"> – <input type="date" id="frTo" aria-label="To"></span>
+      <select id="frCls" aria-label="Class"></select>
+      <select id="feTeacher" aria-label="Teacher"></select>
+      <span class="hint" id="feRangeTxt"></span>
+    </div>
+    <div id="frMsg"></div>
+    <div class="feStats" id="feStats"></div>
+    <section class="card">
+      <div class="feT"><h2>Did every factory day get its evaluation?</h2><span class="hint">Factory days come from the timetable (and the ones you added in Timetable). Click a day to open it.</span></div>
+      <div class="tw" id="feGrid"></div>
+    </section>
+    <div class="feTwo">
+      <section class="card"><h2>Incidents to follow up</h2><div id="feInc"></div></section>
+      <section class="card"><h2>Students to watch</h2><div id="feWatch"></div></section>
+    </div>
+    <section class="card">
+      <div class="feT"><h2>Latest evaluations</h2><input type="search" id="feQ" placeholder="Search a student…" aria-label="Search a student"></div>
+      <div class="tw" id="feDays"></div>
+      <div class="feLegend"><span><i style="background:#16A34A"></i>Outstanding</span><span><i style="background:#84CC16"></i>Proficient</span><span><i style="background:#F7C948"></i>Developing</span><span><i style="background:#EA580C"></i>Needs improvement</span><span><i style="background:#B91C1C"></i>Unsatisfactory</span><span><i style="background:#D4D4D8"></i>Absent</span></div>
+    </section>
+    <details class="card evUp" id="evUpBox" hidden>
       <summary><h2 style="display:inline">Upload past evaluations</h2> <span class="hint">· for one class and one teacher, from Excel</span></summary>
       <p class="hint">1. Choose the class and the teacher, then download the template: one row per student, one column per date.
         2. Fill each cell with the evaluation: a letter (O, P, D, N, U, A), the English word (Outstanding, Proficient,
@@ -743,7 +806,7 @@ main,main.wide{max-width:1260px}
       <div id="evPreview"></div>
       <button class="btn save" id="evSave" type="button" hidden>Save evaluations</button>
     </details>
-    <iframe id="boardFrame" title="Evaluations board" class="boardFrame"></iframe>
+    <iframe id="boardFrame" title="Evaluations board" class="boardFrame" hidden></iframe>
   </div>
 
   <!-- ===================== STUDENTS: everyone, filtered your way ===================== -->
@@ -4002,11 +4065,185 @@ async function frLoad() {
   return FR.rows.filter(r => !c || r.cls === c);
 }
 function frFill() {
-  if ($('frCls').options.length) return;
+  if ($('frCls').options.length > 1) return;
   $('frCls').innerHTML = '<option value="">All classes</option>' + RAW.filter(x => x.Type === 'Class').map(x => `<option>${esc(x.Name)}</option>`).join('');
-  const [f, t] = stRange('month');
-  $('frFrom').value = f; $('frTo').value = t;
+  if (!$('frFrom').value) { const [f, t] = stRange('week'); $('frFrom').value = f; $('frTo').value = t; }
 }
+
+// ===================== FACTORY EVALUATIONS (admin): coverage, follow-ups, fixes — server side in Evals.gs =====================
+let FE = null, FE_RANGE = 'week', FE_DAY = null, FE_MORE = 30;
+const FE_EV = ['Outstanding', 'Proficient', 'Developing', 'Needs Improvement', 'Unsatisfactory', 'Absent'];
+const FE_L = { Outstanding: 'O', Proficient: 'P', Developing: 'D', 'Needs Improvement': 'N', Unsatisfactory: 'U', Absent: 'A' };
+const FE_C = { Outstanding: '#16A34A', Proficient: '#84CC16', Developing: '#F7C948', 'Needs Improvement': '#EA580C', Unsatisfactory: '#B91C1C', Absent: '#D4D4D8' };
+const feCode = n => { const s = String(n || '').trim(), m = s.match(/^([A-Za-z])[A-Za-z]*\s*(\d+)/); return m ? (m[1] + m[2]).toUpperCase() : s.toUpperCase(); };
+const feDay = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }); };
+const feFirst = n => String(n || '').split(' ')[0];
+function feInit() {
+  frFill();
+  $('feRange').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.r === FE_RANGE));
+  if (!FE) feLoad();
+}
+async function feLoad() {
+  if (FE_RANGE !== 'custom') { const [f, t] = stRange(FE_RANGE); $('frFrom').value = f; $('frTo').value = t; }
+  $('feCustom').hidden = FE_RANGE !== 'custom';
+  const from = $('frFrom').value, to = $('frTo').value;
+  if (!from || !to) return;
+  $('feRangeTxt').textContent = feDay(from) + ' – ' + feDay(to);
+  $('feStats').innerHTML = '<div class="hint">Loading…</div>';
+  try { FE = await post('evalOverview', { from, to }); }
+  catch (e) { $('feStats').innerHTML = `<div class="msg err">${esc(e.message)}</div>`; return; }
+  const ts = [...new Set(FE.records.map(r => r.teacher).concat(FE.expected.map(x => x.teacher)))].sort();
+  const keep = $('feTeacher').value;
+  $('feTeacher').innerHTML = '<option value="">All teachers</option>' + ts.map(t => `<option>${esc(t)}</option>`).join('');
+  $('feTeacher').value = ts.includes(keep) ? keep : '';
+  feDraw();
+}
+function feDraw() {
+  if (!FE) return;
+  const cf = $('frCls').value, tf = $('feTeacher').value, today = FE.today;
+  const recs = FE.records.filter(r => (!cf || feCode(r.class) === feCode(cf)) && (!tf || r.teacher === tf));
+  const exp = FE.expected.filter(x => (!cf || feCode(x.cls) === feCode(cf)) && (!tf || x.teacher === tf));
+  const byDay = {};
+  recs.forEach(r => { const k = r.date + '|' + feCode(r.class); (byDay[k] = byDay[k] || []).push(r); });
+  // coverage grid: classes × factory days
+  const names = {}; FE.classes.forEach(n => { names[feCode(n)] = n; }); recs.forEach(r => { names[feCode(r.class)] = names[feCode(r.class)] || r.class; });
+  const codes = [...new Set(exp.map(x => feCode(x.cls)).concat(recs.map(r => feCode(r.class))))].filter(Boolean).sort();
+  const dates = [...new Set(exp.map(x => x.date).concat(recs.map(r => r.date)))].sort();
+  let due = 0, done = 0, missing = 0;
+  const cell = (code, date) => {
+    const rs = byDay[date + '|' + code] || [], ex = exp.filter(x => x.date === date && feCode(x.cls) === code);
+    if (ex.length && date <= today) { due++; if (rs.length) done++; }
+    if (rs.length) {
+      const late = rs.some(r => r.uploaded.slice(0, 10) > date), who = [...new Set(rs.map(r => feFirst(r.teacher)))].join(', ');
+      return `<td><button type="button" class="feCell ${late ? 'late' : 'ok'}" data-day="${esc(date + '|' + code)}"><b>${late ? 'Done late' : 'Done'}</b><span>${esc(who)} · ${rs.length} students</span></button></td>`;
+    }
+    if (!ex.length) return '<td class="feNone">—</td>';
+    const t = ex[0];
+    if (date < today) { missing++; return `<td><div class="feCell miss"><b>Missing</b><span>${esc(t.teacher)}</span><button type="button" class="btn alt small" data-remind="${esc(t.teacher)}" data-date="${date}" data-cls="${esc(code)}">Remind ${esc(feFirst(t.teacher))}</button></div></td>`; }
+    return `<td><div class="feCell wait"><b>${date === today ? 'Due today' : 'Coming'}</b><span>${esc(t.teacher)}</span></div></td>`;
+  };
+  $('feGrid').innerHTML = codes.length && dates.length ? `<table class="feGridT"><thead><tr><th>Class</th>${dates.map(d => `<th>${feDay(d)}</th>`).join('')}</tr></thead><tbody>${
+    codes.map(c => `<tr><th class="feCls">${esc(c)}${names[c] && names[c] !== c ? ' · <span>' + esc(names[c]) + '</span>' : ''}</th>${dates.map(d => cell(c, d)).join('')}</tr>`).join('')}</tbody></table>`
+    : '<div class="aEmpty">No factory days and no factory evaluations in these dates.</div>';
+  // incidents
+  const incs = recs.filter(r => r.incidents > 0).map(r => Object.assign({ key: r.date + '|' + r.class + '|' + r.student }, r)).sort((a, b) => a.date < b.date ? 1 : -1);
+  const open = incs.filter(r => !FE.followups[r.key]), closed = incs.filter(r => FE.followups[r.key]);
+  // numbers
+  const scored = recs.filter(r => r.evaluation !== 'Absent');
+  const avg = scored.length ? Math.round(scored.reduce((a, r) => a + r.score, 0) / scored.length * 10) / 10 : null;
+  $('feStats').innerHTML = `<div class="feStat"><span>Factory days evaluated</span><b>${done} <small>of ${due}</small></b></div>
+    <div class="feStat ${missing ? 'bad' : ''}"><span>Missing evaluations</span><b>${missing}</b></div>
+    <div class="feStat"><span>Incidents to follow up</span><b>${open.length}</b></div>
+    <div class="feStat"><span>Average rating</span><b>${avg === null ? '—' : avg} <small>/ 5</small></b></div>`;
+  $('feInc').innerHTML = incs.length ? open.map(r => `<div class="feRow"><span class="aTag red">INCIDENT${r.incidents > 1 ? ' ×' + r.incidents : ''}</span><div class="t"><b>${esc(r.student)}</b> · ${esc(feCode(r.class))} · ${feDay(r.date)} · ${esc(feFirst(r.teacher))}${r.comment ? `<div class="hint" style="margin:2px 0 0">“${esc(r.comment)}”</div>` : ''}</div><button type="button" class="btn alt small" data-follow="${esc(r.key)}">Followed up</button></div>`).join('') +
+    closed.slice(0, 4).map(r => `<div class="feRow done"><span class="aTag grey">DONE</span><div class="t"><b>${esc(r.student)}</b> · ${esc(feCode(r.class))} · ${feDay(r.date)} · followed up by ${esc(feFirst(FE.followups[r.key].by))}</div><button type="button" class="btn alt small" data-unfollow="${esc(r.key)}">Undo</button></div>`).join('')
+    : '<div class="aEmpty">No incidents in these dates.</div>';
+  // students to watch
+  const per = {};
+  recs.slice().sort((a, b) => a.date < b.date ? -1 : 1).forEach(r => { const k = r.class + '|' + r.student; (per[k] = per[k] || []).push(r); });
+  const watch = [];
+  Object.keys(per).forEach(k => {
+    const l = per[k], [cls, name] = k.split('|');
+    const abs = l.filter(r => r.evaluation === 'Absent').length, u = l.filter(r => r.evaluation === 'Unsatisfactory').length;
+    const sc = l.filter(r => r.evaluation !== 'Absent').map(r => r.score);
+    if (abs >= 2) watch.push({ w: abs + 10, tag: `ABSENT ${abs}×`, lvl: 'grey', name, cls });
+    else if (u >= 2) watch.push({ w: u + 8, tag: `U ${u}×`, lvl: 'red', name, cls });
+    else if (sc.length >= 3 && sc[sc.length - 1] <= sc[0] - 2) watch.push({ w: 5, tag: 'DROPPING', lvl: 'amb', name, cls, note: `from ${FE_L[l.find(r => r.evaluation !== 'Absent').evaluation]} to ${FE_L[l.filter(r => r.evaluation !== 'Absent').pop().evaluation]}` });
+  });
+  watch.sort((a, b) => b.w - a.w);
+  $('feWatch').innerHTML = watch.length ? watch.slice(0, 8).map(x => `<div class="feRow"><span class="aTag ${x.lvl}">${x.tag}</span><div class="t"><b>${esc(x.name)}</b> · ${esc(feCode(x.cls))}${x.note ? ' · ' + esc(x.note) : ''}</div><button type="button" class="btn alt small" data-stu="${esc(x.name)}">Profile</button></div>`).join('')
+    : '<div class="aEmpty">Nobody to watch in these dates.</div>';
+  // latest class days
+  const q = $('feQ').value.trim().toLowerCase();
+  const days = Object.keys(byDay).map(k => byDay[k]).filter(l => !q || l.some(r => r.student.toLowerCase().includes(q)))
+    .sort((a, b) => a[0].date < b[0].date ? 1 : a[0].date > b[0].date ? -1 : 0);
+  $('feDays').innerHTML = days.length ? `<table class="feDaysT"><thead><tr><th>Day</th><th>Class</th><th>Teacher</th><th>Ratings</th><th>Avg</th><th>Incidents</th><th>Absent</th><th></th></tr></thead><tbody>${
+    days.slice(0, FE_MORE).map(l => {
+      const r0 = l[0], sc2 = l.filter(r => r.evaluation !== 'Absent'), a2 = sc2.length ? (sc2.reduce((a, r) => a + r.score, 0) / sc2.length).toFixed(1) : '—';
+      const bar = FE_EV.map(e => { const n = l.filter(r => r.evaluation === e).length; return n ? `<i style="width:${n / l.length * 100}%;background:${FE_C[e]}" title="${e}: ${n}"></i>` : ''; }).join('');
+      const late = l.some(r => r.uploaded.slice(0, 10) > r0.date);
+      return `<tr><td>${feDay(r0.date)}${late ? ' <span class="aTag amb">LATE</span>' : ''}</td><td><b>${esc(feCode(r0.class))}</b></td><td>${esc([...new Set(l.map(r => r.teacher))].join(', '))}</td><td><div class="feBar">${bar}</div></td><td>${a2}</td><td>${l.reduce((a, r) => a + r.incidents, 0)}</td><td>${l.filter(r => r.evaluation === 'Absent').length}</td><td style="text-align:right"><button type="button" class="btn alt small" data-day="${esc(r0.date + '|' + feCode(r0.class))}">Open</button></td></tr>`;
+    }).join('')}</tbody></table>${days.length > FE_MORE ? `<button type="button" class="btn alt small" id="feMore" style="margin-top:10px">Show more (${days.length - FE_MORE})</button>` : ''}`
+    : '<div class="aEmpty">No factory evaluations in these dates.</div>';
+}
+function feOpenDay(key) {
+  const [date, code] = key.split('|');
+  const l = FE.records.filter(r => r.date === date && feCode(r.class) === code && (!$('feTeacher').value || r.teacher === $('feTeacher').value)).sort((a, b) => a.student.localeCompare(b.student));
+  if (!l.length) return;
+  FE_DAY = { date, code, cls: l[0].class, teacher: l[0].teacher, rows: l.map(r => Object.assign({}, r)) };
+  const up = l.map(r => r.uploaded).sort()[0] || '', late = up.slice(0, 10) > date;
+  $('feDayTitle').textContent = `${code}${l[0].class !== code ? ' · ' + l[0].class : ''} · ${feDay(date)}`;
+  $('feDaySub').textContent = `By ${[...new Set(l.map(r => r.teacher))].join(', ')} · uploaded ${up}${late ? ' (late)' : ''}`;
+  feDayDraw();
+  $('feDayMsg').textContent = 'Changes are saved in the activity log.';
+  $('feDayOvl').hidden = false;
+}
+function feDayDraw() {
+  const l = FE_DAY.rows;
+  $('feDaySum').innerHTML = FE_EV.map(e => { const n = l.filter(r => r.evaluation === e).length; return n ? `<span class="feChip" style="--c:${FE_C[e]}">${e === 'Absent' ? 'Absent' : FE_L[e]} ${n}</span>` : ''; }).join('') +
+    (l.some(r => r.incidents) ? `<span class="aTag red">${l.reduce((a, r) => a + r.incidents, 0)} incident(s)</span>` : '');
+  $('feDayList').innerHTML = l.map((r, i) => `<div class="feStu ${r.incidents ? 'inc' : ''}" data-i="${i}">
+      <div class="n"><b>${esc(r.student)}</b>${r.teacher !== FE_DAY.teacher ? ` <span class="hint">· ${esc(feFirst(r.teacher))}</span>` : ''}
+        <input class="feCom" data-k="comment" value="${esc(r.comment)}" placeholder="Comment" maxlength="1000"></div>
+      <div class="feR">${FE_EV.map(e => `<button type="button" data-ev="${e}" class="${r.evaluation === e ? 'on' : ''}" style="--c:${FE_C[e]}" title="${e}">${FE_L[e]}</button>`).join('')}
+        <label class="feInc" title="Incidents">! <input type="number" min="0" max="20" data-k="incidents" value="${r.incidents}"></label></div></div>`).join('');
+}
+document.addEventListener('click', e => {
+  if (e.target.closest('#feDaySave')) return feDaySave();
+  if (e.target.closest('#feDayDel')) return feDayDel();
+  const b = e.target.closest('#feDayList [data-ev]'); if (!b) return;
+  const i = Number(b.closest('.feStu').dataset.i); FE_DAY.rows[i].evaluation = b.dataset.ev;
+  b.parentElement.querySelectorAll('[data-ev]').forEach(x => x.classList.toggle('on', x === b));
+});
+document.addEventListener('input', e => {
+  if (!e.target.closest('#feDayList')) return;
+  const k = e.target.dataset.k; if (!k) return;
+  const i = Number(e.target.closest('.feStu').dataset.i);
+  FE_DAY.rows[i][k] = k === 'incidents' ? Math.max(0, Number(e.target.value) || 0) : e.target.value;
+  e.target.closest('.feStu').classList.toggle('inc', FE_DAY.rows[i].incidents > 0);
+});
+const feSenior = () => { const s = localStorage.getItem('hubSenior') || ''; if (!s) alert('First choose who you are (George or Ramy) in Team hub.'); return s; };
+async function feDaySave() {
+  const sen = feSenior(); if (!sen) return;
+  const orig = {}; FE.records.forEach(r => { orig[r.id] = r; });
+  const rows = FE_DAY.rows.filter(r => { const o = orig[r.id]; return o && (o.evaluation !== r.evaluation || o.incidents !== r.incidents || o.comment !== r.comment); })
+    .map(r => ({ id: r.id, evaluation: r.evaluation, incidents: r.incidents, comment: r.comment }));
+  if (!rows.length) { $('feDayMsg').textContent = 'Nothing changed.'; return; }
+  $('feDaySave').disabled = true; $('feDayMsg').textContent = 'Saving…';
+  try { await post('evalDaySave', { rows, senior: sen, cls: FE_DAY.cls, date: FE_DAY.date, teacher: FE_DAY.teacher }); $('feDayOvl').hidden = true; await feLoad(); showFe(`Saved ${rows.length} change(s).`, true); }
+  catch (err) { $('feDayMsg').textContent = err.message; } finally { $('feDaySave').disabled = false; }
+}
+async function feDayDel() {
+  const sen = feSenior(); if (!sen) return;
+  if (!confirm(`Delete all ${FE_DAY.rows.length} evaluations of ${FE_DAY.code} on ${feDay(FE_DAY.date)} by ${FE_DAY.teacher}? This cannot be undone.`)) return;
+  try { const out = await post('evalDayDelete', { cls: FE_DAY.cls, date: FE_DAY.date, teacher: FE_DAY.teacher, senior: sen }); $('feDayOvl').hidden = true; await feLoad(); showFe(`Deleted ${out.removed} evaluation(s).`, true); }
+  catch (err) { $('feDayMsg').textContent = err.message; }
+}
+let FE_T = 0;
+const showFe = (t, ok) => { clearTimeout(FE_T); $('frMsg').innerHTML = `<div class="msg ${ok ? 'ok' : 'err'}">${esc(t)}</div>`; if (ok) FE_T = setTimeout(() => { $('frMsg').innerHTML = ''; }, 5000); };
+$('paneEvals').addEventListener('click', async e => {
+  const r = e.target.closest('#feRange [data-r]');
+  if (r) { FE_RANGE = r.dataset.r; $('feRange').querySelectorAll('button').forEach(b => b.classList.toggle('on', b === r)); if (FE_RANGE === 'custom') { $('feCustom').hidden = false; return; } return feLoad(); }
+  const d = e.target.closest('[data-day]'); if (d) return feOpenDay(d.dataset.day);
+  if (e.target.id === 'feMore') { FE_MORE += 30; return feDraw(); }
+  if (e.target.id === 'feUpBtn') { const u = $('evUpBox'); u.hidden = false; u.open = true; u.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+  const st = e.target.closest('[data-stu]'); if (st) { showPane('students'); $('stQ').value = st.dataset.stu; $('stQ').dispatchEvent(new Event('input')); return; }
+  const rm = e.target.closest('[data-remind]'), fo = e.target.closest('[data-follow], [data-unfollow]');
+  if (rm || fo) {
+    const sen = feSenior(); if (!sen) return;
+    (rm || fo).disabled = true;
+    try {
+      if (rm) { await post('evalRemind', { teacher: rm.dataset.remind, date: rm.dataset.date, cls: rm.dataset.cls, senior: sen }); rm.textContent = 'Reminded ✓'; showFe(`${rm.dataset.remind} was reminded in Team hub.`, true); return; }
+      await post('evalFollowUp', { item: fo.dataset.follow || fo.dataset.unfollow, undo: !!fo.dataset.unfollow, senior: sen });
+      if (fo.dataset.follow) FE.followups[fo.dataset.follow] = { by: sen, time: '' }; else delete FE.followups[fo.dataset.unfollow];
+      feDraw();
+    } catch (err) { (rm || fo).disabled = false; showFe(err.message, false); }
+  }
+});
+['frFrom', 'frTo'].forEach(id => { $(id).addEventListener('change', () => { if (FE_RANGE === 'custom') feLoad(); }); });
+$('frCls').addEventListener('change', feDraw);
+$('feTeacher').addEventListener('change', feDraw);
+$('feQ').addEventListener('input', feDraw);
 function frByClass(rows) {
   const out = {};
   rows.forEach(r => { (out[r.cls] = out[r.cls] || []).push(r); });
@@ -4162,6 +4399,8 @@ const BOARD_HTML_B64 = "PCFET0NUWVBFIGh0bWw+CjxodG1sIGxhbmc9ImVuIiBkaXI9Imx0ciI+
 let boardStarted = false;
 function evInit() {
   evFill();
+  feInit();
+  return;
   if (boardStarted) return;
   boardStarted = true;
   // the board talks to the same server as this page (the live one, or the test one in the test copy)
@@ -4555,6 +4794,14 @@ else adminGateShow(gateNote);
       <div class="hubBtns"><button class="btn alt" type="button" id="meetPrint">🖨 Print</button><button class="btn alt" type="button" id="meetEdit">Edit minutes</button><button class="btn alt" type="button" data-close>✕</button></div></div>
     <div id="meetViewBox"></div>
     <div id="meetReaders"></div>
+  </div>
+</div>
+<div class="ovl feDrawer" id="feDayOvl" hidden>
+  <div class="ovlCard" role="dialog" aria-labelledby="feDayTitle">
+    <div class="feDH"><div style="flex:1"><div class="hint" style="margin:0">Factory evaluation</div><h2 id="feDayTitle"></h2><div class="hint" id="feDaySub" style="margin:2px 0 0"></div></div><button class="btn alt" type="button" data-close aria-label="Close">✕</button></div>
+    <div class="feDSum" id="feDaySum"></div>
+    <div class="feDList" id="feDayList"></div>
+    <div class="feDF"><button class="btn rm" type="button" id="feDayDel">Delete this day</button><span class="hint" id="feDayMsg">Changes are saved in the activity log.</span><button class="btn save" type="button" id="feDaySave">Save changes</button></div>
   </div>
 </div>
 <div class="ovl" id="visitViewOvl" hidden>
