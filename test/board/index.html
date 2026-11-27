@@ -6,6 +6,7 @@
 <title>OMHG EVA SCHOOL · Board overview</title>
 <script src="../config.js"></script>
 <script src="../kpi.js"></script>
+<script src="../meetings.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -115,6 +116,13 @@ table.matrix td:first-child,table.matrix th:first-child{text-align:start;white-s
 table.matrix td.m{border-radius:6px;font-weight:600;min-width:56px}
 td.m.h1{background:#FEF3CC}td.m.h2{background:#FDEBB0}td.m.h3{background:#F9D96B}td.m.h4{background:#F7C948}td.m.lo{background:#FFE4D1;color:#9A3412}
 [data-theme="dark"] td.m.h1{background:#2E2915}[data-theme="dark"] td.m.h2{background:#3A3214}[data-theme="dark"] td.m.h3{background:#4A3E12}[data-theme="dark"] td.m.h4{background:#5C4A0E}[data-theme="dark"] td.m.lo{background:#3B2416;color:#FDBA74}
+
+.meetCard{padding:0;overflow:hidden}
+.meetCard summary{padding:14px 18px;cursor:pointer;list-style:none;display:flex;flex-direction:column;gap:2px}
+.meetCard summary::-webkit-details-marker{display:none}
+.meetCard summary:hover{background:var(--bg)}
+.meetCard .meetBody{padding:4px 18px 18px}
+.embedded .meetTab{display:none !important}
 </style>
 </head>
 <body>
@@ -148,6 +156,7 @@ td.m.h1{background:#FEF3CC}td.m.h2{background:#FDEBB0}td.m.h3{background:#F9D96B
       <button class="tab" data-view="vComments" type="button" data-i18n="tabComments"></button>
       <button class="tab" data-view="vIncidents" type="button" data-i18n="tabIncidents"></button>
       <button class="tab" data-view="vAbsent" type="button" data-i18n="tabAbsent"></button>
+      <button class="tab meetTab" data-view="vMeet" type="button" data-i18n="tabMeet"></button>
       <button class="tab kpiTab" data-view="vKpi" type="button" data-i18n="tabKpi"></button>
       <button class="btn" id="refresh" type="button" style="margin-inline-start:auto" data-i18n="refresh"></button>
     </div>
@@ -250,6 +259,8 @@ td.m.h1{background:#FEF3CC}td.m.h2{background:#FDEBB0}td.m.h3{background:#F9D96B
     <!-- ABSENCES: one row per student absent at least once in the chosen dates -->
     <!-- TEACHER KPIs (shared with the seniors' admin page; see ../kpi.js) -->
     <div id="vKpi" hidden><div class="card" id="kpiBox"></div></div>
+    <!-- MEETINGS: minutes of meeting from Team hub (Meetings.gs) -->
+    <div id="vMeet" hidden><div id="meetCount" class="muted"></div><div id="meetList"></div></div>
 
     <div id="vAbsent" hidden>
       <div class="row noprint">
@@ -308,6 +319,7 @@ const T = {
     tabOverview: "Overview", tabTeachers: "Teachers", tabClasses: "Classes", tabAll: "All evaluations",
     tabComments: "Comments", tabIncidents: "Incidents",
     asOf: "Data as of", badPw: "The board password is not correct.", loadErr: "Could not load the data: ",
+    tabMeet: "Meetings", meetCount: "{n} meeting(s) with minutes in these dates", meetNone: "No minutes in these dates.", loading: "Loading…",
     sumHead: "In one line", sumLine: "{evals} evaluations, average {avg} / 5. Students absent at least once: {abs}.", sumWatch: " {cls} is the class to watch ({cavg}).", sumNone: "No evaluations in these dates yet.",
     matrixTitle: "Teachers × classes (average out of 5)", matrixNote: "Darker = higher average. Orange = below 3.", 
     kEvals: "Evaluations (by date)", kStudents: "Students", kAvg: "Average score (0-5)", kInc: "Incidents",
@@ -349,6 +361,7 @@ const T = {
     tabOverview: "نظرة عامة", tabTeachers: "المعلمون", tabClasses: "الفصول", tabAll: "كل التقييمات",
     tabComments: "التعليقات", tabIncidents: "الحوادث",
     asOf: "البيانات حتى", badPw: "كلمة مرور المجلس غير صحيحة.", loadErr: "تعذر تحميل البيانات: ",
+    tabMeet: "الاجتماعات", meetCount: "{n} اجتماع بمحضر في هذه الفترة", meetNone: "لا توجد محاضر في هذه الفترة.", loading: "جارٍ التحميل…",
     sumHead: "باختصار", sumLine: "{evals} تقييم، بمتوسط {avg} من 5. عدد الطلاب الذين غابوا مرة على الأقل: {abs}.", sumWatch: " الفصل الذي يحتاج متابعة: {cls} ({cavg}).", sumNone: "لا توجد تقييمات في هذه الفترة بعد.",
     matrixTitle: "المعلمون × الفصول (المتوسط من 5)", matrixNote: "اللون الأغمق = متوسط أعلى. البرتقالي = أقل من 3.",
     kEvals: "التقييمات (حسب التاريخ)", kStudents: "الطلاب", kAvg: "متوسط الدرجة (من 5)", kInc: "الحوادث",
@@ -463,11 +476,33 @@ function table(headers, rows) {
 }
 
 function setView(id) {
-  ["vOverview", "vTeachers", "vClasses", "vAll", "vComments", "vIncidents", "vAbsent", "vKpi"].forEach(v => $(v).hidden = v !== id);
+  ["vOverview", "vTeachers", "vClasses", "vAll", "vComments", "vIncidents", "vAbsent", "vKpi", "vMeet"].forEach(v => $(v).hidden = v !== id);
   document.querySelectorAll(".tab").forEach(b => b.classList.toggle("on", b.dataset.view === id));
   // the date filter doesn't apply to the KPIs, which have their own month
   ["range", "rangeNote"].forEach(x => { if ($(x)) $(x).style.display = id === "vKpi" ? "none" : ""; });
   if (id === "vKpi") drawKpi();
+  if (id === "vMeet") drawMeet(true);
+}
+
+// ---------- meetings (minutes of meeting) ----------
+let MEETS = null;
+async function drawMeet(fetchNew) {
+  if (!window.MEET) { $("meetList").textContent = ""; return; }
+  if (fetchNew || !MEETS) {
+    $("meetCount").textContent = t("loading");
+    try {
+      const res = await fetch(BOARD_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "boardMeetings", key: PW }) });
+      const out = await res.json();
+      if (out.error) throw new Error(out.error);
+      MEETS = out.meetings || [];
+    } catch (e) { $("meetCount").textContent = t("loadErr") + e.message; return; }
+  }
+  const r = rangeDates();
+  const list = MEETS.filter(m => !r || r.missing || (m.date >= r.from && m.date <= r.to));
+  $("meetCount").textContent = t("meetCount", { n: list.length });
+  $("meetList").innerHTML = list.map((m, i) => `<details class="card meetCard" ${i === 0 ? "open" : ""}><summary><b>${m.title.replace(/[<>&"]/g, c => ({ "<": "&lt;", ">": "&gt;", "&": "&amp;", '"': "&quot;" }[c]))}</b>
+    <span class="daymeta">${MEET.day(m.date, LANG)}${m.time ? " · " + m.time : ""} · ${MEET.label(m.type, LANG)} · ${m.actions.length ? MEET.label("progress", LANG).replace("{d}", m.actionsDone).replace("{n}", m.actions.length) : MEET.label("none", LANG) + " " + MEET.label("actions", LANG)}</span></summary>
+    <div class="meetBody">${MEET.report(m, { lang: LANG })}</div></details>`).join("") || `<div class="card muted">${t("meetNone")}</div>`;
 }
 
 // ---------- teacher KPIs ----------
@@ -640,6 +675,7 @@ function renderAll() {
     : DATA.allRecords.filter(x => x.date >= r.from && x.date <= r.to);
   drawRange(r);
   renderViews();
+  if ($("vMeet") && !$("vMeet").hidden) drawMeet(false);
 }
 
 function renderViews() {
