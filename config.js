@@ -4,6 +4,6 @@
 // url: the Google Apps Script web app URL (ends with /exec)
 // key: the same value as SECRET in Code.gs
 window.FEEDBACK_CONFIG = {
-  url: "https://script.google.com/macros/s/AKfycbzXI1B0s_Hr2np_BiJlc0ibmYsMIoL2yaxOaIzYqogtfAdUXbe7wBUfGdaF_qf0wmchRg/exec",
+  url: "https://exuberant-deer-347.convex.site/exec",
   key: "mybbIp-pobfod-2xabgy-CviUs345-Po45l34"
 };
