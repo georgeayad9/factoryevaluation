@@ -16,6 +16,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#F7C948">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 .ovl{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:flex-start;justify-content:center;padding:6vh 14px;z-index:80}
 .ovl[hidden]{display:none}
@@ -375,6 +377,72 @@ header .hdrList .btn:hover{background:var(--bg)}
 .cmpT td{padding:8px 6px;border-bottom:1px solid var(--line)}
 .cmpT td.n{font-weight:700;font-size:15px}
 .better{color:var(--ok-ink)}.worse{color:var(--danger)}
+
+/* ===== Design D (Nov 2026): clean light, Inter, grouped sidebar ===== */
+:root{--bg:#F6F6F4;--line:#E4E4E7;--muted:#52525B;--ink:#18181B;--brand-soft:#FEF6DA}
+[data-theme="dark"]{--bg:#0E0E11;--card:#17171C;--line:#26262D;--muted:#A1A1AA;--ink:#F4F4F5;--brand-soft:#2A2414}
+body{font-family:Inter,system-ui,"Segoe UI",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+header{background:var(--card);color:var(--ink);border-bottom:1px solid var(--line);padding:10px 20px}
+header h1{font-size:16px}
+header .btn.alt{color:var(--ink);border-color:var(--line)}
+.btn{border-radius:10px}
+.btn.alt{border-color:var(--line)}
+.btn.alt:hover{background:var(--bg)}
+.btn.save{background:#18181B;color:#fff}
+[data-theme="dark"] .btn.save{background:#F7C948;color:#141414}
+.card{border-radius:14px;padding:18px}
+input,select,textarea{border-radius:10px}
+main,main.wide{max-width:1260px}
+.ptabs.kind{background:#EDEDEA;border-radius:12px;padding:4px;gap:4px;margin-top:0}
+[data-theme="dark"] .ptabs.kind{background:#1C1C22}
+.ptabs.kind button{border:0;background:transparent;color:var(--muted);font-weight:500;height:46px}
+.ptabs.kind button.on{background:var(--card);color:var(--ink);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.hubTabs button.on{border-bottom-color:#18181B}
+[data-theme="dark"] .hubTabs button.on{border-bottom-color:#F7C948}
+/* sidebar */
+.side{display:flex;gap:2px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px}
+.side > button{display:flex;align-items:center;gap:10px;border:0;background:transparent;color:var(--muted);font:500 14px Inter,system-ui,sans-serif;height:42px;padding:0 12px;border-radius:10px;cursor:pointer;text-align:left;white-space:nowrap}
+.side > button:hover{background:var(--bg);color:var(--ink)}
+.side > button.on{background:var(--brand-soft);color:var(--ink);font-weight:600}
+.side .ic{display:inline-flex;width:20px;height:20px;flex:0 0 20px}.side .ic svg{width:19px;height:19px}
+.sideH{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:12px 12px 4px}
+.sideBrand{display:flex;gap:10px;align-items:center;padding:4px 8px 12px;font-size:14px}
+.sideBrand .mark{width:32px;height:32px;border-radius:8px;background:#F7C948;color:#18181B;display:flex;align-items:center;justify-content:center;font-weight:700}
+.sideBrand small{display:block;font-size:12px;color:var(--muted)}
+@media (min-width:960px){
+  main{display:grid;grid-template-columns:220px minmax(0,1fr);column-gap:28px;row-gap:0;align-items:start}
+  main > *{grid-column:2}
+  main > .side{grid-column:1;grid-row:1 / span 40;position:sticky;top:16px;flex-direction:column}
+}
+@media (max-width:959px){
+  .side{overflow-x:auto;margin-bottom:14px;padding:6px}
+  .sideH,.sideBrand{display:none}
+  .side > button{flex:0 0 auto}
+}
+/* home */
+.aHead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:14px;margin-bottom:18px}
+.aDate{font-size:13px;color:var(--muted)}
+.aHead h1{margin:4px 0 0;font-size:28px;letter-spacing:-.02em}
+.aHead input{flex:0 1 340px;min-width:220px;height:44px}
+.aStats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin-bottom:16px}
+.aStat{display:flex;flex-direction:column;gap:6px;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;cursor:pointer;font:inherit;color:var(--ink)}
+.aStat:hover{border-color:var(--muted)}
+.aStat span{font-size:13px;color:var(--muted)}.aStat b{font-size:28px;letter-spacing:-.02em}
+.aGrid{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+.aAttn{flex:3 1 440px;min-width:0;margin:0}
+.aGrid h2{margin:0 0 8px;font-size:16px}
+.aRow{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
+.aRow:last-child{border-bottom:0}.aRow .t{flex:1;line-height:1.4}
+.aRow .btn{min-height:38px}
+.aTag{font-size:11px;font-weight:700;border-radius:6px;padding:4px 8px;white-space:nowrap}
+.aTag.red{background:#FEE2E2;color:#991B1B}.aTag.amb{background:#FEF3C7;color:#92400E}.aTag.blue{background:#EEF4FF;color:#1E40AF}.aTag.grey{background:#F4F4F5;color:#3F3F46}
+.aEmpty{padding:18px 0;color:var(--muted);font-size:14px}
+.aQuick{flex:2 1 280px;background:#18181B;color:#fff;border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.aQuick h2{color:#fff}
+.aQuick .q{height:46px;border-radius:10px;border:0;background:#27272A;color:#fff;font:500 14px Inter,system-ui,sans-serif;text-align:left;padding:0 16px;cursor:pointer}
+.aQuick .q:hover{background:#3F3F46}
+.aQuick .q.main{background:#F7C948;color:#18181B;font-weight:600}
+[data-theme="dark"] .aQuick{background:#17171C;border:1px solid var(--line)}
 </style>
 </head>
 <body>
@@ -425,25 +493,41 @@ header .hdrList .btn:hover{background:var(--bg)}
     <div class="nSet" id="nSet" hidden></div>
     <div class="nList" id="nList"></div>
   </div>
-  <nav class="ptabs">
-    <button type="button" id="tabStudents">Students</button>
-    <button type="button" id="tabTeachers">Teachers</button>
-    <button type="button" id="tabTT">Timetable</button>
-    <button type="button" id="tabEvalAll">Evaluations<small>class or factory</small></button>
-    <div class="moreWrap">
-      <button type="button" id="tabMore" aria-expanded="false">⋯ More</button>
-      <div class="moreList" id="moreList" hidden>
-        <button type="button" id="tabLists">Setup<small>teachers, classes and students</small></button>
-        <button type="button" id="tabAssess">Assessments<small>coming soon</small></button>
-        <button type="button" id="tabKpi">Teacher KPIs<small>shared with the board</small></button>
-        <button type="button" id="tabTeam">Team hub<small>tasks and rules</small></button>
-      </div>
-    </div>
+  <nav class="side" aria-label="Admin">
+    <div class="sideBrand"><span class="mark">E</span><span><b>OMHG EVA</b><small>Admin</small></span></div>
+    <button type="button" id="tabHome"><span class="ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span><span class="lbl">Home</span></button>
+    <div class="sideH">People</div>
+    <button type="button" id="tabStudents"><span class="ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span><span class="lbl">Students</span></button>
+    <button type="button" id="tabTeachers"><span class="ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3 3-5 6-5s6 2 6 5M15 15c3 0 6 1.5 6 4.5"/></svg></span><span class="lbl">Teachers</span></button>
+    <div class="sideH">Teaching</div>
+    <button type="button" id="tabTT"><span class="ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></span><span class="lbl">Timetable</span></button>
+    <button type="button" id="tabEvalAll"><span class="ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg></span><span class="lbl">Evaluations</span></button>
+    <button type="button" id="tabAssess"><span class="ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></span><span class="lbl">Assessments</span></button>
+    <div class="sideH">Team</div>
+    <button type="button" id="tabTeam"><span class="ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><span class="lbl">Team hub</span></button>
+    <button type="button" id="tabKpi"><span class="ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-6"/></svg></span><span class="lbl">Teacher KPIs</span></button>
+    <button type="button" id="tabLists"><span class="ic"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></span><span class="lbl">Setup</span></button>
+    <div class="moreWrap" hidden><button type="button" id="tabMore" aria-expanded="false"></button><div class="moreList" id="moreList" hidden></div></div>
   </nav>
   <nav class="ptabs kind" id="kindTabs" hidden>
     <button type="button" id="tabGrades">Class<small>daily grading</small></button>
     <button type="button" id="tabEvals">Factory<small>factory evaluations</small></button>
   </nav>
+  <div id="paneHome" hidden>
+    <div class="aHead"><div><div class="aDate" id="aDate"></div><h1 id="aHello">Hello</h1></div>
+      <input id="aFind" type="search" placeholder="Search a student, teacher or class…" aria-label="Search"></div>
+    <div class="aStats" id="aStats"></div>
+    <div class="aGrid">
+      <section class="card aAttn"><h2>Needs your attention</h2><div id="aAttn"><div class="hint">Loading…</div></div></section>
+      <section class="aQuick"><h2>Quick actions</h2>
+        <button type="button" class="q main" data-q="visit">Start a class visit</button>
+        <button type="button" class="q" data-q="plan">Plan a class visit</button>
+        <button type="button" class="q" data-q="task">Add a task for the team</button>
+        <button type="button" class="q" data-q="tt">Mark a teacher absent / cover</button>
+        <button type="button" class="q" data-q="kpi">Enter this month’s KPIs</button>
+      </section>
+    </div>
+  </div>
   <div id="paneLists">
   <div id="status"></div>
   <div class="counts" id="counts">Loading…</div>
@@ -1173,6 +1257,7 @@ async function loadLists() {
     renderAll();
     showMsg('Lists loaded from the sheet.', true);
     if (!$('paneGrades').hidden) grInit();
+    if (!$('paneHome').hidden) homeStats();
     if (!$('paneEvals').hidden) evFill();
   } catch (e) {
     if (/unauthorized/i.test(e.message)) return adminSignOut('That admin password is not correct. Sign in again.');
@@ -1321,7 +1406,7 @@ const PDFJS_BASES = [`https://cdn.jsdelivr.net/npm/pdfjs-dist@${PDFJS_VERSION}/b
                      `https://unpkg.com/pdfjs-dist@${PDFJS_VERSION}/build/`];
 
 // ---------- page tabs: lists | timetable ----------
-const PANES = { lists: ['paneLists', 'tabLists'], tt: ['paneTT', 'tabTT'], grades: ['paneGrades', 'tabGrades'],
+const PANES = { home: ['paneHome', 'tabHome'], lists: ['paneLists', 'tabLists'], tt: ['paneTT', 'tabTT'], grades: ['paneGrades', 'tabGrades'],
   evals: ['paneEvals', 'tabEvals'], assess: ['paneAssess', 'tabAssess'], team: ['paneTeam', 'tabTeam'], kpi: ['paneKpi', 'tabKpi'],
   students: ['paneStudents', 'tabStudents'], teachers: ['paneTeachers', 'tabTeachers'] };
 function showPane(p) {
@@ -1351,7 +1436,71 @@ function showPane(p) {
   if (p === 'evals') evInit();
   if (p === 'kpi') kpiInit();
   if (p === 'team' && window.hubInit) window.hubInit();
+  if (p === 'home') homeInit();
 }
+
+// ---------- Home: counts, what needs attention, quick actions ----------
+const aEsc = t => String(t == null ? '' : t).replace(/[<>&"]/g, c => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;' }[c]));
+const aDay = s => { if (!s) return ''; const [y, m, d] = String(s).slice(0, 10).split('-').map(Number); return new Date(y, m - 1, d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }); };
+function homeStats() {
+  const n = (v, l, go) => `<button type="button" class="aStat" data-pane="${go}"><span>${l}</span><b>${v}</b></button>`;
+  $('aStats').innerHTML = loaded
+    ? n(state.students.length, 'Students', 'students') + n(state.teachers.length, 'Teachers', 'teachers') + n(state.classes.length, 'Classes', 'lists') + `<span id="aStatVis"></span>`
+    : '';
+}
+async function homeInit() {
+  const now = new Date(), hr = now.getHours();
+  const who = (localStorage.getItem('hubSenior') || '').split(' ')[0];
+  $('aHello').textContent = (hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening') + (who ? ', ' + who : '');
+  $('aDate').textContent = now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+  homeStats();
+  let H = null;
+  try { H = await post('hubAdmin'); } catch (e) { /* the hub may be off; the rest still works */ }
+  const today = isoDay(new Date());
+  const items = [];
+  if (H) {
+    (H.tasks || []).forEach(t => (t.statuses || []).filter(x => x.status === 'overdue').forEach(x =>
+      items.push({ lvl: t.kind === 'safety' ? 'red' : 'amb', tag: t.kind === 'safety' ? 'SAFETY' : 'OVERDUE', text: `<b>${aEsc(t.title)}</b> · ${aEsc(x.teacher)}, due ${aDay(t.occurrence)}`, act: 'tasks', btn: 'Open' })));
+    (H.visits || []).filter(v => v.status === 'planned' && v.date <= today).forEach(v =>
+      items.push({ lvl: 'amb', tag: v.date === today ? 'TODAY' : 'LATE', text: `<b>Visit report to fill in</b> · ${aEsc(v.teacher)}, ${aEsc(v.cls || '')}${v.session ? ' session ' + v.session : ''}, ${aDay(v.date)}`, act: 'vfill:' + v.id, btn: 'Fill in' }));
+    (H.visits || []).filter(v => v.status === 'planned' && v.date > today).slice(0, 3).forEach(v =>
+      items.push({ lvl: 'blue', tag: 'PLANNED', text: `<b>Class visit</b> · ${aEsc(v.teacher)}, ${aDay(v.date)}${v.session ? ' session ' + v.session : ''}`, act: 'visits', btn: 'View' }));
+    (H.visits || []).filter(v => v.status !== 'planned' && !v.seen).slice(0, 3).forEach(v =>
+      items.push({ lvl: 'grey', tag: 'NOT SEEN', text: `${aEsc(v.teacher)} hasn't opened the visit report of ${aDay(v.date)} yet`, act: 'visits', btn: 'View' }));
+    const wk = (H.visits || []).filter(v => v.date >= sundayOf(today) && v.date <= addDays(sundayOf(today), 6)).length;
+    const el = $('aStatVis'); if (el) el.outerHTML = `<button type="button" class="aStat" data-pane="team"><span>Visits this week</span><b>${wk}</b></button>`;
+  }
+  try { Object.keys(localStorage).filter(k => k.indexOf('visitDraft:') === 0).forEach(k => items.unshift({ lvl: 'amb', tag: 'DRAFT', text: '<b>Unfinished visit form</b> saved on this device', act: k === 'visitDraft:new' ? 'visits' : 'vfill:' + k.slice(11), btn: 'Continue' })); } catch (e) {}
+  if (W.dirty) items.unshift({ lvl: 'blue', tag: 'UNSAVED', text: '<b>Timetable changes not saved</b>', act: 'tt', btn: 'Open' });
+  $('aAttn').innerHTML = items.length ? items.map(i => `<div class="aRow"><span class="aTag ${i.lvl}">${i.tag}</span><div class="t">${i.text}</div><button type="button" class="btn alt small" data-act="${aEsc(i.act)}">${i.btn}</button></div>`).join('')
+    : '<div class="aEmpty">Nothing needs you right now.</div>';
+}
+async function homeGoHub(view, then) {
+  showPane('team');
+  if (window.hubInit) await window.hubInit();
+  const t = { tasks: 'hubTabTasks', rules: 'hubTabRules', visits: 'hubTabVisits' }[view];
+  if (t) $(t).click();
+  if (then) then();
+}
+document.addEventListener('click', e => {
+  const st = e.target.closest('#paneHome [data-pane]');
+  if (st) return showPane(st.dataset.pane);
+  const a = e.target.closest('#paneHome [data-act], #paneHome [data-q]');
+  if (!a) return;
+  const act = a.dataset.act || a.dataset.q;
+  if (act === 'tt') return showPane('tt');
+  if (act === 'kpi') return showPane('kpi');
+  if (act === 'visit') return homeGoHub('visits', () => $('hubUnplanned').click());
+  if (act === 'plan') return homeGoHub('visits', () => $('hubPlanVisit').click());
+  if (act === 'task') return homeGoHub('tasks', () => $('hubNewTask').click());
+  if (act.indexOf('vfill:') === 0) return homeGoHub('visits', () => { const b = document.querySelector(`[data-vfill="${act.slice(6)}"]`); if (b) b.click(); });
+  homeGoHub(act);
+});
+$('aFind').addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || !e.target.value.trim()) return;
+  $('findBtn').click();
+  setTimeout(() => { const f = document.querySelector('#findOvl input, .findBox input, [id^="find"] input[type="search"], #findQ'); if (f) { f.value = e.target.value.trim(); f.dispatchEvent(new Event('input', { bubbles: true })); } }, 60);
+});
 
 // ---------- teacher KPIs (the table and rules come from kpi.js) ----------
 let KPI_TEACHERS = null;
@@ -4276,7 +4425,7 @@ function adminStart() {
   noteLoad();
   renderAll();
   loadLists();
-  showPane(localStorage.getItem('adminPane') || 'students');
+  showPane('home');
 }
 
 // Forget the key on this device; the page reloads so nothing signed-in stays open (e.g. the board)
