@@ -638,6 +638,7 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
 .asT td.asName{z-index:1}
 
 .asWhy{width:100%;margin:4px 0 8px;font:inherit;font-size:13px;border:1px solid #f0b4b4;border-radius:10px;padding:8px 10px;background:#FFF7F7;color:var(--ink)}.asWhy.miss{border:2px solid #dc2626}
+.asApprBar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 10px}.asApprBar #asApprBtn{margin-left:auto}
 .asCardsH{font-weight:700;font-size:13px;margin:14px 2px 6px;color:var(--muted)}
 .asSCard{padding:12px 14px;margin:0 0 10px}.asSH{display:flex;justify-content:space-between;align-items:center;gap:8px}.asSH .asStu{font-weight:700;font-size:15px}.asSH small{color:var(--muted)}
 .asSP{font-size:13px;margin:6px 0 4px;display:flex;align-items:center}.asSG{font-size:11px;color:var(--muted);margin:8px 0 3px;text-transform:uppercase;letter-spacing:.04em}
@@ -5808,6 +5809,7 @@ else adminGateShow(gateNote);
   <div class="ovlCard" role="dialog" aria-labelledby="asMarkTitle">
     <div class="feDH"><div style="flex:1"><div class="hint" style="margin:0" id="asMarkKind">Assessment</div><h2 id="asMarkTitle"></h2><div class="hint" id="asMarkSub" style="margin:2px 0 0"></div></div><button class="btn alt" type="button" data-close aria-label="Close">✕</button></div>
     <div class="feDSum" id="asMarkSum"></div>
+    <div class="asApprBar"><button class="btn alt sm" type="button" id="asMarkAll">✓ Pass everyone</button><span id="asApprTxt" class="hint" style="margin:0"></span><button class="btn alt sm" type="button" id="asApprBtn" hidden>Approve results (اعتماد)</button></div>
     <div class="feDList" id="asMarkList"></div>
     <div class="feDF"><button class="btn rm" type="button" id="asMarkCancel">Remove this assessment</button><span class="hint" id="asMarkMsg"></span><button class="btn save" type="button" id="asMarkSave">Save results</button></div>
   </div>
@@ -6064,7 +6066,7 @@ else adminGateShow(gateNote);
       F.map(a => {
         const k = comp(a.code);
         const res = a.status === 'Open' ? `<span class="pill q">${a.date < today ? 'not marked yet' : 'planned'}</span> <small>${a.students.length} students</small>`
-          : `<span class="pill ok">${a.passed || 0} passed</span> <small>of ${a.marked || 0}${a.absent ? ' · ' + a.absent + ' absent' : ''}</small>`;
+          : `<span class="pill ok">${a.passed || 0} passed</span> <small>of ${a.marked || 0}${a.absent ? ' · ' + a.absent + ' absent' : ''}</small>${a.source === 'import' ? '' : a.approved ? ' <span class="pill ok">approved ✓</span>' : ' <span class="pill q">not approved</span>'}`;
         return `<tr><td>${day(a.date)}</td><td><b>${e(a.code)}</b> ${e(k.short || k.name)}${a.source === 'import' ? ' <small>imported</small>' : ''}</td><td>${e(a.cls)}${a.track ? ' <small>' + e(a.track) + '</small>' : ''}</td>` +
           `<td>${a.attempt > 1 ? 'Retake ' + a.attempt : '1st'}</td><td>${e(a.assessor)}</td><td>${e(a.taughtBy)}</td><td>${res}</td>` +
           `<td><button class="btn alt sm" type="button" data-asopen="${e(a.id)}">${a.status === 'Open' ? 'Mark' : 'View'}</button></td></tr>`;
@@ -6157,6 +6159,7 @@ else adminGateShow(gateNote);
     $('asMarkKind').textContent = MK.attempt > 1 ? 'Retake · attempt ' + MK.attempt : 'Assessment · 1st attempt';
     $('asMarkTitle').textContent = MK.code + ' ' + MK.name + ' · ' + MK.cls;
     $('asMarkSub').textContent = day(MK.date) + ' · assessed by ' + MK.assessor + ' · taught by ' + MK.taughtBy + (MK.status === 'Marked' ? ' · marked ' + MK.marked : ' · not marked yet');
+    apprDraw();
     mDraw();
   }
   window.asMarkHTML = (M, MARKS) => M.students.map(s => {
@@ -6186,6 +6189,18 @@ else adminGateShow(gateNote);
     const s = asMarkSum(MK, MARKS);
     $('asMarkSum').innerHTML = s.html;
     $('asMarkSave').disabled = s.done < s.total;
+  }
+  function apprDraw() {
+    $('asApprBtn').hidden = MK.status !== 'Marked';
+    $('asApprBtn').textContent = MK.approved ? 'Remove approval' : 'Approve results (اعتماد)';
+    $('asApprTxt').innerHTML = MK.approved ? `<span class="pill ok">approved ✓</span> by ${e(MK.approvedBy)} · the teacher can no longer change it` : MK.status === 'Marked' ? 'The teacher can still fix it until you approve.' : '';
+  }
+  async function mApprove() {
+    const sen = senior(); if (!sen) return;
+    const on = !MK.approved;
+    if (!confirm(on ? 'Approve these results (اعتماد)? ' + MK.assessor + ' will no longer be able to change them.' : 'Remove the approval? ' + MK.assessor + ' will be able to change the results again.')) return;
+    try { await post('asApprove', { id: MK.id, approve: on, senior: sen }); MK.approved = on ? 'yes' : ''; MK.approvedBy = on ? sen : ''; apprDraw(); await load(); draw(); }
+    catch (err) { $('asMarkMsg').textContent = err.message; }
   }
   async function mSave() {
     const sen = senior(); if (!sen) return;
@@ -6502,6 +6517,8 @@ else adminGateShow(gateNote);
     if (t.closest('.asWhy')) return;
     if (t.closest('#asMarkList') && MK) { if (asMarkClick(ev, MK, MARKS)) mDraw(); return; }
     if (t.closest('#asMarkSave')) { mSave(); return; }
+    if (t.closest('#asApprBtn')) { mApprove(); return; }
+    if (t.closest('#asMarkAll') && MK) { MK.students.forEach(x => { MARKS[x.name].absent = false; x.need.forEach(o => { MARKS[x.name].marks[o] = 'P'; }); }); mDraw(); return; }
     if (t.closest('#asMarkCancel')) { mCancel(); return; }
     if (t.closest('#asImpGo')) { impGo(); return; }
     if (t.closest('#asMvGo')) { mvGo(); return; }

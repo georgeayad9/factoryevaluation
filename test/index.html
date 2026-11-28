@@ -412,6 +412,7 @@
 .asAr{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
 .asWhy{width:100%;margin:4px 0 8px;font:inherit;font-size:14px;border:1px solid #f0b4b4;border-radius:10px;padding:8px 10px;background:#FFF7F7;color:var(--ink)}.asWhy.miss{border:2px solid #dc2626}
 .asTTabs{display:flex;gap:6px;margin:0 0 10px}.asTTabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:6px 14px;font-weight:600;cursor:pointer}.asTTabs button.on{background:var(--ink);color:var(--card)}
+.asAppr{background:#DCFCE7;color:#14532D;border-radius:10px;padding:8px 12px;margin:0 0 10px;font-weight:600;font-size:14px}
 .asTRes{display:inline-block;min-width:24px;text-align:center;border-radius:6px;font-weight:700;padding:1px 6px}
 </style>
 </head>
@@ -3565,6 +3566,8 @@ loadLists();
 <div id="asTOvl" hidden><div class="asTIn">
   <div class="asTHead"><div><div class="hint" id="asTKind" style="margin:0"></div><h2 id="asTTitle"></h2><div class="hint" id="asTSub" style="margin:0"></div></div><button class="ghost x" type="button" id="asTClose">✕ Close</button></div>
   <div class="asTSum" id="asTSum"></div>
+  <div id="asTAppr" class="asAppr" hidden></div>
+  <button type="button" class="ghost" id="asTAll" style="margin:0 0 10px">✓ Pass everyone, then mark only who failed</button>
   <div id="asTList"></div>
 </div><div class="asTBar"><span class="hint" id="asTMsg"></span><button class="primary" type="button" id="asTSave">Save results</button></div></div>
 <script>
@@ -3586,8 +3589,8 @@ loadLists();
     const L = sets[TTAB];
     $('asTBody').innerHTML = L.length ? L.map(a => {
       const res = a.status === 'Marked' ? (() => { const p = a.students.filter(s => !s.absent && s.need.every(o => s.marks[o] === 'P')).length, f = a.students.filter(s => !s.absent && s.need.some(o => s.marks[o] === 'F')).length; return `${p} passed · ${f} retake`; })() : `${a.students.length} students · ${a.outcomes.length} learning outcomes`;
-      return `<div class="asTRow"><span><b>${e(a.code)} ${e(a.short || a.name)}</b> · ${e(a.cls)}${a.attempt > 1 ? ` <span class="pill" style="background:#FDF1C8;color:#5c4500">retake · attempt ${a.attempt}</span>` : ''}<br><small>${day(a.date)} · ${res}</small></span>` +
-        (TTAB === 'plan' ? `<small>from ${day(a.date)}</small>` : `<button class="${TTAB === 'mark' ? 'primary' : 'ghost'}" type="button" data-asm="${e(a.id)}">${TTAB === 'mark' ? 'Mark' : 'View / fix'}</button>`) + '</div>';
+      return `<div class="asTRow"><span><b>${e(a.code)} ${e(a.short || a.name)}</b> · ${e(a.cls)}${a.approved ? ' <span class="pill" style="background:#DCFCE7;color:#14532D">approved ✓</span>' : ''}${a.attempt > 1 ? ` <span class="pill" style="background:#FDF1C8;color:#5c4500">retake · attempt ${a.attempt}</span>` : ''}<br><small>${day(a.date)} · ${res}</small></span>` +
+        (TTAB === 'plan' ? `<small>from ${day(a.date)}</small>` : `<button class="${TTAB === 'mark' ? 'primary' : 'ghost'}" type="button" data-asm="${e(a.id)}">${TTAB === 'mark' ? 'Mark' : a.approved ? 'View' : 'View / fix'}</button>`) + '</div>';
     }).join('') : `<p class="hint">${{ mark: 'Nothing to mark right now.', plan: 'No assessments planned for you.', done: 'You have not marked any assessment yet.' }[TTAB]}</p>`;
   }
   window.asTLoad = async () => {
@@ -3605,7 +3608,10 @@ loadLists();
     $('asTKind').textContent = MK.attempt > 1 ? 'Retake · attempt ' + MK.attempt + ' · only the learning outcomes each student still needs' : 'Assessment · 1st attempt';
     $('asTTitle').textContent = MK.code + ' ' + MK.name + ' · ' + MK.cls;
     $('asTSub').textContent = day(MK.date) + ' · ' + MK.outcomes.length + ' learning outcome(s). A student passes when every one is passed.';
-    NEEDWHY = false; $('asTMsg').textContent = ''; $('asTOvl').hidden = false; window.scrollTo(0, 0); draw();
+    NEEDWHY = false; $('asTMsg').textContent = ''; $('asTOvl').hidden = false; window.scrollTo(0, 0);
+    $('asTAppr').hidden = !MK.approved; $('asTAppr').textContent = MK.approved ? `Approved (اعتماد) by ${MK.approvedBy}: view only. Ask George or Ramy to change anything.` : '';
+    $('asTAll').hidden = !!MK.approved; $('asTSave').hidden = !!MK.approved;
+    draw();
   }
   function draw() {
     $('asTList').innerHTML = MK.students.map(s => {
@@ -3641,7 +3647,8 @@ loadLists();
     const m = t.closest('[data-asm]'); if (m) { open(m.dataset.asm); return; }
     if (t.closest('#asTClose')) { $('asTOvl').hidden = true; return; }
     if (t.closest('#asTSave')) { save(); return; }
-    if (!t.closest('#asTList') || !MK) return;
+    if (t.closest('#asTAll') && MK) { MK.students.forEach(x => { MARKS[x.name].absent = false; x.need.forEach(o => { MARKS[x.name].marks[o] = 'P'; }); }); draw(); return; }
+    if (!t.closest('#asTList') || !MK || MK.approved) return;
     const b = t.closest('[data-st],[data-allp],[data-abs]'); if (!b) return;
     if (b.dataset.st) { const mm = MARKS[b.dataset.st].marks; mm[b.dataset.o] = mm[b.dataset.o] === b.dataset.v ? '' : b.dataset.v; }
     else if (b.dataset.allp) { const s = MK.students.find(x => x.name === b.dataset.allp); MARKS[s.name].absent = false; s.need.forEach(o => { MARKS[s.name].marks[o] = 'P'; }); }
