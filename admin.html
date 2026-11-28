@@ -654,6 +654,11 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
 
 #wkGrid td.offcell{background:#F4F4F2;color:#777}#wkGrid td.offcell.del{background:repeating-linear-gradient(45deg,#fafafa,#fafafa 6px,#f0f0f0 6px,#f0f0f0 12px)}
 #ttPop button.danger{color:#b91c1c}
+
+.asSeg{display:flex;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:4px}.asSeg button{flex:1;border:0;background:var(--card);color:var(--ink);padding:9px 10px;font-weight:600;cursor:pointer}.asSeg button.on{background:var(--ink);color:var(--card)}
+#prDoc .asPT{margin-bottom:2mm}#prDoc .asPT th{text-align:center}#prDoc .asPT[dir="rtl"] th,#prDoc .asPT[dir="rtl"] td{text-align:right}#prDoc .asPT[dir="rtl"] td:not(:first-child){text-align:center}
+#prDoc .asPTc{font-size:8px!important;white-space:normal!important;vertical-align:bottom;min-width:12mm}#prDoc .asPTc span{font-weight:400;font-size:7.5px}
+#prDoc .asPTg{background:#eee!important;font-weight:700}#prDoc .asPTk{font-size:8.5px;margin:2mm 0 0}
 </style>
 </head>
 <body>
@@ -5850,6 +5855,17 @@ else adminGateShow(gateNote);
     <div class="asFoot"><button class="btn alt" type="button" id="pinCancel">Cancel</button><button class="btn save" type="button" id="pinGo">OK</button></div>
   </div>
 </div>
+<div class="ovl" id="asPdfOvl" hidden data-keep="1">
+  <div class="ovlCard" role="dialog" aria-labelledby="asPdfTitle" style="max-width:420px">
+    <div class="ovlHead"><h2 id="asPdfTitle">Print / PDF</h2><button class="btn alt" type="button" data-close aria-label="Close">✕</button></div>
+    <label>Language</label>
+    <div class="asSeg" id="asPdfLang"><button type="button" data-pl="ar" class="on">عربي (right to left)</button><button type="button" data-pl="en">English</button></div>
+    <label style="margin-top:12px">What to print</label>
+    <div class="asSeg" id="asPdfWhat"><button type="button" data-pw="year" class="on">Whole school year</button><button type="button" data-pw="tab">This tab only</button></div>
+    <p class="hint" id="asPdfHint"></p>
+    <div class="asFoot"><button class="btn alt" type="button" data-close>Cancel</button><button class="btn save" type="button" id="asPdfGo">Print / PDF</button></div>
+  </div>
+</div>
 <footer class="copyFoot">© 2026 George Ayad · OMHG EVA SCHOOL · All rights reserved</footer>
 <script>
 (() => {
@@ -6462,21 +6478,42 @@ else adminGateShow(gateNote);
   const sub = () => { const f = [$('asFCls').value, $('asFMonth').value, $('asFWeek').value && 'week of ' + $('asFWeek').value, $('asFTeacher').value && $('asFRole').value.replace('assessor', 'assessed by').replace('taughtBy', 'taught by') + ' ' + $('asFTeacher').value, $('asFQ').value && 'search: ' + $('asFQ').value].filter(Boolean);
     return `الفصل: ${GRP[GRIDV.lvl]} (${Object.keys(GRIDV.byCls).sort().join(' · ')})${f.length ? ' · ' + f.join(' · ') : ''}`; };
   const plain = (v, k, s) => k.track && s.track && k.track !== s.track ? '–' : !v ? '' : v.letter ? v.letter + (v.edited ? '*' : '') : v.tries ? '(' + 'ABCD'[v.tries] + ')' : v.open ? '…' : '';
-  function exportPdf() {
+  // PDF: the whole school year (Juniors, Wheelers, Seniors) or this tab, in Arabic (right to left) or English
+  let PDF = { lang: 'ar', what: 'year' };
+  function pdfOpen() {
     if (!GRIDV) return;
-    const { flat, groups, byCls } = GRIDV;
-    let h = '<table class="asPT"><thead><tr><th rowspan="2">Student</th>' + groups.map(x => `<th colspan="${x.cols.length}" style="text-align:center">${GRP[x.gr]} year</th>`).join('') + '<th rowspan="2">Passed</th></tr><tr>' +
-      flat.map(k => `<th style="text-align:center">${e(k.code)}<br>${e(k.short || k.name)}</th>`).join('') + '</tr></thead><tbody>';
-    Object.keys(byCls).sort().forEach(cl => {
-      h += `<tr><td colspan="${flat.length + 2}" style="background:#eee;font-weight:700">${e(cl)} · ${byCls[cl].length}</td></tr>`;
-      byCls[cl].slice().sort((a, b) => a.name.localeCompare(b.name, 'ar')).forEach(s => {
-        const due = flat.filter(k => !k.track || !s.track || k.track === s.track), passed = due.filter(k => { const v = st(s.name, k.code); return v && v.letter && v.letter !== 'F'; }).length;
-        h += `<tr><td style="white-space:nowrap">${e(s.name)}${flat.some(k => (st(s.name, k.code) || {}).letter === 'F') ? ' <b style="color:#b91c1c">(repeating)</b>' : ''}</td>` +
-          flat.map(k => `<td style="text-align:center">${k.track && s.track && k.track !== s.track ? '–' : cell(st(s.name, k.code), k)}</td>`).join('') + `<td style="text-align:center"><b>${passed}/${due.length}</b></td></tr>`;
+    $('asPdfHint').textContent = `School year ${GRIDV.yv.replace('-', '/')}. The filters above (class, month, week, teacher, search) are used too.`;
+    $('asPdfOvl').hidden = false;
+  }
+  function levelData(lvl) {
+    const keep = LVL; LVL = lvl; drawGrid(); const d = GRIDV && GRIDV.lvl === lvl && Object.keys(GRIDV.byCls).length ? GRIDV : null; LVL = keep; drawGrid(); return d;
+  }
+  function exportPdf() {
+    const AR = PDF.lang === 'ar', yv = GRIDV.yv.replace('-', '/');
+    const T = AR ? { title: `كشف تقييم جدارات السنة الدراسية ${yv}`, st: 'اسم الطالب', pass: 'الجدارات المجتازة', rep: 'يعيد السنة', yr: { Junior: 'الصف الأول (Juniors)', Wheeler: 'الصف الثاني (Wheelers)', Senior: 'الصف الثالث (Seniors)' },
+        cls: 'الفصل', key: 'A اجتاز من المحاولة الأولى · B الثانية · C الثالثة · D الرابعة (الأخيرة) · F رسب في ٤ محاولات ويعيد السنة · الحرف المنقط = رسب وينتظر الإعادة (أعلى تقدير ممكن الآن) · … تقييم مخطط · · لم يُقيَّم بعد · * تم تعديله', term: GRIDV.back ? 'العام كاملاً' : GRIDV.tn === 2 ? 'حتى الفصل الدراسى الثانى' : 'حتى الفصل الدراسى الاول' }
+      : { title: `Competency assessment report · school year ${yv}`, st: 'Student', pass: 'Passed', rep: 'repeating', yr: { Junior: 'Juniors', Wheeler: 'Wheelers', Senior: 'Seniors' },
+        cls: 'Class', key: 'A passed on the 1st try · B 2nd · C 3rd · D 4th (last) · F failed 4 times, repeats the year · dashed letter = failed, waiting for the retake (best grade now) · … planned · · not yet · * edited', term: GRIDV.back ? 'whole year' : 'up to term ' + GRIDV.tn };
+    const levels = PDF.what === 'year' ? GR.map(levelData).filter(Boolean) : [GRIDV];
+    if (!levels.length) { alert('Nothing to print for these filters.'); return; }
+    const pages = levels.map(G => {
+      const { flat, groups, byCls } = G;
+      const cname = k => AR ? (k.nameAr || k.name) : (k.short || k.name);
+      let h = `<table class="asPT"${AR ? ' dir="rtl"' : ''}><thead><tr><th rowspan="2">${T.st}</th>` + groups.map(x => `<th colspan="${x.cols.length}" style="text-align:center">${T.yr[x.gr]}</th>`).join('') + `<th rowspan="2">${T.pass}</th></tr><tr>` +
+        flat.map(k => `<th class="asPTc">${e(k.code)}<br><span>${e(cname(k))}</span></th>`).join('') + '</tr></thead><tbody>';
+      Object.keys(byCls).sort().forEach(cl => {
+        h += `<tr><td colspan="${flat.length + 2}" class="asPTg">${T.cls}: ${e(cl)} · ${byCls[cl].length}</td></tr>`;
+        byCls[cl].slice().sort((a, b) => a.name.localeCompare(b.name, 'ar')).forEach(s => {
+          const due = flat.filter(k => !k.track || !s.track || k.track === s.track), passed = due.filter(k => { const v = st(s.name, k.code); return v && v.letter && v.letter !== 'F'; }).length;
+          h += `<tr><td style="white-space:nowrap">${e(s.name)}${flat.some(k => (st(s.name, k.code) || {}).letter === 'F') ? ` <b style="color:#b91c1c">(${T.rep})</b>` : ''}</td>` +
+            flat.map(k => `<td style="text-align:center">${k.track && s.track && k.track !== s.track ? '–' : cell(st(s.name, k.code), k)}</td>`).join('') + `<td style="text-align:center"><b>${passed}/${due.length}</b></td></tr>`;
+        });
       });
+      h += `</tbody></table><p class="asPTk"${AR ? ' dir="rtl"' : ''}>${T.key}</p>`;
+      const sb = `${T.yr[G.lvl]} · ${T.term}${$('asFCls').value ? ' · ' + $('asFCls').value : ''}`;
+      return AR ? { html: `<div dir="rtl" style="text-align:right"><div class="prTitle">${e(T.title)}</div><div class="prSub">${e(sb)}</div>${h}</div>` } : { title: T.title, sub: sb, html: h };
     });
-    h += '</tbody></table><p style="font-size:9px;margin-top:3mm">A passed on the 1st try · B 2nd · C 3rd · D 4th (last) · F failed 4 times, repeats the year · dashed letter = failed, waiting for the retake (best grade now) · … planned · · not yet · * edited</p>';
-    prPrint({ file: `Competencies - ${GRP[GRIDV.lvl]} - ${GRIDV.yv}`, landscape: true, pages: [{ title: ttl(), sub: sub(), html: h }] });
+    prPrint({ file: (AR ? 'كشف تقييم جدارات ' : 'Competency assessment report ') + GRIDV.yv + (PDF.what === 'year' ? '' : ' - ' + GRP[GRIDV.lvl]), landscape: true, pages });
   }
   function exportXlsx2() {
     if (!GRIDV) return;
@@ -6498,7 +6535,10 @@ else adminGateShow(gateNote);
   document.addEventListener('click', ev => {
     const t = ev.target;
     if (t.closest('#asFTog')) { $('asFBox').classList.toggle('open'); t.closest('#asFTog').textContent = $('asFBox').classList.contains('open') ? 'Filters ▴' : 'Filters ▾'; return; }
-    if (t.closest('#asPdf')) { exportPdf(); return; }
+    if (t.closest('#asPdf')) { pdfOpen(); return; }
+    if (t.closest('#asPdfLang [data-pl]')) { PDF.lang = t.closest('[data-pl]').dataset.pl; $('asPdfLang').querySelectorAll('[data-pl]').forEach(b => b.classList.toggle('on', b.dataset.pl === PDF.lang)); return; }
+    if (t.closest('#asPdfWhat [data-pw]')) { PDF.what = t.closest('[data-pw]').dataset.pw; $('asPdfWhat').querySelectorAll('[data-pw]').forEach(b => b.classList.toggle('on', b.dataset.pw === PDF.what)); return; }
+    if (t.closest('#asPdfGo')) { $('asPdfOvl').hidden = true; exportPdf(); return; }
     if (t.closest('#asXls')) { exportXlsx2(); return; }
     if (t.closest('[data-edit]') && t.closest('#asGrid')) { const b = t.closest('[data-edit]'); edOpen(b.dataset.edit, b.dataset.code); return; }
     if (t.closest('#asEditL [data-el]')) { ED.letter = t.closest('[data-el]').dataset.el; $('asEditL').querySelectorAll('[data-el]').forEach(x => x.classList.toggle('sel', x.dataset.el === ED.letter)); return; }
