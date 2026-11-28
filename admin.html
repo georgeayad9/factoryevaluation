@@ -867,6 +867,7 @@ body.nav2 header .tools{flex-wrap:nowrap;margin-left:auto}
     <div class="asTwo"><label>From<select id="asMvFrom"></select></label><label>To<select id="asMvTo"></select></label></div>
     <div id="asMvList" class="asMvList"></div>
     <div class="asRowB"><span class="hint" id="asMvMsg"></span><button class="btn save" type="button" id="asMvGo">Move selected</button></div>
+    <div class="asRowB" id="asStuTrackRow" hidden><span>Track of the ticked seniors:</span><span style="display:flex;gap:6px"><button class="btn alt" type="button" data-sttr="Operation">Operation</button><button class="btn alt" type="button" data-sttr="Utilities">Utilities</button></span></div>
     <h3 class="asH3">Senior class tracks</h3>
     <p class="hint">Mixed = one class with both tracks (each student keeps Operation or Utilities). Choosing a track gives it to every student of the class.</p>
     <div id="asTrackList"></div>
@@ -6172,13 +6173,19 @@ else adminGateShow(gateNote);
   }
   function nComps() {
     const cls = $('asNCls').value, cl = AS.classes.find(c => c.name === cls) || {}, g = gradeOf(cls);
-    const opts = AS.comps.filter(k => k.active && k.grade === g && (!cl.track || !k.track || k.track === cl.track)).map(k => {
-      const el = eligible(cls, k), left = el.filter(s => { const v = st(s.name, k.code); return !v || (!v.letter && !v.open); });
-      if (!left.length) return '';
+    // every competency of the year: the ones that can't be planned are shown greyed out with the reason
+    const opts = [], off = [];
+    AS.comps.filter(k => k.active && k.grade === g).forEach(k => {
+      const lbl = `${e(k.code)} ${e(k.short || k.name)}${k.track ? ' (' + e(k.track) + ')' : ''}`;
+      if (cl.track && k.track && k.track !== cl.track) { off.push(`<option disabled>${lbl} — ${e(cls)} is set to ${e(cl.track)} only (Setup → Classes and students → Senior class tracks)</option>`); return; }
+      const el = eligible(cls, k);
+      if (!el.length) { off.push(`<option disabled>${lbl} — no ${e(k.track || '')} students in ${e(cls)} (check each student's track in Setup)</option>`); return; }
+      const left = el.filter(s => { const v = st(s.name, k.code); return !v || (!v.letter && !v.open); });
+      if (!left.length) { off.push(`<option disabled>${lbl} — done or already planned for every student</option>`); return; }
       const re = left.filter(s => (st(s.name, k.code) || {}).tries);
-      return `<option value="${e(k.code)}">${e(k.code)} ${e(k.short || k.name)}${k.track ? ' (' + e(k.track) + ')' : ''} — ${re.length ? 'retake · ' + re.length + (left.length > re.length ? ' + ' + (left.length - re.length) + ' first try' : '') : left.length + ' students'}</option>`;
-    }).filter(Boolean);
-    $('asNComp').innerHTML = opts.length ? opts.join('') : '<option value="">Nothing left: every competency of this class has a result or is planned</option>';
+      opts.push(`<option value="${e(k.code)}">${lbl} — ${re.length ? 'retake · ' + re.length + (left.length > re.length ? ' + ' + (left.length - re.length) + ' first try' : '') : left.length + ' students'}</option>`);
+    });
+    $('asNComp').innerHTML = (opts.length ? opts.join('') : '<option value="">Nothing left to plan for this class</option>') + (off.length ? '<optgroup label="Can\'t be planned now">' + off.join('') + '</optgroup>' : '');
     nComp();
   }
   function nComp() {
@@ -6414,6 +6421,7 @@ else adminGateShow(gateNote);
   function mvDraw() {
     const from = $('asMvFrom').value, g = gradeOf(from);
     $('asMvTo').innerHTML = AS.classes.filter(c => c.grade === g && c.name !== from).map(c => `<option>${e(c.name)}${c.track ? ' (' + e(c.track) + ')' : ''}</option>`).join('') || '<option value="">No other class of this year</option>';
+    $('asStuTrackRow').hidden = g !== 'Senior';
     $('asMvList').innerHTML = AS.students.filter(s => s.cls === from).sort((a, b) => a.name.localeCompare(b.name, 'ar'))
       .map(s => `<label class="asChk"><input type="checkbox" value="${e(s.name)}"> ${e(s.name)}${s.track ? ' <small>' + e(s.track) + '</small>' : ''}</label>`).join('') || '<p class="hint">No students.</p>';
   }
@@ -6607,6 +6615,8 @@ else adminGateShow(gateNote);
     if (t.closest('#asMarkCancel')) { mCancel(); return; }
     if (t.closest('#asImpGo')) { impGo(); return; }
     if (t.closest('#asMvGo')) { mvGo(); return; }
+    if (t.closest('[data-sttr]')) { (async () => { const sen = senior(); if (!sen) return; const students = [...$('asMvList').querySelectorAll('input:checked')].map(i => i.value); if (!students.length) { $('asMvMsg').textContent = 'Tick the students first.'; return; }
+      try { const r = await post('asStuTrack', { students, track: t.closest('[data-sttr]').dataset.sttr, senior: sen }); $('asMvMsg').textContent = `${r.changed} set to ${t.closest('[data-sttr]').dataset.sttr}.`; await load(); setupDraw(); if (typeof loadLists === 'function') loadLists(); } catch (err) { $('asMvMsg').textContent = err.message; } })(); return; }
     if (t.closest('#asCompAdd')) { compRead(); COMPS.push({ code: '', name: '', short: '', nameAr: '', outcomesAr: [], term: '', hours: '', grade: $('asCompBox').dataset.addTo || 'Junior', track: '', taughtBy: '', outcomes: [], active: true }); const g = prompt('Which year? Junior, Wheeler or Senior', 'Junior'); if (!g) { COMPS.pop(); return; } COMPS[COMPS.length - 1].grade = GR.find(x => x.toLowerCase() === g.trim().toLowerCase()) || 'Junior'; compDraw(); return; }
     if (t.closest('[data-cdel]')) { compRead(); const c = COMPS[t.closest('[data-cdel]').dataset.cdel]; if (AS.assessments.some(a => a.code === c.code) && !confirm(c.code + ' already has assessments. Remove it from the list anyway? (Untick "In use" to keep its results visible.)')) return; COMPS.splice(Number(t.closest('[data-cdel]').dataset.cdel), 1); compDraw(); return; }
     if (t.closest('#asCompSave')) { compSave(); return; }
@@ -6626,7 +6636,8 @@ else adminGateShow(gateNote);
     if (t.id === 'asMvFrom') { mvDraw(); return; }
     if (t.id === 'asCloseOk') { $('asCloseGo').disabled = !t.checked; return; }
     if (t.closest('#asCloseBox')) { closeRead(); return; }
-    if (t.dataset && t.dataset.track) { const sen = senior(); if (!sen) return; post('asTrack', { cls: t.dataset.track, track: t.value, senior: sen }).then(async () => { await load(); setupDraw(); if (typeof loadLists === 'function') loadLists(); }).catch(err => alert(err.message)); }
+    if (t.dataset && t.dataset.track) { const sen = senior(); if (!sen) return;
+      if (t.value && !confirm(`Make ${t.dataset.track} ${t.value} only? Every student of ${t.dataset.track} gets the ${t.value} track, and ${t.value === 'Operation' ? 'Utilities' : 'Operation'} competencies can no longer be planned for this class.`)) { t.value = (AS.classes.find(c => c.name === t.dataset.track) || {}).track || ''; return; } post('asTrack', { cls: t.dataset.track, track: t.value, senior: sen }).then(async () => { await load(); setupDraw(); if (typeof loadLists === 'function') loadLists(); }).catch(err => alert(err.message)); }
   });
   document.addEventListener('input', ev => { if (ev.target.id === 'asFQ') draw(); const w = ev.target.closest && ev.target.closest('#asMarkList .asWhy'); if (w && MK) { MARKS[w.dataset.why].notes[w.dataset.o] = w.value; w.classList.remove('miss'); } });
   let wasPhone = window.innerWidth < 700;
