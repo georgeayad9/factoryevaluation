@@ -659,6 +659,51 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
 #prDoc .asPT{margin-bottom:2mm}#prDoc .asPT th{text-align:center}#prDoc .asPT[dir="rtl"] th,#prDoc .asPT[dir="rtl"] td{text-align:right}#prDoc .asPT[dir="rtl"] td:not(:first-child){text-align:center}
 #prDoc .asPTc{font-size:8px!important;white-space:normal!important;vertical-align:bottom;min-width:12mm}#prDoc .asPTc span{font-weight:400;font-size:7.5px}
 #prDoc .asPTg{background:#eee!important;font-weight:700}#prDoc .asPTk{font-size:8.5px;margin:2mm 0 0}
+/* ===================== NEW HEADER: one bar on laptops, bottom tabs on phones (your 4 tabs + More) ===================== */
+body.nav2 nav.side,body.nav2 .hdrMore{display:none!important}
+body.nav2 main{display:block!important}
+body.nav2 main > *{grid-column:auto}
+body.nav2 header{position:sticky;top:0;z-index:50;display:flex;flex-wrap:nowrap;align-items:center;gap:14px;padding:8px 18px;min-height:56px}
+body.nav2 header h1{display:flex;align-items:center;gap:10px;white-space:nowrap;font-size:15px}
+body.nav2 header h1 .mk{width:30px;height:30px;border-radius:8px;background:#F7C948;color:#18181B;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+body.nav2 header .tools{flex-wrap:nowrap;margin-left:auto}
+.n2Tabs{display:flex;gap:4px;align-items:center;flex:1;min-width:0}
+.n2Tabs button,.n2Bar button{display:flex;align-items:center;gap:7px;border:0;background:transparent;color:var(--muted);font:500 14px Inter,system-ui,sans-serif;height:38px;padding:0 12px;border-radius:10px;cursor:pointer;white-space:nowrap}
+.n2Tabs button:hover{background:var(--bg);color:var(--ink)}
+.n2Tabs button.on{background:var(--brand-soft);color:var(--ink);font-weight:600}
+.n2Tabs svg,.n2Bar svg,.n2List svg{width:18px;height:18px;flex:0 0 18px}
+.n2MoreW{position:relative}
+.n2List{position:absolute;right:0;top:calc(100% + 8px);min-width:250px;max-width:calc(100vw - 24px);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:6px;box-shadow:0 10px 30px rgba(0,0,0,.16);z-index:60}
+.n2List button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:transparent;color:var(--ink);font:500 14px Inter,system-ui,sans-serif;padding:10px 12px;border-radius:9px;text-align:left;cursor:pointer}
+.n2List button:hover{background:var(--bg)}.n2List button.on{background:var(--brand-soft);font-weight:600}
+.n2List hr{border:0;border-top:1px solid var(--line);margin:6px 4px}.n2List .n2Out{color:#b91c1c}
+.n2Bar{display:none}
+@media (min-width:900px){body.nav2 header h1 .n2Now{display:none}}
+.n2Shade{display:none}
+@media (max-width:899px){
+  body.nav2 header{padding:8px 12px;min-height:52px}
+  body.nav2 header h1 .n2Brand{display:none}
+  .n2Tabs{display:none}
+  .n2Bar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:55;background:var(--card);border-top:1px solid var(--line);padding:4px 4px calc(4px + env(safe-area-inset-bottom))}
+  .n2Bar button{flex:1;flex-direction:column;height:54px;gap:3px;font-size:11px;padding:0 2px;justify-content:center}
+  .n2Bar button svg{width:22px;height:22px}
+  .n2Bar button.on{color:var(--ink);font-weight:700}
+  .n2Bar button.on svg{stroke-width:2.4}
+  body.nav2{padding-bottom:72px}
+  .n2MoreW .n2List{position:fixed;left:0;right:0;top:auto;bottom:0;max-width:none;min-width:0;border-radius:18px 18px 0 0;padding:8px 8px calc(14px + env(safe-area-inset-bottom));max-height:80vh;overflow:auto;z-index:70}
+  .n2MoreW .n2List::before{content:"";display:block;width:40px;height:4px;border-radius:9px;background:var(--line);margin:2px auto 8px}
+  .n2MoreW .n2List button{padding:14px 12px;font-size:15px}
+  .n2Shade{display:block;position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:65}
+  .n2Shade[hidden]{display:none}
+}
+/* Setup: tabs on top, one part at a time */
+.stTabs{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 14px}
+.stTabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:8px 16px;font-weight:600;cursor:pointer}
+.stTabs button.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
+@media (max-width:899px){.stTabs{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}.stTabs button{flex:0 0 auto}}
+.stHide{display:none!important}
+.n2Pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin:10px 0}
+.n2Pick label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -6619,6 +6664,114 @@ window.pinRun = (action, body, what) => new Promise(done => {
   $('pinCancel').onclick = $('pinX').onclick = () => close(null);
   post('asPinStatus', { senior: sen }).then(r => open(r.set ? `${sen}: enter your PIN to ${what}.` : `${sen}, choose your own 6-digit PIN (different from the admin password). You will need it to ${what}.`, !r.set)).catch(err => { alert(err.message); done(null); });
 });
+</script>
+<script>
+// ===================== NEW HEADER (laptop: one bar · phone: bottom tabs) and Setup tabs =====================
+(() => {
+  const $ = id => document.getElementById(id);
+  // every page: key, label, the old sidebar button it opens
+  const PAGES = [
+    { k: 'home', l: 'Home', b: 'tabHome' }, { k: 'tt', l: 'Timetable', b: 'tabTT' }, { k: 'assess', l: 'Assessments', b: 'tabAssess' },
+    { k: 'team', l: 'Team hub', b: 'tabTeam' }, { k: 'eval', l: 'Evaluations', b: 'tabEvalAll' }, { k: 'kpi', l: 'Teacher KPIs', b: 'tabKpi' },
+    { k: 'students', l: 'Students', b: 'tabStudents' }, { k: 'teachers', l: 'Teachers', b: 'tabTeachers' }, { k: 'lists', l: 'Setup', b: 'tabLists' }];
+  PAGES.forEach(p => { const b = $(p.b); p.ic = b ? (b.querySelector('.ic') || { innerHTML: '' }).innerHTML : ''; });
+  const DEF = ['home', 'tt', 'assess', 'team'];
+  const mainTabs = () => { try { const v = JSON.parse(localStorage.getItem('adminMainTabs') || 'null'); if (Array.isArray(v) && v.length === 4 && v.every(k => PAGES.some(p => p.k === k))) return v; } catch (e) { /* default */ } return DEF; };
+  const MORE_IC = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg>';
+  document.body.classList.add('nav2');
+  const h1 = document.querySelector('header h1');
+  h1.innerHTML = '<span class="mk">E</span><span class="n2Brand">OMHG EVA · Admin</span><span class="n2Now" hidden></span>';
+  const tabs = document.createElement('nav'); tabs.className = 'n2Tabs'; tabs.setAttribute('aria-label', 'Admin');
+  h1.after(tabs);
+  const bar = document.createElement('nav'); bar.className = 'n2Bar'; bar.setAttribute('aria-label', 'Admin');
+  document.body.appendChild(bar);
+  const shade = document.createElement('div'); shade.className = 'n2Shade'; shade.hidden = true; document.body.appendChild(shade);
+  // the old ⋯ menu items (Dark, Passwords, Activity log, backup, copy, sign out) move into More
+  const EXTRA = ['themeBtn', 'pwBtn', 'actBtn', 'backupBtn', 'copyLiveBtn', 'signOutBtn'];
+  let current = 'home';
+  function draw() {
+    const main = mainTabs(), rest = PAGES.filter(p => !main.includes(p.k));
+    const btn = p => `<button type="button" data-n2="${p.k}" class="${p.k === current ? 'on' : ''}">${p.ic}<span>${p.l}</span></button>`;
+    const inMore = rest.some(p => p.k === current), cur = PAGES.find(p => p.k === current);
+    const list = '<div class="n2List" hidden>' + rest.map(p => `<button type="button" data-n2="${p.k}" class="${p.k === current ? 'on' : ''}">${p.ic}${p.l}</button>`).join('') + '<hr>' +
+      EXTRA.filter(id => $(id) && !$(id).hidden).map(id => `<button type="button" data-n2x="${id}" class="${id === 'signOutBtn' ? 'n2Out' : ''}">${$(id).textContent.replace(/^[^A-Za-z]+/, '')}</button>`).join('') + '</div>';
+    const more = `<div class="n2MoreW"><button type="button" class="n2More${inMore ? ' on' : ''}" aria-expanded="false">${MORE_IC}<span>${inMore ? cur.l : 'More'}</span></button>${list}</div>`;
+    tabs.innerHTML = main.map(k => btn(PAGES.find(p => p.k === k))).join('') + more;
+    bar.innerHTML = main.map(k => btn(PAGES.find(p => p.k === k))).join('') + `<button type="button" class="n2More${inMore ? ' on' : ''}" data-n2sheet>${MORE_IC}<span>More</span></button>`;
+    // the phone sheet is the laptop list, reused
+    $('n2Sheet') && $('n2Sheet').remove();
+    const sheet = document.createElement('div'); sheet.className = 'n2MoreW'; sheet.id = 'n2Sheet'; sheet.innerHTML = list; document.body.appendChild(sheet);
+    const now = h1.querySelector('.n2Now'); now.textContent = cur ? cur.l : ''; now.hidden = false;
+  }
+  function closeMore() { document.querySelectorAll('.n2List').forEach(l => { l.hidden = true; }); shade.hidden = true; document.querySelectorAll('.n2More').forEach(b => b.setAttribute('aria-expanded', 'false')); }
+  // which page is open: follow the old sidebar buttons
+  function sync() {
+    const on = PAGES.find(p => $(p.b) && $(p.b).classList.contains('on'));
+    if (on && on.k !== current) { current = on.k; draw(); }
+  }
+  new MutationObserver(sync).observe(document.querySelector('nav.side'), { attributes: true, subtree: true, attributeFilter: ['class'] });
+  document.addEventListener('click', ev => {
+    const t = ev.target;
+    const go = t.closest('[data-n2]');
+    if (go) { closeMore(); const p = PAGES.find(x => x.k === go.dataset.n2); if (p && $(p.b)) $(p.b).click(); return; }
+    const x = t.closest('[data-n2x]');
+    if (x) { closeMore(); $(x.dataset.n2x).click(); setTimeout(draw, 50); return; }
+    if (t.closest('[data-n2sheet]')) { const l = $('n2Sheet').querySelector('.n2List'); const open = l.hidden; closeMore(); l.hidden = !open; shade.hidden = !open; return; }
+    const m = t.closest('.n2Tabs .n2More');
+    if (m) { const l = m.parentElement.querySelector('.n2List'); const open = l.hidden; closeMore(); l.hidden = !open; m.setAttribute('aria-expanded', String(open)); return; }
+    if (!t.closest('.n2List')) closeMore();
+  });
+  document.addEventListener('keydown', ev => { if (ev.key === 'Escape') closeMore(); });
+  // signing in shows Passwords / Activity log / Sign out: redraw the menu then
+  ['pwBtn', 'actBtn', 'signOutBtn', 'copyLiveBtn'].forEach(id => { if ($(id)) new MutationObserver(draw).observe($(id), { attributes: true, attributeFilter: ['hidden'] }); });
+  draw(); sync();
+
+  // ---------- Setup: tabs on top ----------
+  const pane = $('paneLists');
+  const cards = [...pane.children];
+  const H = c => ((c.querySelector('h2') || {}).textContent || '').trim();
+  const GROUPS = [
+    { k: 'people', l: 'Teachers', f: c => H(c) === 'Teachers' },
+    { k: 'classes', l: 'Classes and students', f: c => ['Classes', 'Students', 'Move students between classes'].includes(H(c)) },
+    { k: 'comp', l: 'Competencies', f: c => c.id === 'asSetComp' },
+    { k: 'year', l: 'School year', f: c => c.id === 'asSetYear' },
+    { k: 'menu', l: 'Menu', f: c => c.id === 'n2Menu' }];
+  const menuCard = document.createElement('div'); menuCard.className = 'card'; menuCard.id = 'n2Menu';
+  menuCard.innerHTML = '<h2>Menu</h2><p class="hint">Choose the 4 pages on the main bar (bottom bar on phones, top bar on laptops). Everything else is under More. Saved on this device.</p><div class="n2Pick" id="n2Pick"></div><div class="asRowB"><button class="btn alt" type="button" id="n2Reset">Back to default</button><span class="hint" id="n2Msg"></span></div>';
+  pane.appendChild(menuCard);
+  const st = document.createElement('nav'); st.className = 'stTabs'; st.id = 'stTabs';
+  st.innerHTML = GROUPS.map(g => `<button type="button" data-st="${g.k}">${g.l}</button>`).join('');
+  pane.insertBefore(st, pane.firstChild.nextSibling);
+  let ST = localStorage.getItem('adminSetupTab') || 'classes';
+  function stDraw() {
+    st.querySelectorAll('[data-st]').forEach(b => b.classList.toggle('on', b.dataset.st === ST));
+    const g = GROUPS.find(x => x.k === ST) || GROUPS[1];
+    [...pane.children].forEach(c => {
+      if (c === st || c.id === 'status' || c.id === 'counts') return;
+      const mine = g.f(c);
+      const any = GROUPS.some(x => x.f(c));
+      c.classList.toggle('stHide', any ? !mine : ST !== 'people');   // other notes go with Teachers
+    });
+    // Save / Reload belong to Teachers, Classes and students
+    const lists = ST === 'people' || ST === 'classes';
+    if ($('saveBtn') && $('paneLists') && !$('paneLists').hidden) { $('saveBtn').style.visibility = lists ? '' : 'hidden'; $('loadBtn').style.visibility = lists ? '' : 'hidden'; }
+    if (ST === 'menu') pickDraw();
+  }
+  function pickDraw() {
+    const m = mainTabs(), opt = v => PAGES.map(p => `<option value="${p.k}"${p.k === v ? ' selected' : ''}>${p.l}</option>`).join('');
+    $('n2Pick').innerHTML = m.map((v, i) => `<label>Tab ${i + 1}<select data-pick="${i}">${opt(v)}</select></label>`).join('');
+  }
+  st.addEventListener('click', ev => { const b = ev.target.closest('[data-st]'); if (!b) return; ST = b.dataset.st; localStorage.setItem('adminSetupTab', ST); stDraw(); });
+  document.addEventListener('change', ev => {
+    const s = ev.target.closest('[data-pick]'); if (!s) return;
+    const m = [...document.querySelectorAll('#n2Pick [data-pick]')].map(x => x.value);
+    if (new Set(m).size !== 4) { $('n2Msg').textContent = 'Choose 4 different pages.'; return; }
+    localStorage.setItem('adminMainTabs', JSON.stringify(m)); $('n2Msg').textContent = 'Saved.'; draw();
+  });
+  document.addEventListener('click', ev => { if (ev.target.closest('#n2Reset')) { localStorage.removeItem('adminMainTabs'); pickDraw(); draw(); $('n2Msg').textContent = 'Back to Home, Timetable, Assessments, Team hub.'; } });
+  stDraw();
+  new MutationObserver(stDraw).observe($('paneLists'), { attributes: true, attributeFilter: ['hidden'] });
+})();
 </script>
 </body>
 </html>
