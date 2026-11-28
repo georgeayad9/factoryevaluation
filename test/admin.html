@@ -644,6 +644,15 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
 .asTiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:6px}.asTile{display:flex;flex-direction:column;align-items:center;gap:2px}.asTile small{font-size:10.5px;color:var(--muted);max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 .asFTog{display:none}@media(max-width:700px){.asFTog{display:inline-block;margin:0 0 8px}#asFBox{display:none}#asFBox.open{display:flex}.asLegend{font-size:12px}}
+
+.asCellB{border:0;background:none;padding:0;cursor:pointer;font:inherit}.asCellB:hover .asL{outline:2px solid var(--line)}
+.asL.ed{box-shadow:inset 0 -3px 0 #7c3aed}
+.asExp{margin-left:auto;display:flex;gap:6px}.asLvl{align-items:center}
+.asLetters{display:flex;gap:8px;align-items:center;margin:12px 0}.asLetters .asL{width:42px;height:38px;font-size:16px;border:2px solid transparent;cursor:pointer}.asLetters .sel{border-color:var(--ink)!important;transform:scale(1.08)}
+#prDoc .asPT th,#prDoc .asPT td{font-size:9px;padding:2px 3px}#prDoc .asL{min-width:18px;height:16px;font-size:10px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-weight:700}
+
+#wkGrid td.offcell{background:#F4F4F2;color:#777}#wkGrid td.offcell.del{background:repeating-linear-gradient(45deg,#fafafa,#fafafa 6px,#f0f0f0 6px,#f0f0f0 12px)}
+#ttPop button.danger{color:#b91c1c}
 </style>
 </head>
 <body>
@@ -1166,7 +1175,7 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
     </div>
     <div id="asMsg"></div>
     <nav class="hubTabs" id="asTabs"><button type="button" data-ast="grid" class="on">Final status</button><button type="button" data-ast="list">Assessments <span class="n" id="asOpenN"></span></button><button type="button" data-ast="kpi">First try by teacher</button></nav>
-    <section data-asp="grid"><div class="asLvl" id="asLvl"><button type="button" data-lvl="Junior">Juniors</button><button type="button" data-lvl="Wheeler">Wheelers</button><button type="button" data-lvl="Senior">Seniors</button></div><div class="asLegend"><span class="asL A">A</span> 1st try <span class="asL B">B</span> 2nd <span class="asL C">C</span> 3rd <span class="asL D">D</span> 4th (last) <span class="asL F">F</span> failed · repeats the year <span class="asL Rw">B</span> waiting for retake (best now) <span class="asL Rw last">D</span> last chance <span class="asL O">…</span> planned <span class="asL N">·</span> not yet <label class="asOnlyF"><input type="checkbox" id="asFOnly"> only students who need a retake or failed</label></div><div id="asGrid"></div></section>
+    <section data-asp="grid"><div class="asLvl" id="asLvl"><button type="button" data-lvl="Junior">Juniors</button><button type="button" data-lvl="Wheeler">Wheelers</button><button type="button" data-lvl="Senior">Seniors</button><span class="asExp"><button class="btn alt sm" type="button" id="asPdf">PDF</button><button class="btn alt sm" type="button" id="asXls">Excel</button></span></div><div class="asLegend"><span class="asL A">A</span> 1st try <span class="asL B">B</span> 2nd <span class="asL C">C</span> 3rd <span class="asL D">D</span> 4th (last) <span class="asL F">F</span> failed · repeats the year <span class="asL Rw">B</span> waiting for retake (best now) <span class="asL Rw last">D</span> last chance <span class="asL O">…</span> planned <span class="asL N">·</span> not yet <label class="asOnlyF"><input type="checkbox" id="asFOnly"> only students who need a retake or failed</label></div><div id="asGrid"></div></section>
     <section data-asp="list" hidden><div id="asList"></div></section>
     <section data-asp="kpi" hidden><p class="hint">Share of students who passed every learning outcome on the first attempt, by the teacher who <b>taught</b> the competency. It follows the year, month, week and year group filters above. This is what the Assessments KPI (40 points) will use.</p><div id="asKpi"></div></section>
   </div>
@@ -1908,6 +1917,7 @@ $('wkTeacher').onchange = () => { W.adding = null; W.dayMenu = null; localStorag
 const coverAt = (t, date, s) => W.cover.find(c => c.type === 'Absent' && c.teacher === t && c.date === date && c.session === s);
 // a substitution: the class goes to another teacher, but the teacher is NOT absent (early leave, late arrival, other duty)
 const subAt = (t, date, s) => W.cover.find(c => c.type === 'Sub' && c.teacher === t && c.date === date && c.session === s);
+const offAt = (t, date, s) => W.cover.find(c => (c.type === 'Cancelled' || c.type === 'Deleted') && c.teacher === t && c.date === date && c.session === s);
 const SUB_REASONS = ['Early leave', 'Late arrival', 'Other duty'];
 // a factory day the admin gave this teacher (saved as a "Factory" row; their classes that day are absences to cover)
 const givenFactory = (t, date) => W.cover.some(c => c.type === 'Factory' && c.teacher === t && c.date === date);
@@ -1937,17 +1947,18 @@ function weekCounts() {
   const add = (t, date) => { const x = get(t); x.perDay[date] = (x.perDay[date] || 0) + 1; };
   W.planned.filter(p => !p.factory).forEach(p => {
     get(p.teacher).planned++;
-    if (!coverAt(p.teacher, p.date, p.session) && !subAt(p.teacher, p.date, p.session)) add(p.teacher, p.date);
+    if (!coverAt(p.teacher, p.date, p.session) && !subAt(p.teacher, p.date, p.session) && !offAt(p.teacher, p.date, p.session)) add(p.teacher, p.date);
   });
   W.cover.forEach(r => {
     if (r.type === 'Factory' || r.type === 'NoFactory') return;
     if (r.type === 'Extra') { if (r.substitute) { get(r.substitute).extra++; add(r.substitute, r.date); } return; }
+    if (r.type === 'Cancelled' || r.type === 'Deleted') { get(r.teacher).off = (get(r.teacher).off || 0) + 1; return; }
     if (r.type === 'Sub') get(r.teacher).given++; else get(r.teacher).absent++;
     if (r.substitute) { get(r.substitute).subs++; add(r.substitute, r.date); }
   });
   Object.keys(c).forEach(t => {
     const x = c[t];
-    x.total = x.planned - x.absent - x.given + x.subs + x.extra;   // the classes the teacher really takes this week
+    x.total = x.planned - x.absent - x.given - (x.off || 0) + x.subs + x.extra;   // the classes the teacher really takes this week
     const auto = Math.max(0, 5 - factoryDays(t).length);
     const l = W.limits[t] && W.limits[t].saved ? W.limits[t] : { days: auto, max: auto * W.perDay };
     x.days = l.days;
@@ -1997,20 +2008,43 @@ document.querySelectorAll('#paneTT [data-tt]').forEach(b => { b.onclick = () => 
 ttTab(TT_TAB);
 // ----- the small menu on a class (substitute / absent) -----
 function ttPopClose() { const p = $('ttPop'); if (p) p.hidden = true; }
+// cancel or delete one session (George's or Ramy's PIN), and bring it back
+async function ttOff(p, dn, del) {
+  if (W.dirty) { alert('Save or undo the other changes of this week first.'); return; }
+  const what = `${p.cls} · ${p.teacher} · ${dn} ${shortDate(p.date)} · session ${p.session}`;
+  let reason = '';
+  if (!del) { reason = (prompt(`Cancel ${what}?\n\nIt stays on the timetable crossed out and is not counted in ${p.teacher.split(' ')[0]}'s classes. ${p.teacher.split(' ')[0]} is told.\n\nWhy is it cancelled?`, 'Factory visit') || '').trim(); if (!reason) return; }
+  else if (!confirm(`Delete ${what}?\n\nIt is removed from this week completely and not counted. ${p.teacher.split(' ')[0]} is told.`)) return;
+  const r = await pinRun('ttSessionOff', { teacher: p.teacher, date: p.date, session: p.session, kind: del ? 'delete' : 'cancel', reason }, del ? 'delete a session' : 'cancel a session');
+  if (!r) return;
+  await loadWeek(W.weekStart);
+  ttMsg(`${what}: ${del ? 'deleted' : 'cancelled'}. Saved in the activity log.`, true);
+}
+async function ttOffUndo(p, dn, off) {
+  if (W.dirty) { alert('Save or undo the other changes of this week first.'); return; }
+  if (!confirm(`Bring back ${p.cls} · ${p.teacher} · ${dn} session ${p.session}? (it was ${off.type === 'Deleted' ? 'deleted' : 'cancelled'})`)) return;
+  const r = await pinRun('ttSessionOn', { teacher: p.teacher, date: p.date, session: p.session }, 'bring back a session');
+  if (!r) return;
+  await loadWeek(W.weekStart);
+  ttMsg(`${p.cls} on ${dn} session ${p.session} is back.`, true);
+}
 function ttPopOpen(cell, p, dn) {
   const pop = $('ttPop');
   pop.innerHTML = `<div class="ttPopH">${esc(dn)} ${esc(shortDate(p.date))} · session ${p.session} · ${esc(p.cls)}</div>
     <button type="button" role="menuitem" data-pop="sub">Give to another teacher<small>Substitution · not absent</small></button>
     <button type="button" role="menuitem" data-pop="absent">Mark absent</button>
-    <button type="button" role="menuitem" data-pop="x" class="mute">Cancel</button>`;
+    <button type="button" role="menuitem" data-pop="cancelS">Cancel this session<small>Stays crossed out · not counted · PIN</small></button>
+    <button type="button" role="menuitem" data-pop="deleteS" class="danger">Delete this session<small>Removed from this week · PIN</small></button>
+    <button type="button" role="menuitem" data-pop="x" class="mute">Close</button>`;
   pop.hidden = false;
   const r = cell.getBoundingClientRect(), w = 240;
   pop.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, r.left)) + 'px';
-  pop.style.top = (r.bottom + 6 + 170 > window.innerHeight ? Math.max(8, r.top - 170) : r.bottom + 6) + 'px';
+  pop.style.top = (r.bottom + 6 + 260 > window.innerHeight ? Math.max(8, r.top - 260) : r.bottom + 6) + 'px';
   pop.onclick = e => {
     const b = e.target.closest('[data-pop]'); if (!b) return;
     ttPopClose();
     if (b.dataset.pop === 'absent') toggleAbsent(p);
+    if (b.dataset.pop === 'cancelS' || b.dataset.pop === 'deleteS') ttOff(p, dn, b.dataset.pop === 'deleteS');
     if (b.dataset.pop === 'sub') {
       W.cover.push({ type: 'Sub', teacher: p.teacher, date: p.date, session: p.session, cls: p.cls, subject: p.subject, substitute: ttSuggest({ teacher: p.teacher, date: p.date, session: p.session }, weekCounts()) || '', reason: 'Other duty' });
       markWeekDirty();
@@ -2382,9 +2416,14 @@ function renderWeek() {
         td.className = 'fac';
         td.innerHTML = '<small>factory</small>';
       } else if (p) {
-        const c = coverAt(t, date, s), g = subAt(t, date, s);
+        const c = coverAt(t, date, s), g = subAt(t, date, s), off = offAt(t, date, s);
         const menu = W.cellMenu && W.cellMenu.date === date && W.cellMenu.session === s;
-        if (g) {
+        if (off) {
+          td.className = 'click offcell' + (off.type === 'Deleted' ? ' del' : '');
+          td.innerHTML = off.type === 'Deleted' ? `<small>removed</small>` : `<b><s>${esc(p.cls)}</s></b><small>cancelled${off.reason ? ' · ' + esc(off.reason) : ''}</small>`;
+          td.title = (off.type === 'Deleted' ? 'Removed' : 'Cancelled') + ' with the PIN. Click to bring it back';
+          td.onclick = () => ttOffUndo(p, dn, off);
+        } else if (g) {
           td.className = 'click given';
           td.innerHTML = `<b>${esc(p.cls)}</b><small>${g.substitute ? 'given to ' + esc(g.substitute.split(' ')[0]) : 'to give · choose who'}${g.reason ? ' · ' + esc(g.reason.split(':')[0].toLowerCase()) : ''}</small>`;
           td.title = 'Substitution (not absent). Click to undo it';
@@ -5789,6 +5828,26 @@ else adminGateShow(gateNote);
     <div class="asFoot"><label class="asChk"><input type="checkbox" id="asCloseOk"> I checked the lists. This cannot be undone (a copy of the student list is kept in the tab “Setup backup”).</label><button class="btn save" type="button" id="asCloseGo" disabled>Close the year</button></div>
   </div>
 </div>
+<div class="ovl" id="asEditOvl" hidden data-keep="1">
+  <div class="ovlCard" role="dialog" aria-labelledby="asEditTitle">
+    <div class="ovlHead"><h2 id="asEditTitle">Edit grade</h2><button class="btn alt" type="button" data-close aria-label="Close">✕</button></div>
+    <div id="asEditInfo" class="hint"></div>
+    <div class="asLetters" id="asEditL"></div>
+    <label>Reason for the change<textarea id="asEditWhy" rows="2" placeholder="e.g. paper record from 2025, retake marked on paper"></textarea></label>
+    <div id="asEditMsg"></div>
+    <div class="asFoot"><button class="btn alt" type="button" data-close>Cancel</button><button class="btn save" type="button" id="asEditGo">Save with PIN</button></div>
+  </div>
+</div>
+<div class="ovl" id="pinOvl" hidden data-keep="1">
+  <div class="ovlCard" role="dialog" aria-labelledby="pinTitle" style="max-width:380px">
+    <div class="ovlHead"><h2 id="pinTitle">Your 6-digit PIN</h2><button class="btn alt" type="button" id="pinX" aria-label="Close">✕</button></div>
+    <p class="hint" id="pinHint"></p>
+    <input type="password" id="pinIn" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="••••••" style="font-size:24px;letter-spacing:.5em;text-align:center">
+    <input type="password" id="pinIn2" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="again" style="font-size:24px;letter-spacing:.5em;text-align:center;margin-top:8px" hidden>
+    <div id="pinMsg" class="hint" style="color:#b91c1c"></div>
+    <div class="asFoot"><button class="btn alt" type="button" id="pinCancel">Cancel</button><button class="btn save" type="button" id="pinGo">OK</button></div>
+  </div>
+</div>
 <footer class="copyFoot">© 2026 George Ayad · OMHG EVA SCHOOL · All rights reserved</footer>
 <script>
 (() => {
@@ -5927,12 +5986,13 @@ else adminGateShow(gateNote);
   }
   const cell = (s, c) => {
     if (!s) return '<span class="asL N">·</span>';
+    if (s.edited && s.letter) return `<span class="asL ${s.letter} ed" title="Edited by ${e(s.edited.by)} (${e(s.edited.reason)})${s.edited.was ? ' · was ' + e(s.edited.was) : ''}">${s.letter}</span>`;
     if (s.letter) return `<span class="asL ${s.letter}" title="${s.letter === 'F' ? 'Failed 4 attempts' : 'Passed on attempt ' + ('ABCD'.indexOf(s.letter) + 1)}">${s.letter}</span>`;
     if (s.tries) { const L = 'ABCD'[s.tries]; return `<span class="asL Rw${s.tries === 3 ? ' last' : ''}" title="Failed attempt ${s.tries} · ${s.open ? 'retake planned' : 'waiting for the retake'} · best grade now ${L}${s.tries === 3 ? ' (last chance)' : ''} · still needs: ${e(s.need.join(', '))}">${L}</span>`; }
     if (s.open) return `<span class="asL O" title="Assessment planned">…</span>`;
     return '<span class="asL N">·</span>';
   };
-  let LVL = 'Junior';
+  let LVL = 'Junior', GRIDV = null;
   const termNow = () => { const m = Number(String(AS.today).slice(5, 7)); return m >= 2 && m < 9 ? 2 : 1; };
   function drawGrid() {
     document.querySelectorAll('#asLvl [data-lvl]').forEach(b => b.classList.toggle('on', b.dataset.lvl === LVL));
@@ -5960,6 +6020,7 @@ else adminGateShow(gateNote);
       groups.map(x => `<th colspan="${x.cols.length}" class="asGrpH">${GRP[x.gr]} year${x.gr === LVL && LVL !== 'Senior' && !back ? ' · up to term ' + tn : ''}</th>`).join('') + '<th rowspan="2">Passed</th></tr><tr>' +
       groups.map(x => x.cols.map(k => `<th class="asCode" title="${e(k.name)} · ${e(k.nameAr)}${k.track ? ' · ' + e(k.track) : ''} · taught by ${e(k.taughtBy)}"><b>${e(k.code)}</b><small>${e(k.short || k.name)}</small></th>`).join('')).join('') + '</tr></thead><tbody>';
     const flat = groups.flatMap(x => x.cols);
+    GRIDV = { flat, groups, byCls, back, yv: yv || AS.year, tn, lvl: LVL };
     Object.keys(byCls).sort().forEach(cl => {
       h += `<tr class="asClsRow"><td colspan="${flat.length + 2}"><span>${e(cl)} · ${byCls[cl].length}</span></td></tr>`;
       byCls[cl].sort((a, b) => a.name.localeCompare(b.name, 'ar')).forEach(s => {
@@ -5968,7 +6029,7 @@ else adminGateShow(gateNote);
         const passed = due.filter(k => { const v = st(s.name, k.code); return v && v.letter && v.letter !== 'F'; }).length;
         const failed = flat.some(k => (st(s.name, k.code) || {}).letter === 'F');
         h += `<tr><td class="asName"><button type="button" class="asStu" data-prof="${e(s.name)}">${e(s.name)}</button>${s.track ? ` <small>${e(s.track[0])}</small>` : ''}${failed ? ' <span class="asRep">REPEATING</span>' : ''}${s.archived ? ` <small>archived ${e(s.archived)}</small>` : ''}</td>` +
-          flat.map(k => `<td>${later(k) && !st(s.name, k.code) ? '' : k.track && s.track && k.track !== s.track ? '<span class="asL X">–</span>' : cell(st(s.name, k.code), k)}</td>`).join('') +
+          flat.map(k => `<td>${later(k) && !st(s.name, k.code) ? '' : k.track && s.track && k.track !== s.track ? '<span class="asL X">–</span>' : `<button type="button" class="asCellB" data-edit="${e(s.name)}" data-code="${e(k.code)}">${cell(st(s.name, k.code), k)}</button>`}</td>`).join('') +
           `<td class="asPass">${passed}/${due.length}</td></tr>`;
       });
     });
@@ -5982,7 +6043,7 @@ else adminGateShow(gateNote);
     const note = $('asGrid').dataset.note ? `<p class="hint">${e($('asGrid').dataset.note)}</p>` : '';
     // phones: one card per student instead of the wide table
     if (window.innerWidth < 700) {
-      const tile = (s, k) => k.track && s.track && k.track !== s.track ? '' : `<span class="asTile" title="${e(k.code + ' ' + k.name)}">${cell(st(s.name, k.code), k)}<small>${e(k.short || k.code)}</small></span>`;
+      const tile = (s, k) => k.track && s.track && k.track !== s.track ? '' : `<button type="button" class="asTile asCellB" data-edit="${e(s.name)}" data-code="${e(k.code)}" title="${e(k.code + ' ' + k.name)}">${cell(st(s.name, k.code), k)}<small>${e(k.short || k.code)}</small></button>`;
       $('asGrid').innerHTML = note + Object.keys(byCls).sort().map(cl => `<div class="asCardsH">${e(cl)} · ${byCls[cl].length}</div>` + byCls[cl].sort((a, b) => a.name.localeCompare(b.name, 'ar')).map(s => {
         const gi = GR.indexOf(s.grade) - back, due = flat.filter(k => (!k.track || !s.track || k.track === s.track));
         const passed = due.filter(k => { const v = st(s.name, k.code); return v && v.letter && v.letter !== 'F'; }).length;
@@ -6362,10 +6423,71 @@ else adminGateShow(gateNote);
     } catch (err) { alert(err.message); $('asCloseGo').disabled = false; }
   }
 
+  // ---------- edit one grade (PIN) ----------
+  let ED = null;
+  function edOpen(name, code) {
+    const k = comp(code), v = st(name, code) || {};
+    ED = { name, code, letter: '' };
+    $('asEditInfo').innerHTML = `<b>${e(name)}</b> · ${e(code)} ${e(k.short || k.name)}<br>Now: ${v.letter ? v.letter : v.tries ? 'retake needed (attempt ' + (v.tries + 1) + ')' : 'not assessed'}${v.edited ? ` · edited by ${e(v.edited.by)}` : ''}`;
+    $('asEditL').innerHTML = ['A', 'B', 'C', 'D', 'F'].map(l => `<button type="button" class="asL ${l}" data-el="${l}">${l}</button>`).join('') + '<button type="button" class="btn alt sm" data-el="clear">Clear</button>';
+    $('asEditWhy').value = ''; $('asEditMsg').innerHTML = ''; $('asEditOvl').hidden = false;
+  }
+  async function edGo() {
+    if (!ED.letter) { msg('asEditMsg', 'Choose the new grade.'); return; }
+    if ($('asEditWhy').value.trim().length < 3) { msg('asEditMsg', 'Write the reason.'); return; }
+    $('asEditOvl').hidden = true;
+    const r = await pinRun('asGradeEdit', { student: ED.name, code: ED.code, letter: ED.letter, reason: $('asEditWhy').value.trim() }, 'edit a grade');
+    if (!r) { $('asEditOvl').hidden = false; return; }
+    await load(); draw();
+    msg('asMsg', `${ED.name} · ${ED.code}: ${r.was || 'not assessed'} → ${r.letter === 'clear' ? 'cleared' : r.letter}. Saved in the activity log.`, true);
+  }
+
+  // ---------- PDF and Excel of the current view, with the school's official header ----------
+  const ttl = () => `كشف الجدارات للعام الدراسى ${GRIDV.yv.replace('-', '/')} — ${GRIDV.back ? 'العام كاملاً' : GRIDV.tn === 2 ? 'الفصل الدراسى الثانى' : 'الفصل الدراسى الاول'}`;
+  const sub = () => { const f = [$('asFCls').value, $('asFMonth').value, $('asFWeek').value && 'week of ' + $('asFWeek').value, $('asFTeacher').value && $('asFRole').value.replace('assessor', 'assessed by').replace('taughtBy', 'taught by') + ' ' + $('asFTeacher').value, $('asFQ').value && 'search: ' + $('asFQ').value].filter(Boolean);
+    return `الفصل: ${GRP[GRIDV.lvl]} (${Object.keys(GRIDV.byCls).sort().join(' · ')})${f.length ? ' · ' + f.join(' · ') : ''}`; };
+  const plain = (v, k, s) => k.track && s.track && k.track !== s.track ? '–' : !v ? '' : v.letter ? v.letter + (v.edited ? '*' : '') : v.tries ? '(' + 'ABCD'[v.tries] + ')' : v.open ? '…' : '';
+  function exportPdf() {
+    if (!GRIDV) return;
+    const { flat, groups, byCls } = GRIDV;
+    let h = '<table class="asPT"><thead><tr><th rowspan="2">Student</th>' + groups.map(x => `<th colspan="${x.cols.length}" style="text-align:center">${GRP[x.gr]} year</th>`).join('') + '<th rowspan="2">Passed</th></tr><tr>' +
+      flat.map(k => `<th style="text-align:center">${e(k.code)}<br>${e(k.short || k.name)}</th>`).join('') + '</tr></thead><tbody>';
+    Object.keys(byCls).sort().forEach(cl => {
+      h += `<tr><td colspan="${flat.length + 2}" style="background:#eee;font-weight:700">${e(cl)} · ${byCls[cl].length}</td></tr>`;
+      byCls[cl].slice().sort((a, b) => a.name.localeCompare(b.name, 'ar')).forEach(s => {
+        const due = flat.filter(k => !k.track || !s.track || k.track === s.track), passed = due.filter(k => { const v = st(s.name, k.code); return v && v.letter && v.letter !== 'F'; }).length;
+        h += `<tr><td style="white-space:nowrap">${e(s.name)}${flat.some(k => (st(s.name, k.code) || {}).letter === 'F') ? ' <b style="color:#b91c1c">(repeating)</b>' : ''}</td>` +
+          flat.map(k => `<td style="text-align:center">${k.track && s.track && k.track !== s.track ? '–' : cell(st(s.name, k.code), k)}</td>`).join('') + `<td style="text-align:center"><b>${passed}/${due.length}</b></td></tr>`;
+      });
+    });
+    h += '</tbody></table><p style="font-size:9px;margin-top:3mm">A passed on the 1st try · B 2nd · C 3rd · D 4th (last) · F failed 4 times, repeats the year · dashed letter = failed, waiting for the retake (best grade now) · … planned · · not yet · * edited</p>';
+    prPrint({ file: `Competencies - ${GRP[GRIDV.lvl]} - ${GRIDV.yv}`, landscape: true, pages: [{ title: ttl(), sub: sub(), html: h }] });
+  }
+  function exportXlsx2() {
+    if (!GRIDV) return;
+    const { flat, groups, byCls } = GRIDV;
+    const head = [['وزارة التربية والتعليم والتعليم الفني'], ['وحدة تشغيل وإدارة مدارس التكنولوجيا التطبيقية'], ['مدرسة إيفا الدولية للتكنولوجيا التطبيقية'], [ttl()], [sub()], []];
+    const sheets = Object.keys(byCls).sort().map(cl => {
+      const rows = head.concat([['Student'].concat(groups.flatMap(x => x.cols.map((k, i) => i === 0 ? GRP[x.gr] + ' year' : ''))).concat(['']), ['', ...flat.map(k => k.code + ' ' + (k.short || k.name)), 'Passed']]);
+      byCls[cl].slice().sort((a, b) => a.name.localeCompare(b.name, 'ar')).forEach(s => {
+        const due = flat.filter(k => !k.track || !s.track || k.track === s.track), passed = due.filter(k => { const v = st(s.name, k.code); return v && v.letter && v.letter !== 'F'; }).length;
+        rows.push([s.name, ...flat.map(k => plain(st(s.name, k.code), k, s)), passed + '/' + due.length]);
+      });
+      rows.push([], ['A 1st try · B 2nd · C 3rd · D 4th · F failed, repeats the year · (B) failed, waiting for the retake · … planned · * edited']);
+      return { name: cl.replace(/[\\/?*\[\]:]/g, ' ').slice(0, 31), rows, bold: [0, 1, 2, 3, 6, 7] };
+    });
+    prDownload(xlsxBlob(sheets), `Competencies - ${GRP[GRIDV.lvl]} - ${GRIDV.yv}.xlsx`);
+  }
+
   // ---------- events (delegated: the overlays sit after this script) ----------
   document.addEventListener('click', ev => {
     const t = ev.target;
     if (t.closest('#asFTog')) { $('asFBox').classList.toggle('open'); t.closest('#asFTog').textContent = $('asFBox').classList.contains('open') ? 'Filters ▴' : 'Filters ▾'; return; }
+    if (t.closest('#asPdf')) { exportPdf(); return; }
+    if (t.closest('#asXls')) { exportXlsx2(); return; }
+    if (t.closest('[data-edit]') && t.closest('#asGrid')) { const b = t.closest('[data-edit]'); edOpen(b.dataset.edit, b.dataset.code); return; }
+    if (t.closest('#asEditL [data-el]')) { ED.letter = t.closest('[data-el]').dataset.el; $('asEditL').querySelectorAll('[data-el]').forEach(x => x.classList.toggle('sel', x.dataset.el === ED.letter)); return; }
+    if (t.closest('#asEditGo')) { edGo(); return; }
     if (t.closest('#asLvl [data-lvl]')) { LVL = t.closest('[data-lvl]').dataset.lvl; draw(); return; }
     if (t.closest('#asTabs [data-ast]')) { TAB = t.closest('[data-ast]').dataset.ast; draw(); return; }
     if (t.closest('#asNewBtn')) { if (!AS) return; nOpen(); return; }
@@ -6408,6 +6530,38 @@ else adminGateShow(gateNote);
   let wasPhone = window.innerWidth < 700;
   window.addEventListener('resize', () => { const p = window.innerWidth < 700; if (p !== wasPhone && AS && TAB === 'grid') { wasPhone = p; draw(); } });
 })();
+</script>
+
+<script>
+// ===================== 6-digit PIN (George's or Ramy's own): grade edits, cancelling or deleting sessions =====================
+// pinRun(action, body, what) asks for the PIN (the first time it sets it) and calls the server with it.
+window.pinRun = (action, body, what) => new Promise(done => {
+  const $ = id => document.getElementById(id), sen = localStorage.getItem('hubSenior') || '';
+  if (!sen) { alert('First choose who you are (George or Ramy) in Team hub.'); return done(null); }
+  let setting = false;
+  const open = (hint, set) => { setting = set; $('pinHint').textContent = hint; $('pinIn').value = ''; $('pinIn2').value = ''; $('pinIn2').hidden = !set; $('pinMsg').textContent = ''; $('pinOvl').hidden = false; setTimeout(() => $('pinIn').focus(), 50); };
+  const close = r => { $('pinOvl').hidden = true; $('pinGo').onclick = $('pinCancel').onclick = $('pinX').onclick = $('pinIn').onkeydown = null; done(r); };
+  const go = async () => {
+    const pin = $('pinIn').value.trim();
+    if (!/^\d{6}$/.test(pin)) { $('pinMsg').textContent = 'The PIN is 6 digits.'; return; }
+    $('pinGo').disabled = true;
+    try {
+      if (setting) {
+        if ($('pinIn2').value.trim() !== pin) { $('pinMsg').textContent = 'The two PINs are different.'; $('pinGo').disabled = false; return; }
+        await post('asPinSet', { pin, senior: sen });
+      }
+      const r = await post(action, Object.assign({}, body, { pin, senior: sen }));
+      $('pinGo').disabled = false; close(r);
+    } catch (err) {
+      $('pinGo').disabled = false;
+      if (err.message === 'PIN_NOT_SET') return open(`${sen}, choose your own 6-digit PIN (different from the admin password). You will need it to ${what}.`, true);
+      $('pinMsg').textContent = err.message;
+    }
+  };
+  $('pinGo').onclick = go; $('pinIn').onkeydown = ev => { if (ev.key === 'Enter') go(); };
+  $('pinCancel').onclick = $('pinX').onclick = () => close(null);
+  post('asPinStatus', { senior: sen }).then(r => open(r.set ? `${sen}: enter your PIN to ${what}.` : `${sen}, choose your own 6-digit PIN (different from the admin password). You will need it to ${what}.`, !r.set)).catch(err => { alert(err.message); done(null); });
+});
 </script>
 </body>
 </html>

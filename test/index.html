@@ -868,7 +868,7 @@ async function rqLoadDay() {
   try {
     const w = (T_WEEK && date >= T_WEEK.weekStart && date <= tAdd(T_WEEK.weekStart, 6)) ? T_WEEK : await post('myTimetable', { ...session(), date });
     const day = Math.round((new Date(date) - new Date(w.weekStart)) / 86400000);
-    const list = w.classes.filter(c => c.day === day && !c.factory && !c.absent && !c.given).sort((a, b) => a.session - b.session);
+    const list = w.classes.filter(c => c.day === day && !c.factory && !c.absent && !c.given && !c.cancelled).sort((a, b) => a.session - b.session);
     $('rqSessions').innerHTML = list.length ? `<label>Which classes need someone else?</label><div class="rqSess">${list.map(c =>
         `<label><input type="checkbox" value="${c.session}"><span><b>Session ${c.session}</b> · ${hEsc(c.cls)} <small>${fmtTime(SESSION_TIMES[c.session - 1][0])}</small></span></label>`).join('')}</div>
         <div class="rqQuick"><button class="ghost" type="button" data-rqq="all">All</button><button class="ghost" type="button" data-rqq="last">From the last…</button></div>`
@@ -940,8 +940,8 @@ function homeDraw(w, today) {
   const items = [];
   if (day >= 0 && day <= 4) {
     (w.classes || []).filter(x => x.day === day).forEach(x => items.push({ s: x.session, cls: x.cls,
-      note: x.factory || x.factoryDay ? 'Factory day' : x.given ? 'Given to ' + String(x.coveredBy).split(' ')[0] + (x.reason ? ' · ' + x.reason.split(':')[0].toLowerCase() : '') : x.absent ? (x.coveredBy ? 'You are absent · ' + x.coveredBy + ' covers' : 'You are absent') : x.subject,
-      tag: x.factory || x.factoryDay ? 'fac' : x.given ? 'giv' : x.absent ? 'abs' : '', can: !(x.factory || x.factoryDay || x.absent || x.given) }));
+      note: x.cancelled ? 'Cancelled' + (x.reason ? ' · ' + x.reason : '') : x.factory || x.factoryDay ? 'Factory day' : x.given ? 'Given to ' + String(x.coveredBy).split(' ')[0] + (x.reason ? ' · ' + x.reason.split(':')[0].toLowerCase() : '') : x.absent ? (x.coveredBy ? 'You are absent · ' + x.coveredBy + ' covers' : 'You are absent') : x.subject,
+      tag: x.cancelled ? 'abs' : x.factory || x.factoryDay ? 'fac' : x.given ? 'giv' : x.absent ? 'abs' : '', can: !(x.factory || x.factoryDay || x.absent || x.given || x.cancelled) }));
     (w.subs || []).filter(x => x.day === day).forEach(x => items.push({ s: x.session, cls: x.cls,
       note: x.type === 'Extra' ? 'Extra class' : 'Cover for ' + String(x.forTeacher).split(' ')[0], tag: 'cov', can: true }));
     (w.visits || []).filter(v => v.day === day).forEach(v => {
