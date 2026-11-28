@@ -410,6 +410,8 @@
 .asTBar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:10px 14px;display:flex;gap:10px;align-items:center;justify-content:flex-end;z-index:91}
 .asTBar .hint{margin:0 auto 0 0}
 .asAr{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.asWhy{width:100%;margin:4px 0 8px;font:inherit;font-size:14px;border:1px solid #f0b4b4;border-radius:10px;padding:8px 10px;background:#FFF7F7;color:var(--ink)}.asWhy.miss{border:2px solid #dc2626}
+.asTTabs{display:flex;gap:6px;margin:0 0 10px}.asTTabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:6px 14px;font-weight:600;cursor:pointer}.asTTabs button.on{background:var(--ink);color:var(--card)}
 .asTRes{display:inline-block;min-width:24px;text-align:center;border-radius:6px;font-weight:700;padding:1px 6px}
 </style>
 </head>
@@ -737,6 +739,11 @@
     </div>
 
     <!-- COMING SOON -->
+    <div class="card" id="asTCard" hidden>
+      <div class="hT"><h2>My assessments</h2></div>
+      <div class="asTTabs" id="asTTabs"><button type="button" data-ttab="mark" class="on">To mark</button><button type="button" data-ttab="plan">Planned</button><button type="button" data-ttab="done">Done</button></div>
+      <div id="asTBody"><div class="hint">Loading…</div></div>
+    </div>
     <div class="card soon" id="soon" hidden></div>
 
   </div>
@@ -1322,7 +1329,10 @@ function showSection() {
   const isHome = section === 'home';
   $('homeCard').hidden = !isHome;
   if (isHome) homeLoad();
-  $('soon').hidden = isEval || isGrade || isTime || isHub || isHome;
+  const isAs = section === 'assess';
+  $('asTCard').hidden = !isAs;
+  if (isAs && window.asTTab) window.asTTab();
+  $('soon').hidden = isEval || isGrade || isTime || isHub || isHome || isAs;
   $('hubCard').hidden = !isHub;
   if (section === 'team') hubLoad();
   $('tCard').hidden = !isTime;
@@ -2665,7 +2675,7 @@ function profHTML(p) {
         const res = c.letter ? `<span class="pill ${lc[c.letter]}">${c.letter}</span> <small>${c.letter === 'F' ? T.f : T.p('ABCD'.indexOf(c.letter) + 1)}</small>`
           : c.open ? `<small>${T.plan}</small>` : c.tries ? `<small>${T.re}${e(c.need.map(n => { const f = c.attempts.flatMap(t => t.outcomes).find(o => o.name === n); return f ? on(f) : n; }).join(AR ? '، ' : ', '))}</small>` : '—';
         const tries = c.attempts.map(t => `<div><small>${day(t.date)}${t.void ? T.old : ''} · ${e(String(t.assessor).split(' ')[0])}:</small> ` +
-          (t.absent ? `<span class="pill A">${T.abs}</span>` : t.outcomes.map(o => `<span class="pill ${o.mark === 'P' ? 'ok' : 'bad'}">${o.mark === 'P' ? '✓' : '✗'} ${e(on(o))}</span>`).join(' ')) + '</div>').join('');
+          (t.absent ? `<span class="pill A">${T.abs}</span>` : t.outcomes.map(o => `<span class="pill ${o.mark === 'P' ? 'ok' : 'bad'}">${o.mark === 'P' ? '✓' : '✗'} ${e(on(o))}</span>${o.note ? `<div><small>↳ ${e(o.note)}</small></div>` : ''}`).join(' ')) + '</div>').join('');
         return `<tr><td><b>${e(c.code)}</b> ${e(AR ? (c.nameAr || c.name) : (c.short || c.name))}</td><td>${res}</td><td>${tries || '—'}</td></tr>`;
       }).join('') + '</table></div></div>';
   }
@@ -3563,32 +3573,48 @@ loadLists();
   const $ = id => document.getElementById(id);
   const e = t => String(t === undefined || t === null ? '' : t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const day = ymd => { const [y, m, d] = String(ymd).split('-').map(Number); return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date(y, m - 1, d).getDay()] + ' ' + d + '/' + m; };
-  let LIST = [], MK = null, MARKS = {}, TODAY = '';
+  let LIST = [], MK = null, MARKS = {}, TODAY = '', NEEDWHY = false;
+  const addD = (ymd, n) => { const [y, m, d] = ymd.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10); };
+  let TTAB = 'mark';
+  window.asTTab = async () => {
+    try { const r = await post('asMine', session()); LIST = r.assessments || []; TODAY = r.today; } catch (err) { $('asTBody').innerHTML = `<div class="msg err">${e(err.message)}</div>`; return; }
+    tDraw();
+  };
+  function tDraw() {
+    const sets = { mark: LIST.filter(a => a.status === 'Open' && a.date <= TODAY), plan: LIST.filter(a => a.status === 'Open' && a.date > TODAY), done: LIST.filter(a => a.status === 'Marked').reverse() };
+    document.querySelectorAll('#asTTabs [data-ttab]').forEach(b => { b.classList.toggle('on', b.dataset.ttab === TTAB); b.textContent = { mark: 'To mark', plan: 'Planned', done: 'Done' }[b.dataset.ttab] + ' · ' + sets[b.dataset.ttab].length; });
+    const L = sets[TTAB];
+    $('asTBody').innerHTML = L.length ? L.map(a => {
+      const res = a.status === 'Marked' ? (() => { const p = a.students.filter(s => !s.absent && s.need.every(o => s.marks[o] === 'P')).length, f = a.students.filter(s => !s.absent && s.need.some(o => s.marks[o] === 'F')).length; return `${p} passed · ${f} retake`; })() : `${a.students.length} students · ${a.outcomes.length} learning outcomes`;
+      return `<div class="asTRow"><span><b>${e(a.code)} ${e(a.short || a.name)}</b> · ${e(a.cls)}${a.attempt > 1 ? ` <span class="pill" style="background:#FDF1C8;color:#5c4500">retake · attempt ${a.attempt}</span>` : ''}<br><small>${day(a.date)} · ${res}</small></span>` +
+        (TTAB === 'plan' ? `<small>from ${day(a.date)}</small>` : `<button class="${TTAB === 'mark' ? 'primary' : 'ghost'}" type="button" data-asm="${e(a.id)}">${TTAB === 'mark' ? 'Mark' : 'View / fix'}</button>`) + '</div>';
+    }).join('') : `<p class="hint">${{ mark: 'Nothing to mark right now.', plan: 'No assessments planned for you.', done: 'You have not marked any assessment yet.' }[TTAB]}</p>`;
+  }
   window.asTLoad = async () => {
     const card = $('hAssess'); if (!card) return;
     try { const r = await post('asMine', session()); LIST = r.assessments || []; TODAY = r.today; } catch (err) { card.hidden = true; return; }
-    const open = LIST.filter(a => a.status === 'Open'), done = LIST.filter(a => a.status === 'Marked');
-    card.hidden = !LIST.length;
+    const open = LIST.filter(a => a.status === 'Open'), done = LIST.filter(a => a.status === 'Marked' && a.date >= addD(TODAY, -14));
+    card.hidden = !open.length && !done.length;
     $('hAssessBody').innerHTML = open.map(a => `<div class="asTRow"><span><b>${e(a.code)} ${e(a.name)}</b> · ${e(a.cls)}<br><small>${day(a.date)} · ${a.students.length} students${a.attempt > 1 ? ' · retake (attempt ' + a.attempt + ')' : ''}</small></span>` +
       (a.date <= TODAY ? `<button class="primary" type="button" data-asm="${e(a.id)}">Mark</button>` : `<small>from ${day(a.date)}</small>`) + '</div>').join('') +
       done.slice(-3).map(a => `<div class="asTRow"><span>${e(a.code)} ${e(a.name)} · ${e(a.cls)}<br><small>marked · ${day(a.date)}</small></span><button class="ghost" type="button" data-asm="${e(a.id)}">View / fix</button></div>`).join('');
   };
   function open(id) {
     MK = LIST.find(a => a.id === id); if (!MK) return;
-    MARKS = {}; MK.students.forEach(s => { MARKS[s.name] = { absent: s.absent, marks: Object.assign({}, s.marks) }; });
+    MARKS = {}; MK.students.forEach(s => { MARKS[s.name] = { absent: s.absent, marks: Object.assign({}, s.marks), notes: Object.assign({}, s.notes || {}) }; });
     $('asTKind').textContent = MK.attempt > 1 ? 'Retake · attempt ' + MK.attempt + ' · only the learning outcomes each student still needs' : 'Assessment · 1st attempt';
     $('asTTitle').textContent = MK.code + ' ' + MK.name + ' · ' + MK.cls;
     $('asTSub').textContent = day(MK.date) + ' · ' + MK.outcomes.length + ' learning outcome(s). A student passes when every one is passed.';
-    $('asTMsg').textContent = ''; $('asTOvl').hidden = false; window.scrollTo(0, 0); draw();
+    NEEDWHY = false; $('asTMsg').textContent = ''; $('asTOvl').hidden = false; window.scrollTo(0, 0); draw();
   }
   function draw() {
     $('asTList').innerHTML = MK.students.map(s => {
       const m = MARKS[s.name];
       return `<div class="asMk${m.absent ? ' abs' : ''}"><div class="asMkH"><b>${e(s.name)}</b>${s.tries ? ` <span class="pill" style="background:#FDF1C8;color:#5c4500">retake · attempt ${s.tries + 1}</span>` : ''}` +
         `<span class="asMkBtns"><button type="button" data-allp="${e(s.name)}">All ✓</button><button type="button" class="${m.absent ? 'on' : ''}" data-abs="${e(s.name)}">Absent</button></span></div>` +
-        (m.absent ? '<div class="hint">Absent: does not use an attempt.</div>' : '<div class="asMkO">' + MK.outcomes.map((o, oi) => s.need.includes(o)
+        (m.absent ? '<div class="hint">Absent: does not use an attempt.</div>' : '<div class="asMkO">' + MK.outcomes.map((o, oi) => (s.need.includes(o)
           ? `<div class="asMkRow"><span>${e(o)}${(MK.outcomesAr || [])[oi] ? `<small class="asAr" dir="rtl">${e(MK.outcomesAr[oi])}</small>` : ''}</span><span class="asPF"><button type="button" class="${m.marks[o] === 'P' ? 'on p' : ''}" data-st="${e(s.name)}" data-o="${e(o)}" data-v="P">✓ Pass</button><button type="button" class="${m.marks[o] === 'F' ? 'on f' : ''}" data-st="${e(s.name)}" data-o="${e(o)}" data-v="F">✗ Fail</button></span></div>`
-          : `<div class="asMkRow done"><span>${e(o)}</span><small>passed before</small></div>`).join('') + '</div>') + '</div>';
+          : `<div class="asMkRow done"><span>${e(o)}</span><small>passed before</small></div>`) + (m.marks[o] === 'F' && s.need.includes(o) ? `<textarea class="asWhy${NEEDWHY && !(m.notes[o] || '').trim() ? ' miss' : ''}" data-why="${e(s.name)}" data-o="${e(o)}" rows="2" placeholder="Why exactly did ${e(s.name)} fail this? (the teacher who taught it gets this as a task)">${e(m.notes[o] || '')}</textarea>` : '')).join('') + '</div>') + '</div>';
     }).join('');
     let done = 0, pass = 0, fail = 0, abs = 0;
     MK.students.forEach(s => { const m = MARKS[s.name]; if (m.absent) { abs++; done++; return; } if (!s.need.every(o => m.marks[o])) return; done++; if (s.need.every(o => m.marks[o] === 'P')) pass++; else fail++; });
@@ -3597,17 +3623,21 @@ loadLists();
     $('asTMsg').textContent = done < MK.students.length ? 'Mark every student to save.' : '';
   }
   async function save() {
+    const miss = MK.students.filter(s => !MARKS[s.name].absent && s.need.some(o => MARKS[s.name].marks[o] === 'F' && !(MARKS[s.name].notes[o] || '').trim()));
+    if (miss.length) { NEEDWHY = true; draw(); $('asTMsg').textContent = 'Write why each ✗ failed (' + miss.map(s => s.name).join(', ') + ').'; const t = document.querySelector('.asWhy.miss'); if (t) t.focus(); return; }
     $('asTSave').disabled = true; $('asTMsg').textContent = 'Saving…';
     try {
-      const results = MK.students.map(s => MARKS[s.name].absent ? { student: s.name, absent: true } : { student: s.name, marks: MARKS[s.name].marks });
+      const results = MK.students.map(s => MARKS[s.name].absent ? { student: s.name, absent: true } : { student: s.name, marks: MARKS[s.name].marks, notes: MARKS[s.name].notes });
       const r = await post('asMark', { ...session(), id: MK.id, results });
       $('asTOvl').hidden = true;
-      await window.asTLoad();
+      await window.asTLoad(); if (section === 'assess') window.asTTab();
       const box = $('hMsg'); if (box) box.innerHTML = `<div class="msg ok">Saved: ${r.passed} passed${r.retake ? ', ' + r.retake + ' need a retake (George or Ramy plan it)' : ''}${r.failed ? ', ' + r.failed + ' failed the last attempt' : ''}.</div>`;
     } catch (err) { $('asTMsg').textContent = err.message; $('asTSave').disabled = false; }
   }
   document.addEventListener('click', ev => {
     const t = ev.target;
+    const tt = t.closest('#asTTabs [data-ttab]'); if (tt) { TTAB = tt.dataset.ttab; tDraw(); return; }
+    if (t.closest('.asWhy')) return;
     const m = t.closest('[data-asm]'); if (m) { open(m.dataset.asm); return; }
     if (t.closest('#asTClose')) { $('asTOvl').hidden = true; return; }
     if (t.closest('#asTSave')) { save(); return; }
@@ -3618,6 +3648,7 @@ loadLists();
     else if (b.dataset.abs) MARKS[b.dataset.abs].absent = !MARKS[b.dataset.abs].absent;
     draw();
   });
+  document.addEventListener('input', ev => { const w = ev.target.closest && ev.target.closest('.asWhy'); if (w && MK) { MARKS[w.dataset.why].notes[w.dataset.o] = w.value; w.classList.remove('miss'); } });
   try { if (me) window.asTLoad(); } catch (err) { /* not signed in yet */ }
 })();
 </script>

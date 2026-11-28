@@ -637,6 +637,7 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
 .asT thead tr th.asNameH{z-index:4 !important;left:0}
 .asT td.asName{z-index:1}
 
+.asWhy{width:100%;margin:4px 0 8px;font:inherit;font-size:13px;border:1px solid #f0b4b4;border-radius:10px;padding:8px 10px;background:#FFF7F7;color:var(--ink)}.asWhy.miss{border:2px solid #dc2626}
 .asCardsH{font-weight:700;font-size:13px;margin:14px 2px 6px;color:var(--muted)}
 .asSCard{padding:12px 14px;margin:0 0 10px}.asSH{display:flex;justify-content:space-between;align-items:center;gap:8px}.asSH .asStu{font-weight:700;font-size:15px}.asSH small{color:var(--muted)}
 .asSP{font-size:13px;margin:6px 0 4px;display:flex;align-items:center}.asSG{font-size:11px;color:var(--muted);margin:8px 0 3px;text-transform:uppercase;letter-spacing:.04em}
@@ -3268,7 +3269,7 @@ function profHTML(p) {
         const res = c.letter ? `<span class="pill ${lc[c.letter]}">${c.letter}</span> <small>${c.letter === 'F' ? T.f : T.p('ABCD'.indexOf(c.letter) + 1)}</small>`
           : c.open ? `<small>${T.plan}</small>` : c.tries ? `<small>${T.re}${e(c.need.map(n => { const f = c.attempts.flatMap(t => t.outcomes).find(o => o.name === n); return f ? on(f) : n; }).join(AR ? '، ' : ', '))}</small>` : '—';
         const tries = c.attempts.map(t => `<div><small>${day(t.date)}${t.void ? T.old : ''} · ${e(String(t.assessor).split(' ')[0])}:</small> ` +
-          (t.absent ? `<span class="pill A">${T.abs}</span>` : t.outcomes.map(o => `<span class="pill ${o.mark === 'P' ? 'ok' : 'bad'}">${o.mark === 'P' ? '✓' : '✗'} ${e(on(o))}</span>`).join(' ')) + '</div>').join('');
+          (t.absent ? `<span class="pill A">${T.abs}</span>` : t.outcomes.map(o => `<span class="pill ${o.mark === 'P' ? 'ok' : 'bad'}">${o.mark === 'P' ? '✓' : '✗'} ${e(on(o))}</span>${o.note ? `<div><small>↳ ${e(o.note)}</small></div>` : ''}`).join(' ')) + '</div>').join('');
         return `<tr><td><b>${e(c.code)}</b> ${e(AR ? (c.nameAr || c.name) : (c.short || c.name))}</td><td>${res}</td><td>${tries || '—'}</td></tr>`;
       }).join('') + '</table></div></div>';
   }
@@ -6090,7 +6091,8 @@ else adminGateShow(gateNote);
     $('asMarkOvl').hidden = false; $('asMarkList').innerHTML = '<div class="hint">Loading…</div>'; $('asMarkMsg').textContent = '';
     try { MK = await post('asGet', { id }); } catch (err) { $('asMarkList').innerHTML = `<div class="msg err">${e(err.message)}</div>`; return; }
     MARKS = {};
-    MK.students.forEach(s => { MARKS[s.name] = { absent: s.absent, marks: Object.assign({}, s.marks) }; });
+    MK.students.forEach(s => { MARKS[s.name] = { absent: s.absent, marks: Object.assign({}, s.marks), notes: Object.assign({}, s.notes || {}) }; });
+    window.AS_NEEDWHY = false;
     $('asMarkKind').textContent = MK.attempt > 1 ? 'Retake · attempt ' + MK.attempt : 'Assessment · 1st attempt';
     $('asMarkTitle').textContent = MK.code + ' ' + MK.name + ' · ' + MK.cls;
     $('asMarkSub').textContent = day(MK.date) + ' · assessed by ' + MK.assessor + ' · taught by ' + MK.taughtBy + (MK.status === 'Marked' ? ' · marked ' + MK.marked : ' · not marked yet');
@@ -6100,9 +6102,9 @@ else adminGateShow(gateNote);
     const m = MARKS[s.name];
     return `<div class="asMk${m.absent ? ' abs' : ''}"><div class="asMkH"><b>${e(s.name)}</b>${s.tries ? ` <span class="pill q">retake · attempt ${s.tries + 1}</span>` : ''}` +
       `<span class="asMkBtns"><button type="button" class="btn alt sm" data-allp="${e(s.name)}">All ✓</button><button type="button" class="btn alt sm${m.absent ? ' on' : ''}" data-abs="${e(s.name)}">Absent</button></span></div>` +
-      (m.absent ? '<div class="hint">Absent: does not use an attempt.</div>' : '<div class="asMkO">' + M.outcomes.map((o, oi) => s.need.includes(o)
+      (m.absent ? '<div class="hint">Absent: does not use an attempt.</div>' : '<div class="asMkO">' + M.outcomes.map((o, oi) => (s.need.includes(o)
         ? `<div class="asMkRow"><span>${e(o)}${(M.outcomesAr || [])[oi] ? `<small class="asAr" dir="rtl">${e(M.outcomesAr[oi])}</small>` : ''}</span><span class="asPF"><button type="button" class="${m.marks[o] === 'P' ? 'on p' : ''}" data-st="${e(s.name)}" data-o="${e(o)}" data-v="P">✓ Pass</button><button type="button" class="${m.marks[o] === 'F' ? 'on f' : ''}" data-st="${e(s.name)}" data-o="${e(o)}" data-v="F">✗ Fail</button></span></div>`
-        : `<div class="asMkRow done"><span>${e(o)}</span><small>passed before</small></div>`).join('') + '</div>') + '</div>';
+        : `<div class="asMkRow done"><span>${e(o)}</span><small>passed before</small></div>`) + (m.marks[o] === 'F' && s.need.includes(o) ? `<textarea class="asWhy${window.AS_NEEDWHY && !((m.notes || {})[o] || '').trim() ? ' miss' : ''}" data-why="${e(s.name)}" data-o="${e(o)}" rows="2" placeholder="Why exactly did ${e(s.name)} fail this? (the teacher who taught it gets this as a task)">${e((m.notes || {})[o] || '')}</textarea>` : '')).join('') + '</div>') + '</div>';
   }).join('');
   window.asMarkSum = (M, MARKS) => {
     let done = 0, pass = 0, fail = 0, abs = 0;
@@ -6117,7 +6119,7 @@ else adminGateShow(gateNote);
     else if (b.dataset.abs) MARKS[b.dataset.abs].absent = !MARKS[b.dataset.abs].absent;
     return true;
   };
-  window.asMarkBody = (M, MARKS) => M.students.map(s => MARKS[s.name].absent ? { student: s.name, absent: true } : { student: s.name, marks: MARKS[s.name].marks });
+  window.asMarkBody = (M, MARKS) => M.students.map(s => MARKS[s.name].absent ? { student: s.name, absent: true } : { student: s.name, marks: MARKS[s.name].marks, notes: MARKS[s.name].notes || {} });
   function mDraw() {
     $('asMarkList').innerHTML = asMarkHTML(MK, MARKS);
     const s = asMarkSum(MK, MARKS);
@@ -6126,6 +6128,8 @@ else adminGateShow(gateNote);
   }
   async function mSave() {
     const sen = senior(); if (!sen) return;
+    const miss = MK.students.filter(s => !MARKS[s.name].absent && s.need.some(o => MARKS[s.name].marks[o] === 'F' && !((MARKS[s.name].notes || {})[o] || '').trim()));
+    if (miss.length) { window.AS_NEEDWHY = true; mDraw(); $('asMarkMsg').textContent = 'Write why each ✗ failed.'; return; }
     $('asMarkSave').disabled = true;
     try {
       const r = await post('asMarkAdmin', { id: MK.id, results: asMarkBody(MK, MARKS), senior: sen });
@@ -6373,6 +6377,7 @@ else adminGateShow(gateNote);
     if (t.closest('#asNAddOut')) { const n = $('asNOut').children.length + 1; $('asNOut').insertAdjacentHTML('beforeend', `<div class="asOutRow"><span>${n}</span><input placeholder="Learning outcome ${n}"><button class="btn alt sm" type="button" data-rmout>✕</button></div>`); $('asNOut').lastElementChild.querySelector('input').focus(); return; }
     if (t.closest('[data-rmout]')) { t.closest('.asOutRow').remove(); [...$('asNOut').children].forEach((r, i) => { r.firstElementChild.textContent = i + 1; }); return; }
     if (t.closest('#asNSave')) { nSave(); return; }
+    if (t.closest('.asWhy')) return;
     if (t.closest('#asMarkList') && MK) { if (asMarkClick(ev, MK, MARKS)) mDraw(); return; }
     if (t.closest('#asMarkSave')) { mSave(); return; }
     if (t.closest('#asMarkCancel')) { mCancel(); return; }
@@ -6399,7 +6404,7 @@ else adminGateShow(gateNote);
     if (t.closest('#asCloseBox')) { closeRead(); return; }
     if (t.dataset && t.dataset.track) { const sen = senior(); if (!sen) return; post('asTrack', { cls: t.dataset.track, track: t.value, senior: sen }).then(async () => { await load(); setupDraw(); if (typeof loadLists === 'function') loadLists(); }).catch(err => alert(err.message)); }
   });
-  document.addEventListener('input', ev => { if (ev.target.id === 'asFQ') draw(); });
+  document.addEventListener('input', ev => { if (ev.target.id === 'asFQ') draw(); const w = ev.target.closest && ev.target.closest('#asMarkList .asWhy'); if (w && MK) { MARKS[w.dataset.why].notes[w.dataset.o] = w.value; w.classList.remove('miss'); } });
   let wasPhone = window.innerWidth < 700;
   window.addEventListener('resize', () => { const p = window.innerWidth < 700; if (p !== wasPhone && AS && TAB === 'grid') { wasPhone = p; draw(); } });
 })();
