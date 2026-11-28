@@ -639,6 +639,7 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
 
 .asWhy{width:100%;margin:4px 0 8px;font:inherit;font-size:13px;border:1px solid #f0b4b4;border-radius:10px;padding:8px 10px;background:#FFF7F7;color:var(--ink)}.asWhy.miss{border:2px solid #dc2626}
 .asApprBar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:0 0 10px}.asApprBar #asApprBtn{margin-left:auto}
+.asTrackH{font-size:16px;margin:18px 2px 8px}
 .asCardsH{font-weight:700;font-size:13px;margin:14px 2px 6px;color:var(--muted)}
 .asSCard{padding:12px 14px;margin:0 0 10px}.asSH{display:flex;justify-content:space-between;align-items:center;gap:8px}.asSH .asStu{font-weight:700;font-size:15px}.asSH small{color:var(--muted)}
 .asSP{font-size:13px;margin:6px 0 4px;display:flex;align-items:center}.asSG{font-size:11px;color:var(--muted);margin:8px 0 3px;text-transform:uppercase;letter-spacing:.04em}
@@ -6066,7 +6067,7 @@ else adminGateShow(gateNote);
     const back = yv && yv !== AS.year ? Number(AS.year.slice(0, 4)) - Number(yv.slice(0, 4)) : 0;   // years back
     const tn = back > 0 ? 2 : termNow();
     // the competencies the year should have by then: every earlier year, and that year up to this term (graded or not)
-    let cols = AS.comps.filter(k => k.active && GR.indexOf(k.grade) <= li && (GR.indexOf(k.grade) < li || !k.term || Number(k.term) <= tn));
+    let cols = AS.comps.filter(k => k.active && GR.indexOf(k.grade) <= li && (GR.indexOf(k.grade) < li || LVL === 'Senior' || !k.term || Number(k.term) <= tn));
     if (narrowed || back > 0) { const codes = new Set(F.map(a => a.code)); if (narrowed) cols = cols.filter(k => codes.has(k.code)); }
     const inF = new Set(); F.forEach(a => a.students.forEach(n => inF.add(key(n))));
     // students who were in this year group in the chosen school year
@@ -6080,30 +6081,45 @@ else adminGateShow(gateNote);
     const byCls = {};
     studs.forEach(s => { const g = LVL === 'Senior' && s.track ? s.cls + ' · ' + s.track : s.cls; (byCls[g] = byCls[g] || []).push(s); });
     const groups = GR.map(gr => ({ gr, cols: cols.filter(x => x.grade === gr) })).filter(x => x.cols.length);
-    let h = '<div class="card asGridCard"><div class="tw asScroll"><table class="asT"><thead><tr><th rowspan="2" class="asNameH">Student</th>' +
-      groups.map(x => `<th colspan="${x.cols.length}" class="asGrpH">${GRP[x.gr]} year${x.gr === LVL && LVL !== 'Senior' && !back ? ' · up to term ' + tn : ''}</th>`).join('') + '<th rowspan="2">Passed</th></tr><tr>' +
-      groups.map(x => x.cols.map(k => `<th class="asCode" title="${e(k.name)} · ${e(k.nameAr)}${k.track ? ' · ' + e(k.track) : ''} · taught by ${e(k.taughtBy)}"><b>${e(k.code)}</b><small>${e(k.short || k.name)}</small></th>`).join('')).join('') + '</tr></thead><tbody>';
     const flat = groups.flatMap(x => x.cols);
     GRIDV = { flat, groups, byCls, back, yv: yv || AS.year, tn, lvl: LVL };
-    Object.keys(byCls).sort().forEach(cl => {
-      h += `<tr class="asClsRow"><td colspan="${flat.length + 2}"><span>${e(cl)} · ${byCls[cl].length}</span></td></tr>`;
-      byCls[cl].sort((a, b) => a.name.localeCompare(b.name, 'ar')).forEach(s => {
-        const gi = GR.indexOf(s.grade), later = k => s.grade && GR.indexOf(k.grade) > gi;
-        const due = flat.filter(k => (!k.track || !s.track || k.track === s.track) && !later(k));
-        const passed = due.filter(k => { const v = st(s.name, k.code); return v && v.letter && v.letter !== 'F'; }).length;
-        const failed = flat.some(k => (st(s.name, k.code) || {}).letter === 'F');
-        h += `<tr><td class="asName"><button type="button" class="asStu" data-prof="${e(s.name)}">${e(s.name)}</button>${s.track ? ` <small>${e(s.track[0])}</small>` : ''}${failed ? ' <span class="asRep">REPEATING</span>' : ''}${s.archived ? ` <small>archived ${e(s.archived)}</small>` : ''}</td>` +
-          flat.map(k => `<td>${later(k) && !st(s.name, k.code) ? '' : k.track && s.track && k.track !== s.track ? '<span class="asL X">–</span>' : `<button type="button" class="asCellB" data-edit="${e(s.name)}" data-code="${e(k.code)}">${cell(st(s.name, k.code), k)}</button>`}</td>`).join('') +
-          `<td class="asPass">${passed}/${due.length}</td></tr>`;
+    const table = (byCls, groups, studs, title) => {
+      let h = '<div class="card asGridCard"><div class="tw asScroll"><table class="asT"><thead><tr><th rowspan="2" class="asNameH">Student</th>' +
+        groups.map(x => `<th colspan="${x.cols.length}" class="asGrpH">${GRP[x.gr]} year${x.gr === LVL && LVL !== 'Senior' && !back ? ' · up to term ' + tn : ''}</th>`).join('') + '<th rowspan="2">Passed</th></tr><tr>' +
+        groups.map(x => x.cols.map(k => `<th class="asCode" title="${e(k.name)} · ${e(k.nameAr)}${k.track ? ' · ' + e(k.track) : ''} · taught by ${e(k.taughtBy)}"><b>${e(k.code)}</b><small>${e(k.short || k.name)}</small></th>`).join('')).join('') + '</tr></thead><tbody>';
+      const flat = groups.flatMap(x => x.cols);
+      Object.keys(byCls).sort().forEach(cl => {
+        h += `<tr class="asClsRow"><td colspan="${flat.length + 2}"><span>${e(cl)} · ${byCls[cl].length}</span></td></tr>`;
+        byCls[cl].sort((a, b) => a.name.localeCompare(b.name, 'ar')).forEach(s => {
+          const gi = GR.indexOf(s.grade), later = k => s.grade && GR.indexOf(k.grade) > gi;
+          const due = flat.filter(k => (!k.track || !s.track || k.track === s.track) && !later(k));
+          const passed = due.filter(k => { const v = st(s.name, k.code); return v && v.letter && v.letter !== 'F'; }).length;
+          const failed = flat.some(k => (st(s.name, k.code) || {}).letter === 'F');
+          h += `<tr><td class="asName"><button type="button" class="asStu" data-prof="${e(s.name)}">${e(s.name)}</button>${s.track ? ` <small>${e(s.track[0])}</small>` : ''}${failed ? ' <span class="asRep">REPEATING</span>' : ''}${s.archived ? ` <small>archived ${e(s.archived)}</small>` : ''}</td>` +
+            flat.map(k => `<td>${later(k) && !st(s.name, k.code) ? '' : k.track && s.track && k.track !== s.track ? '<span class="asL X">–</span>' : `<button type="button" class="asCellB" data-edit="${e(s.name)}" data-code="${e(k.code)}">${cell(st(s.name, k.code), k)}</button>`}</td>`).join('') +
+            `<td class="asPass">${passed}/${due.length}</td></tr>`;
+        });
       });
-    });
-    // first-try pass rate of each competency, for the students shown
-    h += '<tr class="asFirst"><td>First try pass</td>' + flat.map(k => {
-      const f = studs.map(s => st(s.name, k.code)).filter(v => v && v.first);
-      const p = f.filter(v => v.first.pass).length;
-      return `<td>${f.length ? Math.round(p / f.length * 100) + '%' : '—'}</td>`;
-    }).join('') + '<td></td></tr>';
-    h += '</tbody></table></div></div>';
+      // first-try pass rate of each competency, for the students shown
+      h += '<tr class="asFirst"><td>First try pass</td>' + flat.map(k => {
+        const f = studs.map(s => st(s.name, k.code)).filter(v => v && v.first);
+        const p = f.filter(v => v.first.pass).length;
+        return `<td>${f.length ? Math.round(p / f.length * 100) + '%' : '—'}</td>`;
+      }).join('') + '<td></td></tr>';
+      h += '</tbody></table></div></div>';
+      return (title ? `<h3 class="asTrackH">${title}</h3>` : '') + h;
+    };
+    // seniors: Operation students with the Operation competencies, then Utilities students with the Utilities ones
+    const tracks = LVL === 'Senior' ? [...new Set(studs.map(s => s.track || ''))].sort() : [''];
+    let h = '';
+    if (tracks.length > 1 || (tracks[0] && LVL === 'Senior')) {
+      tracks.forEach(T => {
+        const sub = studs.filter(s => (s.track || '') === T), bc = {};
+        sub.forEach(s => { const g = s.cls + (T ? ' · ' + T : ''); (bc[g] = bc[g] || []).push(s); });
+        const gs = groups.map(x => ({ gr: x.gr, cols: x.cols.filter(k => !k.track || !T || k.track === T) })).filter(x => x.cols.length);
+        h += table(bc, gs, sub, T ? T + ' · ' + sub.length + ' students' : 'No track · ' + sub.length + ' students');
+      });
+    } else h = table(byCls, groups, studs, '');
     const note = $('asGrid').dataset.note ? `<p class="hint">${e($('asGrid').dataset.note)}</p>` : '';
     // phones: one card per student instead of the wide table
     if (window.innerWidth < 700) {
