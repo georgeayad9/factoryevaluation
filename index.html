@@ -432,6 +432,7 @@
     <select id="gName"></select>
     <label for="gPin" style="margin-top:12px;">PIN</label>
     <input type="password" id="gPin" inputmode="numeric" maxlength="6" autocomplete="off" placeholder="4-digit PIN">
+    <label class="gKeep" style="display:flex;gap:8px;align-items:center;margin-top:12px;font-weight:500"><input type="checkbox" id="gKeep" checked style="width:auto;margin:0"> Keep me signed in on this device</label>
     <button class="primary" id="gBtn" type="button" style="margin-top:14px;">Sign in</button>
     <div id="gMsg"></div>
   </div>
@@ -789,7 +790,9 @@ const gate = $('gate'), gName = $('gName'), gPin = $('gPin'), gBtn = $('gBtn'), 
 
 let TEACHERS = [];                                   // teacher names from the Setup tab
 let CLASSES = {};                                    // { class name: [student names] }
-let me = sessionStorage.getItem('teacher') || '';    // signed-in teacher (this tab only)
+// "Keep me signed in": the name and PIN are kept on this device until Sign out
+try { if (!sessionStorage.getItem('teacher') && localStorage.getItem('keepTeacher')) { sessionStorage.setItem('teacher', localStorage.getItem('keepTeacher')); sessionStorage.setItem('pin', localStorage.getItem('keepPin') || ''); } } catch (e) { /* private mode */ }
+let me = sessionStorage.getItem('teacher') || '';    // signed-in teacher
 let rows = [];            // { name, ev, inc, com, sel }
 let dirty = false;        // unsaved changes on screen
 let pendingSaveId = null; // same ID on retry, so the server never writes a save twice
@@ -1171,6 +1174,8 @@ async function signIn() {
     sessionStorage.setItem('teacher', me);
     sessionStorage.setItem('pin', p);
     localStorage.setItem('lastTeacher', me);
+    if ($('gKeep').checked) { localStorage.setItem('keepTeacher', me); localStorage.setItem('keepPin', p); }
+    else { localStorage.removeItem('keepTeacher'); localStorage.removeItem('keepPin'); }
     showApp();
   } catch (e) {
     showIn(gMsg, e.message, false);
@@ -1183,6 +1188,8 @@ function signOut(note) {
   me = '';
   sessionStorage.removeItem('teacher');
   sessionStorage.removeItem('pin');
+  localStorage.removeItem('keepTeacher');
+  localStorage.removeItem('keepPin');
   rows = [];
   dirty = false;
   pendingSaveId = null;
