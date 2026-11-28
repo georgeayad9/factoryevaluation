@@ -636,6 +636,13 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
 .asT thead tr:nth-child(2) th{position:sticky;top:30px;z-index:2;background:var(--card);box-shadow:0 1px 0 var(--line)}
 .asT thead tr th.asNameH{z-index:4 !important;left:0}
 .asT td.asName{z-index:1}
+
+.asCardsH{font-weight:700;font-size:13px;margin:14px 2px 6px;color:var(--muted)}
+.asSCard{padding:12px 14px;margin:0 0 10px}.asSH{display:flex;justify-content:space-between;align-items:center;gap:8px}.asSH .asStu{font-weight:700;font-size:15px}.asSH small{color:var(--muted)}
+.asSP{font-size:13px;margin:6px 0 4px;display:flex;align-items:center}.asSG{font-size:11px;color:var(--muted);margin:8px 0 3px;text-transform:uppercase;letter-spacing:.04em}
+.asTiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(58px,1fr));gap:6px}.asTile{display:flex;flex-direction:column;align-items:center;gap:2px}.asTile small{font-size:10.5px;color:var(--muted);max-width:62px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.asFTog{display:none}@media(max-width:700px){.asFTog{display:inline-block;margin:0 0 8px}#asFBox{display:none}#asFBox.open{display:flex}.asLegend{font-size:12px}}
 </style>
 </head>
 <body>
@@ -1144,7 +1151,8 @@ button.feDot{cursor:pointer}button.feDot:hover{filter:brightness(.96)}
       <div><h1 class="asH1">Assessments</h1><div class="hint" id="asYearTxt" style="margin:2px 0 0">Loading…</div></div>
       <div class="asBtns"><button class="btn alt" type="button" id="asImportBtn">Import Excel</button><button class="btn alt" type="button" id="asExportBtn">Export Excel</button><button class="btn save" type="button" id="asNewBtn">+ New assessment</button></div>
     </div>
-    <div class="card asFilters">
+    <button class="btn alt asFTog" type="button" id="asFTog">Filters ▾</button>
+    <div class="card asFilters" id="asFBox">
       <label>School year<select id="asFYear"></select></label>
       <label>Year group<select id="asFGrade"><option value="">All</option><option>Junior</option><option>Wheeler</option><option>Senior</option></select></label>
       <label>Class<select id="asFCls"></select></label>
@@ -5888,7 +5896,7 @@ else adminGateShow(gateNote);
   };
   function fillFilters() {
     $('asYearTxt').textContent = 'School year ' + AS.year;
-    const years = [...new Set([AS.year].concat(AS.assessments.map(a => a.year)))].filter(Boolean).sort().reverse();
+    const y0 = Number(AS.year.slice(0, 4)), years = [...new Set([AS.year, (y0 - 1) + '-' + y0, (y0 - 2) + '-' + (y0 - 1)].concat(AS.assessments.map(a => a.year)))].filter(Boolean).sort().reverse();
     const keepY = $('asFYear').value;
     $('asFYear').innerHTML = years.map(y => `<option>${e(y)}</option>`).join('') + '<option value="">All years</option>';
     $('asFYear').value = keepY === '' || years.includes(keepY) ? (keepY || (keepY === '' && $('asFYear').dataset.set ? '' : AS.year)) : AS.year;
@@ -5929,21 +5937,26 @@ else adminGateShow(gateNote);
     document.querySelectorAll('#asLvl [data-lvl]').forEach(b => b.classList.toggle('on', b.dataset.lvl === LVL));
     const F = filtered(), c = $('asFCls').value, q = key($('asFQ').value), onlyF = $('asFOnly').checked;
     const narrowed = $('asFMonth').value || $('asFWeek').value || $('asFTeacher').value;
-    const li = GR.indexOf(LVL), tn = termNow();
-    // the competencies the year should have by now: every earlier year, and this year up to this term (graded or not)
+    const li = GR.indexOf(LVL), yv = $('asFYear').value;
+    const back = yv && yv !== AS.year ? Number(AS.year.slice(0, 4)) - Number(yv.slice(0, 4)) : 0;   // years back
+    const tn = back > 0 ? 2 : termNow();
+    // the competencies the year should have by then: every earlier year, and that year up to this term (graded or not)
     let cols = AS.comps.filter(k => k.active && GR.indexOf(k.grade) <= li && (GR.indexOf(k.grade) < li || !k.term || Number(k.term) <= tn));
-    if (narrowed) { const codes = new Set(F.map(a => a.code)); cols = cols.filter(k => codes.has(k.code)); }
+    if (narrowed || back > 0) { const codes = new Set(F.map(a => a.code)); if (narrowed) cols = cols.filter(k => codes.has(k.code)); }
     const inF = new Set(); F.forEach(a => a.students.forEach(n => inF.add(key(n))));
-    let studs = (c === '@arch' ? allStudents().filter(s => s.archived) : AS.students.filter(s => s.grade === LVL))
+    // students who were in this year group in the chosen school year
+    const wasLvl = s => GR.indexOf(s.grade) - back === li;
+    let studs = (c === '@arch' ? allStudents().filter(s => s.archived) : AS.students.filter(wasLvl))
       .filter(s => (!c || c === '@arch' || key(s.cls) === key(c)) && (!q || key(s.name).includes(q)) && (!narrowed || inF.has(key(s.name))));
     if (!cols.length) { $('asGrid').innerHTML = `<div class="card"><p class="hint">No competencies match these filters.</p></div>`; return; }
     if (onlyF) studs = studs.filter(s => cols.some(x => { const v = st(s.name, x.code); return v && (v.letter === 'F' || (!v.letter && v.tries)); }));
-    if (!studs.length) { $('asGrid').innerHTML = `<div class="card"><p class="hint">No students in this year group match these filters.</p></div>`; return; }
+    if (!studs.length) { $('asGrid').innerHTML = `<div class="card"><p class="hint">${back > 0 && li + back > 2 ? 'Today\'s students were not in this year group in ' + e(yv) + ' (they had not started yet).' : 'No students in this year group match these filters.'}</p></div>`; return; }
+    if (back > 0) $('asGrid').dataset.note = `In ${yv} these students were ${GRP[LVL]}: today they are ${[...new Set(studs.map(s => s.cls))].join(', ')}.`; else delete $('asGrid').dataset.note;
     const byCls = {};
     studs.forEach(s => { const g = LVL === 'Senior' && s.track ? s.cls + ' · ' + s.track : s.cls; (byCls[g] = byCls[g] || []).push(s); });
     const groups = GR.map(gr => ({ gr, cols: cols.filter(x => x.grade === gr) })).filter(x => x.cols.length);
     let h = '<div class="card asGridCard"><div class="tw asScroll"><table class="asT"><thead><tr><th rowspan="2" class="asNameH">Student</th>' +
-      groups.map(x => `<th colspan="${x.cols.length}" class="asGrpH">${GRP[x.gr]} year${x.gr === LVL && LVL !== 'Senior' ? ' · up to term ' + tn : ''}</th>`).join('') + '<th rowspan="2">Passed</th></tr><tr>' +
+      groups.map(x => `<th colspan="${x.cols.length}" class="asGrpH">${GRP[x.gr]} year${x.gr === LVL && LVL !== 'Senior' && !back ? ' · up to term ' + tn : ''}</th>`).join('') + '<th rowspan="2">Passed</th></tr><tr>' +
       groups.map(x => x.cols.map(k => `<th class="asCode" title="${e(k.name)} · ${e(k.nameAr)}${k.track ? ' · ' + e(k.track) : ''} · taught by ${e(k.taughtBy)}"><b>${e(k.code)}</b><small>${e(k.short || k.name)}</small></th>`).join('')).join('') + '</tr></thead><tbody>';
     const flat = groups.flatMap(x => x.cols);
     Object.keys(byCls).sort().forEach(cl => {
@@ -5965,7 +5978,21 @@ else adminGateShow(gateNote);
       return `<td>${f.length ? Math.round(p / f.length * 100) + '%' : '—'}</td>`;
     }).join('') + '<td></td></tr>';
     h += '</tbody></table></div></div>';
-    $('asGrid').innerHTML = h;
+    const note = $('asGrid').dataset.note ? `<p class="hint">${e($('asGrid').dataset.note)}</p>` : '';
+    // phones: one card per student instead of the wide table
+    if (window.innerWidth < 700) {
+      const tile = (s, k) => k.track && s.track && k.track !== s.track ? '' : `<span class="asTile" title="${e(k.code + ' ' + k.name)}">${cell(st(s.name, k.code), k)}<small>${e(k.short || k.code)}</small></span>`;
+      $('asGrid').innerHTML = note + Object.keys(byCls).sort().map(cl => `<div class="asCardsH">${e(cl)} · ${byCls[cl].length}</div>` + byCls[cl].sort((a, b) => a.name.localeCompare(b.name, 'ar')).map(s => {
+        const gi = GR.indexOf(s.grade) - back, due = flat.filter(k => (!k.track || !s.track || k.track === s.track));
+        const passed = due.filter(k => { const v = st(s.name, k.code); return v && v.letter && v.letter !== 'F'; }).length;
+        const failed = flat.some(k => (st(s.name, k.code) || {}).letter === 'F');
+        return `<div class="card asSCard"><div class="asSH"><button type="button" class="asStu" data-prof="${e(s.name)}">${e(s.name)}</button>${failed ? '<span class="asRep">REPEATING</span>' : `<small>${e(s.cls)}${s.track ? ' · ' + e(s.track) : ''}</small>`}</div>` +
+          `<div class="asSP"><span class="asBar"><i style="width:${due.length ? Math.round(passed / due.length * 100) : 0}%"></i></span>${passed} / ${due.length} passed</div>` +
+          groups.map(x => { const t = x.cols.map(k => tile(s, k)).join(''); return t ? `<div class="asSG">${GRP[x.gr]} year</div><div class="asTiles">${t}</div>` : ''; }).join('') + '</div>';
+      }).join('')).join('');
+      return;
+    }
+    $('asGrid').innerHTML = note + h;
   }
   function drawList() {
     const F = filtered().slice().sort((a, b) => a.date < b.date ? 1 : a.date > b.date ? -1 : 0);
@@ -6334,6 +6361,7 @@ else adminGateShow(gateNote);
   // ---------- events (delegated: the overlays sit after this script) ----------
   document.addEventListener('click', ev => {
     const t = ev.target;
+    if (t.closest('#asFTog')) { $('asFBox').classList.toggle('open'); t.closest('#asFTog').textContent = $('asFBox').classList.contains('open') ? 'Filters ▴' : 'Filters ▾'; return; }
     if (t.closest('#asLvl [data-lvl]')) { LVL = t.closest('[data-lvl]').dataset.lvl; draw(); return; }
     if (t.closest('#asTabs [data-ast]')) { TAB = t.closest('[data-ast]').dataset.ast; draw(); return; }
     if (t.closest('#asNewBtn')) { if (!AS) return; nOpen(); return; }
@@ -6372,6 +6400,8 @@ else adminGateShow(gateNote);
     if (t.dataset && t.dataset.track) { const sen = senior(); if (!sen) return; post('asTrack', { cls: t.dataset.track, track: t.value, senior: sen }).then(async () => { await load(); setupDraw(); if (typeof loadLists === 'function') loadLists(); }).catch(err => alert(err.message)); }
   });
   document.addEventListener('input', ev => { if (ev.target.id === 'asFQ') draw(); });
+  let wasPhone = window.innerWidth < 700;
+  window.addEventListener('resize', () => { const p = window.innerWidth < 700; if (p !== wasPhone && AS && TAB === 'grid') { wasPhone = p; draw(); } });
 })();
 </script>
 </body>
