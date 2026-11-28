@@ -414,6 +414,55 @@
 .asTTabs{display:flex;gap:6px;margin:0 0 10px}.asTTabs button{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:6px 14px;font-weight:600;cursor:pointer}.asTTabs button.on{background:var(--ink);color:var(--card)}
 .asAppr{background:#DCFCE7;color:#14532D;border-radius:10px;padding:8px 12px;margin:0 0 10px;font-weight:600;font-size:14px}
 .asTRes{display:inline-block;min-width:24px;text-align:center;border-radius:6px;font-weight:700;padding:1px 6px}
+/* ===================== SOFT DARK: charcoal layers, visible lines, colours made for dark ===================== */
+[data-theme="dark"]{color-scheme:dark;--bg:#1B1D22;--card:#24272E;--ink:#ECEDEF;--muted:#B4B8C0;--line:#3D424C;--brand-soft:#3A3320;
+  --ok-bg:#183B26;--ok-ink:#A7EBBE;--err-bg:#4A1F1F;--err-ink:#FFB8B0;--raised:#2C3038;--field:#1E2127;--line-strong:#4D5360}
+[data-theme="dark"] body{background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+[data-theme="dark"] .card,[data-theme="dark"] .ovlCard,[data-theme="dark"] .n2List,[data-theme="dark"] #ttPop{border-color:var(--line)}
+[data-theme="dark"] .ovlCard,[data-theme="dark"] .n2List,[data-theme="dark"] #ttPop,[data-theme="dark"] .feDrawer .ovlCard{background:var(--raised)}
+[data-theme="dark"] header{background:#202329!important;border-bottom:1px solid var(--line)}
+/* fields */
+[data-theme="dark"] input,[data-theme="dark"] select,[data-theme="dark"] textarea{background:var(--field)!important;border:1px solid var(--line-strong)!important;color:var(--ink)!important}
+[data-theme="dark"] input::placeholder,[data-theme="dark"] textarea::placeholder{color:#8A909B}
+[data-theme="dark"] input:focus,[data-theme="dark"] select:focus,[data-theme="dark"] textarea:focus{outline:2px solid #F7C948;outline-offset:1px;border-color:#F7C948!important}
+/* text: never too thin */
+[data-theme="dark"] small,[data-theme="dark"] .hint,[data-theme="dark"] label{color:var(--muted)}
+[data-theme="dark"] small{font-weight:500}
+/* buttons */
+[data-theme="dark"] .btn,[data-theme="dark"] button.ghost{border-color:var(--line-strong)}
+[data-theme="dark"] .btn:disabled,[data-theme="dark"] button:disabled{opacity:.55;color:#C9CDD4}
+[data-theme="dark"] .btn.save,[data-theme="dark"] button.primary{background:#F7C948!important;color:#17171A!important;border-color:#F7C948!important}
+[data-theme="dark"] .btn.save:disabled{background:#6B5A22!important;color:#E8E2CC!important;opacity:1}
+[data-theme="dark"] .btn.rm{color:#FFB8B0;border-color:#7A3A35}
+/* tables and grids: visible lines */
+[data-theme="dark"] table td,[data-theme="dark"] table th{border-color:var(--line)}
+[data-theme="dark"] .ttGrid td,[data-theme="dark"] .ttGrid th{border-color:var(--line-strong)}
+[data-theme="dark"] .asT th,[data-theme="dark"] .asT td{border-bottom-color:var(--line)}
+[data-theme="dark"] .asClsRow td,[data-theme="dark"] .asFirst td{background:#2A2D35}
+[data-theme="dark"] .asT thead tr th{background:var(--card)}
+/* messages and pills */
+[data-theme="dark"] .msg.ok{background:var(--ok-bg);color:var(--ok-ink)}[data-theme="dark"] .msg.err{background:var(--err-bg);color:var(--err-ink)}
+[data-theme="dark"] .pill.q,[data-theme="dark"] .pill.L{background:#4A3B12;color:#FCD873}
+[data-theme="dark"] .tag.rep{background:#183B26;color:#A7EBBE}[data-theme="dark"] .tag.safety{background:#4A1F1F;color:#FFB8B0}
+/* grade letters */
+[data-theme="dark"] .asL.A{background:#1F4A2C;color:#B6F0C8}[data-theme="dark"] .asL.B{background:#34461A;color:#D4EFA0}
+[data-theme="dark"] .asL.C{background:#4A3B12;color:#FCD873}[data-theme="dark"] .asL.D{background:#57331A;color:#FFC594}
+[data-theme="dark"] .asL.F{background:#DC2626;color:#fff}[data-theme="dark"] .asL.O{background:#16365A;color:#B5D4F4}
+[data-theme="dark"] .asL.Rw{border-color:#E0A33A;color:#F5C56B}[data-theme="dark"] .asL.Rw.last{border-color:#F87171;color:#FCA5A5}
+[data-theme="dark"] .asL.N,[data-theme="dark"] .asL.X{color:#8A909B}
+[data-theme="dark"] .asWhy{background:#3A1E1E;border-color:#7A3A35;color:var(--ink)}
+[data-theme="dark"] .asAppr{background:#183B26;color:#A7EBBE}
+[data-theme="dark"] .asPF button.on.p{background:#16A34A;border-color:#16A34A}[data-theme="dark"] .asPF button.on.f{background:#DC2626;border-color:#DC2626}
+/* timetable colours and legend */
+[data-theme="dark"] .ttKey .k1{background:var(--card)}[data-theme="dark"] .ttKey .k2{background:#4A1F1F}[data-theme="dark"] .ttKey .k3{background:#1E3A66}
+[data-theme="dark"] .ttKey .k4{background:#183B26}[data-theme="dark"] .ttKey .k5{background:#3A3E47}
+[data-theme="dark"] .ttGrid td.cov,[data-theme="dark"] .ttGrid td.given{background:#1E3A66}[data-theme="dark"] .ttGrid td.cov small,[data-theme="dark"] .ttGrid td.given small{color:#B5D4F4}
+[data-theme="dark"] .ttGrid td.fac{background:repeating-linear-gradient(45deg,transparent 0 6px,#3A3E47 6px 7px)}
+[data-theme="dark"] #wkGrid td.offcell{background:#2A2D35;color:#9AA0AA}[data-theme="dark"] #wkGrid td.offcell.del{background:repeating-linear-gradient(45deg,#26292F,#26292F 6px,#2E3138 6px,#2E3138 12px)}
+/* the yellow "now" card keeps dark text */
+[data-theme="dark"] .hNow,[data-theme="dark"] .nowCard{color:#17171A}
+/* scrollbars */
+[data-theme="dark"] *{scrollbar-color:#4D5360 transparent}
 </style>
 </head>
 <body>
@@ -1126,16 +1175,23 @@ document.addEventListener('click', async e => {
 const isAuthError = e => /Wrong name or PIN|Too many wrong PINs/.test(e.message);
 
 // ---------- theme ----------
-function applyTheme(t) {
+// Theme: Light, Dark or Auto (follows the phone or laptop setting); the button goes Light → Dark → Auto
+const THEME_MQ = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
+function applyTheme(mode) {
+  if (mode !== 'light' && mode !== 'dark') mode = 'auto';
+  const t = mode === 'auto' ? (THEME_MQ && THEME_MQ.matches ? 'dark' : 'light') : mode;
   document.documentElement.setAttribute('data-theme', t);
-  $('themeBtn').textContent = t === 'dark' ? 'Light' : 'Dark';
-  localStorage.setItem('theme', t);
+  document.documentElement.dataset.themeMode = mode;
+  $('themeBtn').textContent = { light: 'Light', dark: 'Dark', auto: 'Auto' }[mode];
+  $('themeBtn').title = 'Theme: ' + mode + ' (click to change)';
+  localStorage.setItem('theme', mode);
 }
 $('themeBtn').onclick = () => {
-  applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  const m = document.documentElement.dataset.themeMode;
+  applyTheme(m === 'light' ? 'dark' : m === 'dark' ? 'auto' : 'light');
 };
-applyTheme(localStorage.getItem('theme') ||
-  (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+if (THEME_MQ && THEME_MQ.addEventListener) THEME_MQ.addEventListener('change', () => { if (document.documentElement.dataset.themeMode === 'auto') applyTheme('auto'); });
+applyTheme(localStorage.getItem('theme') || 'auto');
 
 // ---------- sign in / sign out ----------
 function showGate(note) {
@@ -3605,9 +3661,9 @@ loadLists();
     try { const r = await post('asMine', session()); LIST = r.assessments || []; TODAY = r.today; } catch (err) { card.hidden = true; return; }
     const open = LIST.filter(a => a.status === 'Open'), done = LIST.filter(a => a.status === 'Marked' && a.date >= addD(TODAY, -14));
     card.hidden = !open.length && !done.length;
-    $('hAssessBody').innerHTML = open.map(a => `<div class="asTRow"><span><b>${e(a.code)} ${e(a.name)}</b> · ${e(a.cls)}<br><small>${day(a.date)} · ${a.students.length} students${a.attempt > 1 ? ' · retake (attempt ' + a.attempt + ')' : ''}</small></span>` +
+    $('hAssessBody').innerHTML = open.map(a => `<div class="asTRow"><span><b>${e(a.code)} ${e(a.short || a.name)}</b> · ${e(a.cls)}<br><small>${day(a.date)} · ${a.students.length} students${a.attempt > 1 ? ' · retake (attempt ' + a.attempt + ')' : ''}</small></span>` +
       (a.date <= TODAY ? `<button class="primary" type="button" data-asm="${e(a.id)}">Mark</button>` : `<small>from ${day(a.date)}</small>`) + '</div>').join('') +
-      done.slice(-3).map(a => `<div class="asTRow"><span>${e(a.code)} ${e(a.name)} · ${e(a.cls)}<br><small>marked · ${day(a.date)}</small></span><button class="ghost" type="button" data-asm="${e(a.id)}">View / fix</button></div>`).join('');
+      done.slice(-3).map(a => `<div class="asTRow"><span>${e(a.code)} ${e(a.short || a.name)} · ${e(a.cls)}<br><small>marked · ${day(a.date)}</small></span><button class="ghost" type="button" data-asm="${e(a.id)}">View / fix</button></div>`).join('');
   };
   function open(id) {
     MK = LIST.find(a => a.id === id); if (!MK) return;
